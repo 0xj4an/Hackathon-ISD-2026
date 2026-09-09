@@ -1,0 +1,12 @@
+{
+  "name": "@app/spikes",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Experimentos de validacion. Codigo propio del equipo.",
+  "scripts": {
+    "dataset": "node lora-medpsy/make-dataset.mjs",
+    "spike": "node lora-medpsy/spike.mjs"
+  },
+  "dependencies": { "@qvac/sdk": "0.18.2" }
+}

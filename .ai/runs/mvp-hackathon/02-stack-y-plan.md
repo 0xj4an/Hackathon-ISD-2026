@@ -249,13 +249,15 @@ o el backend de GPU.
 - **`perf/logger.ts` desde ya.** Cada `completion()` escribe una linea en
   `perf.jsonl` con el formato de `perf/README.md`. Si esto no se hace ahora, no
   se hace nunca, y es entregable de Tether Psy.
-  **Dos cosas que evitan rehacerlo:** las metricas NO salen de la API de logging
-  del SDK (esos logs son diagnostico: `level`, `namespace`, `message`,
-  `timestamp`, sin tokens ni tiempos), salen del objeto `stats` de
-  `await result.final`. Y de ese `stats` solo estan documentados
-  `tokensPerSecond` y `avgConcurrentSeq`: **volcarlo entero sin filtrar** y medir
-  el TTFT a mano con `Date.now()`, como ya hace `mobile/App.tsx`. Para escribir
-  el archivo, `getLogger()` con transporte propio.
+  **Lo que evita rehacerlo:** las metricas NO salen de la API de logging del SDK
+  (esos logs son diagnostico: `level`, `namespace`, `message`, `timestamp`, sin
+  tokens ni tiempos), salen del objeto `stats` de `await result.final`.
+  Ese `stats` trae, **comprobado ejecutandolo**: `timeToFirstToken`,
+  `tokensPerSecond`, `promptTokens`, `generatedTokens`, `emittedTokens`,
+  `cacheTokens`, `avgConcurrentSeq` y `backendDevice`. Aun asi, **volcarlo
+  entero sin filtrar**: los docs solo listan dos de esos ocho, o sea que la
+  documentacion va por detras del SDK y puede haber mas. Para escribir el
+  archivo, `getLogger()` con transporte propio.
 - **Las dos vias de deteccion** (ver `03-specification.md`, seccion "Las dos
   vias"). `reglasTendencia()` sobre el historial y `reglasRango()` sobre
   `core/marcadores.ts`, ambas devolviendo el mismo tipo `Senal`.

@@ -12,3 +12,6 @@ perf/*.jsonl
 data/private/
 core/out/
 nodo/state/
+
+# Artefactos del spike de LoRA: el adaptador y los checkpoints se regeneran
+spikes/lora-medpsy/out/

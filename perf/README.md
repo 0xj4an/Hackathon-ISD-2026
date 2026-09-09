@@ -17,19 +17,30 @@ correcto para **escribir** este archivo (solo JS/TS).
 
 ## Qué campos existen de verdad
 
-Verificado en `docs.qvac.tether.io/ai-capabilities/text-generation/`:
+**Comprobado ejecutando el SDK 0.18.2 en el Mac**, no leyendo docs. Salida real
+de `(await result.final).stats` en una completion de MedPsy 1.7B Q8_0:
 
-| Campo | Estado |
-| --- | --- |
-| `tokensPerSecond` | **Confirmado en docs** |
-| `avgConcurrentSeq` | **Confirmado en docs** ("how busy the shared backend was") |
-| `timeToFirstToken` | No documentado |
-| `promptTokens` | No documentado |
-| `generatedTokens` | No documentado |
-| `backendDevice` | No documentado |
+```json
+{
+  "timeToFirstToken": 118.829,
+  "tokensPerSecond": 30.695,
+  "cacheTokens": 0,
+  "promptTokens": 58,
+  "generatedTokens": 23,
+  "emittedTokens": 23,
+  "avgConcurrentSeq": 1,
+  "backendDevice": "gpu"
+}
+```
 
-Los cuatro últimos venían de una versión anterior de este README y **no se
-pudieron corroborar**. No construir el logger asumiendo que existen.
+Los ocho campos existen. Una versión anterior de este README los marcaba como
+"no documentados" porque la página de `text-generation` solo menciona
+`tokensPerSecond` y `avgConcurrentSeq`. **La documentación está incompleta, no
+el SDK.** Y aparecieron dos que nadie había listado: `cacheTokens` y
+`emittedTokens`.
+
+Lección: para saber qué devuelve una API, ejecutarla. Los docs sirven para
+saber qué está soportado, no qué existe.
 
 ## Cómo escribirlo
 
