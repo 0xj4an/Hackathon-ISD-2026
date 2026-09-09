@@ -49,6 +49,7 @@ cola y viaja al banco cuando hay red o cuando aparece el nodo del corregimiento.
 | A4 | Validaciones en código | `core/validaciones.ts` sobre el JSON extraído, antes de armar la solicitud |
 | A5 | Cola offline | SQLite, estado `pendiente`, la app dice que no hay señal |
 | A6 | Transporte | HTTP local cuando hay red; Hyperswarm al nodo del corregimiento cuando no |
+| A6b | **El nodo reparte el modelo** | El nodo sirve los 2.1 GB de pesos (y el adaptador LoRA) a los teléfonos por P2P local, sin internet. Ver abajo |
 | A7 | Respuesta del banco | `nodo/credito.mjs` decide y responde por el mismo camino |
 | A8 | Aceptación | Botón "Acepto" que guarda `firma_hash` |
 | A9 | Log de rendimiento | `perf/perf.jsonl`, una línea por inferencia |
@@ -161,6 +162,41 @@ cuesta una hora en vez de una noche.
 
 **Se declara tal cual en el README**: los datos entran por archivo exportado, no
 por conexión viva a Health Connect, y esa es la ruta de producción pendiente.
+
+## El nodo del corregimiento tiene dos usos, y el segundo es el bueno
+
+Escrito el 9 sep 15:30, tras revisar por qué el nodo existe. Es una laptop que
+vive en el pueblo, típicamente donde el **corresponsal bancario** (la tienda o
+farmacia donde la gente ya hace vueltas del banco), no la laptop del usuario.
+
+**Uso 1, cartero (`nodo/index.mjs`, rol `corregimiento`).** Recibe solicitudes
+de teléfonos que pasen cerca, las guarda y las reenvía al banco cuando ella
+consigue internet. Ya está escrito y funciona.
+
+> **Aporta menos de lo que parece.** Si el teléfono va a conseguir señal en
+> algún momento, la solicitud sale sola y el nodo sobra. Solo ayuda en el caso
+> estrecho de que el teléfono nunca consiga señal pero el nodo sí.
+
+**Uso 2, distribuir el modelo. No está escrito y es el que justifica el nodo.**
+Los pesos son 2.1 GB y cada teléfono los necesita. Bajarlos por datos móviles en
+zona rural no ocurre. El nodo los tiene en caché y se los sirve a los teléfonos
+por wifi local o Hyperswarm, sin internet. Lo mismo con el adaptador LoRA de
+34 MB cuando se reentrene.
+
+Esto no hay que inventarlo: las constantes del catálogo de QVAC son
+"registry-backed" y se distribuyen por Hyperdrive y Hyperswarm, que es el mismo
+stack que ya usa `nodo/`. Y resuelve de paso el riesgo 2 del plan, que es la
+descarga de 2.1 GB en el evento.
+
+**Consecuencia para el vídeo:** la escena "el teléfono baja la inteligencia
+artificial desde la laptop del pueblo, sin tocar internet" es mejor pitch que la
+del cartero, y sostiene mejor el criterio de Pears que los tres retos valoran.
+Va al guion.
+
+**Consecuencia para el alcance:** el uso 1 ya está hecho y se deja. El uso 2 es
+trabajo nuevo del bloque 5. Si el tiempo aprieta, se degrada a pre-descargar los
+modelos con `downloadAsset()` y contar el uso 2 como trabajo pendiente, sin
+fingir que está.
 
 ## Criterios de aceptación
 
