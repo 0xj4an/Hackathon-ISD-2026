@@ -118,7 +118,7 @@ cosas de forma distinta**.
 | Qué mira | Una **tendencia**: el valor viene mal N días seguidos | Un **valor suelto** contra su rango de referencia |
 | Necesita historia | Sí, sin serie temporal no hay señal | No, con un dato basta |
 | Ejemplo | "glucosa en ayunas sobre 126 en las últimas 3 tomas" | "hemoglobina 9.1 g/dL, rango 12 a 16, anemia" |
-| Estado hoy | `core/reglas.ts`, 4 reglas escritas | **Solo existe en `spikes/lora-medpsy/make-dataset.mjs`**, con 8 marcadores y sus rangos. Falta llevarlo a `core/` |
+| Estado hoy | `core/reglas.ts`, 4 reglas escritas | **`core/marcadores.ts`**, con los 8 marcadores, sus rangos y el clasificador |
 
 **Las dos desembocan en el mismo tipo `Senal`** (`codigo`, `descripcion`,
 `examen`, `costo_usd`, `urgencia`) y de ahí en adelante el flujo es uno solo:
@@ -128,7 +128,7 @@ deciden en código, el modelo sigue solo redactando.
 
 ### Los 8 marcadores de la vía B ya están escritos
 
-En `spikes/lora-medpsy/make-dataset.mjs`, con rango y siguiente paso:
+En `core/marcadores.ts`, con rango y siguiente paso:
 glicemia en ayunas, hemoglobina, plaquetas, creatinina, linfocitos CD4,
 colesterol total, hematocrito y TSH. Hay que moverlos a `core/reglas.ts` como
 `reglasRango()`. Es trabajo de copiar y adaptar, no de diseñar.
@@ -205,7 +205,7 @@ fingir que está.
 | C1 | MedPsy carga en el 14T Pro y produce texto en español | Captura con "modelo cargado" y TTFT en ms |
 | C2 | TTFT medido con `gpu` y con `cpu`, y se usa el mejor | Dos líneas en `perf.jsonl` con `device_cfg` distinto |
 | C3 | Las reglas de tendencia (vía A) disparan con el historial del usuario con hallazgo | `eval/run.mjs` recorre el historial y las cuenta |
-| C3b | Las reglas de rango (vía B) clasifican bien los 8 marcadores, alto, bajo y normal | `eval/run.mjs` contra los casos del dataset del spike |
+| C3b | Las reglas de rango (vía B) clasifican bien los 8 marcadores, alto, bajo y normal | `eval/run.mjs` contra los casos de `core/marcadores.ts` |
 | C3c | **El usuario sano no dispara ninguna alerta** | `eval/run.mjs` sobre su historial completo: cero señales |
 | C3d | `linfocitos CD4` no aparece en pantalla ni en el video | Grep en la app y revisión del guion |
 | C4 | Toda salida del modelo pasa por `limpiarJson()` antes de `JSON.parse` | Grep: cero `JSON.parse` sin `limpiarJson` en el repo |

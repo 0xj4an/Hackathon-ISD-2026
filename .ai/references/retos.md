@@ -94,4 +94,4 @@ Requisitos: SDK de QVAC, preferiblemente sus modelos; nube solo para lo no-IA (U
   - **Philips + Tether Psy + General**: captura de base instalada por voz y foto de placas, con VisionPsy-Nano como modelo central para la lectura de placas (cumple "Psy con función central") y delegación P2P teléfono → laptop (suma en General y Technical). Exige licencia permisiva y log de rendimiento estructurado.
   - **Caja de Ahorros + Tether Psy + General**: extracción de documentos bancarios (cédula, recibos, formularios) con VisionPsy/OCR + asistente de trámites offline con TranslatePsy para idiomas indígenas o inglés. Reto abierto, jurado bancario, menos competencia directa que Philips.
   - **Ovnicom** va solo: dominio muy específico (Kafka, ClickHouse, Wazuh, Grafana), pesado de montar en 48 h, pero probablemente con muy pocos equipos compitiendo. Buen candidato si el equipo tiene perfil de redes/infra.
-- Todos los retos valoran Pears / delegación P2P: la prueba `qvac-course/prep/p2p-test.mjs` (funciona en 0.18.2) es un activo transversal.
+- Todos los retos valoran Pears / delegación P2P: el transporte Hyperswarm de `nodo/` es el activo transversal.

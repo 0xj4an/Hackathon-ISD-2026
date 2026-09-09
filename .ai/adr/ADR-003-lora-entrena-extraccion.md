@@ -14,7 +14,7 @@
 
 El adaptador se entrena con un dataset mixto de ~300 ejemplos, con el peso en
 **extracción de documentos** (cédula e ingresos) y el resto en triaje. Se reusa
-`spikes/lora-medpsy/make-dataset.mjs` para la parte de triaje.
+`core/marcadores.ts` para la parte de triaje.
 
 ## Alternativas consideradas
 

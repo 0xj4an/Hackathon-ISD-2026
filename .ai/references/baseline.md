@@ -17,10 +17,10 @@ Por definir. Restricción base: `@qvac/sdk` levanta un worker Bare y se comunica
 ## Lo que ya está probado (en `../qvac-course/`, fuera del repo)
 
 - Entorno: `qvac doctor` pasa completo en el Mac (Metal, Node 26, adb, Xcode, ffmpeg, Bare 1.31).
-- Chat offline con `LLAMA_3_2_1B_INST_Q4_0`: carga en caliente 2.1 s, primer token 57–130 ms en caliente, 60–200 tok/s. El 1B falla en aritmética, hechos y razonamiento sobre historial largo; sirve para chat acotado, no como enciclopedia.
+- Chat offline con `LLAMA_3_2_1B_INST_Q4_0`: carga en caliente 2.1 s, primer token 57-130 ms en caliente, 60-200 tok/s. El 1B falla en aritmética, hechos y razonamiento sobre historial largo; sirve para chat acotado, no como enciclopedia.
 - RAG con embeddings (`m2/rag.js`).
-- Descarga y caché de modelos (`prep/download-models.mjs`).
-- Delegación P2P entre pares (`prep/p2p-test.mjs`, funciona en 0.18.2). Activo transversal: todos los retos valoran Pears / delegación P2P.
+- Descarga y caché de modelos con `downloadAsset()`.
+- Delegación P2P entre pares, probada en 0.18.2. `ADR-007` la descartó: 0.19 eliminó el provider mode y el nodo delega con `qvac serve`.
 - Spike de fine tuning LoRA sobre MedPsy 1.7B Q8_0: funciona; ~28 min/época en el Mac; base 1/3 → LoRA 2/3 JSON válidos con 52 ejemplos. Ver `spikes/lora-medpsy/RESULTADOS.md`.
 
 ## Riesgos y deuda conocida

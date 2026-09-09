@@ -44,7 +44,7 @@ const id = await loadModel({ modelSrc: LLAMA_3_2_1B_INST_Q4_0, modelType: "llm" 
 2.1 GB. El tutorial de QVAC usa Llama 1B Q4_0, ~0.7 GB: estamos pidiendo el
 triple. **Esa descarga no puede pasar en el evento ni grabando el video.** Hay
 que pre-descargar al telefono antes, con `downloadAsset()`. Ya existe
-`spikes/p2p/download-models.mjs` para eso.
+un script propio con `downloadAsset()` para eso.
 
 **2. RAM, no disco.** Los docs dicen *"Below 4 GB, most LLMs will fail to
 load"* y piden >= 2 GB de RAM **disponible** al cargar. Cargar 2.1 GB de pesos
@@ -238,7 +238,7 @@ o el backend de GPU.
   dos vias"). `reglasTendencia()` sobre el historial y `reglasRango()` sobre
   resultados de laboratorio, ambas devolviendo el mismo tipo `Senal`. Los 8
   marcadores de la via B ya estan escritos en
-  `spikes/lora-medpsy/make-dataset.mjs`: es copiar y adaptar, no disenar.
+  `core/marcadores.ts`: los 8 marcadores y sus rangos ya estan ahi.
   **Quitar `linfocitos CD4`** del demo (su siguiente paso menciona VIH y el
   BRIEF lo prohibe).
 - Artur: `data/` con el historial exportado de **dos usuarios ficticios**, uno
@@ -293,8 +293,8 @@ real fueron ~90 minutos.
 - README con lo que exige Tether Psy: modelos con nombre y cuantizacion honestos,
   hardware real de ejecucion, instrucciones de setup reproducibles, APIs remotas
   y componentes de terceros declarados, licencia MIT ya puesta.
-- **Declarar la base preexistente**: `../qvac-course/`, los spikes de
-  `spikes/`, la plantilla AI Engineering Kit, el tutorial Expo de QVAC y las
+- **Declarar la base preexistente**: solo la plantilla AI Engineering Kit. El
+  codigo copiado del curso se retiro del repo. Ver el README y las
   recetas de Tether que se hayan usado. **Omitir esto descalifica.**
 
 ### Bloque 7 · vie 02:00 a 06:00 · colchon
@@ -356,13 +356,13 @@ su propio catalogo y va a notar la eleccion; explicarla suma, esconderla resta.
 ### Dataset
 
 - ~300 ejemplos: 200 de extraccion (cedula e ingresos, con ruido de OCR) y 100
-  de triaje reusando `make-dataset.mjs`, que ya existe.
+  de triaje a partir de `core/marcadores.ts`.
 - 30 de validacion, disjuntos.
 - Formato JSONL de mensajes, el mismo que ya consume el spike.
 
 ### Entrenamiento
 
-Reusar `spikes/lora-medpsy/spike.mjs` tal cual, cambiando el dataset:
+Escribir el script de entrenamiento (`finetune()`), con este dataset:
 
 ```js
 numberOfEpochs: 2, learningRate: 2e-4, lrMin: 1e-8, contextLength: 1024,
@@ -377,7 +377,7 @@ Con 300 ejemplos y 2 epocas son ~2 h en el Mac. **Lanzarlo al cerrar el bloque 2
 y dormir.** Es la mejor hora del hackathon para gastarla: el Mac trabaja y el
 equipo descansa.
 
-Con `caffeinate -i node spike.mjs`, o el Mac se duerme como en el spike.
+Correr el entrenamiento con `caffeinate -i`, o el Mac se duerme como en el spike.
 
 ### Cargarlo
 
@@ -444,7 +444,7 @@ ya existe.
 | # | Riesgo | Mitigacion | Cuando se sabe |
 | --- | --- | --- | --- |
 | 1 | El telefono no aparece en `adb` o Expo no compila. En Xiaomi, la opcion de instalar por USB puede pedir cuenta Mi | Es el bloque 0 entero. Sin esto no hay proyecto. | mie 15:30 |
-| 2 | La descarga de 2.1 GB pasa en el evento o grabando | Pre-descargar con `downloadAsset()` antes de moverse. `spikes/p2p/download-models.mjs` ya existe | mie 15:30 |
+| 2 | La descarga de 2.1 GB pasa en el evento o grabando | Pre-descargar con `downloadAsset()` antes de moverse | mie 15:30 |
 | 3 | Sin `perf.jsonl` ni `eval/` | Se construyen en los bloques 1 y 2, no al final | jue 01:00 |
 | 4 | Metro no resuelve `core/` | Opcion A: mover a `mobile/src/core/` | mie 16:00 |
 | 5 | Base preexistente sin declarar | Checklist del bloque 6. **Descalifica.** | jue 22:00 |
