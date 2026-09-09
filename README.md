@@ -53,7 +53,8 @@ que se clasifica están en [`core/marcadores.ts`](core/marcadores.ts).
 
 
 ## Contexto compartido del equipo
-- `docs/BRIEF.md`: qué construimos, flujo, arquitectura, plan por horas.
+- `docs/CHECKLIST.md`: **el plan de trabajo que se sigue**, por bloques y con criterios de aceptación.
+- `docs/BRIEF.md`: qué construimos, flujo y arquitectura.
 - `.ai/`: contexto estable (reglas del hackathon, los 5 retos, referencia del SDK QVAC, línea base) y decisiones.
 - `spikes/`: experimentos de validación. Vacío por ahora: el spike de LoRA se rehace desde cero dentro de la ventana, con sus scripts en el repo para que el jurado pueda repetirlo.
 - `docs/Reglas_Decentralized_AI_Hackathon.pdf`: reglamento oficial.

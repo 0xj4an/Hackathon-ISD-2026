@@ -295,15 +295,19 @@ Se resuelven con evidencia, no con opinión, antes de construir sobre ellas:
 
 ## Reparto
 
-Sin ambigüedad, para no chocar en los mismos archivos.
+`0xj4an` define el dominio y el diseno. Artur implementa.
 
-| `0xj4an` | Artur |
+| `0xj4an` (dominio y diseno) | Artur (implementacion) |
 | --- | --- |
-| `mobile/` completo (UI, cámara, OCR, SQLite, cola) | `core/` (schemas, prompts, reglas, validaciones) |
-| `perf/logger.ts` y la exportación | `data/` sintéticos (mediciones y documentos) |
-| Cliente Hyperswarm y HTTP en el teléfono | `nodo/` (peer, banco, `credito.mjs`) |
-| Entrenamiento del LoRA en el Mac | `eval/` y la tabla base contra LoRA |
-| Grabación y edición del vídeo | README y guion del vídeo |
+| Que datos de salud se generan y los dos usuarios ficticios | `mobile/` completo (UI, camara, OCR, SQLite, cola) |
+| Umbrales de alerta, examen, especialista y costo | `core/` (schemas, prompts, reglas, validaciones) |
+| Politica de credito y que documentos se piden | `nodo/` (peer, banco, `credito.mjs`) |
+| Pantallas, estados y textos | Cliente Hyperswarm y HTTP en el telefono |
+| Guion y grabacion del video | `perf/logger.ts`, `eval/` y la tabla base contra LoRA |
+| | Entrenamiento del LoRA en el Mac y el README |
 
-Frontera: `core/` es de Artur y se mueve a `mobile/src/core/` (`ADR-004`). Una
-vez movido, cambios de schema se avisan antes de tocar.
+Frontera: los valores de dominio (umbrales, examenes, costos, politica de
+credito) viven dentro de `core/reglas.ts`, `core/marcadores.ts` y
+`nodo/credito.mjs`. `0xj4an` los revisa y edita ahi; Artur no los cambia sin
+avisar. `core/` se mueve a `mobile/src/core/` (`ADR-004`); una vez movido, los
+cambios de schema se avisan antes de tocar.
