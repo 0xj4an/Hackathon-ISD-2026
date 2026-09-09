@@ -189,25 +189,48 @@ requisito explicito de Tether Psy.
 
 ## 4. Plan por bloques, en orden
 
-El reparto asume `0xj4an` en movil y transporte, Artur en core, datos y
-evaluacion.
+**El reparto.** `0xj4an` define el dominio y el diseno: que datos de salud se
+generan, que dispara una alerta, que examen y que especialista corresponden y
+cuanto cuestan, la politica de credito, que se le pide al usuario y como se ve
+la app. Artur implementa: movil, `core/`, `nodo/`, transporte y evaluacion.
+
+Para que ese reparto funcione sin pisarse, el contenido de dominio sale del
+codigo y vive en archivos que `0xj4an` edita solos:
+
+| Archivo | Quien lo llena | Que contiene |
+| --- | --- | --- |
+| `core/marcadores.ts` | `0xj4an` | Los 8 marcadores de laboratorio, sus rangos y el siguiente paso. **Ya existe** |
+| `core/examenes.ts` | `0xj4an` | Catalogo: codigo de senal -> examen sugerido, especialista, costo estimado, urgencia. **Hoy esta incrustado a mano dentro de `core/reglas.ts`** |
+| `core/umbrales.ts` | `0xj4an` | Los umbrales de la via A (tendencia): cuantas tomas, que promedio dispara que. **Hoy tambien esta incrustado en `core/reglas.ts`** |
+| `core/politica-credito.ts` | `0xj4an` | Cuota maxima sobre ingreso, tasas, plazos por monto, umbral de confianza de OCR, monto minimo y maximo. **Hoy esta incrustado en `nodo/credito.mjs`** |
+| `data/` | `0xj4an` | Los dos usuarios ficticios y los documentos sinteticos |
+| `docs/UI.md` | `0xj4an` | Las pantallas, los estados y los textos |
+
+Artur consume esos archivos; `reglas.ts`, `credito.mjs` y las pantallas quedan
+como logica sin datos dentro.
+
+### Pregunta abierta antes de arrancar
+
+**Quien tiene el Xiaomi 14T Pro en la mano.** El bloque 0 es fisico y bloquea
+todo lo demas. Si lo tiene `0xj4an`, el bloque 0 es suyo aunque sea trabajo de
+implementacion, y el reparto de arriba empieza a aplicar desde el bloque 1.
 
 ### Bloque 0 · DESBLOQUEO (nada mas importa)
 
-Todo lo demas esta bloqueado por esto.
+Todo lo demas esta bloqueado por esto. Lo hace quien tenga el telefono.
 
-1. `0xj4an`: conectar el Xiaomi 14T Pro por USB. Opciones de desarrollador
-   (7 toques en "Version de HyperOS"), depuracion USB **y la opcion de instalar
-   por USB**, que es la que suele faltar en Xiaomi y puede pedir cuenta Mi.
-   `adb devices` tiene que listarlo. **Hoy no lista nada.**
-2. `0xj4an`: `adb shell df -h /data` para confirmar que hay >= 5 GB libres antes
-   de bajar 2.1 GB de pesos.
-3. `0xj4an`: `cd mobile && npx expo run:android --device`. El smoke test carga
-   MedPsy y pide un primer token con TTFT. **La primera vez se va a quedar un
-   rato descargando 2.1 GB: es esperado, no es un cuelgue.**
-4. `0xj4an`: repetir el smoke test con `device: "cpu"` y anotar los dos TTFT. El
-   backend de GPU en Mali/Vulkan no esta documentado para Android y con este SoC
-   la CPU puede ser suficiente.
+1. Conectar el Xiaomi 14T Pro por USB. Opciones de desarrollador (7 toques en
+   "Version de HyperOS"), depuracion USB **y la opcion de instalar por USB**,
+   que es la que suele faltar en Xiaomi y puede pedir cuenta Mi. `adb devices`
+   tiene que listarlo. **Hoy no lista nada.**
+2. `adb shell df -h /data` para confirmar que hay >= 5 GB libres antes de bajar
+   2.1 GB de pesos.
+3. `cd mobile && npx expo run:android --device`. El smoke test carga MedPsy y
+   pide un primer token con TTFT. **La primera vez se va a quedar un rato
+   descargando 2.1 GB: es esperado, no es un cuelgue.**
+4. Repetir el smoke test con `device: "cpu"` y anotar los dos TTFT. El backend
+   de GPU en Mali/Vulkan no esta documentado para Android y con este SoC la CPU
+   puede ser suficiente.
 5. Artur en paralelo: `npm install` en `nodo/` y `core/`. Arrancar
    `npm run banco` y `npm run corregimiento` y ver que se descubren por
    Hyperswarm.
@@ -219,12 +242,29 @@ o el backend de GPU.
 
 ### Bloque 1 · rebanada vertical
 
-- `0xj4an`: pantalla 1, alerta de salud. `core/reglas.ts` sobre mediciones
-  sinteticas -> `SYSTEM_ALERTA` -> `limpiarJson()` -> `AlertaSchema.parse()`.
-  Que se vea en el telefono.
-- `0xj4an`: **`perf/logger.ts` desde ya.** Cada `completion()` escribe una linea
-  en `perf.jsonl` con el formato de `perf/README.md`. Si esto no se hace ahora,
-  no se hace nunca, y es entregable de Tether Psy.
+**`0xj4an` (dominio):**
+
+- `core/umbrales.ts`: los umbrales de la via A. Hoy `reglas.ts` tiene cuatro
+  reglas escritas a ojo (glucosa >= 126 y >= 100 sobre 3 tomas, pulso > 100
+  durante 5 dias, sistolica >= 140 en 3 tomas). Confirmar cada una contra una
+  fuente citable y dejar la cita en el archivo.
+- `core/examenes.ts`: por cada codigo de senal, que examen se sugiere, **que
+  especialista lo interpreta** y cuanto cuesta en Panama. Los costos que hay hoy
+  (25, 8, 40, 15 USD) son inventados. La app se los va a mostrar al usuario, asi
+  que o se sostienen o se etiquetan como estimados.
+- **Quitar `linfocitos CD4`** del demo: su siguiente paso menciona VIH y el
+  BRIEF lo prohibe.
+- `data/`: el historial de **dos usuarios ficticios**, uno sano y uno con
+  hallazgo. El sano no debe disparar nada: esa es media demo.
+
+**Artur (implementacion):**
+
+- Pantalla 1, alerta de salud. `core/reglas.ts` sobre mediciones sinteticas ->
+  `SYSTEM_ALERTA` -> `limpiarJson()` -> `AlertaSchema.parse()`. Que se vea en el
+  telefono.
+- **`perf/logger.ts` desde ya.** Cada `completion()` escribe una linea en
+  `perf.jsonl` con el formato de `perf/README.md`. Si esto no se hace ahora, no
+  se hace nunca, y es entregable de Tether Psy.
   **Dos cosas que evitan rehacerlo:** las metricas NO salen de la API de logging
   del SDK (esos logs son diagnostico: `level`, `namespace`, `message`,
   `timestamp`, sin tokens ni tiempos), salen del objeto `stats` de
@@ -232,30 +272,40 @@ o el backend de GPU.
   `tokensPerSecond` y `avgConcurrentSeq`: **volcarlo entero sin filtrar** y medir
   el TTFT a mano con `Date.now()`, como ya hace `mobile/App.tsx`. Para escribir
   el archivo, `getLogger()` con transporte propio.
-- Artur: **las dos vias de deteccion** (ver `03-specification.md`, seccion "Las
-  dos vias"). `reglasTendencia()` sobre el historial y `reglasRango()` sobre
-  resultados de laboratorio, ambas devolviendo el mismo tipo `Senal`. Los 8
-  marcadores de la via B ya estan escritos en
-  `core/marcadores.ts`: los 8 marcadores y sus rangos ya estan ahi.
-  **Quitar `linfocitos CD4`** del demo (su siguiente paso menciona VIH y el
-  BRIEF lo prohibe).
-- Artur: `data/` con el historial exportado de **dos usuarios ficticios**, uno
-  sano y uno con hallazgo, mas el importador al formato normalizado. El sano no
-  debe disparar nada: esa es media demo.
-- Artur: `data/documentos/` con cedula, carta laboral y extracto **ficticios**
-  renderizados como imagen, para probar OCR sin datos reales.
+- **Las dos vias de deteccion** (ver `03-specification.md`, seccion "Las dos
+  vias"). `reglasTendencia()` leyendo `core/umbrales.ts` y `reglasRango()`
+  leyendo `core/marcadores.ts`, ambas devolviendo el mismo tipo `Senal`, y el
+  examen resuelto contra `core/examenes.ts`.
+- El importador de `data/` al formato normalizado.
 
 ### Bloque 2 · flujo completo, UI fea
 
-- `0xj4an`: camara -> `ocr()` -> texto -> `SYSTEM_EXTRACCION_CEDULA` ->
-  `CedulaSchema` -> **borrar la foto** -> guardar JSON en SQLite.
-- `0xj4an`: cola en SQLite con estado `pendiente`, y el envio al nodo (HTTP
-  primero, que es mas facil de depurar que Hyperswarm).
-- Artur: `eval/` con el set de evaluacion y `eval/run.mjs`. Metricas: % de JSON
+**`0xj4an` (dominio y diseno):**
+
+- `core/politica-credito.ts`: cuota maxima sobre ingreso, tasas, plazos por
+  monto, umbral de confianza de OCR, minimo y maximo. Los valores de hoy (30%
+  del ingreso, 9.5% o 12.5% anual, 6/12/24 meses, confianza 0.5, tope 5000) son
+  de juguete y estan escondidos en `nodo/credito.mjs`.
+- **Que se le pide al usuario.** Hoy los schemas asumen cedula, carta laboral y
+  extracto. Decidir si son esos tres, que campos de cada uno y que pasa si falta
+  uno.
+- `data/documentos/`: cedula, carta laboral y extracto **ficticios**
+  renderizados como imagen, con tipografia y ruido realistas. Texto plano
+  perfecto no prueba el OCR.
+- `docs/UI.md`: las pantallas, los estados (sin senal, con senal, subiendo
+  documentos, en cola, respondida) y los textos.
+
+**Artur (implementacion):**
+
+- Camara -> `ocr()` -> texto -> `SYSTEM_EXTRACCION_CEDULA` -> `CedulaSchema` ->
+  **borrar la foto** -> guardar JSON en SQLite.
+- Cola en SQLite con estado `pendiente`, y el envio al nodo (HTTP primero, que
+  es mas facil de depurar que Hyperswarm).
+- `eval/` con el set de evaluacion y `eval/run.mjs`. Metricas: % de JSON
   parseable, % de campos exactos contra ground truth, por tarea. Correrlo contra
-  el modelo base **hoy** para tener la linea base antes del LoRA.
-- Artur: afinar `nodo/credito.mjs` y verificar que `RespuestaBancoSchema` valida
-  lo que el nodo devuelve de verdad.
+  el modelo base **antes del LoRA** para tener la linea base.
+- `nodo/credito.mjs` leyendo `core/politica-credito.ts`, y verificar que
+  `RespuestaBancoSchema` valida lo que el nodo devuelve de verdad.
 
 **Al terminar el bloque, lanzar el entrenamiento del LoRA y irse a dormir.**
 Ver seccion 5. Son ~30 min por epoca y el Mac trabaja solo.
@@ -271,10 +321,11 @@ real fueron ~90 minutos.
 
 ### Bloque 4 · integrar LoRA y medir
 
-- Cargar el adaptador (seccion 5) y correr `eval/run.mjs` otra vez.
-- **La tabla antes/despues es el activo mas valioso del proyecto** para Technical
+- Artur: cargar el adaptador (seccion 5) y correr `eval/run.mjs` otra vez.
+  **La tabla antes/despues es el activo mas valioso del proyecto** para Technical
   (35%) y para el criterio de "calidad de dominio medible" de Tether Psy.
-- UI presentable. Disclaimers de salud visibles en pantalla, no en el README.
+- `0xj4an`: UI presentable segun `docs/UI.md`. Disclaimers de salud visibles en
+  pantalla, no en el README.
 
 ### Bloque 5 · P2P y la demo
 
@@ -286,14 +337,13 @@ real fueron ~90 minutos.
 
 ### Bloque 6 · video y README
 
-- Video <= 5 min, espanol, enlace sin login. Es **lo primero que mira el jurado**
-  del reto General.
-- README con lo que exige Tether Psy: modelos con nombre y cuantizacion honestos,
-  hardware real de ejecucion, instrucciones de setup reproducibles, APIs remotas
-  y componentes de terceros declarados, licencia MIT ya puesta.
-- **Declarar la base preexistente**: solo la plantilla AI Engineering Kit. El
-  codigo copiado del curso se retiro del repo. Ver el README y las
-  recetas de Tether que se hayan usado. **Omitir esto descalifica.**
+- `0xj4an`: guion y grabacion. Video <= 5 min, espanol, enlace sin login. Es **lo
+  primero que mira el jurado** del reto General.
+- Artur: README con lo que exige Tether Psy: modelos con nombre y cuantizacion
+  honestos, hardware real de ejecucion, instrucciones de setup reproducibles,
+  APIs remotas y componentes de terceros declarados, licencia MIT ya puesta.
+- **Declarar la base preexistente**: solo la plantilla AI Engineering Kit.
+  **Omitir esto descalifica.**
 
 ### Bloque 7 · colchon
 
