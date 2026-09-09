@@ -25,3 +25,22 @@ Technical 35% · Innovation 25% · Impact 20% · Design 10% · Completion 10%. D
 ## Reglas de uso
 
 Lee solo las referencias y artefactos declarados por la etapa actual. No supongas requisitos que no estén confirmados. Referencias estables en `references/`: `hackathon.md` (reglas, evaluación, fechas), `retos.md` (los 5 tracks), `qvac.md` (SDK, capacidades, limitaciones) y `baseline.md` (lo que ya está probado).
+
+**Antes de planificar contra un dato de `references/qvac.md`, contrástalo con
+`docs.qvac.tether.io`.** Ese archivo mezcla docs, CHANGELOG y notas propias, y el
+9 sep se detectó al menos una afirmación que no existe en los docs (una supuesta
+cuota de caché de 512 MiB en React Native) que llegó a cambiar el plan. Las
+afirmaciones sin corroborar están marcadas **NO VERIFICADO** en ese archivo.
+
+Artefactos de la iniciativa en curso, en orden de lectura:
+
+1. `runs/2026-09-09-mvp-hackathon/01-idea-validation.md`: por qué esta idea.
+2. `runs/2026-09-09-mvp-hackathon/03-specification.md`: **qué se construye**,
+   alcance, criterios de aceptación, casos límite, reparto y decisiones abiertas.
+3. `runs/2026-09-09-mvp-hackathon/02-stack-y-plan.md`: **cómo**, stack, plan por
+   bloques hasta el viernes, e integración del LoRA.
+4. `adr/`: las 5 decisiones que no se reabren sin la evidencia que cada ADR
+   especifica.
+
+`docs/BRIEF.md` es el resumen para el equipo; ante una discrepancia, mandan la
+especificación y los ADR.
