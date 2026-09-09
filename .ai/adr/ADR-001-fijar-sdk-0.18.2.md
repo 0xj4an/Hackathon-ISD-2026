@@ -1,6 +1,6 @@
 # ADR-001: Fijar `@qvac/sdk` en 0.18.2 exacto
 
-- Estado: aceptada
+- Estado: **reemplazada por [ADR-007](ADR-007-mover-a-sdk-0.19.md)** el 9 sep 16:05
 - Fecha: 2026-09-09
 - Contexto: `@qvac/sdk` 0.19.0 salió el 7 de septiembre, dos días antes del
   hackathon, y es breaking. Textual del CHANGELOG: *"Provider mode and DHT
@@ -9,6 +9,13 @@
   `heartbeat`, `isDelegated` y `providerInfo`. La página de docs
   `/p2p-capabilities/delegated-inference` ya no existe. El Mac tiene 0.18.2
   instalada, que es la última con provider mode.
+
+> **Reemplazada.** Este ADR fijó 0.18.2 por una sola razón, conservar la
+> delegación P2P nativa, y nunca comprobó si de verdad la necesitábamos. Al
+> revisarlo el 9 sep: no. Los tres usos del nodo funcionan sin `delegate`, y
+> 0.19 trae `assessModelFit()`, que es justo lo que `ADR-006` necesita. Ver
+> [ADR-007](ADR-007-mover-a-sdk-0.19.md). Lo único de aquí que sigue vigente es
+> **fijar la versión exacta, sin caret**, sea cual sea.
 
 ## Decisión
 
