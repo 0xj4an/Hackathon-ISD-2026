@@ -41,7 +41,9 @@ cola y viaja al banco cuando hay red o cuando aparece el nodo del corregimiento.
 
 | # | Capacidad | Detalle |
 | --- | --- | --- |
-| A1 | Alerta de salud local | Mediciones sintéticas -> `core/reglas.ts` detecta la señal -> MedPsy la explica -> `AlertaSchema` |
+| A1a | Detección por **historial** | Export de Google Health / Apple Health -> reglas de tendencia -> `Senal` |
+| A1b | Detección por **laboratorio** | Un resultado de examen -> reglas de rango de referencia -> `Senal` |
+| A1c | Explicación de la señal | `Senal` (venga de donde venga) -> MedPsy la redacta -> `AlertaSchema` |
 | A2 | Lectura de cédula | Foto -> `ocr()` -> LLM extrae -> `CedulaSchema` -> **se borra la foto** |
 | A3 | Lectura de comprobante de ingresos | Igual que A2 -> `IngresosSchema` |
 | A4 | Validaciones en código | `core/validaciones.ts` sobre el JSON extraído, antes de armar la solicitud |
@@ -70,8 +72,17 @@ Decidido, no se discute de nuevo:
 ## Flujo principal
 
 ```text
-1. ALERTA        mediciones sintéticas -> detectarSenales() -> hay señal
-                 -> MedPsy redacta -> limpiarJson() -> AlertaSchema.parse()
+1. ALERTA        DOS VÍAS DE ENTRADA, UNA SOLA SALIDA
+
+                 vía A: historial de Google/Apple Health
+                        -> reglasTendencia()  (¿el valor viene mal N días seguidos?)
+                                                                    \
+                                                                     -> Senal
+                                                                    /
+                 vía B: un resultado de laboratorio
+                        -> reglasRango()      (¿el valor está fuera del rango?)
+
+                 Senal -> MedPsy redacta -> limpiarJson() -> AlertaSchema.parse()
                  -> pantalla: qué se observa, qué examen, cuánto cuesta, disclaimer
 
 2. DECISIÓN      "¿Necesitas ayuda para pagarlo?" -> entra el flujo de crédito
@@ -94,13 +105,73 @@ Decidido, no se discute de nuevo:
 7. ACEPTACIÓN    botón "Acepto" -> firma_hash -> estado "aceptada"
 ```
 
+## Las dos vías de detección (A1a y A1b)
+
+Corregido el 9 sep 15:20. La versión anterior solo contemplaba mediciones
+caseras. Son dos vías distintas, y la diferencia no es cosmética: **detectan
+cosas de forma distinta**.
+
+| | Vía A: historial | Vía B: laboratorio |
+| --- | --- | --- |
+| De dónde viene | Export de Google Health o Apple Health | Un examen de rutina, escrito o fotografiado |
+| Qué mira | Una **tendencia**: el valor viene mal N días seguidos | Un **valor suelto** contra su rango de referencia |
+| Necesita historia | Sí, sin serie temporal no hay señal | No, con un dato basta |
+| Ejemplo | "glucosa en ayunas sobre 126 en las últimas 3 tomas" | "hemoglobina 9.1 g/dL, rango 12 a 16, anemia" |
+| Estado hoy | `core/reglas.ts`, 4 reglas escritas | **Solo existe en `spikes/lora-medpsy/make-dataset.mjs`**, con 8 marcadores y sus rangos. Falta llevarlo a `core/` |
+
+**Las dos desembocan en el mismo tipo `Senal`** (`codigo`, `descripcion`,
+`examen`, `costo_usd`, `urgencia`) y de ahí en adelante el flujo es uno solo:
+MedPsy redacta, `AlertaSchema` valida, la pantalla lo muestra. Una sola ruta de
+explicación, dos de detección. Esto mantiene `ADR-005` intacto: las dos vías
+deciden en código, el modelo sigue solo redactando.
+
+### Los 8 marcadores de la vía B ya están escritos
+
+En `spikes/lora-medpsy/make-dataset.mjs`, con rango y siguiente paso:
+glicemia en ayunas, hemoglobina, plaquetas, creatinina, linfocitos CD4,
+colesterol total, hematocrito y TSH. Hay que moverlos a `core/reglas.ts` como
+`reglasRango()`. Es trabajo de copiar y adaptar, no de diseñar.
+
+> **Quitar `linfocitos CD4` del demo.** Su siguiente paso es "referir a programa
+> de VIH", y `docs/BRIEF.md` dice explícitamente "sin VIH en el demo público".
+> El marcador se queda en el dataset de entrenamiento si hace falta volumen,
+> pero no puede aparecer en pantalla ni en el video.
+
+### Los datos: dos usuarios, uno sano y uno no
+
+Para el hackathon se carga un historial ya exportado de dos usuarios ficticios.
+
+- **Usuario sano.** Todas sus series dentro de rango. **La app no dice nada.**
+  Esto vale tanto como la alerta: demuestra que el sistema no alarma por gusto,
+  que es la crítica obvia a cualquier app de salud.
+- **Usuario con hallazgo.** Dispara al menos dos señales, una por cada vía.
+
+Ese par es a la vez la demo y el set de evaluación de las reglas.
+
+### Decisión sobre el formato de entrada
+
+**No se integra con Health Connect ni con HealthKit en vivo.** Se define un
+formato normalizado propio (JSON o CSV: `usuario`, `ts`, `tipo`, `valor`,
+`unidad`) y un importador de 30 líneas que traduce el export real a ese formato.
+
+Por qué: el export de Apple Health es un XML enorme, HealthKit es solo iOS y
+nuestro objetivo es Android, y Health Connect en vivo pide permisos y una
+integración que no cabe en 41 horas. El importador demuestra el mismo punto y
+cuesta una hora en vez de una noche.
+
+**Se declara tal cual en el README**: los datos entran por archivo exportado, no
+por conexión viva a Health Connect, y esa es la ruta de producción pendiente.
+
 ## Criterios de aceptación
 
 | # | Criterio | Cómo se verificará |
 | --- | --- | --- |
 | C1 | MedPsy carga en el 14T Pro y produce texto en español | Captura con "modelo cargado" y TTFT en ms |
 | C2 | TTFT medido con `gpu` y con `cpu`, y se usa el mejor | Dos líneas en `perf.jsonl` con `device_cfg` distinto |
-| C3 | Las 4 reglas de `core/reglas.ts` disparan con los datos sintéticos | `eval/run.mjs` recorre `data/mediciones/` y las cuenta |
+| C3 | Las reglas de tendencia (vía A) disparan con el historial del usuario con hallazgo | `eval/run.mjs` recorre el historial y las cuenta |
+| C3b | Las reglas de rango (vía B) clasifican bien los 8 marcadores, alto, bajo y normal | `eval/run.mjs` contra los casos del dataset del spike |
+| C3c | **El usuario sano no dispara ninguna alerta** | `eval/run.mjs` sobre su historial completo: cero señales |
+| C3d | `linfocitos CD4` no aparece en pantalla ni en el video | Grep en la app y revisión del guion |
 | C4 | Toda salida del modelo pasa por `limpiarJson()` antes de `JSON.parse` | Grep: cero `JSON.parse` sin `limpiarJson` en el repo |
 | C5 | La alerta valida contra `AlertaSchema` | `.parse()` sin excepción sobre 20 corridas |
 | C6 | La foto se borra tras extraer | Listar el directorio después del paso 3: cero imágenes |

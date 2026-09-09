@@ -234,8 +234,16 @@ o el backend de GPU.
   `tokensPerSecond` y `avgConcurrentSeq`: **volcarlo entero sin filtrar** y medir
   el TTFT a mano con `Date.now()`, como ya hace `mobile/App.tsx`. Para escribir
   el archivo, `getLogger()` con transporte propio.
-- Artur: `data/mediciones/` con un generador de series sinteticas que dispare
-  cada una de las 4 reglas de `core/reglas.ts`.
+- Artur: **las dos vias de deteccion** (ver `03-specification.md`, seccion "Las
+  dos vias"). `reglasTendencia()` sobre el historial y `reglasRango()` sobre
+  resultados de laboratorio, ambas devolviendo el mismo tipo `Senal`. Los 8
+  marcadores de la via B ya estan escritos en
+  `spikes/lora-medpsy/make-dataset.mjs`: es copiar y adaptar, no disenar.
+  **Quitar `linfocitos CD4`** del demo (su siguiente paso menciona VIH y el
+  BRIEF lo prohibe).
+- Artur: `data/` con el historial exportado de **dos usuarios ficticios**, uno
+  sano y uno con hallazgo, mas el importador al formato normalizado. El sano no
+  debe disparar nada: esa es media demo.
 - Artur: `data/documentos/` con cedula, carta laboral y extracto **ficticios**
   renderizados como imagen, para probar OCR sin datos reales.
 
