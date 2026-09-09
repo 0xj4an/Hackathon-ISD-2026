@@ -9,37 +9,105 @@ Referencias: `01-idea-validation.md` (decision de idea), `docs/BRIEF.md`,
 
 ---
 
-## 1. Hallazgo bloqueante (leer antes que nada)
+## 1. Como funciona QVAC en el telefono, y donde esta el riesgo real
 
-`references/qvac.md` linea 39 y gotcha 8: **la cuota de cache de modelos en
-React Native es 512 MiB.** En el resto de plataformas son 4 GiB.
+> **Corregido el 9 sep 14:30.** La primera version de esta seccion decia que
+> React Native tiene una cuota de cache de 512 MiB y que por eso el modelo no
+> cabia. **Ese dato no existe en los docs de QVAC.** Buscado en
+> `about/how-it-works`, `system-requirements`, `configuration`,
+> `troubleshooting` y `llms-full.txt`: no aparece. Venia de `references/qvac.md`
+> y se dio por bueno sin verificar. El riesgo es real pero el mecanismo es otro.
 
-`mobile/App.tsx` carga hoy `HEALTHCARE_1_7B_MEDICAL_Q8_0`, que pesa **2.1 GB**.
-Son 4 veces la cuota. El smoke test no ha corrido nunca en un telefono, asi que
-esto no esta descartado: es la hipotesis mas probable de por que fallara.
+### Que se instala y que se descarga
 
-Y el gotcha 12 empeora el cuadro: *"1B alucina en extraccion; usar >= 4B para el
-JSON estructurado"*. Un modelo de 4B en Q4 pesa ~2.5 GB. Tampoco entra.
+Son dos cosas distintas y conviene tenerlo claro antes de discutir tamanos.
 
-Es decir: **el plan actual pide en el telefono dos cosas que, por cuota, no
-caben.** Hay que resolverlo en la primera hora, no en la hora 30.
+- **Se instala con la app** (via `expo prebuild` y el plugin de QVAC): el SDK y
+  los **motores nativos de inferencia**. Es el `mobile/qvac/worker.bundle.js` de
+  9.5 MB mas los addons. Por eso `mobile/qvac.config.json` declara solo
+  `llamacpp-completion` y `ggml-ocr`: para no linkear motores que no se usan.
+- **NO se instala: los pesos del modelo.** Textual del tutorial de Expo:
+  *"On the first run, the model may download from peers"*. Bajan en el primer
+  arranque, por P2P o HTTP, a `cacheDirectory` (default `~/.qvac/models`,
+  personalizable, **sin limite de tamano documentado**).
 
-### Las tres salidas, a probar en este orden
+El patron del tutorial:
 
-1. **Cargar por path local, no por constante de catalogo.** El SDK acepta
-   `modelSrc` como path local si se pasa `modelType`. La cuota de 512 MiB es del
-   *cache* de modelos; un archivo sideloaded con `adb push` a la carpeta de la
-   app y cargado por ruta plausiblemente no pasa por ese contador. Es la salida
-   mas barata y la que preserva todo el diseno. **Probar primero.**
-2. **Mover `cacheDirectory`.** Es configurable en `qvac.config.json`. Apuntarlo
-   al directorio de documentos de la app puede levantar el limite.
-3. **Delegar MedPsy al nodo por P2P.** Si 1 y 2 fallan, el telefono corre solo
-   OCR (`OCR_LATIN`, chico) y la inferencia del LLM viaja al nodo del
-   corregimiento. Esto **sigue cumpliendo el reglamento** ("en el dispositivo o
-   delegada por P2P") y de hecho es justo lo que los tres retos premian.
+```js
+await downloadAsset({ assetSrc: LLAMA_3_2_1B_INST_Q4_0, onProgress: ... });
+const id = await loadModel({ modelSrc: LLAMA_3_2_1B_INST_Q4_0, modelType: "llm" });
+```
 
-No es una tragedia: la salida 3 convierte la restriccion en el argumento del
-proyecto. Pero hay que saber cual de las tres es antes de escribir UI.
+### Los dos riesgos que si son reales
+
+**1. La primera descarga son 2.1 GB.** `HEALTHCARE_1_7B_MEDICAL_Q8_0` pesa
+2.1 GB. El tutorial de QVAC usa Llama 1B Q4_0, ~0.7 GB: estamos pidiendo el
+triple. **Esa descarga no puede pasar en el evento ni grabando el video.** Hay
+que pre-descargar al telefono antes, con `downloadAsset()`. Ya existe
+`spikes/p2p/download-models.mjs` para eso.
+
+**2. RAM, no disco.** Los docs dicen *"Below 4 GB, most LLMs will fail to
+load"* y piden >= 2 GB de RAM **disponible** al cargar. Cargar 2.1 GB de pesos
+en un telefono de gama media es el limite real. Esto sigue sin probarse.
+
+Y el gotcha 12 de `references/qvac.md` sigue en pie: *"1B alucina en extraccion;
+usar >= 4B para el JSON estructurado"*. Un 4B en Q4 son ~2.5 GB, peor todavia.
+**Ese conflicto es exactamente lo que el LoRA de la seccion 5 resuelve**: en vez
+de subir a 4B, se hace que el 1.7B rinda en un esquema estrecho.
+
+### Telefono objetivo: Xiaomi 14T Pro (decidido el 9 sep)
+
+Y el riesgo de RAM practicamente desaparece. Specs confirmadas:
+
+| | |
+| --- | --- |
+| SoC | MediaTek Dimensity 9300+ (4 nm), Cortex-X4 a 3.25 GHz |
+| RAM | **12 GB LPDDR5X** (hay variante de 16 GB) |
+| GPU | Immortalis-G720 MC12 |
+| SO | Android 14 con HyperOS |
+
+Contra los requisitos de los docs:
+
+- **Android 12+ y arm64**: cumple de sobra (Android 14).
+- **RAM**: 12 GB contra el *"below 4 GB, most LLMs will fail to load"*. Cargar
+  2.1 GB de pesos es comodo. **Este era el riesgo grande y queda casi cerrado.**
+- **Dispositivo fisico**: es fisico. Textual de los docs: *"QVAC currently does
+  not run on emulators. You must use a physical device."*
+- **>= 5 GB de disco libre**: verificar cuanto le queda, es lo unico pendiente.
+
+Consecuencias para el plan:
+
+1. **La delegacion a la laptop deja de ser plan de rescate y vuelve a ser lo que
+   deberia: una decision de producto.** Se hace porque suma en los tres retos,
+   no porque el telefono no aguante.
+2. **Entrenar el LoRA en el propio telefono sube de "improbable" a "vale la pena
+   intentarlo".** Un Dimensity 9300+ con 12 GB es mejor maquina que muchos
+   portatiles. Sigue sin estar documentado que `finetune()` corra en Android,
+   asi que no se promete en el guion hasta verlo, pero el hardware no es la
+   excusa.
+3. **Queda un desconocido nuevo: el backend de GPU.** `mobile/App.tsx` pide
+   `device: "gpu"`. La tabla de plataformas de `references/qvac.md` dice que en
+   Android el soporte es **"Vulkan / OpenCL (Adreno 700+)"**. El 14T Pro no
+   lleva Adreno sino **Mali Immortalis-G720**, o sea que la ruta OpenCL no
+   aplica y todo depende de Vulkan. Los docs solo exigen Vulkan >= 1.4
+   explicitamente para Linux y Windows y no dicen nada de Android.
+   En el bloque 0 hay que probar **`device: "gpu"` y `device: "cpu"`** y anotar
+   cual gana en TTFT. Con un Dimensity 9300+, incluso CPU deberia ser usable, asi
+   que esto no bloquea nada: solo decide un parametro.
+
+El unico riesgo de esta seccion que sigue vivo es la descarga de 2.1 GB.
+
+### Trampa de HyperOS que puede costar horas
+
+HyperOS y MIUI no bastan con "USB debugging". Para que `expo run:android` pueda
+**instalar** el APK hace falta habilitar tambien la opcion de instalar por USB
+dentro de Opciones de desarrollador, y en varios equipos Xiaomi eso exige tener
+sesion iniciada con cuenta Mi. Averiguarlo con el telefono en la mano en el
+bloque 0, no a las 3 de la manana.
+
+Para entrar a Opciones de desarrollador: Ajustes, Acerca del telefono, tocar
+7 veces "Version de HyperOS", luego Ajustes adicionales, Opciones de
+desarrollador.
 
 ---
 
@@ -130,20 +198,26 @@ datos y evaluacion.
 
 Todo lo demas esta bloqueado por esto.
 
-1. `0xj4an`: conectar el Android por USB con depuracion activada. `adb devices`
-   tiene que listarlo. **Hoy no lista nada.**
-2. `0xj4an`: `cd mobile && npx expo run:android --device`. El smoke test carga
-   MedPsy y pide un primer token con TTFT.
-3. Si falla por memoria o cuota: probar las tres salidas de la seccion 1 en
-   orden. Presupuesto: 45 minutos. Pasado eso, ir a la salida 3 (delegacion) sin
-   discutir mas.
-4. Artur en paralelo: `npm install` en `nodo/` y `core/`. Arrancar
+1. `0xj4an`: conectar el Xiaomi 14T Pro por USB. Opciones de desarrollador
+   (7 toques en "Version de HyperOS"), depuracion USB **y la opcion de instalar
+   por USB**, que es la que suele faltar en Xiaomi y puede pedir cuenta Mi.
+   `adb devices` tiene que listarlo. **Hoy no lista nada.**
+2. `0xj4an`: `adb shell df -h /data` para confirmar que hay >= 5 GB libres antes
+   de bajar 2.1 GB de pesos.
+3. `0xj4an`: `cd mobile && npx expo run:android --device`. El smoke test carga
+   MedPsy y pide un primer token con TTFT. **La primera vez se va a quedar un
+   rato descargando 2.1 GB: es esperado, no es un cuelgue.**
+4. `0xj4an`: repetir el smoke test con `device: "cpu"` y anotar los dos TTFT. El
+   backend de GPU en Mali/Vulkan no esta documentado para Android y con este SoC
+   la CPU puede ser suficiente.
+5. Artur en paralelo: `npm install` en `nodo/` y `core/`. Arrancar
    `npm run banco` y `npm run corregimiento` y ver que se descubren por
    Hyperswarm.
 
 **Salida verificable:** una captura del telefono mostrando "modelo cargado" y
-texto en espanol, mas el TTFT en milisegundos. Esa captura es la que decide la
-arquitectura de las siguientes 40 horas.
+texto en espanol, mas los dos TTFT (gpu y cpu). Con 12 GB de RAM esto **deberia**
+funcionar; si falla, el sospechoso ya no es la memoria sino el pipeline de Expo
+o el backend de GPU.
 
 ### Bloque 1 · mie 15:30 a 20:00 · rebanada vertical
 
@@ -153,6 +227,13 @@ arquitectura de las siguientes 40 horas.
 - `0xj4an`: **`perf/logger.ts` desde ya.** Cada `completion()` escribe una linea
   en `perf.jsonl` con el formato de `perf/README.md`. Si esto no se hace ahora,
   no se hace nunca, y es entregable de Tether Psy.
+  **Dos cosas que evitan rehacerlo:** las metricas NO salen de la API de logging
+  del SDK (esos logs son diagnostico: `level`, `namespace`, `message`,
+  `timestamp`, sin tokens ni tiempos), salen del objeto `stats` de
+  `await result.final`. Y de ese `stats` solo estan documentados
+  `tokensPerSecond` y `avgConcurrentSeq`: **volcarlo entero sin filtrar** y medir
+  el TTFT a mano con `Date.now()`, como ya hace `mobile/App.tsx`. Para escribir
+  el archivo, `getLogger()` con transporte propio.
 - Artur: `data/mediciones/` con un generador de series sinteticas que dispare
   cada una de las 4 reglas de `core/reglas.ts`.
 - Artur: `data/documentos/` con cedula, carta laboral y extracto **ficticios**
@@ -275,11 +356,14 @@ su propio catalogo y va a notar la eleccion; explicarla suma, esconderla resta.
 
 Reusar `spikes/lora-medpsy/spike.mjs` tal cual, cambiando el dataset:
 
-```
+```js
 numberOfEpochs: 2, learningRate: 2e-4, lrMin: 1e-8, contextLength: 1024,
 loraRank: 8, loraAlpha: 16, assistantLossOnly: true,
 loraModules: "attn_q,attn_k,attn_v,attn_o,ffn_gate,ffn_up,ffn_down"
 ```
+
+`finetune()` tambien soporta `pause` y `resume` con checkpoints (confirmado en
+docs). Util si el Mac se duerme a mitad, como paso en el spike.
 
 Con 300 ejemplos y 2 epocas son ~2 h en el Mac. **Lanzarlo al cerrar el bloque 2
 y dormir.** Es la mejor hora del hackathon para gastarla: el Mac trabaja y el
@@ -323,11 +407,20 @@ modelo pase por ahi antes de `JSON.parse`. Sin excepciones.
 
 ### Entrenar en el telefono (opcional, solo si sobra tiempo)
 
-La doc dice que `finetune()` corre en movil sobre Vulkan y Metal. Entrenar en el
-propio telefono, sin red, es la escena que mejor cuenta "Sovereign Intelligence
-at the Edge" y probablemente ningun otro equipo la tenga.
+Entrenar en el propio telefono, sin red, es la escena que mejor cuenta
+"Sovereign Intelligence at the Edge" y probablemente ningun otro equipo la
+tenga.
 
-Pero es riesgo puro: no esta probado en este hardware y puede comerse una noche.
+**Cuidado con la fuente.** `references/qvac.md` afirmaba que `finetune()`
+"corre en movil (Vulkan/Metal)". La pagina de fine-tuning de los docs **no
+menciona Android ni iOS**. Es la misma clase de dato no corroborado que ya
+causo un error en este plan, asi que: **no se promete en el guion del video
+hasta verlo correr.**
+
+Lo que si cambio a favor: el Xiaomi 14T Pro tiene Dimensity 9300+ y 12 GB de
+RAM. Si el obstaculo fuera hardware, este telefono lo pasa. El obstaculo es
+saber si el SDK lo soporta, y eso se resuelve con una prueba de 20 minutos, no
+con una noche.
 
 Como hacerlo sin arriesgar nada: el adaptador de produccion se entrena en el
 Mac (ya decidido arriba). Si el jueves a las 20:00 todo esta entregable, se
@@ -342,14 +435,16 @@ ya existe.
 
 | # | Riesgo | Mitigacion | Cuando se sabe |
 | --- | --- | --- | --- |
-| 1 | El telefono no aparece en `adb` o Expo no compila | Es el bloque 0 entero. Sin esto no hay proyecto. | mie 15:30 |
-| 2 | Cuota de 512 MiB bloquea el modelo en el movil | Tres salidas de la seccion 1, la ultima (delegar por P2P) siempre funciona | mie 15:30 |
+| 1 | El telefono no aparece en `adb` o Expo no compila. En Xiaomi, la opcion de instalar por USB puede pedir cuenta Mi | Es el bloque 0 entero. Sin esto no hay proyecto. | mie 15:30 |
+| 2 | La descarga de 2.1 GB pasa en el evento o grabando | Pre-descargar con `downloadAsset()` antes de moverse. `spikes/p2p/download-models.mjs` ya existe | mie 15:30 |
 | 3 | Sin `perf.jsonl` ni `eval/` | Se construyen en los bloques 1 y 2, no al final | jue 01:00 |
 | 4 | Metro no resuelve `core/` | Opcion A: mover a `mobile/src/core/` | mie 16:00 |
 | 5 | Base preexistente sin declarar | Checklist del bloque 6. **Descalifica.** | jue 22:00 |
 | 6 | El OCR lee mal las imagenes sinteticas | Renderizar los documentos con tipografia y ruido realistas, no texto plano perfecto | mie 20:00 |
 | 7 | Hyperswarm no atraviesa NAT entre redes distintas | Demo en la misma LAN. Los relays de los ejemplos usan claves mock. | jue 16:00 |
-| 8 | `npm update` accidental rompe 0.18.2 | Version fijada. No correr update. | siempre |
+| 8 | `npm update` accidental rompe 0.18.2 | Version fijada exacta en `package.json` y en el lock. No correr update. | siempre |
+| 9 | El backend `device: "gpu"` no rinde en Mali/Vulkan | Medir gpu y cpu en el bloque 0 y quedarse con el mejor | mie 15:30 |
+| 10 | Planificar contra datos no verificados de `references/qvac.md` | Ya paso una vez con la cuota de 512 MiB. Todo dato que decida arquitectura se contrasta contra `docs.qvac.tether.io` antes de usarlo | siempre |
 
 ---
 
