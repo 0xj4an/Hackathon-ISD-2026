@@ -30,16 +30,12 @@ Hardware de referencia: (modelo de Android, RAM, SoC - completar). Log de rendim
 
 ## Base preexistente (declaración obligatoria)
 
-El cronómetro arrancó el 9 de septiembre a las 08:00 (Panamá). El primer commit
-de este repositorio es de ese mismo día a las 11:00, y `mobile/`, `core/` y
-`nodo/` se construyen dentro de las 48 horas. Lo anterior al cronómetro:
+El cronómetro arrancó el 9 de septiembre a las 08:00 (Panamá) y el primer commit
+de este repositorio es de ese mismo día a las 11:00. `core/`, `nodo/` y `mobile/`
+son código propio escrito dentro de las 48 horas. Lo que no:
 
 - **Plantilla [`ArturVargas/AI_Engineering_Kit`](https://github.com/ArturVargas/AI_Engineering_Kit)** (ago 2026), de la que se generó el repo: `standards/`, `templates/`, la estructura de `.ai/` y `docs/ai-engineering-kit.md`. Documentación, no código de producto.
-- **Curso Dojo Coding "Local AI with QVAC"** (ago-sep 2026), repo `qvac-course` del equipo, fuera de este: patrones de `loadModel`/`completion`, RAG y delegación P2P.
-
-- **Spikes** en `spikes/` (8-9 sep): LoRA sobre MedPsy 1.7B y delegación P2P. Son validaciones, no producto.
-- **Notas de lectura** del reglamento, los retos y los docs del SDK (7-8 sep), en `.ai/references/`.
-- **Librerías open source** de los `package.json`. Sin otro boilerplate.
+- **`spikes/`**: cuatro scripts copiados tal cual del repo `qvac-course` del equipo (ejercicios del curso Dojo Coding "Local AI with QVAC"), del 8 y 9 de septiembre. Validan `finetune()` y la delegación P2P. No son parte de la app.
 
 ## Contexto compartido del equipo
 - `docs/BRIEF.md`: qué construimos, flujo, arquitectura, plan por horas.
