@@ -34,5 +34,11 @@ Hardware de referencia: (modelo de Android, RAM, SoC — completar). Log de rend
 - Spike de fine-tuning LoRA (8–9 sep) para validar `finetune()`; no forma parte del producto salvo que se indique.
 - Librerías open source listadas en `package.json`. Sin otro boilerplate.
 
+## Contexto compartido del equipo
+- `docs/BRIEF.md`: qué construimos, flujo, arquitectura, plan por horas.
+- `.ai/`: contexto estable (reglas del hackathon, los 5 retos, referencia del SDK QVAC, línea base) y decisiones.
+- `spikes/`: experimentos ya validados (LoRA, P2P).
+- `docs/Reglas_Decentralized_AI_Hackathon.pdf`: reglamento oficial.
+
 ## Licencia
 MIT. Ver [LICENSE](LICENSE).

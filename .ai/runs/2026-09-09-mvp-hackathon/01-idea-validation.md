@@ -16,7 +16,7 @@ Un proyecto que encadene 2–3 capacidades de QVAC (voz + LLM + RAG, o visión +
 
 ## Usuario y problema
 
-Por definir según el candidato elegido.
+Persona en zona rural de Panamá con teléfono Android de gama media y señal intermitente, sin medicina prepagada. Problema doble: no sabe cuándo conviene hacerse un examen ni cómo pagarlo; y para pedir crédito debe entregar cédula y extractos físicos a asesores (riesgo de fraude y fuga de datos).
 
 ## Experimento mínimo
 
@@ -34,4 +34,4 @@ Ver `references/baseline.md` (lo que ya funciona en la máquina) y `references/r
 
 ## Decisión
 
-Pendiente.
+**Tomada el 9 sep ~11:00 (Panamá).** Se construye una variante de B + C: **alerta de salud local → solicitud de crédito de salud con documentos leídos en el dispositivo → cola offline → envío por P2P/red al banco → respuesta y firma**, para usuarios rurales con conectividad intermitente. Retos: General + Tether Psy + Caja de Ahorros. Se descartan A (Philips) y la versión "urbana" de B (Tether ya la cubre con su app QVAC Health). Detalle en `docs/BRIEF.md`.

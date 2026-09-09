@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-Repo creado el 9 sep 2026 a partir de la plantilla AI Engineering Kit (ArturVargas/AI_Engineering_Kit). Todavía sin código de producto. Idea por decidir entre los candidatos de `runs/2026-09-09-mvp-hackathon/01-idea-validation.md`.
+Repo creado el 9 sep 2026 a partir de la plantilla AI Engineering Kit (ArturVargas/AI_Engineering_Kit). Idea decidida el 9 sep (ver `docs/BRIEF.md`). Scaffold de producto: `mobile/` (Expo SDK 54 + `@qvac/sdk` 0.18.2 fijado, prebuild Android OK, smoke test MedPsy), `core/` (schemas, prompts, reglas, validaciones), `nodo/` (peer Hyperswarm + banco mock).
 
 ## Arquitectura y despliegue
 
@@ -21,7 +21,7 @@ Por definir. Restricción base: `@qvac/sdk` levanta un worker Bare y se comunica
 - RAG con embeddings (`m2/rag.js`).
 - Descarga y caché de modelos (`prep/download-models.mjs`).
 - Delegación P2P entre pares (`prep/p2p-test.mjs`, funciona en 0.18.2). Activo transversal: todos los retos valoran Pears / delegación P2P.
-- Spike de fine tuning LoRA sobre MedPsy 1.7B Q8_0 (`HEALTHCARE_1_7B_MEDICAL_Q8_0`) en `prep/lora/` (ver `spike.log` para el resultado).
+- Spike de fine tuning LoRA sobre MedPsy 1.7B Q8_0: funciona; ~28 min/época en el Mac; base 1/3 → LoRA 2/3 JSON válidos con 52 ejemplos. Ver `spikes/lora-medpsy/RESULTADOS.md`.
 
 ## Riesgos y deuda conocida
 
