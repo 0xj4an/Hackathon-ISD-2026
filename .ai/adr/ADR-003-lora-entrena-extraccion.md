@@ -1,13 +1,17 @@
 # ADR-003: El adaptador LoRA entrena extracción de documentos, no solo triaje
 
 - Estado: aceptada
-- Contexto: el spike de LoRA
-  (`spikes/lora-medpsy/RESULTADOS.md`) entrenó un adaptador para el **triaje de
-  salud**: 52 ejemplos, 3 épocas, ~28 min por época en el Mac, adaptador de
-  34 MB, resultado base 1/3 -> LoRA 2/3 JSON parseables. El pipeline funciona de
-  punta a punta; el riesgo técnico del LoRA está cerrado.
+- Contexto: hubo un spike de LoRA previo que entrenó un adaptador para triaje de
+  salud y dio buenos indicios. **Sus scripts y sus números se retiraron del
+  repo**: vivían fuera de él y sin ellos la medición no era reproducible, y el
+  reto Tether Psy exige evidencia que el jurado pueda repetir.
 
-  La pregunta no es si el LoRA funciona, sino a qué apuntarlo.
+  El spike **se rehace desde cero dentro de la ventana**, con los scripts en el
+  repo. Este ADR decide a qué apuntarlo cuando se rehaga.
+
+  > **Ojo con el orden.** Mientras el spike nuevo no corra, el pipeline de
+  > `finetune()` está **sin validar en este repo**. No se puede planificar como
+  > si ya funcionara.
 
 ## Decisión
 
@@ -17,8 +21,9 @@ El adaptador se entrena con un dataset mixto de ~300 ejemplos, con el peso en
 
 ## Alternativas consideradas
 
-- **Seguir solo con triaje**, como el spike. Es lo ya hecho, coste cero. Pero
-  entrena la parte del flujo donde un fallo es cosmético.
+- **Seguir solo con triaje**, como el spike anterior. Entrena la parte del flujo
+  donde un fallo es cosmético, y ya no es "coste cero" porque el spike se rehace
+  igual.
 - **Dos adaptadores, uno por tarea.** Más limpio conceptualmente, el doble de
   entrenamiento y de gestión de archivos, sin beneficio visible en la demo.
 - **No usar LoRA** y documentar el spike como experimento. Es el último escalón

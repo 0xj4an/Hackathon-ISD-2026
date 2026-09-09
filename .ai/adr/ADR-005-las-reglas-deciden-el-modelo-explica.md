@@ -5,8 +5,11 @@
   las comunica a una persona sin formación médica, en una zona sin acceso rápido
   a un profesional. Es el punto donde una alucinación hace daño de verdad.
 
-  El spike de LoRA lo vio en vivo: el modelo base **inventó rangos de
+  El spike de LoRA anterior lo vio en vivo: el modelo base **inventó rangos de
   referencia** ("plaquetas 45-60"). Un 1.7B no es una fuente de verdad clínica.
+  Ese spike se retiró del repo y se rehace, pero la observación es la razón de
+  ser de este ADR y no depende de volver a medirla: si el modelo puede inventar
+  un rango, no puede ser quien decide.
 
   Además el reto Tether Psy exige explícitamente, para proyectos médicos,
   "comunicar limitaciones, sin afirmaciones clínicas no respaldadas, con medidas

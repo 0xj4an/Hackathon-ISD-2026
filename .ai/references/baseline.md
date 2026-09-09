@@ -6,7 +6,7 @@ Repo generado a partir de la plantilla AI Engineering Kit (ArturVargas/AI_Engine
 
 ## Arquitectura y despliegue
 
-Por definir. Restricción base: `@qvac/sdk` levanta un worker Bare y se comunica por RPC; un worker por app, varios modelos cargados a la vez; ciclo `loadModel()` → operaciones → `unloadModel()` → `close()`.
+Por definir. Restricción base: `@qvac/sdk` levanta un worker Bare y se comunica por RPC; un worker por app, varios modelos cargados a la vez; ciclo `loadModel()` -> operaciones -> `unloadModel()` -> `close()`.
 
 ## Dependencias e integraciones
 
@@ -21,7 +21,7 @@ Por definir. Restricción base: `@qvac/sdk` levanta un worker Bare y se comunica
 - RAG con embeddings (`m2/rag.js`).
 - Descarga y caché de modelos con `downloadAsset()`.
 - Delegación P2P entre pares, probada en 0.18.2. `ADR-001` la descartó: 0.19 eliminó el provider mode y el nodo delega con `qvac serve`.
-- Spike de fine tuning LoRA sobre MedPsy 1.7B Q8_0: funciona; ~28 min/época en el Mac; base 1/3 → LoRA 2/3 JSON válidos con 52 ejemplos. Ver `spikes/lora-medpsy/RESULTADOS.md`.
+- Fine tuning LoRA sobre MedPsy 1.7B Q8_0: **sin validar en este repo.** Hubo un spike anterior con buenos indicios, pero se retiró porque no era reproducible aquí. Se rehace desde cero, con los scripts dentro del repo. Hasta que corra, no se planifica como si funcionara.
 
 ## Riesgos y deuda conocida
 

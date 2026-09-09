@@ -3,7 +3,7 @@
 Clasificacion: `architectural`.
 
 Referencias: `01-idea-validation.md` (decision de idea), `docs/BRIEF.md`,
-`references/qvac.md`, `references/retos.md`, `spikes/lora-medpsy/RESULTADOS.md`.
+`references/qvac.md`, `references/retos.md`, `references/baseline.md`.
 
 ---
 
@@ -290,8 +290,13 @@ o el backend de GPU.
 - Afinar `nodo/credito.mjs` y verificar que `RespuestaBancoSchema` valida lo
   que el nodo devuelve de verdad.
 
-**Al terminar el bloque, lanzar el entrenamiento del LoRA y irse a dormir.**
-Ver seccion 5. Son ~30 min por epoca y el Mac trabaja solo.
+**Al terminar el bloque, escribir los dos scripts del spike y lanzar el
+entrenamiento antes de dormir.** Ver seccion 5. El spike se rehace desde cero,
+asi que primero hay que escribir `make-dataset.mjs` y `spike.mjs` (una hora
+larga entre los dos) y recien ahi lanzar. Son ~30 min por epoca y el Mac trabaja
+solo mientras el equipo descansa.
+
+Con `caffeinate -i`, o el Mac se duerme a mitad.
 
 ### Bloque 3 · descanso por turnos
 
@@ -336,19 +341,31 @@ Solo se toca lo que este roto. Nada nuevo. Entregar con margen.
 
 ## 5. LoRA: que entrenar, como cargarlo, como demostrarlo
 
-### Que dice el spike que ya corrio
+### El spike se rehace desde cero
 
-`spikes/lora-medpsy/RESULTADOS.md`, del 8 al 9 de septiembre:
+Hubo un spike anterior que entreno un adaptador de triaje y dio buenos indicios.
+**Se retiro del repo**: sus scripts vivian fuera y sin ellos la medicion no era
+reproducible, y el reto Tether Psy exige evidencia que el jurado pueda repetir.
 
-- Base `HEALTHCARE_1_7B_MEDICAL_Q8_0`. Es el unico entrenable del catalogo.
-- 52 ejemplos, 3 epocas, lr 2e-4, rank 8, alpha 16, ctx 1024, `assistantLossOnly`,
-  modulos attn+ffn.
-- ~28 min por epoca en el M5 Pro. Loss de 2.0 a 0.010, accuracy val 0.994.
-- Artefacto: `out/trained-lora-adapter.gguf`, **34 MB**.
-- Resultado: base 1/3 -> LoRA 2/3 JSON parseables.
+Consecuencia que hay que tener presente: **el pipeline de `finetune()` esta hoy
+sin validar en este repo.** No se planifica como si funcionara.
 
-O sea: **el pipeline funciona de punta a punta y ya esta probado.** El riesgo
-tecnico de LoRA esta cerrado. Lo que falta es apuntarlo al blanco correcto.
+El spike nuevo vive en `spikes/lora-medpsy/`, con sus scripts adentro, y ya
+apunta al blanco correcto de entrada (extraccion, no solo triaje). Lo que hay que
+producir:
+
+- `make-dataset.mjs`: genera el JSONL a partir de `core/marcadores.ts` y de los
+  documentos sinteticos. Codigo propio, sin dependencias del curso.
+- `spike.mjs`: carga `HEALTHCARE_1_7B_MEDICAL_Q8_0`, mide el base, entrena,
+  mide con el adaptador, imprime la tabla antes/despues.
+- `RESULTADOS.md`: los numeros que salgan, con el comando exacto para repetirlos.
+
+Parametros de partida, que ya estaban afinados y sirven como punto de inicio:
+3 epocas, lr 2e-4, rank 8, alpha 16, ctx 1024, `assistantLossOnly`, modulos
+attn+ffn. El adaptador resultante ronda los **34 MB**.
+
+**Presupuesto: ~30 min por epoca en el M5 Pro.** Con 2 epocas son ~1 h de Mac
+trabajando solo, mas el tiempo de escribir los dos scripts.
 
 ### El cambio que recomiendo: entrenar la extraccion, no solo el triaje
 
