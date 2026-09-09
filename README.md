@@ -30,20 +30,16 @@ Hardware de referencia: (modelo de Android, RAM, SoC - completar). Log de rendim
 
 ## Base preexistente (declaración obligatoria)
 
-El cronómetro arrancó el 9 de septiembre a las 08:00 hora de Panamá. El primer
-commit de este repositorio es de ese mismo día a las 11:00 y todo el producto
-(`mobile/`, `core/`, `nodo/`) se construye dentro de las 48 horas. Lo anterior al
-cronómetro es esto, y se declara completo:
+El cronómetro arrancó el 9 de septiembre a las 08:00 (Panamá). El primer commit
+de este repositorio es de ese mismo día a las 11:00, y `mobile/`, `core/` y
+`nodo/` se construyen dentro de las 48 horas. Lo anterior al cronómetro:
 
-| Qué | De cuándo | Dónde está en el repo |
-| --- | --- | --- |
-| **Plantilla AI Engineering Kit** ([`ArturVargas/AI_Engineering_Kit`](https://github.com/ArturVargas/AI_Engineering_Kit)), de la que sale el commit inicial. Andamiaje de documentación, no código de producto | ago 2026 | `standards/`, `templates/`, estructura de `.ai/`, `docs/ai-engineering-kit.md`, `docs/superpowers/` |
-| **Ejercicios del curso Dojo Coding "Local AI with QVAC"** (repo `qvac-course` del equipo, fuera de este repo): patrones de `loadModel`/`completion`, RAG y delegación P2P | ago-sep 2026 | influyen en `core/` y `mobile/`; nada copiado literal |
+- **Plantilla [`ArturVargas/AI_Engineering_Kit`](https://github.com/ArturVargas/AI_Engineering_Kit)** (ago 2026), de la que se generó el repo: `standards/`, `templates/`, la estructura de `.ai/` y `docs/ai-engineering-kit.md`. Documentación, no código de producto.
+- **Curso Dojo Coding "Local AI with QVAC"** (ago-sep 2026), repo `qvac-course` del equipo, fuera de este: patrones de `loadModel`/`completion`, RAG y delegación P2P.
 
-| **Spike de fine-tuning LoRA** sobre MedPsy 1.7B, para validar `finetune()`. Es validación, no producto; si el adaptador entra en la app se dice aquí y en la tabla de modelos | 8-9 sep 2026 | `spikes/lora-medpsy/` |
-| **Spike de delegación P2P** y pre-descarga de modelos, para validar el transporte entre pares | 8-9 sep 2026 | `spikes/p2p/` |
-| **Notas de investigación**: lectura del reglamento y de los cinco retos, y referencia del SDK QVAC | 7-8 sep 2026 | `.ai/references/` |
-| **Librerías open source** declaradas en los `package.json`. Sin otro boilerplate | - | `package.json`, `mobile/package.json`, `core/`, `nodo/` |
+- **Spikes** en `spikes/` (8-9 sep): LoRA sobre MedPsy 1.7B y delegación P2P. Son validaciones, no producto.
+- **Notas de lectura** del reglamento, los retos y los docs del SDK (7-8 sep), en `.ai/references/`.
+- **Librerías open source** de los `package.json`. Sin otro boilerplate.
 
 ## Contexto compartido del equipo
 - `docs/BRIEF.md`: qué construimos, flujo, arquitectura, plan por horas.
