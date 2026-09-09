@@ -14,13 +14,32 @@ Toda la inferencia corre en el dispositivo con [`@qvac/sdk`](https://docs.qvac.t
 | OCR de documentos | `OCR_LATIN` | - | - |
 | Extracción a JSON | (por definir: MedPsy o `QWEN3_1_7B_INST_Q4`) | | |
 
-Hardware de referencia: (modelo de Android, RAM, SoC - completar). Log de rendimiento: [`perf/`](perf/).
+Hardware de referencia: Xiaomi 14T Pro, MediaTek Dimensity 9300+, 12 GB LPDDR5X, HyperOS (Android 14). Log de rendimiento: [`perf/`](perf/).
 
 ## Cómo correrlo
-(completar: requisitos, `npm install`, `expo prebuild`, `expo run:android --device`, nodo, datos sintéticos)
+
+Requisitos: Node >= 22.17, un Android físico con depuración USB (los emuladores
+no sirven, el SDK necesita el runtime nativo) y Android SDK con `adb` en el
+`PATH`. `npx qvac doctor` valida el entorno.
+
+```bash
+# app
+cd mobile && npm install && npx expo prebuild && npx expo run:android --device
+
+# nodo del corregimiento y banco mock, en dos terminales
+cd nodo && npm install
+npm run corregimiento
+npm run banco
+```
+
+La primera ejecución descarga MedPsy 1.7B Q8_0 (2.1 GB) al caché de QVAC.
+Hacerlo con wifi antes de la demo, no delante del jurado.
 
 ## Evaluación reproducible
-(completar: `eval/` con set de casos y script; % JSON válido, % campos correctos)
+
+`eval/` (pendiente) corre un set de casos sintéticos contra el flujo y reporta
+% de JSON válido y % de campos correctos. Los rangos de referencia contra los
+que se clasifica están en [`core/marcadores.ts`](core/marcadores.ts).
 
 ## Seguridad y límites
 - No es un diagnóstico. La alerta es orientativa y lo dice en pantalla. Validación de rangos y consistencia antes de invocar el modelo.
