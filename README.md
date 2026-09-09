@@ -30,7 +30,7 @@ Hardware de referencia: (modelo de Android, RAM, SoC - completar). Log de rendim
 
 ## Base preexistente (declaración obligatoria)
 
-- Plantilla [`ArturVargas/AI_Engineering_Kit`](https://github.com/ArturVargas/AI_Engineering_Kit) (ago 2026), de la que se generó el repo: `standards/`, `templates/`, la estructura de `.ai/` y `docs/ai-engineering-kit.md`.
+- Plantilla [`ArturVargas/AI_Engineering_Kit`](https://github.com/ArturVargas/AI_Engineering_Kit) (ago 2026), de la que se generó el repo: `standards/`, `templates/`, `docs/superpowers/`, la estructura de `.ai/` y `docs/ai-engineering-kit.md` (su README).
 
 ## Contexto compartido del equipo
 - `docs/BRIEF.md`: qué construimos, flujo, arquitectura, plan por horas.
