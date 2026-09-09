@@ -17,7 +17,7 @@ correcto para **escribir** este archivo (solo JS/TS).
 
 ## Qué campos existen de verdad
 
-Verificado en `docs.qvac.tether.io/ai-capabilities/text-generation/` el 9 sep:
+Verificado en `docs.qvac.tether.io/ai-capabilities/text-generation/`:
 
 | Campo | Estado |
 | --- | --- |

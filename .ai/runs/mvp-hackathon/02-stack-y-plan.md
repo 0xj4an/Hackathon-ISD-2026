@@ -1,8 +1,6 @@
 # Stack y plan de implementacion · MVP hackathon
 
-Clasificacion: `architectural`. Escrito el 9 sep 2026 a las 14:00 Panama.
-Quedan **42 horas** hasta el cierre (vie 11 sep 08:00). Objetivo de entrega
-real: **vie 06:00**, con 2 h de margen.
+Clasificacion: `architectural`.
 
 Referencias: `01-idea-validation.md` (decision de idea), `docs/BRIEF.md`,
 `references/qvac.md`, `references/retos.md`, `spikes/lora-medpsy/RESULTADOS.md`.
@@ -11,7 +9,7 @@ Referencias: `01-idea-validation.md` (decision de idea), `docs/BRIEF.md`,
 
 ## 1. Como funciona QVAC en el telefono, y donde esta el riesgo real
 
-> **Corregido el 9 sep 14:30.** La primera version de esta seccion decia que
+> **Corregido.** La primera version de esta seccion decia que
 > React Native tiene una cuota de cache de 512 MiB y que por eso el modelo no
 > cabia. **Ese dato no existe en los docs de QVAC.** Buscado en
 > `about/how-it-works`, `system-requirements`, `configuration`,
@@ -55,7 +53,7 @@ usar >= 4B para el JSON estructurado"*. Un 4B en Q4 son ~2.5 GB, peor todavia.
 **Ese conflicto es exactamente lo que el LoRA de la seccion 5 resuelve**: en vez
 de subir a 4B, se hace que el 1.7B rinda en un esquema estrecho.
 
-### Telefono objetivo: Xiaomi 14T Pro (decidido el 9 sep)
+### Telefono objetivo: Xiaomi 14T Pro
 
 Y el riesgo de RAM practicamente desaparece. Specs confirmadas:
 
@@ -97,7 +95,7 @@ Consecuencias para el plan:
 
 El unico riesgo de esta seccion que sigue vivo es la descarga de 2.1 GB.
 
-### Trampa de HyperOS que puede costar horas
+### Trampa de HyperOS
 
 HyperOS y MIUI no bastan con "USB debugging". Para que `expo run:android` pueda
 **instalar** el APK hace falta habilitar tambien la opcion de instalar por USB
@@ -129,7 +127,7 @@ desarrollador.
 - **El nodo del corregimiento con store-and-forward** es un uso real de Pears,
   no un checkbox. Los tres retos lo valoran.
 
-### Lo que hay que recortar hoy
+### Lo que hay que recortar
 
 - **Tres documentos con OCR es tres veces el trabajo.** Cedula + comprobante de
   ingresos alcanza. `ExtractoSchema` ya esta como `.optional()` en
@@ -167,7 +165,7 @@ Sin ellos ese reto se cae aunque la app funcione.
 | Transporte | Hyperswarm directo (`nodo/index.mjs`) + HTTP local como alterno | Ya escrito y funcionando. No depende de la delegacion nativa del SDK, que es la parte fragil de 0.18.2. |
 | Compartido | `core/` en TypeScript puro, sin deps nativas | Schemas zod, prompts, reglas, validaciones. Ya escrito. |
 
-### Decision sobre `core/` (hay que tomarla en la primera hora)
+### Decision sobre `core/`
 
 Metro no resuelve `../core` como paquete hermano sin configurar workspaces. Dos
 caminos:
@@ -189,12 +187,12 @@ requisito explicito de Tether Psy.
 
 ---
 
-## 4. Plan por bloques
+## 4. Plan por bloques, en orden
 
 Hora Panama. El reparto asume `0xj4an` en movil y transporte, Artur en core,
 datos y evaluacion.
 
-### Bloque 0 · mie 14:00 a 15:30 · DESBLOQUEO (nada mas importa)
+### Bloque 0 · DESBLOQUEO (nada mas importa)
 
 Todo lo demas esta bloqueado por esto.
 
@@ -219,7 +217,7 @@ texto en espanol, mas los dos TTFT (gpu y cpu). Con 12 GB de RAM esto **deberia*
 funcionar; si falla, el sospechoso ya no es la memoria sino el pipeline de Expo
 o el backend de GPU.
 
-### Bloque 1 · mie 15:30 a 20:00 · rebanada vertical
+### Bloque 1 · rebanada vertical
 
 - `0xj4an`: pantalla 1, alerta de salud. `core/reglas.ts` sobre mediciones
   sinteticas -> `SYSTEM_ALERTA` -> `limpiarJson()` -> `AlertaSchema.parse()`.
@@ -247,7 +245,7 @@ o el backend de GPU.
 - Artur: `data/documentos/` con cedula, carta laboral y extracto **ficticios**
   renderizados como imagen, para probar OCR sin datos reales.
 
-### Bloque 2 · mie 20:00 a jue 01:00 · flujo completo, UI fea
+### Bloque 2 · flujo completo, UI fea
 
 - `0xj4an`: camara -> `ocr()` -> texto -> `SYSTEM_EXTRACCION_CEDULA` ->
   `CedulaSchema` -> **borrar la foto** -> guardar JSON en SQLite.
@@ -262,7 +260,7 @@ o el backend de GPU.
 **Al terminar el bloque, lanzar el entrenamiento del LoRA y irse a dormir.**
 Ver seccion 5. Son ~30 min por epoca y el Mac trabaja solo.
 
-### Bloque 3 · jue 01:00 a 08:00 · descanso por turnos
+### Bloque 3 · descanso por turnos
 
 El LoRA entrena sin supervision. Quien quede despierto deja corriendo el eval
 base y prepara el guion del video en `docs/VIDEO.md`.
@@ -271,14 +269,14 @@ base y prepara el guion del video en `docs/VIDEO.md`.
 durmio a mitad del entrenamiento y el log marco 53,621 s cuando el tiempo activo
 real fueron ~90 minutos.
 
-### Bloque 4 · jue 08:00 a 14:00 · integrar LoRA y medir
+### Bloque 4 · integrar LoRA y medir
 
 - Cargar el adaptador (seccion 5) y correr `eval/run.mjs` otra vez.
 - **La tabla antes/despues es el activo mas valioso del proyecto** para Technical
   (35%) y para el criterio de "calidad de dominio medible" de Tether Psy.
 - UI presentable. Disclaimers de salud visibles en pantalla, no en el README.
 
-### Bloque 5 · jue 14:00 a 20:00 · P2P y la demo
+### Bloque 5 · P2P y la demo
 
 - Wi-Fi apagado: la solicitud queda en cola, la app lo dice.
 - Wi-Fi encendido o nodo del corregimiento cerca: la solicitud sale, el banco
@@ -286,7 +284,7 @@ real fueron ~90 minutos.
 - Ensayar la demo completa **tres veces seguidas** con el telefono en la mano.
   Lo que falla, falla aqui y no grabando.
 
-### Bloque 6 · jue 20:00 a vie 02:00 · video y README
+### Bloque 6 · video y README
 
 - Video <= 5 min, espanol, enlace sin login. Es **lo primero que mira el jurado**
   del reto General.
@@ -297,9 +295,9 @@ real fueron ~90 minutos.
   codigo copiado del curso se retiro del repo. Ver el README y las
   recetas de Tether que se hayan usado. **Omitir esto descalifica.**
 
-### Bloque 7 · vie 02:00 a 06:00 · colchon
+### Bloque 7 · colchon
 
-Solo se toca lo que este roto. Nada nuevo. Entregar a las 06:00.
+Solo se toca lo que este roto. Nada nuevo. Entregar con margen.
 
 ---
 
@@ -431,7 +429,7 @@ saber si el SDK lo soporta, y eso se resuelve con una prueba de 20 minutos, no
 con una noche.
 
 Como hacerlo sin arriesgar nada: el adaptador de produccion se entrena en el
-Mac (ya decidido arriba). Si el jueves a las 20:00 todo esta entregable, se
+Mac (ya decidido arriba). Si todo esta entregable, se
 lanza **1 epoca sobre 30 ejemplos** en el telefono solo para grabar la escena, y
 se declara en el video y en el README como demostracion de capacidad, no como el
 adaptador que usa la app. Si falla, no se pierde nada porque el adaptador bueno
@@ -441,18 +439,18 @@ ya existe.
 
 ## 6. Riesgos ordenados por lo que cuesta que salgan mal
 
-| # | Riesgo | Mitigacion | Cuando se sabe |
-| --- | --- | --- | --- |
-| 1 | El telefono no aparece en `adb` o Expo no compila. En Xiaomi, la opcion de instalar por USB puede pedir cuenta Mi | Es el bloque 0 entero. Sin esto no hay proyecto. | mie 15:30 |
-| 2 | La descarga de 2.1 GB pasa en el evento o grabando | Pre-descargar con `downloadAsset()` antes de moverse | mie 15:30 |
-| 3 | Sin `perf.jsonl` ni `eval/` | Se construyen en los bloques 1 y 2, no al final | jue 01:00 |
-| 4 | Metro no resuelve `core/` | Opcion A: mover a `mobile/src/core/` | mie 16:00 |
-| 5 | Base preexistente sin declarar | Checklist del bloque 6. **Descalifica.** | jue 22:00 |
-| 6 | El OCR lee mal las imagenes sinteticas | Renderizar los documentos con tipografia y ruido realistas, no texto plano perfecto | mie 20:00 |
-| 7 | Hyperswarm no atraviesa NAT entre redes distintas | Demo en la misma LAN. Los relays de los ejemplos usan claves mock. | jue 16:00 |
-| 8 | `npm update` accidental rompe 0.18.2 | Version fijada exacta en `package.json` y en el lock. No correr update. | siempre |
-| 9 | El backend `device: "gpu"` no rinde en Mali/Vulkan | Medir gpu y cpu en el bloque 0 y quedarse con el mejor | mie 15:30 |
-| 10 | Planificar contra datos no verificados de `references/qvac.md` | Ya paso una vez con la cuota de 512 MiB. Todo dato que decida arquitectura se contrasta contra `docs.qvac.tether.io` antes de usarlo | siempre |
+| # | Riesgo | Mitigacion |
+| --- | --- | --- |
+| 1 | El telefono no aparece en `adb` o Expo no compila. En Xiaomi, la opcion de instalar por USB puede pedir cuenta Mi | Es el bloque 0 entero. Sin esto no hay proyecto. |
+| 2 | La descarga de 2.1 GB pasa en el evento o grabando | Pre-descargar con `downloadAsset()` antes de moverse |
+| 3 | Sin `perf.jsonl` ni `eval/` | Se construyen en los bloques 1 y 2, no al final |
+| 4 | Metro no resuelve `core/` | Opcion A: mover a `mobile/src/core/` |
+| 5 | Base preexistente sin declarar | Checklist del bloque 6. **Descalifica.** |
+| 6 | El OCR lee mal las imagenes sinteticas | Renderizar los documentos con tipografia y ruido realistas, no texto plano perfecto |
+| 7 | Hyperswarm no atraviesa NAT entre redes distintas | Demo en la misma LAN. Los relays de los ejemplos usan claves mock. |
+| 8 | `npm update` accidental rompe 0.18.2 | Version fijada exacta en `package.json` y en el lock. No correr update. |
+| 9 | El backend `device: "gpu"` no rinde en Mali/Vulkan | Medir gpu y cpu en el bloque 0 y quedarse con el mejor |
+| 10 | Planificar contra datos no verificados de `references/qvac.md` | Ya paso una vez con la cuota de 512 MiB. Todo dato que decida arquitectura se contrasta contra `docs.qvac.tether.io` antes de usarlo |
 
 ---
 
@@ -463,7 +461,7 @@ Completion 10%, y desempata por Technical y luego Impact. Pero **Completion es l
 puerta**: sin demo funcional no hay puntaje, y ahi el 10% enganna.
 
 Traducido a esta semana: **una demo mas corta que funcione entera le gana a una
-demo ambiciosa a medias.** Si el jueves a las 14:00 el flujo completo no corre en
+demo ambiciosa a medias.** Si el flujo completo no corre en
 el telefono, hay que recortar (fuera el extracto bancario, fuera la firma, fuera
 el LoRA) y no al reves.
 

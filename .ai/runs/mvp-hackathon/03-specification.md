@@ -1,8 +1,5 @@
 # Especificación · MVP hackathon
 
-Escrita el 9 sep 2026, 14:50 Panamá. Quedan **41 horas** (cierre vie 11 sep
-08:00). Entrega objetivo: **vie 06:00**.
-
 Referencias: `01-idea-validation.md` (decisión de idea), `02-stack-y-plan.md`
 (stack, plan por bloques, LoRA), `docs/BRIEF.md`, `references/retos.md`.
 Decisiones difíciles de revertir: `adr/ADR-001` a `ADR-005`.
@@ -108,7 +105,7 @@ Decidido, no se discute de nuevo:
 
 ## Las dos vías de detección (A1a y A1b)
 
-Corregido el 9 sep 15:20. La versión anterior solo contemplaba mediciones
+La versión anterior solo contemplaba mediciones
 caseras. Son dos vías distintas, y la diferencia no es cosmética: **detectan
 cosas de forma distinta**.
 
@@ -165,7 +162,7 @@ por conexión viva a Health Connect, y esa es la ruta de producción pendiente.
 
 ## El nodo del corregimiento tiene dos usos, y el segundo es el bueno
 
-Escrito el 9 sep 15:30, tras revisar por qué el nodo existe. Es una laptop que
+El nodo es una laptop que
 vive en el pueblo, típicamente donde el **corresponsal bancario** (la tienda o
 farmacia donde la gente ya hace vueltas del banco), no la laptop del usuario.
 
@@ -280,19 +277,19 @@ hay que repetirlo antes de entregar.
 
 ## Decisiones abiertas
 
-Se resuelven con evidencia, no con opinión, y todas en el bloque 0:
+Se resuelven con evidencia, no con opinión, antes de construir sobre ellas:
 
-| # | Pregunta | Cómo se cierra | Cuándo |
-| --- | --- | --- | --- |
-| D1 | ¿MedPsy carga en el 14T Pro? | Correr el smoke test. Con 12 GB debería | mié 15:30 |
-| D2 | ¿`gpu` o `cpu`? | Medir TTFT con ambos. El 14T Pro lleva Mali, no Adreno, así que la ruta OpenCL no aplica | mié 15:30 |
-| D3 | ¿Instalar por USB en HyperOS pide cuenta Mi? | Con el teléfono en la mano | mié 15:30 |
-| D4 | Si D1 falla, ¿bajar cuantización o delegar? | Q4_0 primero (entrenable, ~1.1 GB), delegar después. **Q4_K_M nunca**: rompe el LoRA (`ADR-006`) | mié 16:15 |
-| D6 | ¿Existe constante **Q4_0** de MedPsy 1.7B en el catálogo? | `modelRegistrySearch({ quantization })`. De esto depende el modo ligero de `ADR-006` | mié 16:00 |
-| D8 | ¿0.19 rompe el pipeline de Expo? | Smoke test en 0.18.2 primero, mover a 0.19, repetir (`ADR-007`) | mié 16:30 |
-| D9 | ¿Sobrevive la distribución P2P de modelos en 0.19? | Los docs vigentes solo describen HTTP. No bloquea: el nodo sirve el `.gguf` por HTTP en la LAN | jue 14:00 |
-| D7 | ¿Un adaptador entrenado sobre Q8_0 carga sobre Q4_0? | Probar con el adaptador del spike. Si no, son dos entrenamientos de ~2 h | jue 08:00 |
-| D5 | ¿`finetune()` corre en Android? | Prueba de 20 min, solo si el jueves 20:00 está todo entregable. No se promete en el guion antes | jue 20:00 |
+| # | Pregunta | Cómo se cierra |
+| --- | --- | --- |
+| D1 | ¿MedPsy carga en el 14T Pro? | Correr el smoke test. Con 12 GB debería |
+| D2 | ¿`gpu` o `cpu`? | Medir TTFT con ambos. El 14T Pro lleva Mali, no Adreno, así que la ruta OpenCL no aplica |
+| D3 | ¿Instalar por USB en HyperOS pide cuenta Mi? | Con el teléfono en la mano |
+| D4 | Si D1 falla, ¿bajar cuantización o delegar? | Q4_0 primero (entrenable, ~1.1 GB), delegar después. **Q4_K_M nunca**: rompe el LoRA (`ADR-006`) |
+| D6 | ¿Existe constante **Q4_0** de MedPsy 1.7B en el catálogo? | `modelRegistrySearch({ quantization })`. De esto depende el modo ligero de `ADR-006` |
+| D8 | ¿0.19 rompe el pipeline de Expo? | Smoke test en 0.18.2 primero, mover a 0.19, repetir (`ADR-001`) |
+| D9 | ¿Sobrevive la distribución P2P de modelos en 0.19? | Los docs vigentes solo describen HTTP. No bloquea: el nodo sirve el `.gguf` por HTTP en la LAN |
+| D7 | ¿Un adaptador entrenado sobre Q8_0 carga sobre Q4_0? | Probar con el adaptador del spike. Si no, son dos entrenamientos de ~2 h |
+| D5 | ¿`finetune()` corre en Android? | Prueba corta, solo si todo lo demás está entregable. No se promete en el guion antes |
 
 ---
 

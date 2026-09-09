@@ -50,7 +50,7 @@ QVAC con inferencia en el dispositivo o delegada P2P. Enviar la inferencia a una
 ### Nota
 El texto del track en Dojo tiene fragmentos cortados y al final aparecen notas internas de edición del organizador (sobre cómo renderiza el componente). Conviene releerlo cuando publiquen los otros tres tracks por si lo corrigen.
 
-## Track 02 · Tether · "QVAC Psy" · 1,500 USDT (publicado 8 sep, noche)
+## Track 02 · Tether · "QVAC Psy" · 1,500 USDT
 
 Objetivo: apps útiles y fiables basadas en los modelos especializados Psy de QVAC (MedPsy, VisionPsy, TranslatePsy), demostrando inteligencia de dominio de alta calidad, privada, en hardware edge. No excluyente con el ranking general.
 
@@ -87,7 +87,7 @@ Desafío abierto: cualquier solución de IA aplicable a banca sobre QVAC, con in
 
 Requisitos: SDK de QVAC, preferiblemente sus modelos; nube solo para lo no-IA (UI, autenticación). Se valora Pears / delegación P2P (no obligatorio). Sin dataset: datos sintéticos o públicos, nunca datos reales de clientes de ninguna entidad financiera. Entregables generales. El jurado de Caja de Ahorros decide con criterios propios sobre entregas que pasen la verificación técnica de ISD; pondera aplicabilidad real en la operación del banco, aprovechamiento de la ejecución local como ventaja (no como restricción) y calidad de la demo.
 
-## Lectura estratégica (8 sep, noche)
+## Lectura estratégica
 
 - Premios en juego: podio 6,000 (general) + 4 × 1,500 corporativos. Un mismo proyecto puede optar al general y a varios corporativos.
 - Combos naturales:

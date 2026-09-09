@@ -1,6 +1,6 @@
 # Brief del proyecto · Decentralized AI Hackathon · ISD Summit 2026
 
-Nombre de trabajo: **(pendiente)**. Equipo: 0xj4an y Artur. Cierre: vie 11 sep 08:00 Panamá.
+Nombre de trabajo: **(pendiente)**. Equipo: 0xj4an y Artur.
 
 ## Una frase
 Una app para personas en zonas rurales de Panamá con señal intermitente, que detecta en el teléfono una señal de riesgo de salud, explica en español qué examen conviene y cuánto cuesta, y permite solicitar un crédito de salud fotografiando los documentos **sin que ninguna imagen salga del dispositivo**: la solicitud queda en cola y viaja al banco cuando hay red o por P2P a través del nodo del corregimiento.
@@ -33,19 +33,22 @@ Modelos (nombres honestos): `HEALTHCARE_1_7B_MEDICAL_Q8_0` (MedPsy 1.7B, Q8_0) p
 
 ## Reglas duras
 - Ninguna inferencia fuera del dispositivo. El nodo/banco solo recibe JSON, nunca imágenes ni prompts.
-- `README` declara base preexistente: código del curso Dojo "Local AI with QVAC" (qvac-course), tutorial Expo de QVAC, recetas Invoice OCR / NL-to-SQL si se usa código de ellas.
+- `README` declara la base preexistente: la plantilla AI Engineering Kit.
 - Log de rendimiento desde el primer día (`perf/perf.jsonl`): cada inferencia real registra modelo, cuantización, hardware, tokens, TTFT, tok/s.
 - Disclaimers de salud visibles. Validación de entradas antes del modelo. Sin VIH en el demo público.
-- Video ≤ 5 min, español, sin login. Grabar con margen (jueves noche).
+- Video ≤ 5 min, español, sin login. Grabar con margen.
 
 ## Reparto sugerido
 - 0xj4an: mobile (Expo + QVAC), cola, Hyperswarm, perf log, video.
 - Artur: prompts y validaciones (core), datos sintéticos, banco mock, eval set, README y guion.
 
-## Plan por bloques (hora Panamá, arranque real ~13:30 mié)
-- Mié 13:30–18:00: Expo + QVAC corriendo en el Android (primer token + OCR de una foto). Core: schemas y prompts. Nodo: peer que recibe y responde.
-- Mié 18:00–24:00: flujo completo sin UI bonita: alerta → fotos → JSON → cola → nodo → respuesta → firma.
-- Jue 00:00–08:00: descanso por turnos; eval set y perf log corriendo.
-- Jue 08:00–16:00: UI, validaciones, textos, Wi-Fi apagado/encendido, P2P con nodo.
-- Jue 16:00–22:00: video (guion en docs/VIDEO.md), README final, licencia, declaración de base.
-- Jue 22:00–vie 06:00: extras solo si todo está entregado (LoRA de extracción, VisionPsy). Entrega antes de las 06:00.
+## Plan por bloques, en orden
+
+0. **Desbloqueo.** Expo + QVAC corriendo en el Android: primer token y OCR de una foto. Nada más importa hasta que esto pase.
+1. **Rebanada vertical.** Core: schemas y prompts. Nodo: peer que recibe y responde.
+2. **Flujo completo, sin UI bonita.** Alerta, fotos, JSON, cola, nodo, respuesta, firma.
+3. **Descanso por turnos.** Con el eval set y el perf log corriendo.
+4. **Integrar el LoRA y medir.**
+5. **P2P y la demo.** UI, validaciones, textos, wifi apagado y encendido.
+6. **Video** (guion en `docs/VIDEO.md`)**, README, licencia y declaración de base.**
+7. **Colchón.** Extras solo si todo está entregado: LoRA de extracción, VisionPsy.

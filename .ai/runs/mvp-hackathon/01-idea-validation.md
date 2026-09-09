@@ -1,10 +1,10 @@
 # Validación de idea · MVP hackathon
 
-Clasificación: `architectural` (sistema nuevo). Ventana: 9 sep 08:00 → 11 sep 08:00 (Panamá).
+Clasificación: `architectural` (sistema nuevo).
 
 ## Hipótesis
 
-Un proyecto que encadene 2–3 capacidades de QVAC (voz + LLM + RAG, o visión + LLM) y demuestre delegación P2P real teléfono → laptop, aplicado a un problema donde la IA local es la única opción razonable (datos sensibles o sin conectividad), gana más puntos en Technical + Innovation (60%) que un chatbot offline pulido.
+Un proyecto que encadene 2 o 3 capacidades de QVAC (voz + LLM + RAG, o visión + LLM) y demuestre delegación P2P real teléfono → laptop, aplicado a un problema donde la IA local es la única opción razonable (datos sensibles o sin conectividad), gana más puntos en Technical + Innovation (60%) que un chatbot offline pulido.
 
 ## Candidatos
 
@@ -20,7 +20,7 @@ Persona en zona rural de Panamá con teléfono Android de gama media y señal in
 
 ## Experimento mínimo
 
-Antes de las 12:00 del 9 sep: elegir candidato con Artur. Criterio: el que permita una demo funcional end-to-end en < 36 h dejando 12 h para video, README y log de rendimiento.
+Elegir candidato con Artur. Criterio: el que permita una demo funcional end-to-end dejando margen para video, README y log de rendimiento.
 
 ## Métrica y umbral de decisión
 
@@ -34,4 +34,4 @@ Ver `references/baseline.md` (lo que ya funciona en la máquina) y `references/r
 
 ## Decisión
 
-**Tomada el 9 sep ~11:00 (Panamá).** Se construye una variante de B + C: **alerta de salud local → solicitud de crédito de salud con documentos leídos en el dispositivo → cola offline → envío por P2P/red al banco → respuesta y firma**, para usuarios rurales con conectividad intermitente. Retos: General + Tether Psy + Caja de Ahorros. Se descartan A (Philips) y la versión "urbana" de B (Tether ya la cubre con su app QVAC Health). Detalle en `docs/BRIEF.md`.
+Se construye una variante de B + C: **alerta de salud local → solicitud de crédito de salud con documentos leídos en el dispositivo → cola offline → envío por P2P/red al banco → respuesta y firma**, para usuarios rurales con conectividad intermitente. Retos: General + Tether Psy + Caja de Ahorros. Se descartan A (Philips) y la versión "urbana" de B (Tether ya la cubre con su app QVAC Health). Detalle en `docs/BRIEF.md`.
