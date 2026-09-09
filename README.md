@@ -11,10 +11,10 @@ Toda la inferencia corre en el dispositivo con [`@qvac/sdk`](https://docs.qvac.t
 | Uso | Modelo | Cuantización | Tamaño |
 |---|---|---|---|
 | Alerta de salud en español | MedPsy 1.7B (`HEALTHCARE_1_7B_MEDICAL_Q8_0`) | Q8_0 | 2.1 GB |
-| OCR de documentos | `OCR_LATIN` | — | — |
+| OCR de documentos | `OCR_LATIN` | - | - |
 | Extracción a JSON | (por definir: MedPsy o `QWEN3_1_7B_INST_Q4`) | | |
 
-Hardware de referencia: (modelo de Android, RAM, SoC — completar). Log de rendimiento: [`perf/`](perf/).
+Hardware de referencia: (modelo de Android, RAM, SoC - completar). Log de rendimiento: [`perf/`](perf/).
 
 ## Cómo correrlo
 (completar: requisitos, `npm install`, `expo prebuild`, `expo run:android --device`, nodo, datos sintéticos)
@@ -29,10 +29,21 @@ Hardware de referencia: (modelo de Android, RAM, SoC — completar). Log de rend
 - Datos: 100% sintéticos. Ningún dato real de clientes ni de pacientes.
 
 ## Base preexistente (declaración obligatoria)
-- Ejercicios del curso Dojo Coding "Local AI with QVAC" (repo `qvac-course` del equipo, ago–sep 2026): patrones de `loadModel`/`completion`, RAG y P2P.
 
-- Spike de fine-tuning LoRA (8–9 sep) para validar `finetune()`; no forma parte del producto salvo que se indique.
-- Librerías open source listadas en `package.json`. Sin otro boilerplate.
+El cronómetro arrancó el 9 de septiembre a las 08:00 hora de Panamá. El primer
+commit de este repositorio es de ese mismo día a las 11:00 y todo el producto
+(`mobile/`, `core/`, `nodo/`) se construye dentro de las 48 horas. Lo anterior al
+cronómetro es esto, y se declara completo:
+
+| Qué | De cuándo | Dónde está en el repo |
+| --- | --- | --- |
+| **Plantilla AI Engineering Kit** ([`ArturVargas/AI_Engineering_Kit`](https://github.com/ArturVargas/AI_Engineering_Kit)), de la que sale el commit inicial. Andamiaje de documentación, no código de producto | ago 2026 | `standards/`, `templates/`, estructura de `.ai/`, `docs/ai-engineering-kit.md`, `docs/superpowers/` |
+| **Ejercicios del curso Dojo Coding "Local AI with QVAC"** (repo `qvac-course` del equipo, fuera de este repo): patrones de `loadModel`/`completion`, RAG y delegación P2P | ago-sep 2026 | influyen en `core/` y `mobile/`; nada copiado literal |
+
+| **Spike de fine-tuning LoRA** sobre MedPsy 1.7B, para validar `finetune()`. Es validación, no producto; si el adaptador entra en la app se dice aquí y en la tabla de modelos | 8-9 sep 2026 | `spikes/lora-medpsy/` |
+| **Spike de delegación P2P** y pre-descarga de modelos, para validar el transporte entre pares | 8-9 sep 2026 | `spikes/p2p/` |
+| **Notas de investigación**: lectura del reglamento y de los cinco retos, y referencia del SDK QVAC | 7-8 sep 2026 | `.ai/references/` |
+| **Librerías open source** declaradas en los `package.json`. Sin otro boilerplate | - | `package.json`, `mobile/package.json`, `core/`, `nodo/` |
 
 ## Contexto compartido del equipo
 - `docs/BRIEF.md`: qué construimos, flujo, arquitectura, plan por horas.
