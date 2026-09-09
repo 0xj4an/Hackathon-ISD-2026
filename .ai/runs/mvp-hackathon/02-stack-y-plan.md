@@ -189,8 +189,8 @@ requisito explicito de Tether Psy.
 
 ## 4. Plan por bloques, en orden
 
-Hora Panama. El reparto asume `0xj4an` en movil y transporte, Artur en core,
-datos y evaluacion.
+El reparto asume `0xj4an` en movil y transporte, Artur en core, datos y
+evaluacion.
 
 ### Bloque 0 · DESBLOQUEO (nada mas importa)
 
