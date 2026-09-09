@@ -1,0 +1,11 @@
+node_modules/
+.expo/
+android/
+ios/
+*.log
+.DS_Store
+perf/*.jsonl
+!perf/README.md
+data/private/
+core/out/
+nodo/state/

@@ -1,0 +1,9 @@
+{
+  "name": "@app/nodo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Nodo del corregimiento + banco mock. Recibe solicitudes JSON por Hyperswarm (P2P) o HTTP local y responde con una decisión de crédito de juguete.",
+  "scripts": { "start": "node index.mjs", "banco": "ROL=banco node index.mjs", "corregimiento": "ROL=corregimiento node index.mjs" },
+  "dependencies": { "hyperswarm": "^4.8.0", "b4a": "^1.6.7", "hypercore-crypto": "^3.4.2" }
+}
