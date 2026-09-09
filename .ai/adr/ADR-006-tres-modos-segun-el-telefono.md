@@ -1,7 +1,6 @@
 # ADR-006: Tres modos de ejecución según el teléfono que toque
 
 - Estado: aceptada
-- Fecha: 2026-09-09
 - Contexto: la demo corre en un Xiaomi 14T Pro (Dimensity 9300+, **12 GB LPDDR5X**).
   El usuario objetivo del proyecto, según `docs/BRIEF.md` y
   `01-idea-validation.md`, es "una persona en zona rural de Panamá con Android

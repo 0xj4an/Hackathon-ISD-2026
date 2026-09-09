@@ -1,7 +1,7 @@
 # Decentralized AI Hackathon · Retos corporativos (Dojo)
 
 Fuente: pestaña "Tracks" en https://www.trydojo.io/hackathons/decentralized-ai-hackathon
-Revisado: 8 de septiembre de 2026. Los 5 tracks ya están publicados (4 corporativos + el general), completados la noche del 8 sep.
+Los 5 tracks publicados: 4 corporativos y el general.
 
 ## Track 01 · Philips · "Inteligencia de Base Instalada de Clientes" · 1,500 USDT
 

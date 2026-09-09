@@ -1,4 +1,4 @@
-# Spike · LoRA en el dispositivo sobre MedPsy 1.7B (8-9 sep 2026)
+# Spike · LoRA en el dispositivo sobre MedPsy 1.7B
 
 Objetivo: validar que `finetune()` de `@qvac/sdk` 0.18.2 entrena un adaptador LoRA en el Mac y que el adaptador se carga con `modelConfig.lora`. No es un experimento de calidad clínica.
 

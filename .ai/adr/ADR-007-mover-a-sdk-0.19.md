@@ -1,7 +1,6 @@
 # ADR-007: Mover a `@qvac/sdk` 0.19, no necesitamos `delegate`
 
 - Estado: aceptada. **Reemplaza a [ADR-001](ADR-001-fijar-sdk-0.18.2.md)**
-- Fecha: 2026-09-09
 - Contexto: `ADR-001` fijó 0.18.2 por una sola razón: conservar la delegación P2P
   nativa (`startQVACProvider`, `delegate`), que 0.19 eliminó. Nunca se comprobó
   si de verdad la necesitábamos. Al revisarlo, no.

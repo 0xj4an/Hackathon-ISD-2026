@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-Repo creado el 9 sep 2026 a partir de la plantilla AI Engineering Kit (ArturVargas/AI_Engineering_Kit). Idea decidida el 9 sep (ver `docs/BRIEF.md`). Scaffold de producto: `mobile/` (Expo SDK 54 + `@qvac/sdk` 0.18.2 fijado, prebuild Android OK, smoke test MedPsy), `core/` (schemas, prompts, reglas, validaciones), `nodo/` (peer Hyperswarm + banco mock).
+Repo generado a partir de la plantilla AI Engineering Kit (ArturVargas/AI_Engineering_Kit). Idea en `docs/BRIEF.md`. Scaffold de producto: `mobile/` (Expo SDK 54 + `@qvac/sdk` 0.18.2 fijado, prebuild Android OK, smoke test MedPsy), `core/` (schemas, prompts, reglas, validaciones), `nodo/` (peer Hyperswarm + banco mock).
 
 ## Arquitectura y despliegue
 

@@ -1,10 +1,10 @@
 # QVAC · Referencia completa del stack para el hackathon
 
-Revisado: 8 de septiembre de 2026. Fuentes: docs.qvac.tether.io (todas las páginas), qvac.tether.io (blog, changelog, recipes, plugins), CHANGELOG del monorepo tetherto/qvac, PyPI. Complementa `QVAC-Curso-Apuntes.md` (medidas reales en el Mac con SDK 0.18.2).
+Fuentes: docs.qvac.tether.io (todas las páginas), qvac.tether.io (blog, changelog, recipes, plugins), CHANGELOG del monorepo tetherto/qvac, PyPI. Complementa `QVAC-Curso-Apuntes.md` (medidas reales en el Mac con SDK 0.18.2).
 
 ## 0. Lo primero: la alerta de versión
 
-**`@qvac/sdk` 0.19.0 salió ayer, 7 de septiembre, y es breaking.** Lo más grave para nosotros, textual del CHANGELOG: *"Provider mode and DHT delegation are gone. Models load and run locally only."* Se eliminaron `startQVACProvider`, `stopQVACProvider`, las opciones `delegate` de `loadModel` y `heartbeat`, `isDelegated`/`providerInfo` en la info del modelo y las clases de error de provider. La página de docs `/p2p-capabilities/delegated-inference` ya no existe (redirige a Introduction) y `llms-full.txt` no contiene el término. La landing `qvac.tether.io/dev/sdk/` todavía muestra `startQVACProvider`, pero es contenido viejo.
+**`@qvac/sdk` 0.19.0 es breaking.** Lo más grave para nosotros, textual del CHANGELOG: *"Provider mode and DHT delegation are gone. Models load and run locally only."* Se eliminaron `startQVACProvider`, `stopQVACProvider`, las opciones `delegate` de `loadModel` y `heartbeat`, `isDelegated`/`providerInfo` en la info del modelo y las clases de error de provider. La página de docs `/p2p-capabilities/delegated-inference` ya no existe (redirige a Introduction) y `llms-full.txt` no contiene el término. La landing `qvac.tether.io/dev/sdk/` todavía muestra `startQVACProvider`, pero es contenido viejo.
 
 Consecuencias:
 
@@ -38,9 +38,9 @@ Runtime extra: `suspend()/resume()/state()` para móvil (en `suspended` toda ope
 
 Node ≥ 22.17, npm ≥ 10.9, RAM ≥ 2 GB (4 rec.), 5 GB de disco. Móvil solo en dispositivo físico (los emuladores no funcionan). `qvac doctor` valida el host (en el Mac ya pasa todo: Metal, adb, Xcode, ffmpeg, Bare, Bun).
 
-> **NO VERIFICADO (9 sep, 14:30).** Una versión anterior de esta línea afirmaba
+> **NO VERIFICADO.** Una versión anterior de esta línea afirmaba
 > "cuota de caché de modelos: 512 MiB en React Native, 4 GiB en el resto".
-> Buscado el 9 sep en `about/how-it-works`, `system-requirements`,
+> Buscado en `about/how-it-works`, `system-requirements`,
 > `configuration`, `troubleshooting` y `llms-full.txt`: **no aparece en ninguna**.
 > `configuration` documenta `cacheDirectory` (default `~/.qvac/models`,
 > personalizable) y **ningún** límite de tamaño. Puede venir del CHANGELOG o de
@@ -107,7 +107,7 @@ Mic -> Whisper Tiny + Silero VAD (`threshold 0.6`, `min_silence_duration_ms 700`
 - Clasificación: `classify({ modelId, image, topK })`, MobileNetV3 bundled con labels fijos; custom GGUF vía `modelSrc`.
 
 ### 4.8 Fine tuning LoRA en el edge
-`finetune({ modelId, dataset (JSONL messages), numberOfEpochs, learningRate, loraModules, checkpointSaveDir, validation, assistantLossOnly })` -> adapter `.gguf` -> `modelConfig.lora`. Solo arquitecturas `qwen3`, `gemma3`, `bitnet` en F32/F16/Q4_0/Q8_0/TQ1_0/TQ2_0 (confirmado en docs el 9 sep, textual: *"not every model constant is fine-tunable: for example, many Qwen3-4B/8B constants are `Q4_K_M`"*). Soporta además `pause`/`resume` con checkpoints. **"Corre en móvil (Vulkan/Metal)" NO está verificado**: la página de fine-tuning no menciona Android ni iOS. Probar antes de prometerlo en el guion del video. Idea de alto impacto en Technical si sobra tiempo: LoRA de Qwen3 con 200 ejemplos sintéticos de observaciones de hospital -> JSON, entrenado en el propio dispositivo. Muy vistoso, pero es de las últimas horas, no de las primeras.
+`finetune({ modelId, dataset (JSONL messages), numberOfEpochs, learningRate, loraModules, checkpointSaveDir, validation, assistantLossOnly })` -> adapter `.gguf` -> `modelConfig.lora`. Solo arquitecturas `qwen3`, `gemma3`, `bitnet` en F32/F16/Q4_0/Q8_0/TQ1_0/TQ2_0 (confirmado en docs, textual: *"not every model constant is fine-tunable: for example, many Qwen3-4B/8B constants are `Q4_K_M`"*). Soporta además `pause`/`resume` con checkpoints. **"Corre en móvil (Vulkan/Metal)" NO está verificado**: la página de fine-tuning no menciona Android ni iOS. Probar antes de prometerlo en el guion del video. Idea de alto impacto en Technical si sobra tiempo: LoRA de Qwen3 con 200 ejemplos sintéticos de observaciones de hospital -> JSON, entrenado en el propio dispositivo. Muy vistoso, pero es de las últimas horas, no de las primeras.
 
 ### 4.9 Lo que NO conviene tocar en 48 h
 Generación de imagen (`diffusion`, FLUX.2-klein, Ideogram 4, SD), video (`video`, WAN 2.1/2.2, LTX-2; 16 a 20 GB de VRAM, 11 min por clip), música (`audioGen`, ACE-Step/MiniMax, 3.3 GB, solo desktop), BCI, VLA (robótica, `ggml-vla`, 2 a 4 GB), ABot-World (0.19). Todo existe y es impresionante, pero no aporta al reto y consume horas en descargas.

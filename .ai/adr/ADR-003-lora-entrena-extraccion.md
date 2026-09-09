@@ -1,8 +1,7 @@
 # ADR-003: El adaptador LoRA entrena extracción de documentos, no solo triaje
 
 - Estado: aceptada
-- Fecha: 2026-09-09
-- Contexto: el spike del 8 al 9 de septiembre
+- Contexto: el spike de LoRA
   (`spikes/lora-medpsy/RESULTADOS.md`) entrenó un adaptador para el **triaje de
   salud**: 52 ejemplos, 3 épocas, ~28 min por época en el Mac, adaptador de
   34 MB, resultado base 1/3 -> LoRA 2/3 JSON parseables. El pipeline funciona de

@@ -1,9 +1,9 @@
 # Contexto del proyecto
 
-- Producto: proyecto para el Decentralized AI Hackathon · ISD Summit 2026 (Panamá). Nombre del equipo en Dojo: TBD-Panama. Idea final (9 sep): alerta de salud local + crédito de salud con documentos leídos en el dispositivo y envío offline/P2P al banco. Ver `docs/BRIEF.md` y `runs/2026-09-09-mvp-hackathon/01-idea-validation.md`.
+- Producto: proyecto para el Decentralized AI Hackathon · ISD Summit 2026 (Panamá). Nombre del equipo en Dojo: TBD-Panama. Idea final: alerta de salud local + crédito de salud con documentos leídos en el dispositivo y envío offline/P2P al banco. Ver `docs/BRIEF.md` y `runs/2026-09-09-mvp-hackathon/01-idea-validation.md`.
 - Propósito: ganar el ranking general ("Sovereign Intelligence at the Edge", podio 6,000 USDT) y encajar en uno o dos retos corporativos (1,500 USDT c/u). Un mismo proyecto puede optar a varios.
 - Usuarios principales: personas en zonas rurales de Panamá con Android de gama media y conectividad intermitente (retos General + Tether Psy + Caja de Ahorros).
-- Equipo: @0xj4an y Artur (@ArturVargas). Máximo 4, composición cerrada desde el 9 sep 08:00.
+- Equipo: @0xj4an y Artur (@ArturVargas). Máximo 4.
 - Repositorio y comandos relevantes: https://github.com/0xj4an/Hackathon-ISD-2026. Runtime Node ≥ 22.17 con `@qvac/sdk` (0.18.2 probado). `npx qvac doctor` valida el entorno. Código de producto en `mobile/` (Expo), `core/`, `nodo/`. Evidencia de validación en `spikes/` (solo `RESULTADOS.md`).
 - Entornos: desarrollo en MacBook Pro M5 Pro 48 GB (Metal). Demo objetivo: laptop + teléfono físico (Android 12+ / iOS 17+, los emuladores no sirven). Sin navegador como target.
 - Fuente de verdad de datos: sin datasets reales. Solo datos sintéticos o públicos (obligatorio en banca y salud). Modelos desde el registry de QVAC, cacheados en `~/.qvac/models`.
@@ -28,7 +28,7 @@ Lee solo las referencias y artefactos declarados por la etapa actual. No suponga
 
 **Antes de planificar contra un dato de `references/qvac.md`, contrástalo con
 `docs.qvac.tether.io`.** Ese archivo mezcla docs, CHANGELOG y notas propias, y el
-9 sep se detectó al menos una afirmación que no existe en los docs (una supuesta
+se detectó al menos una afirmación que no existe en los docs (una supuesta
 cuota de caché de 512 MiB en React Native) que llegó a cambiar el plan. Las
 afirmaciones sin corroborar están marcadas **NO VERIFICADO** en ese archivo.
 

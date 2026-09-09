@@ -1,7 +1,6 @@
 # ADR-004: `core/` se mueve dentro de `mobile/src/`, sin monorepo
 
 - Estado: aceptada
-- Fecha: 2026-09-09
 - Contexto: `core/` es un paquete hermano (`@app/core`) con los schemas zod, los
   prompts, las reglas y las validaciones. `mobile/` lo necesita entero y `nodo/`
   necesita una parte. Metro, el bundler de React Native, **no resuelve un paquete

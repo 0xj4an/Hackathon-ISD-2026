@@ -1,7 +1,5 @@
 # Decentralized AI Hackathon · ISD Summit 2026 · Contexto
 
-Actualizado: 7 de septiembre de 2026 (lunes). Faltan 2 días para el arranque del cronómetro.
-
 ## 1. El evento en una línea
 
 Hackathon remoto de 48 horas (9 sep 08:00 a 11 sep 08:00, hora Panamá, UTC-5), organizado por Innovation Smart District (ISD) con Tether como socio técnico, dentro del ISD Summit 2026 en Ciudad de Panamá. Stack obligatorio: QVAC (qvac.tether.io). 12,000 USDT en premios. Regla de oro: la inferencia corre en el dispositivo o delegada por P2P, nunca en la nube.

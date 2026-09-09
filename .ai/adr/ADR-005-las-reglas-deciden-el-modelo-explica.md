@@ -1,7 +1,6 @@
 # ADR-005: Las reglas deciden la señal, el modelo solo la explica
 
 - Estado: aceptada
-- Fecha: 2026-09-09
 - Contexto: la app detecta señales de riesgo de salud a partir de mediciones y se
   las comunica a una persona sin formación médica, en una zona sin acceso rápido
   a un profesional. Es el punto donde una alucinación hace daño de verdad.

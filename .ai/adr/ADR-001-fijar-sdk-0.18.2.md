@@ -1,9 +1,7 @@
 # ADR-001: Fijar `@qvac/sdk` en 0.18.2 exacto
 
-- Estado: **reemplazada por [ADR-007](ADR-007-mover-a-sdk-0.19.md)** el 9 sep 16:05
-- Fecha: 2026-09-09
-- Contexto: `@qvac/sdk` 0.19.0 salió el 7 de septiembre, dos días antes del
-  hackathon, y es breaking. Textual del CHANGELOG: *"Provider mode and DHT
+- Estado: **reemplazada por [ADR-007](ADR-007-mover-a-sdk-0.19.md)**
+- Contexto: `@qvac/sdk` 0.19.0 es breaking. Textual del CHANGELOG: *"Provider mode and DHT
   delegation are gone. Models load and run locally only."* Desaparecieron
   `startQVACProvider`, `stopQVACProvider`, la opción `delegate` de `loadModel`,
   `heartbeat`, `isDelegated` y `providerInfo`. La página de docs
@@ -12,7 +10,7 @@
 
 > **Reemplazada.** Este ADR fijó 0.18.2 por una sola razón, conservar la
 > delegación P2P nativa, y nunca comprobó si de verdad la necesitábamos. Al
-> revisarlo el 9 sep: no. Los tres usos del nodo funcionan sin `delegate`, y
+> revisarlo: no. Los tres usos del nodo funcionan sin `delegate`, y
 > 0.19 trae `assessModelFit()`, que es justo lo que `ADR-006` necesita. Ver
 > [ADR-007](ADR-007-mover-a-sdk-0.19.md). Lo único de aquí que sigue vigente es
 > **fijar la versión exacta, sin caret**, sea cual sea.
@@ -22,7 +20,7 @@
 `"@qvac/sdk": "0.18.2"` exacto en `package.json` **y en el lockfile**. Sin
 caret. No se corre `npm update` durante el hackathon bajo ninguna circunstancia.
 
-El lockfile arrastraba `^0.18.2` y se corrigió el 9 sep (commit `9e0e144`). Con
+El lockfile arrastraba `^0.18.2` y se corrigió (commit `9e0e144`). Con
 el caret, cualquier `npm install` en una máquina limpia habría resuelto 0.19.x y
 roto la delegación sin avisar.
 
