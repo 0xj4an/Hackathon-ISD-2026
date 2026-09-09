@@ -30,18 +30,7 @@ Hardware de referencia: (modelo de Android, RAM, SoC - completar). Log de rendim
 
 ## Base preexistente (declaración obligatoria)
 
-El cronómetro arrancó el 9 de septiembre a las 08:00 (Panamá) y el primer commit
-de este repositorio es de ese mismo día a las 11:00. El código de producto de
-`core/`, `nodo/` y `mobile/` se escribió dentro de las 48 horas. El andamiaje de
-
-y `mobile/qvac/worker.bundle.js` lo produce `expo prebuild`: no lo escribimos
-nosotros. Lo único anterior al cronómetro:
-
-- **Plantilla [`ArturVargas/AI_Engineering_Kit`](https://github.com/ArturVargas/AI_Engineering_Kit)** (ago 2026), de la que se generó el repo: `standards/`, `templates/`, la estructura de `.ai/` y `docs/ai-engineering-kit.md`. Documentación, no código de producto.
-
-Los cuatro scripts de validación que el equipo traía del curso Dojo Coding
-"Local AI with QVAC" se retiraron del repo. La tabla de marcadores y rangos que
-usaba uno de ellos se reescribió como código propio en `core/marcadores.ts`.
+- Plantilla [`ArturVargas/AI_Engineering_Kit`](https://github.com/ArturVargas/AI_Engineering_Kit) (ago 2026), de la que se generó el repo: `standards/`, `templates/`, la estructura de `.ai/` y `docs/ai-engineering-kit.md`.
 
 ## Contexto compartido del equipo
 - `docs/BRIEF.md`: qué construimos, flujo, arquitectura, plan por horas.
