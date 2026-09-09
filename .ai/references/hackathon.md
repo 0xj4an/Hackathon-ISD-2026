@@ -23,7 +23,7 @@ Hackathon remoto de 48 horas (9 sep 08:00 a 11 sep 08:00, hora Panamá, UTC-5), 
 - Registro oficial (obligatorio): Dojo Coding, https://www.trydojo.io/hackathons/decentralized-ai-hackathon (188 participantes inscritos al 7 sep; muchos marcados "Looking for a team")
 - Evento en Luma (243 registrados): https://luma.com/uqi84uw0
 - Comunidad WhatsApp para armar equipo y dudas: https://chat.whatsapp.com/C1eNo44yV7V51CBEtrGz55
-- Consultas de reglas: gmdm@isdistrict.com (Guillermo Malo de Molina, COO y fundador de ISD)
+- Consultas de reglas: Guillermo Malo de Molina (COO y fundador de ISD). El correo de contacto esta en el PDF oficial de bases y en la pagina de registro de Dojo Coding
 - Entidad legal organizadora: Zona Franca de la Innovación S.A., Ciudad de Panamá
 - Hosts en Luma: Idabel Coparropa, Federico H, Guillermo Malo de Molina, Ambar Cifuentes
 
@@ -98,7 +98,7 @@ Instalación y requisitos:
 - Sin target de navegador. Python SDK existe en docs pero JS/TS es lo maduro.
 - Config en `qvac.config.json` (plugins, logging, `cacheDirectory` por defecto `~/.qvac/models`, `swarmRelays`, `deviceDefaults`, sección `serve`).
 
-Arquitectura: el SDK levanta un worker en runtime Bare y se comunica por RPC (`bare-rpc`). Un solo worker por app, varios modelos cargados a la vez. Ciclo: `loadModel()` → operaciones → `unloadModel()` → `close()`. Descarga de modelos vía registry P2P (Hyperdrive) o HTTP, con progreso.
+Arquitectura: el SDK levanta un worker en runtime Bare y se comunica por RPC (`bare-rpc`). Un solo worker por app, varios modelos cargados a la vez. Ciclo: `loadModel()` -> operaciones -> `unloadModel()` -> `close()`. Descarga de modelos vía registry P2P (Hyperdrive) o HTTP, con progreso.
 
 Capacidades (addons, cada motor pesa 50 a 200 MB nativos, se empaquetan solo los que declaras):
 - Texto/LLM: `@qvac/llm-llamacpp` (fork de llama.cpp llamado QVAC Fabric). `completion()` con streaming por eventos, tool calling estructurado, loops orquestados por el worker, soporte MCP (ejemplo con servidor DuckDuckGo), KV cache reutilizable, `batchCompletion()`, `cancel()`, completions paralelas. Modelos de ejemplo: `QWEN3_600M_INST_Q4`, `QWEN3_1_7B_INST_Q4`, `LLAMA_3_2_1B_INST_Q4_0`. Registry con ~650 modelos.
@@ -110,7 +110,7 @@ Capacidades (addons, cada motor pesa 50 a 200 MB nativos, se empaquetan solo los
 - Generación de imagen (`@qvac/diffusion-cpp`), video y música (experimental).
 - Fine tuning LoRA en el edge (Fabric LLM, incluso en móvil vía Vulkan).
 - Otros en docs: BCI (interfaz cerebro computador), VLA (visión lenguaje acción para robótica), CLI, servidor HTTP con adaptador compatible OpenAI.
-- Voice assistant de referencia: mic → Whisper Tiny + Silero VAD → Llama 3.2 1B → TTS → parlante, con gating del micrófono, cooldown de 300 ms y filtro de alucinaciones de Whisper. Ejemplo solo desktop (usa FFmpeg).
+- Voice assistant de referencia: mic -> Whisper Tiny + Silero VAD -> Llama 3.2 1B -> TTS -> parlante, con gating del micrófono, cooldown de 300 ms y filtro de alucinaciones de Whisper. Ejemplo solo desktop (usa FFmpeg).
 
 P2P y delegación (lo que más pesa en Technical):
 - Distribución de modelos P2P vía Hyperswarm, con `swarmRelays` (blind relays) para atravesar NAT y firewalls. Los ejemplos de docs usan claves mock; para algo real hay que desplegar relay propio o usar uno confiable.
