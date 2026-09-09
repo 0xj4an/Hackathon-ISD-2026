@@ -31,11 +31,15 @@ Hardware de referencia: (modelo de Android, RAM, SoC - completar). Log de rendim
 ## Base preexistente (declaración obligatoria)
 
 El cronómetro arrancó el 9 de septiembre a las 08:00 (Panamá) y el primer commit
-de este repositorio es de ese mismo día a las 11:00. `core/`, `nodo/` y `mobile/`
-son código propio escrito dentro de las 48 horas. Lo que no:
+de este repositorio es de ese mismo día a las 11:00. **Todo el código de producto
+(`core/`, `nodo/`, `mobile/`) se escribió dentro de las 48 horas.** El repo
+también contiene material anterior, y aquí está todo, sin excepción:
 
 - **Plantilla [`ArturVargas/AI_Engineering_Kit`](https://github.com/ArturVargas/AI_Engineering_Kit)** (ago 2026), de la que se generó el repo: `standards/`, `templates/`, la estructura de `.ai/` y `docs/ai-engineering-kit.md`. Documentación, no código de producto.
 - **`spikes/`**: cuatro scripts copiados tal cual del repo `qvac-course` del equipo (ejercicios del curso Dojo Coding "Local AI with QVAC"), del 8 y 9 de septiembre. Validan `finetune()` y la delegación P2P. No son parte de la app.
+- **`.ai/references/`**: investigación escrita el **7 y 8 de septiembre**, antes de que arrancara el cronómetro, y traída al repo el 9. Cada archivo lleva su fecha en la primera línea. Son apuntes sobre el reglamento, los retos y el SDK; complementan `QVAC-Curso-Apuntes.md`, del mismo curso Dojo. Ningún código.
+
+- **Asistentes de código con IA** usados durante las 48 h, cosa que el reglamento permite de forma explícita.
 
 ## Contexto compartido del equipo
 - `docs/BRIEF.md`: qué construimos, flujo, arquitectura, plan por horas.
