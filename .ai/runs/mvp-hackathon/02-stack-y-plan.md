@@ -194,30 +194,14 @@ generan, que dispara una alerta, que examen y que especialista corresponden y
 cuanto cuestan, la politica de credito, que se le pide al usuario y como se ve
 la app. Artur implementa: movil, `core/`, `nodo/`, transporte y evaluacion.
 
-Para que ese reparto funcione sin pisarse, el contenido de dominio sale del
-codigo y vive en archivos que `0xj4an` edita solos:
-
-| Archivo | Quien lo llena | Que contiene |
-| --- | --- | --- |
-| `core/marcadores.ts` | `0xj4an` | Los 8 marcadores de laboratorio, sus rangos y el siguiente paso. **Ya existe** |
-| `core/examenes.ts` | `0xj4an` | Catalogo: codigo de senal -> examen sugerido, especialista, costo estimado, urgencia. **Hoy esta incrustado a mano dentro de `core/reglas.ts`** |
-| `core/umbrales.ts` | `0xj4an` | Los umbrales de la via A (tendencia): cuantas tomas, que promedio dispara que. **Hoy tambien esta incrustado en `core/reglas.ts`** |
-| `core/politica-credito.ts` | `0xj4an` | Cuota maxima sobre ingreso, tasas, plazos por monto, umbral de confianza de OCR, monto minimo y maximo. **Hoy esta incrustado en `nodo/credito.mjs`** |
-| `data/` | `0xj4an` | Los dos usuarios ficticios y los documentos sinteticos |
-| `docs/UI.md` | `0xj4an` | Las pantallas, los estados y los textos |
-
-Artur consume esos archivos; `reglas.ts`, `credito.mjs` y las pantallas quedan
-como logica sin datos dentro.
-
-### Pregunta abierta antes de arrancar
-
-**Quien tiene el Xiaomi 14T Pro en la mano.** El bloque 0 es fisico y bloquea
-todo lo demas. Si lo tiene `0xj4an`, el bloque 0 es suyo aunque sea trabajo de
-implementacion, y el reparto de arriba empieza a aplicar desde el bloque 1.
+Los valores de dominio se quedan donde estan hoy y se revisan ahi: los umbrales
+y los examenes en `core/reglas.ts`, los rangos de laboratorio en
+`core/marcadores.ts`, la politica de credito en `nodo/credito.mjs`. Si en algun
+momento estorban dentro de la logica, se sacan; hoy no estorban.
 
 ### Bloque 0 · DESBLOQUEO (nada mas importa)
 
-Todo lo demas esta bloqueado por esto. Lo hace quien tenga el telefono.
+Todo lo demas esta bloqueado por esto. Lo hace **Artur**, que tiene el telefono.
 
 1. Conectar el Xiaomi 14T Pro por USB. Opciones de desarrollador (7 toques en
    "Version de HyperOS"), depuracion USB **y la opcion de instalar por USB**,
@@ -231,9 +215,8 @@ Todo lo demas esta bloqueado por esto. Lo hace quien tenga el telefono.
 4. Repetir el smoke test con `device: "cpu"` y anotar los dos TTFT. El backend
    de GPU en Mali/Vulkan no esta documentado para Android y con este SoC la CPU
    puede ser suficiente.
-5. Artur en paralelo: `npm install` en `nodo/` y `core/`. Arrancar
-   `npm run banco` y `npm run corregimiento` y ver que se descubren por
-   Hyperswarm.
+5. `npm install` en `nodo/` y `core/`. Arrancar `npm run banco` y
+   `npm run corregimiento` y ver que se descubren por Hyperswarm.
 
 **Salida verificable:** una captura del telefono mostrando "modelo cargado" y
 texto en espanol, mas los dos TTFT (gpu y cpu). Con 12 GB de RAM esto **deberia**
@@ -244,16 +227,17 @@ o el backend de GPU.
 
 **`0xj4an` (dominio):**
 
-- `core/umbrales.ts`: los umbrales de la via A. Hoy `reglas.ts` tiene cuatro
-  reglas escritas a ojo (glucosa >= 126 y >= 100 sobre 3 tomas, pulso > 100
-  durante 5 dias, sistolica >= 140 en 3 tomas). Confirmar cada una contra una
-  fuente citable y dejar la cita en el archivo.
-- `core/examenes.ts`: por cada codigo de senal, que examen se sugiere, **que
-  especialista lo interpreta** y cuanto cuesta en Panama. Los costos que hay hoy
-  (25, 8, 40, 15 USD) son inventados. La app se los va a mostrar al usuario, asi
-  que o se sostienen o se etiquetan como estimados.
-- **Quitar `linfocitos CD4`** del demo: su siguiente paso menciona VIH y el
-  BRIEF lo prohibe.
+- Revisar los umbrales de la via A, que hoy estan en `core/reglas.ts` puestos a
+  ojo: glucosa >= 126 y >= 100 sobre 3 tomas, pulso > 100 durante 5 dias,
+  sistolica >= 140 en 3 tomas. Confirmar cada uno contra una fuente citable.
+- Revisar el examen y el costo de cada senal, tambien en `core/reglas.ts`. Los
+  costos de hoy (25, 8, 40, 15 USD) son inventados y la app se los muestra al
+  usuario: o se sostienen o se etiquetan como estimados en pantalla.
+- **Anadir el especialista.** Hoy `Senal` tiene `examen` y `costo_usd` pero
+  nadie dice quien interpreta el resultado, que es la mitad de lo que hace util
+  la alerta.
+- **Quitar `linfocitos CD4`** de `core/marcadores.ts`: su siguiente paso
+  menciona VIH y el BRIEF lo prohibe.
 - `data/`: el historial de **dos usuarios ficticios**, uno sano y uno con
   hallazgo. El sano no debe disparar nada: esa es media demo.
 
@@ -273,27 +257,26 @@ o el backend de GPU.
   el TTFT a mano con `Date.now()`, como ya hace `mobile/App.tsx`. Para escribir
   el archivo, `getLogger()` con transporte propio.
 - **Las dos vias de deteccion** (ver `03-specification.md`, seccion "Las dos
-  vias"). `reglasTendencia()` leyendo `core/umbrales.ts` y `reglasRango()`
-  leyendo `core/marcadores.ts`, ambas devolviendo el mismo tipo `Senal`, y el
-  examen resuelto contra `core/examenes.ts`.
+  vias"). `reglasTendencia()` sobre el historial y `reglasRango()` sobre
+  `core/marcadores.ts`, ambas devolviendo el mismo tipo `Senal`.
 - El importador de `data/` al formato normalizado.
 
 ### Bloque 2 · flujo completo, UI fea
 
 **`0xj4an` (dominio y diseno):**
 
-- `core/politica-credito.ts`: cuota maxima sobre ingreso, tasas, plazos por
-  monto, umbral de confianza de OCR, minimo y maximo. Los valores de hoy (30%
-  del ingreso, 9.5% o 12.5% anual, 6/12/24 meses, confianza 0.5, tope 5000) son
-  de juguete y estan escondidos en `nodo/credito.mjs`.
+- Revisar la politica de credito en `nodo/credito.mjs`. Los valores de hoy son
+  de juguete: cuota maxima 30% del ingreso, 9.5% o 12.5% anual segun haya
+  extracto, plazos 6/12/24 meses por monto, umbral de confianza de OCR 0.5,
+  tope 5000 USD.
 - **Que se le pide al usuario.** Hoy los schemas asumen cedula, carta laboral y
   extracto. Decidir si son esos tres, que campos de cada uno y que pasa si falta
   uno.
 - `data/documentos/`: cedula, carta laboral y extracto **ficticios**
   renderizados como imagen, con tipografia y ruido realistas. Texto plano
   perfecto no prueba el OCR.
-- `docs/UI.md`: las pantallas, los estados (sin senal, con senal, subiendo
-  documentos, en cola, respondida) y los textos.
+- Las pantallas, los estados (sin senal, con senal, subiendo documentos, en
+  cola, respondida) y los textos.
 
 **Artur (implementacion):**
 
@@ -304,8 +287,8 @@ o el backend de GPU.
 - `eval/` con el set de evaluacion y `eval/run.mjs`. Metricas: % de JSON
   parseable, % de campos exactos contra ground truth, por tarea. Correrlo contra
   el modelo base **antes del LoRA** para tener la linea base.
-- `nodo/credito.mjs` leyendo `core/politica-credito.ts`, y verificar que
-  `RespuestaBancoSchema` valida lo que el nodo devuelve de verdad.
+- Afinar `nodo/credito.mjs` y verificar que `RespuestaBancoSchema` valida lo
+  que el nodo devuelve de verdad.
 
 **Al terminar el bloque, lanzar el entrenamiento del LoRA y irse a dormir.**
 Ver seccion 5. Son ~30 min por epoca y el Mac trabaja solo.
@@ -324,7 +307,7 @@ real fueron ~90 minutos.
 - Artur: cargar el adaptador (seccion 5) y correr `eval/run.mjs` otra vez.
   **La tabla antes/despues es el activo mas valioso del proyecto** para Technical
   (35%) y para el criterio de "calidad de dominio medible" de Tether Psy.
-- `0xj4an`: UI presentable segun `docs/UI.md`. Disclaimers de salud visibles en
+- `0xj4an`: UI presentable. Disclaimers de salud visibles en
   pantalla, no en el README.
 
 ### Bloque 5 · P2P y la demo
