@@ -287,7 +287,9 @@ Se resuelven con evidencia, no con opinión, y todas en el bloque 0:
 | D1 | ¿MedPsy carga en el 14T Pro? | Correr el smoke test. Con 12 GB debería | mié 15:30 |
 | D2 | ¿`gpu` o `cpu`? | Medir TTFT con ambos. El 14T Pro lleva Mali, no Adreno, así que la ruta OpenCL no aplica | mié 15:30 |
 | D3 | ¿Instalar por USB en HyperOS pide cuenta Mi? | Con el teléfono en la mano | mié 15:30 |
-| D4 | Si D1 falla, ¿bajar cuantización o delegar? | Delegar. Bajar a Q4_K_M rompe el LoRA (`ADR-002`) | mié 16:15 |
+| D4 | Si D1 falla, ¿bajar cuantización o delegar? | Q4_0 primero (entrenable, ~1.1 GB), delegar después. **Q4_K_M nunca**: rompe el LoRA (`ADR-006`) | mié 16:15 |
+| D6 | ¿Existe constante **Q4_0** de MedPsy 1.7B en el catálogo? | `modelRegistrySearch({ quantization })`. De esto depende el modo ligero de `ADR-006` | mié 16:00 |
+| D7 | ¿Un adaptador entrenado sobre Q8_0 carga sobre Q4_0? | Probar con el adaptador del spike. Si no, son dos entrenamientos de ~2 h | jue 08:00 |
 | D5 | ¿`finetune()` corre en Android? | Prueba de 20 min, solo si el jueves 20:00 está todo entregable. No se promete en el guion antes | jue 20:00 |
 
 ---

@@ -1,6 +1,6 @@
 # ADR-002: Un solo modelo base, MedPsy 1.7B Q8_0
 
-- Estado: aceptada
+- Estado: aceptada, **matizada por [ADR-006](ADR-006-tres-modos-segun-el-telefono.md)**
 - Fecha: 2026-09-09
 - Contexto: el flujo necesita dos capacidades de LLM (redactar la alerta de salud
   y extraer campos de documentos a JSON) más OCR. La tentación es un modelo por
@@ -12,6 +12,14 @@
   fine-tunable: for example, many Qwen3-4B/8B constants are `Q4_K_M`"*. En el
   catálogo, **`HEALTHCARE_1_7B_MEDICAL_Q8_0` es el único modelo entrenable** que
   sirve para esto.
+
+> **Matiz del 9 sep 15:35.** Esta decisión se validó contra el teléfono de la
+> demo (12 GB de RAM), no contra el "Android de gama media" que el brief define
+> como usuario. [ADR-006](ADR-006-tres-modos-segun-el-telefono.md) mantiene un
+> solo modelo base pero admite **dos cuantizaciones** (Q8_0 y Q4_0, ambas
+> entrenables) y un tercer modo delegado. Lo esencial de este ADR sigue en pie:
+> un solo modelo base, un solo adaptador, y MedPsy porque es lo único entrenable
+> del catálogo.
 
 ## Decisión
 
