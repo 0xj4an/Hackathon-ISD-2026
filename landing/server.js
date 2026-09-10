@@ -21,6 +21,8 @@ const SEMILLA = [
   {
     id: "demo-aprobada",
     creada: "2026-09-10T14:02:00.000Z",
+    recibida: "2026-09-10T14:02:00.400Z",
+    canal: "directo",
     nombre: "Ana Pérez",
     cedula: "8-888-888",
     ingreso: 520,
@@ -43,6 +45,8 @@ const SEMILLA = [
   {
     id: "demo-extracto",
     creada: "2026-09-10T13:40:00.000Z",
+    recibida: "2026-09-10T13:40:00.800Z",
+    canal: "pueblo",
     nombre: "Luis Mora",
     cedula: "4-222-111",
     ingreso: 520,
@@ -65,6 +69,8 @@ const SEMILLA = [
   {
     id: "demo-revision",
     creada: "2026-09-10T12:11:00.000Z",
+    recibida: "2026-09-10T12:11:01.000Z",
+    canal: "demo",
     nombre: "Marta Quintero",
     cedula: "9-111-333",
     ingreso: 280,

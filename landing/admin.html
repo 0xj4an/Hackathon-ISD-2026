@@ -128,6 +128,11 @@ function pintar(data) {
     card.append(fila);
     card.append(el("div", "quien", f.nombre || "sin nombre"));
     card.append(el("div", "meta", `${f.cedula || ""} · ${f.tipo || ""} · ingreso ${money(f.ingreso)}`));
+    card.append(el("div", "meta", `${cuando(f.recibida || f.creada)} · ${etiquetaCanal(f.canal)}${f.desde ? " · " + f.desde : ""}`));
+    if (f.creada && f.recibida && f.creada !== f.recibida) {
+      card.append(el("div", "meta", `creada en el teléfono ${cuando(f.creada)}`));
+    }
+    if (r.ts) card.append(el("div", "meta", `decidida ${cuando(r.ts)}`));
     const nums = el("div", "nums");
     for (const [k, v] of [
       ["Monto", money(r.monto_aprobado_usd ?? f.monto)],
@@ -143,6 +148,20 @@ function pintar(data) {
     card.append(el("p", "motivo", r.motivo || ""));
     lista.append(card);
   }
+}
+
+function cuando(iso) {
+  if (!iso) return "sin fecha";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return String(iso);
+  return d.toLocaleString("es-PA", { dateStyle: "short", timeStyle: "medium" });
+}
+
+function etiquetaCanal(c) {
+  if (c === "pueblo") return "vía nodo del pueblo";
+  if (c === "directo") return "directo al banco";
+  if (c === "demo") return "demostración";
+  return "origen desconocido";
 }
 
 async function cargar() {

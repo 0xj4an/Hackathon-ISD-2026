@@ -78,10 +78,13 @@ async function pedir(url: string, init: RequestInit, ms: number): Promise<Pedido
   }
 }
 
-function post(sol: Solicitud) {
+function post(sol: Solicitud, via: "telefono" | "pueblo") {
   return {
     method: "POST" as const,
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      "x-via": via,
+    },
     body: JSON.stringify({ ...sol, estado: "enviada" }),
   };
 }
@@ -111,7 +114,7 @@ export async function enviarSolicitud(sol: Solicitud): Promise<Envio> {
   const lineas: string[] = [];
 
   if (!sinWifiDemo()) {
-    const a = await pedir(`${urlBanco()}/solicitud`, post(sol), 8000);
+    const a = await pedir(`${urlBanco()}/solicitud`, post(sol, "telefono"), 8000);
     lineas.push(lineaPedido("banco", a));
     if (esFinal(a.body)) {
       const tecnico = armarTecnico(sol.id, lineas);
@@ -134,7 +137,7 @@ export async function enviarSolicitud(sol: Solicitud): Promise<Envio> {
     });
     return { ok: false, envio: null, pendiente: false, tecnico, detalle };
   }
-  const b = await pedir(`${nodo}/solicitud`, post(sol), 8000);
+  const b = await pedir(`${nodo}/solicitud`, post(sol, "telefono"), 8000);
   lineas.push(lineaPedido("pueblo", b));
   const tecnico = armarTecnico(sol.id, lineas);
   const nodoHost = hostDe(nodo);

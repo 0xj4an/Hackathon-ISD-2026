@@ -72,23 +72,32 @@ function leerRespuesta(id) {
 
 function pendientes() {
   return readdirSync(STATE)
-    .filter((f) => f.endsWith(".json") && !f.includes(".respuesta"))
+    .filter((f) => f.endsWith(".json") && !f.includes(".respuesta") && !f.includes(".meta"))
     .map((f) => f.replace(".json", ""))
     .filter((id) => !existsSync(`${STATE}${id}.respuesta.json`))
     .map((id) => JSON.parse(readFileSync(`${STATE}${id}.json`, "utf8")));
 }
 
+function leerMeta(id) {
+  const f = `${STATE}${id}.meta.json`;
+  return existsSync(f) ? JSON.parse(readFileSync(f, "utf8")) : null;
+}
+
 /** Lo que ve el back office. Sin cédula ni nombre completos. */
 function listar() {
   return readdirSync(STATE)
-    .filter((f) => f.endsWith(".json") && !f.includes(".respuesta"))
+    .filter((f) => f.endsWith(".json") && !f.includes(".respuesta") && !f.includes(".meta"))
     .map((f) => {
       const id = f.replace(".json", "");
       const sol = JSON.parse(readFileSync(`${STATE}${id}.json`, "utf8"));
+      const meta = leerMeta(id);
       const ced = String(sol.cedula?.numero ?? "");
       return {
         id,
         creada: sol.creada,
+        recibida: meta?.recibida,
+        canal: meta?.canal ?? "desconocido",
+        desde: meta?.desde,
         // Redactado: solo iniciales / últimos dígitos para el mock admin.
         nombre: iniciales(sol.cedula?.nombre),
         cedula: ced ? `***${ced.slice(-4)}` : undefined,
@@ -100,7 +109,7 @@ function listar() {
         respuesta: leerRespuesta(id),
       };
     })
-    .sort((a, b) => String(b.creada ?? "").localeCompare(String(a.creada ?? "")));
+    .sort((a, b) => String(b.recibida ?? b.creada ?? "").localeCompare(String(a.recibida ?? a.creada ?? "")));
 }
 
 function iniciales(nombre) {
@@ -122,11 +131,27 @@ function transito(sol) {
   };
 }
 
-function comoBanco(raw) {
+function sellarMeta(id, meta) {
+  if (leerMeta(id)) return;
+  guardar(id, ".meta.json", {
+    recibida: new Date().toISOString(),
+    canal: meta.canal || "directo",
+    ...(meta.desde ? { desde: meta.desde } : {}),
+  });
+}
+
+function canalDesdeReq(req) {
+  const via = String(req?.headers?.["x-via"] || "").toLowerCase();
+  if (via === "pueblo") return "pueblo";
+  return "directo";
+}
+
+function comoBanco(raw, meta = {}) {
   const { sol, respuesta } = recibir(JSON.parse(raw));
   guardar(sol.id, ".json", sol);
   guardar(sol.id, ".respuesta.json", respuesta);
-  log(`decidida ${sol.id} ${respuesta.decision} ${respuesta.monto_aprobado_usd ?? ""}`);
+  sellarMeta(sol.id, meta);
+  log(`decidida ${sol.id} ${respuesta.decision} ${respuesta.monto_aprobado_usd ?? ""} canal=${meta.canal || "directo"}`);
   return { sol, respuesta };
 }
 
@@ -146,7 +171,10 @@ async function comoCartero(raw) {
 async function empujarHttp(sol) {
   const r = await fetch(`${BANCO_URL}/solicitud`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      "x-via": "pueblo",
+    },
     body: JSON.stringify(sol),
     signal: AbortSignal.timeout(Number(process.env.BANCO_TIMEOUT_MS || 12000)),
   });
@@ -174,7 +202,7 @@ async function onMensaje(msg, sock, id) {
   if (msg.tipo === "solicitud") {
     try {
       if (ROL === "banco") {
-        const { respuesta } = comoBanco(JSON.stringify(msg.data));
+        const { respuesta } = comoBanco(JSON.stringify(msg.data), { canal: "pueblo", desde: "p2p" });
         enviarPeer(sock, { tipo: "respuesta", data: respuesta });
       } else {
         const { sol, respuesta } = await comoCartero(JSON.stringify(msg.data));
@@ -270,7 +298,11 @@ createServer(async (req, res) => {
     }
     try {
       const raw = await leerCuerpo(req);
-      const { respuesta } = ROL === "banco" ? comoBanco(raw) : await comoCartero(raw);
+      const meta = {
+        canal: canalDesdeReq(req),
+        desde: req.socket?.remoteAddress,
+      };
+      const { respuesta } = ROL === "banco" ? comoBanco(raw, meta) : await comoCartero(raw);
       json(res, 200, respuesta);
     } catch (e) {
       const code = e.code === 413 ? 413 : e?.name === "ZodError" || e instanceof SyntaxError ? 400 : 500;
