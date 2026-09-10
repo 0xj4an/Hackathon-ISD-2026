@@ -34,26 +34,25 @@ El reglamento pide cosas concretas, y cada una necesita su plano:
 
 ## Minuto a minuto
 
-### 0:00 a 0:30 · El problema
+### 0:00 a 0:35 · El problema (hooks)
 
-**Se ve:** intro cinemática de 22 s ([`intro.html`](intro.html)), muda.
-Luego corte al teléfono en la mano. Nada de la app todavía en ese plano.
+**Se ve:** open de 35 s, cine + documental. **No empieza con el logo.** Primer
+fotograma: el número. Nombre a los ~24 s. Corte duro al teléfono (sin fundido).
+Beats: `media_lab/.ai/runs/2026-09-10-ina-igar/07-open-35s.md`. El animático
+[`intro.html`](intro.html) (22 s, marca primero) queda obsoleto para este corte.
 
-**Se dice:**
+**Se dice** (pausar 2 s al arranque; el cartel habla solo):
 
-> En Panamá, 4 de cada 10 adultos viven con presión alta y no todos lo saben.
-> En el interior, hacerse un examen es bajar al pueblo, pagar de una vez, y
-> volver. Mucha gente no baja. No porque no quiera: porque no sabe si vale la
-> pena, y porque no sabe cuánto va a costar.
->
-> Ina Igar significa "Camino de la medicina" en gunagaya, la lengua del pueblo
-> Guna. Es una app que responde esas dos preguntas sin internet, dentro del
-> teléfono.
+> En Panamá, 4 de cada 10 adultos viven con presión alta. Y no todos lo saben.
+> En el interior, un examen es bajar al pueblo, pagar de una vez, y volver.
+> Mucha gente no baja: no sabe si vale la pena, ni cuánto va a costar.
+> Ina Igar es el Camino de la medicina, en gunagaya. Dos preguntas. En el
+> teléfono. Sin internet.
 
-**Por qué así:** el jurado tiene que entender el problema antes que la
-tecnología. Treinta segundos, no más.
+**Por qué así:** ese día el jurado revisa más de 50 proyectos. Un letrero de
+marca a los 0 s se parece a los otros 49. Un silencio + **4 de cada 10** no.
 
-### 0:30 a 1:10 · Detectar
+### 0:35 a 1:10 · Detectar
 
 **Se ve:** entrar con `insulina@gmail.com` (o chip Caso diabetes). Pantalla de
 salud simulada. Revisión pasando el historial. La alerta: primero las reglas,
