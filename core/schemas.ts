@@ -18,7 +18,7 @@ export const AlertaSchema = z.object({
   costo_max_usd: z.number().min(0).max(2000).optional(),
   costo_nota: z.string().optional().describe("Aviso de que el precio es un rango aproximado y varía por laboratorio"),
   urgencia: z.enum(["Rutinaria", "Prioritaria", "Inmediata"]),
-  mensaje: z.string().describe("Texto en español para la persona, máx 3 frases"),
+  mensaje: z.string().describe("Plain-language text for the person, max 3 sentences (English)"),
   /**
    * De dónde sale el umbral que disparó la alerta. Viene de `Senal.fuente` y se
    * copia tal cual: el modelo no la redacta. Va en pantalla para que la app
