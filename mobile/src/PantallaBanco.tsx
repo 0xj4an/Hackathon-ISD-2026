@@ -2,7 +2,7 @@
  * Respuesta del banco. Mock 6 de Señalética.
  *
  * La decisión la tomó el banco remoto. Este teléfono solo la muestra.
- * El scorecard es de demostración (cartera sintética) y la pantalla lo dice.
+ * Si aprueba, sigue a la firma con trazo y al desembolso simulado.
  */
 import {
   Pantalla, Encabezado, Veredicto, Cifra, FilaRuta, Franja, Boton, Pie,
@@ -11,10 +11,10 @@ import { COLOR } from "./ui/tokens";
 import type { Respuesta } from "./core/credito/motor";
 
 export default function PantallaBanco({
-  respuesta, onAceptar, onVolver,
+  respuesta, onContinuar, onVolver,
 }: {
   respuesta: Respuesta;
-  onAceptar: () => void;
+  onContinuar: () => void;
   onVolver: () => void;
 }) {
   const ok = respuesta.decision === "aprobada";
@@ -73,12 +73,22 @@ export default function PantallaBanco({
       />
 
       {ok ? (
-        <Boton texto="Aceptar y firmar" tono="rutinaria" onPress={onAceptar} />
-      ) : null}
-      <Boton texto="Ahora no" tono="borde" onPress={onVolver} />
-      <Pie>
-        Decisión del banco. Cartera sintética, para demostrar el flujo.
-      </Pie>
+        <>
+          <Boton
+            texto="Firmar para aceptar"
+            tono="rutinaria"
+            onPress={onContinuar}
+            etiqueta="Continuar a firmar con el dedo"
+          />
+          <Boton texto="Ahora no" tono="borde" onPress={onVolver} />
+          <Pie>El siguiente paso es tu trazo. No es una firma electrónica legal.</Pie>
+        </>
+      ) : (
+        <>
+          <Boton texto="Volver" tono="borde" onPress={onVolver} />
+          <Pie>Decisión del banco. Cartera sintética, para demostrar el flujo.</Pie>
+        </>
+      )}
     </Pantalla>
   );
 }

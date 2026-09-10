@@ -10,6 +10,7 @@
 //
 // Firmar: modo local-wifi intenta el banco; modos offline van al pueblo.
 // Si tampoco hay nodo, la solicitud queda en SQLite (`cola`).
+// Tras aprobación: trazo → desembolso simulado → Listo.
 // Las fotos no salen. MedPsy en el teléfono; si no, texto al pueblo (/inferir).
 // `PantallaDatos` sigue en el repo (deudas y personas a cargo, pantalla 11 del
 // mapa) pero el camino de la demo pasa por lo leído → cuota → banco.
@@ -27,6 +28,8 @@ import PantallaLeido from "./src/PantallaLeido";
 import PantallaCuota from "./src/PantallaCuota";
 import PantallaBanco from "./src/PantallaBanco";
 import PantallaExamen from "./src/PantallaExamen";
+import PantallaFirma from "./src/PantallaFirma";
+import PantallaDesembolso from "./src/PantallaDesembolso";
 import { solicitudDeLectura, type LecturaCredito } from "./src/lectura";
 import { consultarRespuesta, enviarSolicitud } from "./src/envio";
 import {
@@ -43,7 +46,7 @@ import { fijarModo, resetModo } from "./src/modo";
 
 /** Lo que cuesta el paquete, y el monto que la persona decidió pedir. */
 type Credito = { min: number; max: number; monto?: number };
-type PasoCredito = "captura" | "leido" | "cuota" | "banco";
+type PasoCredito = "captura" | "leido" | "cuota" | "banco" | "firma" | "desembolso";
 
 export default function App() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
@@ -277,14 +280,37 @@ export default function App() {
     );
   }
 
+  if (paso === "desembolso" && respuesta) {
+    const destino = solicitud?.extracto?.banco
+      ? `Cuenta en ${solicitud.extracto.banco}`
+      : "tu cuenta registrada";
+    return (
+      <PantallaDesembolso
+        respuesta={respuesta}
+        destino={destino}
+        onListo={() => {
+          setCredito(null);
+          soltarCredito();
+        }}
+      />
+    );
+  }
+
+  if (paso === "firma" && respuesta) {
+    return (
+      <PantallaFirma
+        respuesta={respuesta}
+        onConfirmar={() => setPaso("desembolso")}
+        onVolver={() => setPaso("banco")}
+      />
+    );
+  }
+
   if (paso === "banco" && respuesta) {
     return (
       <PantallaBanco
         respuesta={respuesta}
-        onAceptar={() => {
-          setCredito(null);
-          soltarCredito();
-        }}
+        onContinuar={() => setPaso("firma")}
         onVolver={() => {
           setRespuesta(null);
           setPaso("cuota");
