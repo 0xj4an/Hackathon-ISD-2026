@@ -48,7 +48,7 @@ function Tarjeta({ senal }: { senal: Senal }) {
       <View style={s.datos}>
         {r.examen ? <Dato k="Examen" v={r.examen} /> : null}
         {senal.costo ? (
-          <Dato k="Costo" v={`${senal.costo.min_usd} a ${senal.costo.max_usd} USD, aproximado`} />
+          <Dato k="Costo" v={`B/. ${senal.costo.min_usd} a ${senal.costo.max_usd}, aproximado`} />
         ) : null}
         <Dato k="Dónde" v={r.donde} />
         <Dato k="Quién" v={r.especialista} />

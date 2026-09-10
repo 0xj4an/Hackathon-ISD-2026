@@ -72,15 +72,25 @@ const CASA = "En casa";
 const GENERAL = "Medicina general";
 const URGENCIAS = "Urgencias";
 
-// Precios de laboratorio en Panamá. Rangos publicados, no precios de un
-// laboratorio concreto: varían por sede, promoción y paquete.
+// Precios en Panamá, en balboas (B/.), que está a la par con el dólar.
+//
+// Son rangos de laboratorios y clínicas PRIVADAS. Se cotiza lo privado a
+// propósito: es el peor caso para el bolsillo. En un centro de salud del MINSA
+// puede costar menos o nada, y entonces la persona queda mejor de lo que la app
+// dijo, nunca peor. No encontramos tarifa publicada del MINSA para citarla.
+const AVISO_MINSA = "Precio de laboratorio o clínica privada. En un centro de salud del MINSA puede costar menos o nada";
+
 const PRECIO_GLUCOSA: CostoEstimado = {
   min_usd: 6, max_usd: 15,
-  fuente: "Rangos publicados de laboratorios en Panamá (chequeandome.com.pa). Aproximado, varía por laboratorio",
+  fuente: `Rangos publicados de laboratorios en Panamá (chequeandome.com.pa). ${AVISO_MINSA}`,
 };
 const PRECIO_ECG: CostoEstimado = {
   min_usd: 20, max_usd: 45,
-  fuente: "Clínicas en Panamá: trazo desde ~$28, informado por cardiología ~$45. Aproximado",
+  fuente: `Clínicas en Panamá: trazo desde ~B/. 28, informado por cardiología ~B/. 45. ${AVISO_MINSA}`,
+};
+const PRECIO_CONSULTA: CostoEstimado = {
+  min_usd: 8, max_usd: 25,
+  fuente: `Consulta de medicina general en Panamá, la mayoría entre B/. 12 y 15 (chequeandome.com.pa). ${AVISO_MINSA}`,
 };
 
 const ultimos = (m: Medicion[], tipo: TipoMedicion, n: number) =>
@@ -152,6 +162,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
       codigo: "PRES_ALTA",
       descripcion: `presión ${cual} alta en 3 tomas: ${cifras} mmHg (referencia menor a 140/90)`,
       ruta: { tipo: "consulta", examen: "Toma de presión en días distintos para confirmar", donde: CENTRO, especialista: `${GENERAL}, puede derivar a cardiología`, vigilar: "Dolor de cabeza fuerte, visión borrosa o dolor en el pecho" },
+      costo: PRECIO_CONSULTA,
       urgencia: "Prioritaria",
       fuente: "OMS: hipertensión es 140/90 mmHg o más, medida en dos días diferentes",
     });
@@ -188,6 +199,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
         codigo: "SAT_BAJA",
         descripcion: `saturación de oxígeno por debajo de 95% en 3 mediciones (promedio ${promedio(sat3).toFixed(0)}%)`,
         ruta: { tipo: "consulta", examen: "Medición con oxímetro en el centro de salud", donde: CENTRO, especialista: `${GENERAL}, puede derivar a neumología`, vigilar: "Falta de aire en reposo o labios azulados" },
+        costo: PRECIO_CONSULTA,
         urgencia: "Prioritaria",
         fuente: "Saturación normal en adultos: 95 a 100%. Por debajo de 95% se considera anormal",
       });
@@ -203,6 +215,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
       codigo: "FIEBRE",
       descripcion: `temperatura de ${fiebre.toFixed(1)} grados (fiebre a partir de 38)`,
       ruta: { tipo: "consulta", ahora: "Hidratarse y reposo", donde: CENTRO, especialista: GENERAL, vigilar: "Dolor abdominal intenso, vómito persistente, sangrado de encías o nariz. Con cualquiera de estos, acudir de inmediato" },
+      costo: PRECIO_CONSULTA,
       urgencia: "Prioritaria",
       fuente: "38 grados o más se considera fiebre. Los signos de alarma citados son los de la OMS para dengue grave",
     });
@@ -225,6 +238,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
       codigo: "RESP_ALTA",
       descripcion: `frecuencia respiratoria por encima de 20 por minuto en 3 mediciones (promedio ${promedio(respUlt).toFixed(0)})`,
       ruta: { tipo: "consulta", donde: CENTRO, especialista: GENERAL, vigilar: "Falta de aire o dolor en el pecho" },
+      costo: PRECIO_CONSULTA,
       urgencia: "Prioritaria",
       fuente: "Taquipnea en adultos es más de 20 respiraciones por minuto. Normal: 12 a 20",
     });
@@ -250,6 +264,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
         codigo: "IMC_SOBREPESO",
         descripcion: `índice de masa corporal de ${imc.toFixed(1)} (sobrepeso a partir de 25)`,
         ruta: { tipo: "consulta", donde: CENTRO, especialista: `${GENERAL} o nutrición` },
+        costo: PRECIO_CONSULTA,
         urgencia: "Rutinaria",
         fuente: "OMS: en adultos, IMC de 25 o más es sobrepeso. El IMC es un indicador aproximado de grasa corporal",
       });
@@ -266,6 +281,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
         codigo: "PESO_BAJA",
         descripcion: `pérdida de ${(caida * 100).toFixed(0)}% del peso en ${Math.round(dias)} días, de ${primero.valor.toFixed(1)} a ${ultimo.valor.toFixed(1)} kg`,
         ruta: { tipo: "consulta", donde: CENTRO, especialista: GENERAL, vigilar: "Si la pérdida no fue intencional, amerita estudio" },
+        costo: PRECIO_CONSULTA,
         urgencia: "Prioritaria",
         fuente: "Perder más del 5% del peso corporal en 6 a 12 meses sin proponérselo amerita evaluación médica",
       });
