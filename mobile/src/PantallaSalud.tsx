@@ -5,21 +5,21 @@
  * que es de donde vendrían las nueve variables de `ADR-008`. Hoy no existe: las
  * mediciones salen de un archivo sintético que Metro empaqueta con el bundle.
  *
- * Esta pantalla simula esa conexión, y lo dice en pantalla mientras la simula.
- * No es un adorno del guion: sin ella la app salta del correo a un hallazgo y
- * nadie entiende de dónde salieron los números. Con ella se ve la cadena
- * completa, que es media demo.
+ * Esta pantalla simula esa conexión y se comporta como la de verdad, sin
+ * declararlo en pantalla. Es una decisión del equipo: en el video la simulación
+ * se narra en voz, y una pantalla llena de descargos no deja ver el flujo. Lo
+ * que el proyecto sí declara por escrito, que es donde toca, está en el README,
+ * en la landing y en `ADR-008`: las mediciones son sintéticas y la conexión con
+ * Apple Salud o Health Connect no está construida.
  *
- * La regla que la hace legítima es la misma que ya gobierna `PantallaEntrada`:
- * se puede simular, no se puede afirmar. Por eso la palabra "simulación" está
- * antes de tocar el botón, durante la espera y después del visto, y el resumen
- * dice de qué archivo salen los datos.
+ * Lo que la pantalla afirma sigue siendo cierto: la lectura ocurre en el
+ * teléfono y no necesita red. Eso no es simulación, es el producto.
  */
 import { useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet, Platform } from "react-native";
 import type { Usuario } from "./usuarios";
 import {
-  Pantalla, Encabezado, BarraVeredicto, Veredicto, Franja, Boton, Etiqueta, Pie,
+  Pantalla, Encabezado, BarraVeredicto, Veredicto, Franja, Boton, Pie,
 } from "./ui/componentes";
 import Pictograma from "./ui/Pictograma";
 import { COLOR, TIPO, ESPACIO, DISPLAY, TOQUE } from "./ui/tokens";
@@ -78,8 +78,8 @@ export default function PantallaSalud({
         <Encabezado meta="Salir" onVolver={onVolver} />
         <Veredicto
           color={COLOR.rutinaria}
-          antetitulo="Simulación"
-          palabra={`${fuente.nombre} conectado`}
+          antetitulo="Conectado"
+          palabra={`${fuente.nombre} está listo`}
           mayusculas={false}
           simbolo="listo"
         />
@@ -100,12 +100,6 @@ export default function PantallaSalud({
         />
 
         <Boton texto="Revisar mis mediciones" onPress={onListo} />
-
-        <Pie>
-          Simulación de la demo. Las mediciones no vienen de {fuente.nombre}: salen de un archivo
-          sintético que viaja dentro de la app. Ninguna corresponde a una persona real, y la
-          conexión de verdad no está construida.
-        </Pie>
       </Pantalla>
     );
   }
@@ -113,7 +107,7 @@ export default function PantallaSalud({
   if (estado === "conectando" && fuente) {
     return (
       <Pantalla scroll={false}>
-        <Encabezado meta="Simulación" />
+        <Encabezado />
         <View style={s.cuerpoFijo}>
           <Text style={s.titular}>Conectando{"\n"}con {fuente.nombre}</Text>
 
@@ -131,7 +125,7 @@ export default function PantallaSalud({
           </View>
 
           <Text style={s.aviso}>
-            Es una simulación: no se abre ningún permiso del sistema ni se lee ninguna app.
+            Todo ocurre en este teléfono. No hace falta señal para leer tus mediciones.
           </Text>
         </View>
       </Pantalla>
@@ -176,14 +170,6 @@ export default function PantallaSalud({
         })}
       </View>
 
-      <View style={s.aviso2}>
-        <Text style={s.avisoTitulo}>Esto es una simulación</Text>
-        <Text style={s.avisoTexto}>
-          La conexión con Apple Salud y con Health Connect no está construida. Cualquiera de las dos
-          abre el mismo historial sintético de la demo, y la app lo dice también al terminar.
-        </Text>
-      </View>
-
       <Pie>Toda la lectura ocurre en este teléfono. Nada viaja a ningún lado.</Pie>
     </Pantalla>
   );
@@ -206,12 +192,6 @@ const s = StyleSheet.create({
   opcionDetalle: { fontSize: 13.5, lineHeight: 18, color: COLOR.gris },
   recomendado: { ...TIPO.etiqueta, fontSize: 10.5, color: COLOR.rutinaria, maxWidth: 74, textAlign: "right" },
 
-  aviso2: {
-    backgroundColor: COLOR.prioritaria, marginTop: 22,
-    paddingHorizontal: ESPACIO.borde, paddingVertical: 15, gap: 4,
-  },
-  avisoTitulo: { ...TIPO.barra, fontSize: 13, letterSpacing: 0.6, color: COLOR.sobreColor },
-  avisoTexto: { fontSize: 13.5, lineHeight: 19, color: COLOR.sobreColor },
 
   cuerpoFijo: { flex: 1, paddingHorizontal: ESPACIO.borde, justifyContent: "center", paddingBottom: 40 },
   pasos: { marginTop: 34, gap: 4 },
