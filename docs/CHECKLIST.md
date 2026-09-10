@@ -3,6 +3,8 @@
 Se sigue en orden. Un bloque no empieza hasta que el anterior tiene su salida
 verificable. `[J]` es 0xj4an, `[A]` es Artur.
 
+`[x]` hecho y comprobado. `[~]` a medias, dice qué falta. `[ ]` sin empezar.
+
 El detalle de cada punto está en
 [`.ai/runs/mvp-hackathon/02-stack-y-plan.md`](../.ai/runs/mvp-hackathon/02-stack-y-plan.md).
 Las condiciones de "listo" son los criterios C1 a C13 del final.
@@ -36,10 +38,10 @@ Nada más avanza hasta que esto pase.
 
 ### Implementación
 
-- [ ] `[A]` Pantalla 1: reglas sobre mediciones sintéticas, `SYSTEM_ALERTA`, `limpiarJson()`, `AlertaSchema.parse()`. Visible en el teléfono
-- [ ] `[A]` `perf/logger.ts` **desde ya**. Si no se hace ahora no se hace nunca, y es entregable de Tether Psy. Las métricas salen de `stats` de `await result.final`, no de la API de logging. Volcar `stats` entero sin filtrar y medir TTFT a mano con `Date.now()`
-- [ ] `[A]` Las dos vías: `reglasTendencia()` sobre el historial y `reglasRango()` sobre `mobile/src/core/marcadores.ts`, ambas devolviendo `Senal`
-- [ ] `[A]` Importador de `data/` al formato normalizado
+- [~] `[A]` **Código listo, sin verificar.** `mobile/src/PantallaAlerta.tsx` existe y las seis pantallas están escritas. Nadie lo ha visto correr en un teléfono: eso lo cierra el bloque 0
+- [~] `[A]` **Escrito, nunca ejecutado.** `mobile/src/perf/logger.ts` existe y `perf/perf.jsonl` tiene cero líneas, porque no ha corrido una sola inferencia. Original: `perf/logger.ts` **desde ya**. Si no se hace ahora no se hace nunca, y es entregable de Tether Psy. Las métricas salen de `stats` de `await result.final`, no de la API de logging. Volcar `stats` entero sin filtrar y medir TTFT a mano con `Date.now()`
+- [x] `[A]` **Hecho.** Las dos vías viven en `mobile/src/core/reglas.ts` y `marcadores.ts`, 14 señales sobre 9 variables (`ADR-008`). `eval/run.mjs` evalúa ambas y pasa
+- [x] `[A]` **Hecho.** `data/generar-usuarios.mjs` produce el formato normalizado y `PantallaUsuarios.tsx` lo consume
 
 ---
 
@@ -47,17 +49,17 @@ Nada más avanza hasta que esto pase.
 
 ### Dominio
 
-- [ ] `[J]` Revisar la política de crédito en `nodo/credito.mjs`: cuota 30% del ingreso, 9.5% o 12.5% anual, plazos 6/12/24, confianza de OCR 0.5, tope 5000 USD
-- [ ] `[J]` Decidir qué documentos se piden de verdad, qué campos de cada uno y qué pasa si falta uno. Hoy los schemas asumen cédula, carta laboral y extracto
-- [ ] `[J]` `data/documentos/`: los tres ficticios renderizados como imagen, con tipografía y ruido. Texto plano perfecto no prueba el OCR
-- [ ] `[J]` Pantallas, estados (sin señal, con señal, subiendo documentos, en cola, respondida) y textos
+- [x] `[J]` **Hecho.** `ADR-010` cambió el modelo: se cotiza un paquete por condición a un año, con costos con fuente, en vez de un monto suelto. `mobile/src/core/paquete.ts` y `nodo/credito.mjs` lo implementan
+- [~] `[J]` **Decidido a medias.** Son tres: cédula, comprobante de ingresos y extracto, y los campos están en `mobile/src/core/prompts.ts` y `schemas.ts`. Falta decidir **qué pasa si falta uno**
+- [ ] `[J]` `data/documentos/` **está vacío.** Faltan los tres ficticios renderizados como imagen, con tipografía y ruido. Texto plano perfecto no prueba el OCR
+- [x] `[J]` **Hecho.** 15 lienzos en `docs/design/`, más el comparador de direcciones y el diseño de app
 
 ### Implementación
 
-- [ ] `[A]` Cámara, `ocr()`, `SYSTEM_EXTRACCION_CEDULA`, `CedulaSchema`, **borrar la foto**, guardar JSON en SQLite
-- [ ] `[A]` Cola en SQLite con estado `pendiente` y envío al nodo. HTTP primero, que se depura más fácil que Hyperswarm
+- [~] `[A]` **Solo la cámara.** `PantallaDocumentos.tsx` toma la foto con `ImagePicker`. Faltan `ocr()`, la extracción a JSON, **el borrado de la foto** y SQLite: hoy no se usa `expo-sqlite` en ninguna parte
+- [ ] `[A]` Cola en SQLite con estado `pendiente` y envío al nodo. **Sin empezar**: `pendiente` hoy es solo un estilo de texto en pantalla. HTTP primero, que se depura más fácil que Hyperswarm
 - [x] `[A]` **Hecho en la parte de reglas.** `eval/run.mjs` evalúa la vía A (los 6 casos), la vía B (clasificación de los 7 marcadores) y la integridad de las rutas. Determinista, sin teléfono, sale con código 1 si algo falla. La medición del modelo (% JSON, % campos) vive en `spikes/lora-medpsy`
-- [ ] `[A]` Afinar `nodo/credito.mjs` y verificar que `RespuestaBancoSchema` valida lo que el nodo devuelve de verdad
+- [~] `[A]` **Afinado, sin verificar.** `nodo/credito.mjs` ya cotiza el paquete a un año. Falta comprobar que `RespuestaBancoSchema` valida lo que el nodo devuelve de verdad, con el nodo corriendo
 
 **Al cerrar el bloque:** lanzar el entrenamiento del LoRA y dormir. Con `caffeinate -i`, o el Mac se duerme a mitad como pasó en el spike.
 
@@ -108,11 +110,11 @@ Nada más avanza hasta que esto pase.
 | --- | --- | --- |
 | [ ] C1 | MedPsy carga en el 14T Pro y produce texto en español | Captura con "modelo cargado" y TTFT |
 | [ ] C2 | TTFT medido con `gpu` y `cpu`, se usa el mejor | Dos líneas en `perf.jsonl` con `device_cfg` distinto |
-| [ ] C3 | La vía A dispara con el historial del usuario con hallazgo | `eval/run.mjs` las cuenta |
-| [ ] C3b | La vía B clasifica bien los marcadores: alto, bajo y normal | `eval/run.mjs` contra `mobile/src/core/marcadores.ts` |
-| [ ] C3c | **El usuario sano no dispara ninguna alerta** | `eval/run.mjs` sobre su historial: cero señales |
+| [x] C3 | La vía A dispara con el historial del usuario con hallazgo | **Verificado**, `eval/run.mjs` exit 0 |
+| [x] C3b | La vía B clasifica bien los marcadores: alto, bajo y normal | **Verificado**, los 7 marcadores en los tres estados |
+| [x] C3c | **El usuario sano no dispara ninguna alerta** | **Verificado**, cero señales |
 | [x] C3d | `linfocitos CD4` no aparece en pantalla ni en el video | **Fuera de `mobile/src/core/marcadores.ts`.** Falta revisar el guion cuando exista |
-| [ ] C4 | Toda salida del modelo pasa por `limpiarJson()` | Grep: cero `JSON.parse` sin `limpiarJson` |
+| [x] C4 | Toda salida del modelo pasa por `limpiarJson()` | **Verificado**, cero `JSON.parse` sueltos en `mobile/src/` |
 | [ ] C5 | La alerta valida contra `AlertaSchema` | `.parse()` sin excepción en 20 corridas |
 | [ ] C6 | La foto se borra tras extraer | Listar el directorio: cero imágenes |
 | [ ] C7 | Ninguna imagen ni dato clínico sale del teléfono | El JSON que recibe el nodo: solo `SolicitudSchema` |
@@ -120,8 +122,8 @@ Nada más avanza hasta que esto pase.
 | [ ] C9 | Al volver la red, sale y vuelve la respuesta | Video: aparece sin tocar nada |
 | [ ] C10 | `perf.jsonl` con una línea por inferencia y `stats` completo | `wc -l` y cada línea parsea |
 | [ ] C11 | Tabla base contra LoRA sobre el mismo set | `eval/run.mjs` dos veces |
-| [ ] C12 | **Cero llamadas a proveedores de IA remotos** | Grep en el bundle: cero `api.openai.com` y similares |
-| [ ] C13 | README declara modelo, cuantización, hardware y base preexistente | Revisión manual |
+| [x] C12 | **Cero llamadas a proveedores de IA remotos** | **Verificado** en `mobile/src`, `nodo`, `eval`, `data`. Repetir sobre el bundle antes de entregar |
+| [~] C13 | README declara modelo, cuantización, hardware y base preexistente | Hardware y base ya están. Falta cerrar la fila "Extracción a JSON" de la tabla de modelos |
 
 C12 y C13 son los dos que descalifican. Los demás cuestan puntos.
 
