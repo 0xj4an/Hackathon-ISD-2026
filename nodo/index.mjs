@@ -8,6 +8,8 @@
 //            Solo ROL=corregimiento. Las fotos no viajan.
 import { createServer } from "node:http";
 import { mkdirSync, writeFileSync, readdirSync, readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { aceptar, recibir } from "./credito.mjs";
 
 const ROL = process.env.ROL || "banco";
@@ -19,7 +21,10 @@ const SKIP_P2P = process.env.ENABLE_P2P !== "1"
   || Boolean(process.env.RAILWAY_ENVIRONMENT);
 const NODO_TOKEN = process.env.NODO_TOKEN || "";
 const TOPIC_NAME = process.env.TOPIC || "isd-hackathon-credito-salud-v1";
-const STATE = new URL(`./state/${ROL}/`, import.meta.url).pathname;
+// En Railway: Volume montado en /data + STATE_DIR=/data para no perder solicitudes al redeploy.
+const STATE_ROOT = process.env.STATE_DIR
+  || join(fileURLToPath(new URL(".", import.meta.url)), "state");
+const STATE = join(STATE_ROOT, ROL) + "/";
 mkdirSync(STATE, { recursive: true });
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), `[${ROL}]`, ...a);
 
