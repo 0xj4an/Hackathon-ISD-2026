@@ -674,6 +674,10 @@
         Es la pregunta que decide los tres retos a la vez. Toda la inteligencia corre en el
         aparato: las reglas, el modelo que redacta, el OCR que lee la c&eacute;dula. Lo &uacute;nico que
         cruza hacia afuera es un JSON de solicitud, y ese JSON no lleva el motivo de salud.
+        Tres nombres que no se mezclan: <b>v&iacute;a A / v&iacute;a B</b> son salud (historial vs
+        examen en papel); <b>camino A / camino B</b> son transporte del cr&eacute;dito (wifi al
+        banco vs LAN al pueblo); <code>delegate</code> de QVAC es prestar c&oacute;mputo del modelo,
+        y no elige el camino.
       </p>
     </div>
 
@@ -715,7 +719,7 @@
           <rect x="790" y="96" width="174" height="88" rx="8" class="svg-caja"></rect>
           <text x="808" y="128" class="t-titulo">Banco</text>
           <text x="808" y="150" class="t-sub">modelo de cr&eacute;dito</text>
-          <text x="808" y="166" class="t-sub">de juguete, declarado</text>
+          <text x="808" y="166" class="t-sub">cartera sint&eacute;tica</text>
 
           <rect x="600" y="256" width="176" height="88" rx="8" class="svg-caja"></rect>
           <text x="618" y="288" class="t-titulo">Nodo del</text>
@@ -723,14 +727,14 @@
           <text x="618" y="328" class="t-sub">laptop del corresponsal</text>
 
           <path d="M 428 286 H 500 V 140 H 784" class="svg-linea" marker-end="url(#punta)"></path>
-          <text x="560" y="132" class="t-eti">con datos o wifi, directo al banco</text>
+          <text x="560" y="132" class="t-eti">camino A: wifi, directo al banco</text>
           <text x="560" y="158" class="t-sub">solicitud (JSON firmado)</text>
 
           <path d="M 428 300 H 594" class="svg-linea" marker-end="url(#punta)"></path>
-          <text x="496" y="292" class="t-eti">sin internet</text>
+          <text x="496" y="292" class="t-eti">camino B: sin internet</text>
 
           <path d="M 776 300 H 830 V 190" class="svg-linea" marker-end="url(#punta)"></path>
-          <text x="792" y="322" class="t-sub">cifrada, por P2P</text>
+          <text x="792" y="322" class="t-sub">HTTP, cuando el pueblo tiene salida</text>
 
           <path d="M 920 190 V 372 H 470" class="svg-linea" marker-end="url(#punta)"></path>
           <text x="910" y="364" class="t-eti" text-anchor="end">la respuesta vuelve por donde sali&oacute;</text>
@@ -740,11 +744,12 @@
         </svg>
       </div>
       <figcaption>
-        Hay dos caminos hacia el banco y la app toma el que encuentre: con datos o wifi habla
-        directo, y solo cuando no hay internet aparece el nodo del corregimiento. Por los dos
-        cruza el mismo JSON. La flecha punteada es la otra raz&oacute;n de existir del nodo: reparte el
-        <code>.gguf</code> por wifi local y, en modo delegado, presta el c&oacute;mputo al tel&eacute;fono que no
-        alcanza. Incluso ah&iacute; viaja texto, nunca im&aacute;genes.
+        Hay dos caminos hacia el banco y la app toma el que encuentre: <b>camino A</b>, con
+        datos o wifi, habla directo; <b>camino B</b>, sin internet, deja el JSON en el nodo del
+        corregimiento. Por los dos cruza el mismo JSON. La flecha punteada es la otra raz&oacute;n
+        de existir del nodo: reparte el <code>.gguf</code> por wifi local y, si el tel&eacute;fono
+        no alcanza a correr el modelo, QVAC <code>delegate</code> presta el c&oacute;mputo. Eso no es
+        el camino B. Incluso ah&iacute; viaja texto, nunca im&aacute;genes.
       </figcaption>
     </figure>
   </section>
@@ -1145,19 +1150,21 @@
       <article class="parada">
         <div class="hito"><span class="num">6</span><span class="hilo"></span></div>
         <div class="cuerpo">
-          <span class="chip falta">Por construir</span>
+          <span class="chip listo">En el tel&eacute;fono</span>
           <h3>Sale por el primer camino que aparezca</h3>
           <p class="prosa">
-            Hay dos, y el nodo es el segundo. <strong>Con datos o wifi el tel&eacute;fono habla directo
-            con el banco</strong>, sin intermediario, que es lo que va a pasar la mayor&iacute;a de las
-            veces. Solo cuando no hay internet entra el otro camino: el tel&eacute;fono descubre por
-            Hyperswarm la laptop del corresponsal y el JSON viaja cifrado a trav&eacute;s de ella. Ese
-            mismo nodo reparte los pesos del modelo por LAN y presta c&oacute;mputo en modo delegado.
-            Tres oficios, un solo aparato, y ninguno indispensable cuando hay se&ntilde;al.
+            Hay dos, y el nodo es el segundo. <strong>Camino A: con datos o wifi el tel&eacute;fono
+            habla directo con el banco</strong> (Railway), sin intermediario, que es lo que va a
+            pasar la mayor&iacute;a de las veces. <strong>Camino B:</strong> solo cuando no hay internet
+            el JSON va por LAN al nodo del pueblo y &eacute;l se lo lleva al banco cuando tiene
+            salida. Ese mismo nodo reparte los pesos del modelo por LAN. Si el tel&eacute;fono no
+            alcanza a correr MedPsy, QVAC <code>delegate</code> presta c&oacute;mputo: es otro oficio,
+            no el camino B. Ninguno de los tres es indispensable cuando hay se&ntilde;al. No
+            confundir con las v&iacute;as de salud: v&iacute;a A es el historial, v&iacute;a B es el examen en papel.
           </p>
           <dl class="detalles">
-            <div class="detalle"><dt>Camino 1</dt><dd>Datos o wifi: directo al banco</dd></div>
-            <div class="detalle"><dt>Camino 2</dt><dd>Sin internet: por el nodo del corregimiento</dd></div>
+            <div class="detalle"><dt>Camino A</dt><dd>Wifi o datos: directo al banco</dd></div>
+            <div class="detalle"><dt>Camino B</dt><dd>Sin internet: nodo del pueblo, luego el banco</dd></div>
             <div class="detalle"><dt>Sale del tel&eacute;fono</dt><dd><em>El mismo JSON por los dos</em></dd></div>
           </dl>
         </div>
@@ -1186,13 +1193,13 @@
       <article class="parada">
         <div class="hito"><span class="num">7</span><span class="hilo"></span></div>
         <div class="cuerpo">
-          <span class="chip falta">Por construir</span>
+          <span class="chip listo">En el tel&eacute;fono</span>
           <h3>La respuesta vuelve por el mismo camino</h3>
           <p class="prosa">
-            El banco mock decide con una pol&iacute;tica de juguete que est&aacute; escrita y declarada como
-            tal: cuota tope del 30% del ingreso, 9.5% anual si hay extracto y 12.5% si no,
-            plazos de 6, 12 o 24 meses. Si la lectura de los documentos qued&oacute; floja, no rechaza:
-            manda a revisi&oacute;n.
+            El banco remoto decide con el mismo motor que el tel&eacute;fono usa para precalificar:
+            elegibilidad, capacidad de pago, scorecard de cartera sint&eacute;tica y precio. No es
+            la pol&iacute;tica de un banco real, y se declara. Si la lectura de los documentos qued&oacute;
+            floja, no rechaza: manda a revisi&oacute;n.
           </p>
           <dl class="detalles">
             <div class="detalle"><dt>Vuelve</dt><dd>Monto, plazo, tasa, cuota y motivo</dd></div>
@@ -1207,13 +1214,13 @@
               <div class="b-bloque">
                 <div class="b-fila"><span class="k">monto</span><span class="v">B/. 920</span></div>
                 <div class="b-fila"><span class="k">plazo</span><span class="v">12 meses</span></div>
-                <div class="b-fila"><span class="k">tasa</span><span class="v">9.5% anual</span></div>
-                <div class="b-fila"><span class="k">cuota</span><span class="v">B/. 80.67 al mes</span></div>
+                <div class="b-fila"><span class="k">tasa</span><span class="v">17.4% anual</span></div>
+                <div class="b-fila"><span class="k">cuota</span><span class="v">B/. 84.08 al mes</span></div>
               </div>
               <p class="b-boton">Aceptar y firmar</p>
               <p class="b-nota">
-                Ingreso declarado de B/. 600 al mes, con extracto. Cifras que devuelve el modelo
-                de juguete de nodo/credito.mjs.
+                Ingreso declarado de B/. 520 al mes, sin extracto. Cifras del motor
+                de mobile/src/core/credito/.
               </p>
             </div>
           </div>
@@ -1240,7 +1247,7 @@
           <div class="telefono boceto">
             <div class="pantalla">
               <p class="b-titulo">Firma para aceptar</p>
-              <p class="b-texto">B/. 920 a 12 meses, cuota de B/. 80.67.</p>
+              <p class="b-texto">B/. 920 a 12 meses, cuota de B/. 84.08.</p>
               <div class="b-trazo">firma con el dedo</div>
               <p class="b-boton">Confirmar</p>
               <p class="b-nota">
@@ -1485,7 +1492,7 @@
           <li><b>El paquete en balboas</b>: un a&ntilde;o de tratamiento con cada l&iacute;nea citada, que es lo que hace el cr&eacute;dito defendible</li>
           <li><b>La c&aacute;mara</b>, en los documentos del cr&eacute;dito y en el examen de laboratorio</li>
           <li><b>La v&iacute;a B</b>: 7 marcadores con rango por sexo y fuente, y por fin una pantalla que los usa</li>
-          <li><b>La pol&iacute;tica de cr&eacute;dito</b> del banco mock, escrita y declarada como juguete</li>
+          <li><b>La pol&iacute;tica de cr&eacute;dito</b> del banco remoto: elegibilidad, capacidad, scorecard de cartera sint&eacute;tica</li>
         </ul>
       </div>
       <div class="columna">
@@ -1495,7 +1502,7 @@
           <li><b>El modelo en el flujo</b>: el prompt, el schema y el limpiador existen, pero la pantalla a&uacute;n muestra solo las reglas</li>
           <li><b>El log de rendimiento</b>, que es entregable del reto Tether y se hace ahora o no se hace</li>
           <li><b>La lectura de las fotos</b>: el OCR, la extracci&oacute;n a JSON y el borrado que la pantalla promete. El prompt y el schema del examen ya est&aacute;n escritos</li>
-          <li><b>Los dos caminos de salida</b>: el env&iacute;o directo al banco por HTTP y el rodeo por Hyperswarm</li>
+          <li><b>Los dos caminos en el iPhone</b>: el c&oacute;digo ya intenta Railway (A) y el pueblo (B); falta verificarlo en el aparato</li>
           <li><b>La cola en SQLite</b>, la firma, el LoRA y el video</li>
         </ul>
       </div>

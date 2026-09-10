@@ -1,177 +1,122 @@
-# Probar el nodo: teléfono contra laptop
+# Probar los caminos: teléfono, pueblo, banco
 
-Para `[A]`. Todo lo de aquí está medido, no recordado. Lo que no se probó dice
-que no se probó.
+Para `[A]`. Lo medido se dice medido. Lo que no se probó, lo dice.
 
-El objetivo de la demo es que el teléfono le hable a la laptop **sin internet y
-sin nube**. Hay dos transportes escritos. Uno está probado y funciona. El otro
-no ha conectado nunca, y aquí está por qué.
+Hay **dos caminos de crédito**, el mismo JSON, nunca fotos. El motor corre solo
+en el banco remoto.
+
+```
+Camino A (wifi/datos, el teléfono no necesita al pueblo):
+  teléfono --HTTPS--> https://banco-production-3755.up.railway.app
+
+Camino B (sin internet):
+  teléfono --LAN :8788--> pueblo --HTTP--> el mismo banco
+```
+
+No confundir con las **vías de salud** (vía A = historial, vía B = examen en
+papel) ni con QVAC `delegate` (prestar cómputo del modelo).
+
+El objetivo de la escena sin señal es el camino B: el teléfono le habla a la
+laptop **sin internet y sin nube**. HTTP en la LAN está medido. Hyperswarm entre
+dos procesos del mismo Mac **no ha conectado nunca**.
 
 ---
 
-## Lo que ya sabemos
+## Camino A: el teléfono habla con Railway
 
-### HTTP en la LAN: funciona
-
-Probado el 9 de septiembre y **vuelto a probar el 10** con los montos nuevos del
-paquete anual. El nodo con rol `banco` recibe una solicitud y devuelve una
-decisión correcta.
+Con wifi o datos, `enviarSolicitud` hace POST a `urlBanco()` (Railway). El pueblo
+no entra. Comprobarlo sin el teléfono:
 
 ```
-POST http://192.168.0.19:8787/solicitud   (monto 920, ingreso 520, con extracto)
--> aprobada 920, 12 meses, 9.5% anual, cuota 80.67
-GET  http://192.168.0.19:8787/respuesta/<id>
--> la misma respuesta, leída del disco
+POST https://banco-production-3755.up.railway.app/solicitud
+-> aprobada, 12 meses, 17.4% anual, cuota 84.08
+   (caso demo: asalariado, ingreso 520, deudas 40, monto 920, sin extracto)
 ```
 
-La tasa baja de 12.5% a 9.5% porque la solicitud trae extracto bancario. La
-política de `nodo/credito.mjs` hace lo que dice.
+Si hay extracto, el grado baja la tasa (alrededor de 10.6%).
 
-### Hyperswarm entre dos procesos del mismo Mac: NO conecta
+En el iPhone esto **aún no está verificado**. El código ya intenta A (8 s) y si
+no hay respuesta final, cae a B.
+
+---
+
+## Camino B: HTTP en la LAN, medido
+
+Probado el 9 de septiembre y **vuelto a probar el 10**. Hoy el pueblo no decide:
+recibe y reenvía. Arranque:
+
+```bash
+cd nodo && npm run corregimiento
+# HTTP en :8788, BANCO_URL ya apunta a Railway
+ipconfig getifaddr en0        # la IP de la laptop. Hoy: 192.168.0.19
+```
+
+Teléfono y laptop **en el mismo wifi**. Si la red aísla clientes (café, hotel),
+probar con el hotspot del teléfono.
+
+Desde el navegador del teléfono: `http://<IP>:8788/respuesta/loquesea` debe
+responder `{"decision":"pendiente"}`. Si no carga, el problema es la red.
+
+Luego `POST http://<IP>:8788/solicitud` con una `SolicitudSchema` válida. El
+pueblo responde `pendiente` si el banco aún no contestó, o la decisión si ya
+la trajo. `ROL=banco` en `:8787` es solo para correr el motor en la laptop;
+en la demo el banco es Railway.
+
+**Qué anotar:** si respondió, cuánto tardó, y qué decisión devolvió.
+
+---
+
+## Hyperswarm entre dos procesos del mismo Mac: NO conecta
 
 Cero conexiones tras dos minutos, con el código de `nodo/` y también con una
 prueba mínima de dos peers y un topic aislado.
 
-**La causa, medida:** `hyperdht` arranca y llega a la red (61 nodos conocidos, o
-sea que el UDP sale), pero reporta **`firewalled: true`**. El nodo está detrás de
-NAT y no acepta entrantes. Dos peers detrás del mismo NAT necesitan que el router
-haga *hairpinning*, y muchos no lo hacen. El firewall de macOS estaba apagado,
-así que no era eso.
+**La causa, medida:** `hyperdht` arranca y llega a la red (61 nodos conocidos),
+pero reporta **`firewalled: true`**. El nodo está detrás de NAT y no acepta
+entrantes. Dos peers detrás del mismo NAT necesitan *hairpinning*, y muchos
+routers no lo hacen. El firewall de macOS estaba apagado.
 
-**Síntoma adicional, visto el 10 de septiembre:** al arrancar el nodo, la línea
-`rol=banco topic=... esperando peers` **no aparece en los primeros 2 segundos**.
-Esa línea va después de `await swarm.join(...).flushed()`, así que el `flushed()`
-se queda esperando. El HTTP ya está escuchando para entonces. Si al arrancar solo
-se ve `HTTP en :8787` y nada más, es esto, no es que se colgó.
+**Síntoma adicional, visto el 10 de septiembre:** al arrancar, la línea
+`esperando peers` **no aparece en los primeros 2 segundos**. Esa línea iba
+después de `await swarm.join(...).flushed()`, así que el `flushed()` se queda
+esperando. El HTTP ya está escuchando. En Railway el banco arranca con
+`SKIP_P2P=1` y ni lo intenta.
 
-### Lo que esto NO implica
+Esto **no es el camino de la demo**. HTTP (A a Railway, B por LAN) es el que vale.
 
-El caso de la demo son **dos aparatos distintos**, teléfono y laptop. Eso no se
-ha probado y no se puede probar sin el teléfono.
+### Si alguien insiste en probar Hyperswarm
 
-Dato en contra antes de gastar tiempo: `hyperswarm` 4.17.1 **no trae
-descubrimiento en LAN**, ni mDNS ni multicast. Dos aparatos en el mismo wifi
-igual salen por la DHT pública y dependen del mismo *hole punching* que falló
-arriba. Puede fallar por la misma razón.
+Laptop: `cd nodo && npm run banco` (local, sin SKIP_P2P). Esperar 3 minutos.
+¿Salió `peer conectado`? Si no, parar. `hyperswarm` 4.17.1 no trae descubrimiento
+en LAN: dos aparatos en el mismo wifi igual salen por la DHT pública.
 
----
-
-## Procedimiento
-
-### 0. Antes de nada
-
-```bash
-cd nodo && npm install
-ipconfig getifaddr en0        # la IP de la laptop en el wifi. Hoy: 192.168.0.19
-```
-
-El teléfono y la laptop **en el mismo wifi**. Si la red es de un café o un hotel
-con *client isolation*, ningún transporte va a funcionar y no es culpa del
-código: probar con el hotspot del teléfono, que además es el escenario real de
-la demo.
-
-### 1. HTTP, que es el que funciona
-
-Laptop:
-
-```bash
-cd nodo && ROL=banco node index.mjs
-# espera: "HTTP en :8787"
-```
-
-Desde el teléfono, primero el navegador, que descarta la red antes de tocar la
-app: abrir `http://<IP-de-la-laptop>:8787/respuesta/loquesea`. Debe responder
-`{"decision":"pendiente"}`. Si eso no carga, el problema es la red, no la app.
-
-Luego desde la app, `POST` a `http://<IP>:8787/solicitud` con una
-`SolicitudSchema` válida.
-
-**Qué anotar:** si respondió, cuánto tardó, y qué decisión devolvió.
-
-### 2. Hyperswarm, que es el que hay que averiguar
-
-Laptop:
-
-```bash
-cd nodo && ROL=banco node index.mjs
-```
-
-Teléfono, con el rol `corregimiento` desde la app.
-
-Los dos usan el mismo `TOPIC_NAME`, así que se descubren solos si la red deja.
-
-**Esperar 3 minutos, no 30 segundos.** El *hole punching* tarda.
-
-**Qué anotar, en este orden:**
-
-1. ¿Salió `esperando peers` en la laptop? Si no salió, `flushed()` no resolvió y
-   el swarm nunca llegó a anunciarse. Eso ya es el resultado.
-2. ¿Salió `peer conectado <id>`? Esa línea es la única prueba de que conectó.
-3. Si no conectó en 3 minutos, **parar**. No vale la pena insistir: sabemos por
-   qué falla y hay un plan que no depende de esto.
-
-### 3. Si Hyperswarm falla
-
-No es un bloqueo. HTTP en la LAN ya está escrito y probado, y cumple lo que pide
-el reglamento: el teléfono le pega a la IP local de la laptop, sin internet y sin
-nube.
-
-Queda una opción más, sin explorar: `swarmRelays` con relay propio. Los docs de
-QVAC lo mencionan pero **no documentan cómo desplegarlo**, así que es una
-apuesta, no un plan. Solo si sobra tiempo.
+Queda `swarmRelays` con relay propio. Los docs de QVAC lo mencionan y **no
+documentan cómo desplegarlo**. No es un plan.
 
 ---
 
 ## Cómo se cuenta en el video
 
-Esto importa tanto como que funcione.
-
-- Si la demo sale por HTTP en la LAN, se dice **"los aparatos se hablan directo,
-  sin internet"**. Es exacto.
-- Decirle **"Hyperswarm P2P"** a algo que salió por HTTP no lo sería, y es el
-  tipo de cosa que un jurado técnico pregunta.
+- Camino A: **"con wifi, el teléfono habla directo con el banco"**.
+- Camino B: **"sin internet, los aparatos se hablan en la red local y el pueblo
+  se lo lleva al banco"**.
+- Decirle **"Hyperswarm P2P"** a un POST HTTP no lo sería.
 
 Lo que se afirme en el video tiene que ser lo que corrió en el video.
 
 ---
 
-## C7 tiene un hueco, y es de una palabra
+## C7: el esquema ya cierra
 
-`C7` dice que ningún dato clínico sale del teléfono, y que se comprueba viendo
-que el nodo recibe **solo** `SolicitudSchema`. Se probó el 10 de septiembre y el
-esquema **no lo garantiza**:
+El 10 de septiembre `SolicitudSchema` dejaba pasar `motivo_de_salud` y
+`foto_cedula_b64`. Eso ya no: el schema es `.strict()` y `aceptar()` parsea
+antes de escribir. Un POST con esos campos extra responde 400.
 
-```
-la solicitud que mande valida:  si
-la respuesta del nodo valida:   si
-con campos de mas el esquema:   LOS DEJA PASAR
-```
-
-Se le metieron a la solicitud dos campos que jamás deberían viajar,
-`motivo_de_salud: "diabetes tipo 2"` y `foto_cedula_b64`, y **`SolicitudSchema`
-los aceptó sin queja**. Por defecto `zod` ignora las claves que sobran en vez de
-rechazarlas.
-
-Encima, el handler HTTP del nodo hace `JSON.parse` y **no valida nada**: escribe
-a disco lo que le llegue, campos de más incluidos.
-
-Son dos arreglos chicos y uno es literal una palabra:
-
-1. `SolicitudSchema` cerrado con `.strict()`, para que rechace lo que sobra en
-   vez de dejarlo pasar callado.
-2. El handler del nodo pasando el cuerpo por `SolicitudSchema.parse()` antes de
-   escribir nada, y devolviendo 400 si no valida.
-
-Sin eso, la afirmación de privacidad del video se sostiene solo en que nadie
-haya metido un campo de más por accidente. Con eso, el esquema la sostiene solo.
-
-Lo que sí quedó verificado: `RespuestaBancoSchema` valida la respuesta real del
-nodo, con el nodo corriendo, sin retoques.
+---
 
 ## Pendiente de verificar
 
-- [ ] El caso sin red: apagar el wifi, comprobar que la solicitud queda en cola y
-      que la app lo dice. Hoy **la cola no existe**: `expo-sqlite` está en
-      `package.json` pero no se usa en ninguna parte, y `pendiente` es solo un
-      estilo de texto en pantalla. Eso cierra `C8` y `C9`, que son dos escenas
-      del video.
+- [ ] Camino A en el iPhone: wifi encendido, POST a Railway, decisión en pantalla.
+- [ ] Camino B en el iPhone: wifi apagado / solo LAN, POST al pueblo `:8788`.
+- [ ] Cola en SQLite. Hoy `pendiente` es estado en memoria; `expo-sqlite` está
+      en `package.json` y no se usa. Eso cierra `C8` y `C9`.

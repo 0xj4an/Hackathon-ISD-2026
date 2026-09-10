@@ -1,11 +1,12 @@
-// El telefono no habla con el banco. Habla con este proceso (corregimiento)
-// por HTTP en la LAN, sin internet. Este proceso es quien envia y recibe
-// del banco cuando tiene salida.
+// Dos roles, el mismo binario. El motor corre solo con ROL=banco.
 //
-//   telefono --LAN--> nodo pueblo :8788 --HTTP--> banco remoto
+//   camino A: telefono --wifi/HTTPS--> banco remoto (Railway). Este proceso
+//             no interviene. El telefono no necesita al pueblo.
+//   camino B: telefono --LAN :8788--> este proceso (ROL=corregimiento)
+//             --HTTP--> banco remoto, cuando el pueblo tiene salida.
 //
-// En Railway el banco es HTTP puro (SKIP_P2P). En local se intenta Hyperswarm
-// entre pueblo y banco; si no hay peer, el HTTP es el camino que vale.
+// QVAC `delegate` (prestar el modelo) no es este desvio.
+// Las fotos no viajan.
 import { createServer } from "node:http";
 import { mkdirSync, writeFileSync, readdirSync, readFileSync, existsSync } from "node:fs";
 import { aceptar, recibir } from "./credito.mjs";

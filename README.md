@@ -3,7 +3,7 @@
 > Decentralized AI Hackathon · ISD Summit 2026 · Panamá. Equipo: 0xj4an y Artur.
 > Retos: General · Tether QVAC Psy · Caja de Ahorros.
 
-App Expo para zonas rurales de Panamá, **sin internet**: detecta una señal de riesgo de salud, explica qué examen conviene y permite solicitar un crédito fotografiando documentos. Las fotos nunca salen del teléfono. **La demo se graba en un iPhone 17 Pro Max**; el usuario del brief es rural con Android. El Xiaomi 14T Pro se descartó porque Bare aborta al arrancar.
+App Expo para zonas rurales de Panamá: detecta una señal de riesgo de salud, explica qué examen conviene y permite solicitar un crédito fotografiando documentos. Las fotos nunca salen del teléfono. El JSON va al banco remoto por **camino A** (wifi/datos, directo a Railway) o por **camino B** (sin internet: LAN al nodo del pueblo, y él al banco). **La demo se graba en un iPhone 17 Pro Max**; el usuario del brief es rural con Android. El Xiaomi 14T Pro se descartó porque Bare aborta al arrancar.
 
 Toda la inferencia corre en el dispositivo con [`@qvac/sdk`](https://docs.qvac.tether.io) **0.18.2**. Ningún servicio remoto participa en la IA.
 
@@ -27,10 +27,10 @@ eso para el video. `npx qvac doctor` valida el entorno.
 cd mobile && npm install && npx expo run:ios --device --configuration Release
 # Android: npx expo run:android --device  - Bare aborta en el 14T; no es el camino de la demo
 
-# nodo del corregimiento y banco mock, en dos terminales
-cd nodo && npm install
-npm run corregimiento
-npm run banco
+# camino B: nodo del pueblo (apunta al banco en Railway)
+cd nodo && npm install && npm run corregimiento
+# el banco remoto ya está en https://banco-production-3755.up.railway.app
+# opcional, banco local: npm run banco
 ```
 
 La primera ejecución descarga MedPsy 1.7B Q8_0 (2.1 GB) al caché de QVAC.
@@ -45,11 +45,7 @@ que se clasifica están en [`mobile/src/core/marcadores.ts`](mobile/src/core/mar
 ## Seguridad y límites
 - No es un diagnóstico. La alerta es orientativa y lo dice en pantalla. Validación de rangos y consistencia antes de invocar el modelo.
 - El banco recibe solo campos estructurados; nunca imágenes, ni el motivo de salud.
-- El modelo de crédito es propio y determinista: mide capacidad de pago, puntúa con un
-  scorecard y descompone la tasa en sus costos ([`ADR-011`](.ai/adr/ADR-011-el-modelo-de-credito.md)).
-  El scorecard está **entrenado sobre cartera sintética** (`data/cartera-sintetica.mjs`),
-  no sobre datos reales de clientes panameños, y no representa la política de ningún banco.
-  La edad no puntúa. Ningún modelo de lenguaje participa en la decisión.
+- El modelo de crédito corre en el banco remoto, con el mismo código que el teléfono usa para precalificar ([`ADR-011`](.ai/adr/ADR-011-el-modelo-de-credito.md)). Scorecard sobre cartera sintética, declarado. La edad no puntúa. Ningún modelo de lenguaje participa en la decisión.
 - La firma en pantalla no es firma electrónica legal.
 - Datos: 100% sintéticos. Ningún dato real de clientes ni de pacientes.
 
@@ -67,7 +63,7 @@ Los significados salen del diccionario escolar *Gayamar sabga* (gunagaya-españo
 ## Contexto compartido del equipo
 - `docs/CHECKLIST.md`: **el plan de trabajo que se sigue**, por bloques y con criterios de aceptación.
 - `docs/PRUEBA-TELEFONO.md`: lo que se vio en el iPhone físico, incluidas las fallas.
-- `docs/PRUEBA-NODO.md`: HTTP y Hyperswarm, medido, no recordado.
+- `docs/PRUEBA-NODO.md`: camino A (Railway) y camino B (LAN), medido, no recordado.
 - `docs/BRIEF.md`: qué construimos, flujo y arquitectura.
 - `.ai/`: contexto estable (reglas del hackathon, los 5 retos, referencia del SDK QVAC, línea base) y decisiones.
 - `spikes/`: experimentos de validación con sus scripts, para que el jurado pueda repetirlos. `spikes/README.md` explica cómo.

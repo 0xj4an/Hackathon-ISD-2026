@@ -107,9 +107,9 @@ function pintar(data) {
   if (data.origen === "demo") {
     aviso.textContent = "El banco no está en línea. Estas tres son solicitudes de demostración, no llegan del teléfono.";
   } else if (!data.filas.length) {
-    aviso.textContent = "Todavía no llega ninguna. El teléfono las deja en el nodo del pueblo; él se las lleva al banco.";
+    aviso.textContent = "Todavía no llega ninguna. Con wifi el teléfono llega directo (camino A). Sin internet, el pueblo se las trae (camino B).";
   } else {
-    aviso.textContent = `${data.filas.length} solicitud${data.filas.length === 1 ? "" : "es"} decididas por el nodo banco.`;
+    aviso.textContent = `${data.filas.length} solicitud${data.filas.length === 1 ? "" : "es"} decididas por el banco remoto.`;
   }
   lista.replaceChildren();
   if (!data.filas.length) {

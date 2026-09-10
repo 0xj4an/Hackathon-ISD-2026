@@ -69,7 +69,7 @@ export default function PantallaCuota({
         titulo={pendiente ? "Queda pendiente" : "Esto es un estimado"}
         texto={aviso ?? (
           "Lo calculó este teléfono con tus documentos, sin internet. Al firmar " +
-          "va al nodo del pueblo, en esta red local. Él se la lleva al banco."
+          "va al banco si hay wifi; si no, al nodo del pueblo, en esta red local."
         )}
       />
 

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Nodo del corregimiento + banco mock. Recibe solicitudes JSON por Hyperswarm (P2P) o HTTP local y responde con una decisión de crédito tomada por el motor de mobile/src/core/credito/.",
+  "description": "Pueblo (camino B, LAN :8788) y banco (Railway o local :8787). El motor vive en mobile/src/core/credito/. HTTP es el camino que vale; Hyperswarm es opcional.",
   "scripts": {
     "start": "ROL=banco PORT=8787 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON index.mjs",
     "banco": "ROL=banco PORT=8787 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON index.mjs",

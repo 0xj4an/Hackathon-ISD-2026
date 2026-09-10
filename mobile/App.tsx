@@ -9,9 +9,8 @@
 // lateral: la persona trae un examen de laboratorio en papel y la app se lo lee.
 // Vuelve a la alerta, no sigue hacia el crédito.
 //
-// Firmar entrega al nodo del pueblo (LAN, sin internet). El nodo envía y
-// recibe del banco. Si el nodo no está, queda pendiente y reintenta.
-// Las fotos no salen del teléfono.
+// Firmar intenta el banco remoto si hay wifi (camino A). Si no hay internet,
+// deja el JSON en el nodo del pueblo (camino B). Las fotos no salen.
 // `PantallaDatos` sigue en el repo (deudas y personas a cargo, pantalla 11 del
 // mapa) pero el camino de la demo pasa por lo leído → cuota → banco.
 //
@@ -29,7 +28,7 @@ import PantallaCuota from "./src/PantallaCuota";
 import PantallaBanco from "./src/PantallaBanco";
 import PantallaExamen from "./src/PantallaExamen";
 import { solicitudDeLectura, type LecturaCredito } from "./src/lectura";
-import { consultarRespuesta, enviarSolicitud } from "./src/nodo";
+import { consultarRespuesta, enviarSolicitud } from "./src/envio";
 import type { Respuesta } from "./src/core/credito/motor";
 import type { Solicitud } from "./src/core/schemas";
 import type { Usuario } from "./src/usuarios";
@@ -85,9 +84,9 @@ export default function App() {
       return;
     }
     setPendiente(true);
-    setAviso(r.enNodo
+    setAviso(r.pendiente
       ? r.detalle
-      : `Sin el nodo del pueblo. La solicitud queda pendiente. ${r.detalle}`);
+      : `${r.detalle} La solicitud queda pendiente.`);
   };
 
   useEffect(() => {
@@ -114,7 +113,7 @@ export default function App() {
         setAviso(undefined);
         setRespuesta(r.respuesta);
         setPaso("banco");
-      } else if (r.enNodo) {
+      } else if (r.pendiente) {
         setAviso(r.detalle);
       }
     };

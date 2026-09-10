@@ -3,7 +3,7 @@
 Nombre: **Ina Igar** ("camino de la medicina" en gunagaya). Equipo: 0xj4an y Artur.
 
 ## Una frase
-Una app para personas en zonas rurales de Panamá con señal intermitente, que detecta en el teléfono una señal de riesgo de salud, explica en español qué examen conviene y cuánto cuesta, y permite solicitar un crédito de salud fotografiando los documentos **sin que ninguna imagen salga del dispositivo**: la solicitud queda en cola y viaja al banco cuando hay red o por P2P a través del nodo del corregimiento.
+Una app para personas en zonas rurales de Panamá con señal intermitente, que detecta en el teléfono una señal de riesgo de salud, explica en español qué examen conviene y cuánto cuesta, y permite solicitar un crédito de salud fotografiando los documentos **sin que ninguna imagen salga del dispositivo**: la solicitud queda en cola y viaja al banco: por wifi directo (camino A) o, sin internet, por el nodo del pueblo (camino B).
 
 ## Retos a los que aplica
 - **General** (podio 6,000): conectividad intermitente, datos sensibles, trabajo en campo, uso de Pears para transporte P2P.
@@ -15,15 +15,15 @@ Una app para personas en zonas rurales de Panamá con señal intermitente, que d
 2. **Decisión.** "¿Necesitas ayuda para pagarlo?" -> entra el flujo de crédito de salud. El banco **no** recibe el motivo de salud.
 3. **Documentos en el dispositivo.** Foto de cédula, comprobante de ingresos (carta laboral o similar) y extracto. OCR (`OCR_LATIN`, plan B VisionPsy-Nano) -> LLM extrae campos a JSON con schema -> validaciones en código (rangos, consistencia, EXIF) -> **las fotos se borran**, queda el JSON firmado localmente.
 4. **Cola offline.** La solicitud se guarda en SQLite con estado `pendiente`. Se muestra "sin señal, se enviará cuando haya conexión".
-5. **Transporte.** Cuando hay red, o cuando el teléfono descubre por Hyperswarm al **nodo del corregimiento** (laptop del corresponsal), la solicitud viaja cifrada al banco. Demo: Wi-Fi apagado -> cola; Wi-Fi encendido o nodo cerca -> sale.
-6. **Respuesta del banco.** El nodo del banco (mock, modelo de crédito de juguete declarado como tal) devuelve monto, plazo, tasa. Llega por el mismo camino.
+5. **Transporte.** Dos caminos, el mismo JSON, nunca fotos. **Camino A:** hay wifi o datos → el teléfono POST al banco remoto. **Camino B:** no hay internet → LAN al nodo del pueblo; él se la lleva al banco cuando tiene salida. Demo: Wi-Fi apagado → B; Wi-Fi encendido → A.
+6. **Respuesta del banco.** El banco remoto (Railway) corre el mismo motor que el teléfono usa para precalificar. Cartera sintética, declarada. La respuesta vuelve por el camino por el que salió.
 7. **Firma.** La persona acepta y firma con un trazo en pantalla (no es firma electrónica legal; se declara).
 
 ## Arquitectura
 ```
 mobile/   Expo (Android físico) + @qvac/sdk 0.18.2 · UI, cámara, OCR, LLM, SQLite, cola, cliente Hyperswarm
 core/     TypeScript puro compartido: schemas (zod), prompts, validaciones, lógica de cola, datos sintéticos
-nodo/     Node: peer Hyperswarm "nodo del corregimiento" + "banco" mock (modelo de crédito de juguete)
+nodo/     Node: "nodo del pueblo" (camino B, LAN) y arranque del banco remoto (el motor vive en mobile/src/core/credito/)
 data/     datasets sintéticos: mediciones de salud, documentos de ejemplo (nunca datos reales)
 eval/     set de evaluación y script reproducible (calidad de extracción, % JSON válido, campos correctos)
 perf/     log de rendimiento estructurado (carga, prompt, tokens, TTFT, throughput, hardware)

@@ -40,9 +40,9 @@ con reglas y muestra el resultado sin pasarlo por el modelo.
 ### 1.2 La rama de documentos ya lee; falta cola y envío
 
 `PantallaDocumentos` toma foto o archivo, corre `ocr()` + MedPsy → JSON y borra
-la copia (`leerDocumento.ts`). Sigue `PantallaLeido` (lo que se leyó), la cuota
-con `preCalificar()` y la respuesta de `decidir()` en el teléfono. Falta
-verificar en el iPhone, y todavía no hay cola ni envío.
+la copia (`leerDocumento.ts`). Sigue `PantallaLeido`, la cuota con `preCalificar()`
+y el envío: **camino A** al banco remoto si hay wifi, **camino B** al nodo del
+pueblo si no. Falta verificar en el iPhone.
 
 `PantallaDatos.tsx` (pantalla 11 del mapa, editable, deudas y personas a cargo)
 sigue en el repo; el camino de la demo no pasa por ella todavía.
@@ -53,7 +53,7 @@ de `PantallaExamen.tsx`: *"Cuando `ocr()` exista"*.
 - [~] `ocr()` sobre la foto, extracción a JSON con `SYSTEM_EXTRACCION_*`, validación con `CedulaSchema` e `IngresosSchema`. Código listo; falta verificar en el iPhone
 - [~] **Borrar la foto** después de extraer. El código lo hace; falta verificar en el iPhone (C6)
 - [ ] Persistencia y cola. `expo-sqlite` no se importa en ninguna parte y `pendiente` hoy es solo un estilo de texto
-- [ ] Envío al nodo por HTTP. La app todavía no hace un solo `fetch`
+- [ ] Envío: camino A al banco (Railway) si hay wifi; camino B al pueblo si no. Código listo; falta el iPhone
 
 Material listo para probarlo: `data/documentos/` tiene los seis ficticios
 (nítido y difícil de cada uno) más `esperado.json` como ground truth.

@@ -205,9 +205,9 @@ reproducir.
 
 ## Lo que NO se dice
 
-- **"Hyperswarm P2P"** si la demo salió por HTTP en la LAN. Se dice "los
-  aparatos se hablan directo, sin internet", que es exacto. Ver
-  [`PRUEBA-NODO.md`](PRUEBA-NODO.md).
+- **"Hyperswarm P2P"** si la demo salió por HTTP. Camino A se dice "el teléfono
+  habla con el banco, con wifi". Camino B se dice "los aparatos se hablan en
+  la red local, sin internet". Ver [`PRUEBA-NODO.md`](PRUEBA-NODO.md).
 - **"Diagnostica"**, "detecta enfermedades", "sabe qué tienes". Detecta valores
   fuera de rango y sugiere una ruta.
 - Cualquier cifra que no se vea en pantalla en ese momento.

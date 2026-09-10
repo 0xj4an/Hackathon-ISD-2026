@@ -1,7 +1,7 @@
 /**
  * Respuesta del banco. Mock 6 de Señalética.
  *
- * La decisión la tomó el nodo. Este teléfono solo la muestra.
+ * La decisión la tomó el banco remoto. Este teléfono solo la muestra.
  * El scorecard es de demostración (cartera sintética) y la pantalla lo dice.
  */
 import {
@@ -40,7 +40,7 @@ export default function PantallaBanco({
         <Cifra
           valor={`B/. ${respuesta.monto_aprobado_usd}`}
           unidad="aprobados"
-          nota="el año completo, según el nodo"
+          nota="el año completo, según el banco"
         />
       ) : null}
 
@@ -77,7 +77,7 @@ export default function PantallaBanco({
       ) : null}
       <Boton texto="Ahora no" tono="borde" onPress={onVolver} />
       <Pie>
-        Decisión del nodo. Cartera sintética, para demostrar el flujo.
+        Decisión del banco. Cartera sintética, para demostrar el flujo.
       </Pie>
     </Pantalla>
   );
