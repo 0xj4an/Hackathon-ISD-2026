@@ -23,6 +23,8 @@ const OUT = resolve(DIR, "out");
 mkdirSync(OUT, { recursive: true });
 
 const EPOCHS = Number(process.env.EPOCHS || 1);
+/** Un informe con 5 marcadores no cabe en 220 tokens: el JSON sale cortado. */
+const PREDICT = Number(process.env.PREDICT || 512);
 const t0 = Date.now();
 const ts = () => `[${((Date.now() - t0) / 1000).toFixed(0)}s]`;
 
@@ -47,24 +49,74 @@ const tareaDe = (c) => {
   if (s.includes("cedula de identidad")) return "cedula";
   if (s.includes("documento de ingresos")) return "ingresos";
   if (s.includes("estado de cuenta")) return "extracto";
-  return "triaje";
+  return "laboratorio";
 };
-const TAREAS = ["cedula", "ingresos", "extracto", "triaje"];
+const TAREAS = ["cedula", "ingresos", "extracto", "laboratorio"];
+
+/**
+ * Campos que NO se puntuan, y por que.
+ *
+ * `confianza` es imposible de acertar: el valor esperado lo genera
+ * `make-dataset.mjs` como `0.95 - capas*0.18 + azar*0.05`, con un termino
+ * aleatorio que no esta en el texto de entrada. Pedirle al modelo que lo adivine
+ * y contarlo como fallo regalaba una quinta parte de la nota en cada caso, y
+ * castigaba igual al base y al adaptador. Se sigue pidiendo en el JSON porque la
+ * app lo usa, pero no se mide.
+ */
+const NO_SE_PUNTUA = new Set(["confianza"]);
+
+/**
+ * Numero escrito como cadena es acierto. El modelo devuelve "620.00" donde se
+ * espera 620: el valor es correcto y el unico problema es el tipo. Medirlo como
+ * fallo confunde un defecto de formato con uno de lectura, que es justo lo que
+ * el LoRA deberia arreglar. El esquema de la app ya coacciona el tipo.
+ */
+const comoNumero = (v) => {
+  if (typeof v === "number") return v;
+  if (typeof v !== "string") return NaN;
+  const n = Number(v.replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(n) ? n : NaN;
+};
+
+/**
+ * Un informe de laboratorio devuelve un ARREGLO de lecturas, y compararlo como
+ * texto seria todo o nada: un marcador mal y los cinco cuentan como fallo. Se
+ * puntua marcador por marcador, emparejando por `codigo`, que es la pregunta
+ * que importa: cuantos leyo bien.
+ */
+function puntuarLecturas(esperadas, obtenidas) {
+  const total = esperadas.length;
+  if (!Array.isArray(obtenidas)) return { ok: 0, total };
+  const porCodigo = new Map(
+    obtenidas.filter((l) => l && typeof l === "object").map((l) => [String(l.codigo ?? "").toUpperCase(), l]));
+  let ok = 0;
+  for (const e of esperadas) {
+    const g = porCodigo.get(String(e.codigo).toUpperCase());
+    if (g && Math.abs(comoNumero(g.valor) - e.valor) < 0.01) ok++;
+  }
+  return { ok, total };
+}
 
 /** Compara el JSON del modelo contra el esperado, campo por campo. */
 function puntuar(esperado, crudo) {
   let obj = null;
   try { obj = JSON.parse(limpiarJson(crudo)); } catch { /* JSON invalido */ }
   if (obj === null || typeof obj !== "object") return { valido: false, campos: 0, total: 0 };
-  const claves = Object.keys(esperado);
+  const claves = Object.keys(esperado).filter((k) => !NO_SE_PUNTUA.has(k));
   let ok = 0;
+  let total = 0;
   for (const k of claves) {
     const a = obj[k], b = esperado[k];
-    // los numericos se comparan con tolerancia; el resto, texto normalizado
-    if (typeof b === "number") { if (typeof a === "number" && Math.abs(a - b) < 0.01) ok++; }
-    else if (String(a ?? "").trim().toLowerCase() === String(b).trim().toLowerCase()) ok++;
+    if (Array.isArray(b)) {
+      const r = puntuarLecturas(b, a);
+      ok += r.ok; total += r.total;      // cada lectura pesa como un campo
+    } else if (typeof b === "number") {
+      total++; if (Math.abs(comoNumero(a) - b) < 0.01) ok++;
+    } else {
+      total++; if (String(a ?? "").trim().toLowerCase() === String(b).trim().toLowerCase()) ok++;
+    }
   }
-  return { valido: true, campos: ok, total: claves.length };
+  return { valido: true, campos: ok, total };
 }
 
 async function medir(etiqueta, modelConfigExtra) {
@@ -85,7 +137,7 @@ async function medir(etiqueta, modelConfigExtra) {
       modelId,
       history: [caso.messages[0], caso.messages[1]],
       stream: false,
-      generationParams: { temp: 0, predict: 220 },
+      generationParams: { temp: 0, predict: PREDICT },
     });
     const final = await r.final;
     const p = puntuar(esperado, (final.contentText ?? "").trim());

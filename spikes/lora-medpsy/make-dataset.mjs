@@ -146,7 +146,23 @@ const SYSTEM_EXTRACCION = `Recibes el texto OCR (puede tener errores) de una ced
 Extrae: numero (formato como 8-123-4567, PE-12-345, E-8-12345), nombre completo, fecha_nacimiento (YYYY-MM-DD), fecha_expiracion (YYYY-MM-DD si aparece), confianza (0 a 1 segun legibilidad).
 Responde SOLO con un JSON valido con esas claves. Si un dato no aparece, usa null. Sin texto adicional.`;
 
-const SYSTEM_TRIAJE = `Eres un triaje local de laboratorio. Recibes una lectura y respondes SOLO con un JSON valido con las claves: marcador, valor, unidad, rango, hallazgo, siguiente_paso. Sin texto adicional.`;
+/**
+ * La tarea de laboratorio, copiada de SYSTEM_EXTRACCION_LABORATORIO en
+ * mobile/src/core/prompts.ts.
+ *
+ * La version anterior pedia `rango`, `hallazgo` y `siguiente_paso`, o sea le
+ * enseñaba al modelo a CLASIFICAR. Eso es justo lo que `ADR-005` le prohibe: en
+ * la app quien decide si un valor esta alto o bajo es `clasificar()` contra el
+ * catalogo con umbrales citados, nunca el modelo. Medido, el adaptador
+ * entrenado asi no mejoraba el triaje (50% a 51% de campos) y de paso rompia la
+ * extraccion de ingresos (89% a 70%): aprendio una conducta que la app no usa,
+ * a costa de la que si.
+ */
+const SYSTEM_LABORATORIO = `Recibes el texto OCR (puede tener errores) de un informe de laboratorio de Panama.
+Extrae cada marcador medido en "lecturas": un arreglo de objetos con codigo ("GLU"|"HB"|"PLQ"|"CREA"|"COL"|"HTO"|"TSH"), nombre (como aparece impreso), valor (numero) y unidad (como aparece impresa).
+Extrae tambien fecha (YYYY-MM-DD si aparece) y confianza (0 a 1 segun legibilidad).
+Incluye solo los marcadores cuyo valor numerico leiste de verdad. Nunca inventes un valor, nunca completes un marcador que no esta en el papel, y nunca digas si un valor esta alto o bajo: eso se decide en otra parte.
+Responde SOLO con un JSON valido con esas claves. Sin texto adicional.`;
 
 // --------------------------------------------------- CARTA DE TRABAJO
 // La app pide tres documentos y hasta aqui solo se entrenaba la cedula. Estos
@@ -200,12 +216,23 @@ const PLANTILLAS_EXTRACTO = [
   (d) => `ESTADO DE CUENTA\n${d.banco}\n${d.nombre}   ${d.cuenta}\nPeriodo cubierto: ${d.meses} meses\nPromedio del periodo B/. ${plata(d.saldo)}`,
 ];
 
-const FRASEOS_LAB = [
-  (m, v) => `${m.nombre} ${v} ${m.unidad}`,
-  (m, v) => `Paciente con ${m.nombre} de ${v} ${m.unidad}`,
-  (m, v) => `Resultado: ${m.nombre}: ${v}${m.unidad}`,
-  (m, v) => `Me salio ${m.nombre} en ${v} ${m.unidad}, que hago?`,
-  (m, v) => `Lab del puesto de salud: ${m.nombre}=${v} ${m.unidad}`,
+const LABORATORIOS = [
+  "Laboratorio Clinico San Marcos", "Centro de Salud de Sona",
+  "Laboratorio Chiriqui", "Policlinica de Santiago", "Lab. Clinico El Istmo",
+];
+
+/**
+ * Un informe de laboratorio real trae varios marcadores en una tabla, no una
+ * linea suelta. Antes se generaba un marcador por ejemplo, que no se parece a
+ * lo que la persona fotografia.
+ */
+const PLANTILLAS_LAB = [
+  (d) => `${d.lab.toUpperCase()}\nINFORME DE RESULTADOS\nPaciente: ${d.nombre}\nFecha: ${d.fecha}\n\n` +
+    d.lecturas.map((l) => `${l.nombre}          ${l.valor} ${l.unidad}`).join("\n"),
+  (d) => `${d.lab}\n${d.fecha}\n` +
+    d.lecturas.map((l) => `${l.nombre}: ${l.valor}${l.unidad}`).join("\n"),
+  (d) => `RESULTADOS DE LABORATORIO   ${d.fecha}\n${d.lab}\nPaciente ${d.nombre}\n\nPRUEBA               RESULTADO\n` +
+    d.lecturas.map((l) => `${l.nombre.padEnd(20)} ${l.valor} ${l.unidad}`).join("\n"),
 ];
 
 const filas = [];
@@ -290,21 +317,32 @@ for (let i = 0; i < 55; i++) {
   }));
 }
 
-// ---- 80 ejemplos de TRIAJE
-for (let i = 0; i < 80; i++) {
-  const m = USABLES[i % USABLES.length];
-  const span = m.max - m.min || m.max;
-  const estado = i % 3; // 0 normal, 1 alto, 2 bajo
-  let v = estado === 0 ? m.min + rnd() * span
-        : estado === 1 ? m.max * (1.1 + rnd() * 1.2)
-        : Math.max(0.1, m.min * (0.3 + rnd() * 0.6));
-  v = Number(v.toFixed(v < 10 ? 1 : 0));
-  const dentro = v >= m.min && v <= m.max;
-  filas.push(linea(SYSTEM_TRIAJE, pick(FRASEOS_LAB)(m, v), {
-    marcador: m.nombre, valor: v, unidad: m.unidad,
-    rango: `${m.min}-${m.max}`,
-    hallazgo: dentro ? "dentro de rango" : v > m.max ? m.hallazgoAlto : m.hallazgoBajo,
-    siguiente_paso: dentro ? "control habitual" : v > m.max ? m.pasoAlto : m.pasoBajo,
+// ---- 110 informes de LABORATORIO
+// La salida NO dice si el valor esta alto o bajo: eso lo decide `clasificar()`
+// contra el catalogo (`ADR-005`). El modelo solo transcribe lo que leyo.
+for (let i = 0; i < 110; i++) {
+  const cuantos = int(2, 5);
+  const elegidos = [];
+  for (const m of [...USABLES].sort(() => rnd() - 0.5).slice(0, cuantos)) {
+    const span = m.max - m.min || m.max;
+    const estado = int(0, 2); // normal, alto, bajo: el modelo transcribe igual
+    let v = estado === 0 ? m.min + rnd() * span
+          : estado === 1 ? m.max * (1.1 + rnd() * 1.2)
+          : Math.max(0.1, m.min * (0.3 + rnd() * 0.6));
+    elegidos.push({
+      codigo: m.codigo, nombre: m.nombre, unidad: m.unidad,
+      valor: Number(v.toFixed(v < 10 ? 1 : 0)),
+    });
+  }
+  const d = {
+    lab: pick(LABORATORIOS),
+    nombre: `${pick(NOMBRES)} ${pick(APELLIDOS)} ${pick(APELLIDOS)}`,
+    fecha: fecha(2026, 2026),
+    lecturas: elegidos,
+  };
+  const { texto, confianza } = ensuciar(pick(PLANTILLAS_LAB)(d));
+  filas.push(linea(SYSTEM_LABORATORIO, texto, {
+    lecturas: elegidos, fecha: d.fecha, confianza,
   }));
 }
 
@@ -352,11 +390,11 @@ writeFileSync(resolve(DIR, "train.jsonl"), train.join("\n") + "\n");
 writeFileSync(resolve(DIR, "eval.jsonl"), evalu.join("\n") + "\n");
 const filasTrain = train, filasEval = evalu;
 writeFileSync(resolve(DIR, "system-extraccion.txt"), SYSTEM_EXTRACCION);
-writeFileSync(resolve(DIR, "system-triaje.txt"), SYSTEM_TRIAJE);
+writeFileSync(resolve(DIR, "system-laboratorio.txt"), SYSTEM_LABORATORIO);
 writeFileSync(resolve(DIR, "system-ingresos.txt"), SYSTEM_INGRESOS);
 writeFileSync(resolve(DIR, "system-extracto.txt"), SYSTEM_EXTRACTO);
 
 console.log(`marcadores usados: ${USABLES.length} de ${MARCADORES.length} (CD4 excluido por el brief)`);
 console.log(`train ${filasTrain.length} / eval ${filasEval.length} ejemplos (corte estratificado, 20% de cada tarea)`);
 console.log(`duplicados eliminados: ${duplicados}`);
-console.log(`mezcla: 110 cedula + 55 ingresos + 55 extracto + 80 triaje`);
+console.log(`mezcla: 110 cedula + 55 ingresos + 55 extracto + 110 laboratorio`);
