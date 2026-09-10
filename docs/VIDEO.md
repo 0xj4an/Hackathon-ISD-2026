@@ -184,7 +184,7 @@ reproducir.
 | Cifra | Verificación |
 | --- | --- |
 | 42% de hipertensión en Panamá | MINSA, en [`salud.md`](../.ai/references/salud.md) |
-| 65 mediciones en el caso | `data/usuarios/diabetes.json` |
+| ~315 mediciones en un año | `data/usuarios/diabetes.json` |
 | 4 hallazgos | `GLU_ALTA`, `PRES_ALTA`, `PESO_BAJA`, `IMC_SOBREPESO` |
 | B/. 641 a 920 el año | `armarPaquete()` sobre ese caso |
 | 730 tabletas, B/. 380, 41% | Decreto Ejecutivo 36: B/. 0.52 por tableta |

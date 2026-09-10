@@ -109,7 +109,7 @@ No es núcleo, es capa de las últimas horas. `RESULTADOS.md` se retiró en
 - [x] Costos con fuente en rangos publicados; donde no hay precio citable, el campo va ausente y la pantalla no muestra número
 - [x] El especialista entró en el tipo `Ruta`, con qué hacer ahora, qué examen, dónde y qué síntomas obligan a ir de inmediato
 - [x] CD4 fuera, con filtro de respaldo en el generador del spike
-- [x] Seis casos clínicos en `data/usuarios/`. El sano da cero señales
+- [x] Seis casos clínicos en `data/usuarios/` con historial de ~un año. El sano da cero señales
 - [x] Modelo de crédito real ([`ADR-011`](../.ai/adr/ADR-011-el-modelo-de-credito.md)): capacidad de pago con piso de subsistencia, scorecard logístico sobre cartera sintética (AUC 0.723, KS 0.379 en holdout), tasa descompuesta y plazo despejado de la cuota
 - [x] Paquete por condición a un año en vez de un monto suelto ([`ADR-010`](../.ai/adr/ADR-010-el-paquete-y-cuando-ofrecer-credito.md))
 - [x] 15 lienzos en `docs/design/` y dirección visual decidida ([`ADR-012`](../.ai/adr/ADR-012-senaletica-y-el-modo-denso.md))

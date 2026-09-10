@@ -4,7 +4,7 @@
     "correo": "control@gmail.com",
     "nombre": "Sin hallazgos",
     "caso": "Sana",
-    "descripcion": "Todas las mediciones dentro de rango.",
+    "descripcion": "Historial de un ano: todas las mediciones dentro de rango.",
     "senales_esperadas": []
   },
   {
@@ -12,7 +12,7 @@
     "correo": "insulina@gmail.com",
     "nombre": "Diabetes sin diagnosticar",
     "caso": "Diabetes tipo 2 sin diagnosticar",
-    "descripcion": "Glucosa que sube, diastolica alta y perdida de peso involuntaria.",
+    "descripcion": "Un ano de glucosa que sube, diastolica alta y perdida de peso involuntaria.",
     "senales_esperadas": [
       "GLU_ALTA",
       "PRES_ALTA",
@@ -25,7 +25,7 @@
     "correo": "presion@gmail.com",
     "nombre": "Hipertension no controlada",
     "caso": "Hipertension no controlada con obesidad",
-    "descripcion": "Sistolica sostenida por encima de 140 y un IMC por encima de 30.",
+    "descripcion": "Un ano con sistolica sostenida por encima de 140 y IMC por encima de 30.",
     "senales_esperadas": [
       "PRES_ALTA",
       "IMC_OBESIDAD"
@@ -36,7 +36,7 @@
     "correo": "fiebre@gmail.com",
     "nombre": "Cuadro respiratorio agudo",
     "caso": "Cuadro respiratorio agudo",
-    "descripcion": "Fiebre, respiracion rapida, saturacion baja y pulso acelerado.",
+    "descripcion": "Once meses sano y cinco dias de fiebre, respiracion rapida, saturacion baja y pulso acelerado.",
     "senales_esperadas": [
       "FIEBRE",
       "RESP_ALTA",
@@ -49,7 +49,7 @@
     "correo": "azucar@gmail.com",
     "nombre": "Hipoglucemia",
     "caso": "Hipoglucemia",
-    "descripcion": "Una lectura de glucosa por debajo de 54.",
+    "descripcion": "Un ano en tratamiento con glucosa estable y una lectura reciente por debajo de 54.",
     "senales_esperadas": [
       "GLU_MUY_BAJA"
     ]
@@ -59,7 +59,7 @@
     "correo": "limite@gmail.com",
     "nombre": "Prediabetes",
     "caso": "Prediabetes",
-    "descripcion": "Glucosa en el limite y sobrepeso. Nada urgente.",
+    "descripcion": "Un ano con glucosa en el limite y sobrepeso. Nada urgente.",
     "senales_esperadas": [
       "GLU_LIMITE",
       "IMC_SOBREPESO"
