@@ -234,6 +234,14 @@
 
   .parada.demo .num { border-style: dashed; color: var(--ink-3); }
 
+  /* El ramal no es una parada del camino: cuelga de la alerta y vuelve a ella. */
+  .parada.rama { margin-left: 44px; border-top-style: dashed; }
+  .parada.rama .num {
+    border-style: dashed; border-color: var(--teal); color: var(--teal);
+    font-weight: 600;
+  }
+  .parada.rama .hilo { background: transparent; }
+
   .cuerpo { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
   .cuerpo h3 { margin-bottom: -2px; }
   .cuerpo .prosa { font-size: 15.5px; }
@@ -301,6 +309,40 @@
   .pantalla.entrada .b-cursor { background: var(--app-teal); }
   .pantalla.entrada .b-boton { background: var(--app-teal); color: var(--app-bg); }
   .pantalla.entrada .b-nota { color: var(--app-ink-3); }
+  .b-barra {
+    background: var(--app-ink); color: var(--app-bg);
+    font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    padding: 6px 10px; margin: -14px -13px 12px;
+  }
+  .b-franja {
+    background: var(--app-amber); color: #FFFFFF;
+    font-size: 9px; line-height: 13px; padding: 9px 10px; margin-top: 8px;
+  }
+  .b-franja b { font-weight: 700; }
+  .b-marcadores { border-top: 2px solid var(--app-ink); margin-top: 6px; }
+  .b-marcador {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 7px 0; border-bottom: 1px solid var(--app-line);
+  }
+  .b-marcador-nombre { font-size: 10px; font-weight: 700; color: var(--app-ink); }
+  .b-marcador-unidad {
+    display: block; font-family: var(--mono); font-size: 8.5px;
+    font-weight: 400; color: var(--app-ink-3);
+  }
+  .b-marcador-campo {
+    border: 2px solid var(--app-line); padding: 5px 9px; min-width: 54px;
+    text-align: right; font-size: 12px; font-weight: 700; color: var(--app-ink);
+  }
+  .b-marcador-campo.vacio { color: var(--app-ink-3); font-weight: 400; }
+  .p-etiqueta-mini {
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--app-ink-3); margin-top: 14px;
+  }
+  .p-boton.borde {
+    background: transparent; color: var(--app-teal);
+    border: 2px solid var(--app-teal); margin-top: 5px;
+  }
+
   .b-correos { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
   .b-correos span {
     font-family: var(--mono); font-size: 9px; color: var(--app-ink-2);
@@ -612,9 +654,9 @@
       <span class="traduccion">camino de la medicina</span>
     </div>
     <p class="entrada">
-      Siete paradas, de una medici&oacute;n fuera de rango a un cr&eacute;dito de salud aprobado,
-      sin que ninguna foto ni ning&uacute;n dato cl&iacute;nico salga del tel&eacute;fono.
-      Esto es lo que se graba en el video.
+      De una medici&oacute;n fuera de rango a un cr&eacute;dito de salud aprobado, con un ramal para quien
+      llega con un examen en papel, y sin que ninguna foto ni ning&uacute;n dato cl&iacute;nico salga del
+      tel&eacute;fono. Esto es lo que se graba en el video.
     </p>
     <dl class="ficha">
       <div><dt>Equipo</dt><dd>0xj4an y Artur</dd></div>
@@ -652,7 +694,7 @@
 
           <rect x="44" y="92" width="384" height="58" rx="5" class="svg-caja"></rect>
           <text x="60" y="116" class="t-titulo">Alerta de salud</text>
-          <text x="60" y="135" class="t-sub">mediciones -&gt; 14 reglas -&gt; MedPsy redacta</text>
+          <text x="60" y="135" class="t-sub">mediciones o un examen -&gt; reglas -&gt; MedPsy redacta</text>
 
           <rect x="44" y="180" width="384" height="58" rx="5" class="svg-caja"></rect>
           <text x="60" y="204" class="t-titulo">Documentos</text>
@@ -714,7 +756,8 @@
       <p class="prosa">
         Las pantallas de marco s&oacute;lido est&aacute;n escritas y corren en Expo hoy. Las que van en
         marco punteado son <strong>bocetos</strong>, la propuesta de qu&eacute; dice cada pantalla, no c&oacute;digo
-        que exista todav&iacute;a.
+        que exista todav&iacute;a. La parada <strong>B</strong>, sangrada y con hilo punteado, no es un paso
+        del camino: es un ramal que cuelga de la alerta y vuelve a ella.
       </p>
     </div>
 
@@ -884,6 +927,8 @@
                 </p>
                 <p class="p-boton">Pedir el cr&eacute;dito</p>
               </div>
+              <p class="p-etiqueta-mini">&iquest;Te hiciste un examen?</p>
+              <p class="p-boton borde">Subir un examen de laboratorio</p>
               <p class="p-disclaimer">
                 Esto es orientaci&oacute;n autom&aacute;tica y local, no un diagn&oacute;stico. Confirma con un
                 profesional de salud.
@@ -891,6 +936,70 @@
             </div>
           </div>
           <p class="pie-aparato">PantallaAlerta.tsx &middot; caso diabetes, salida real</p>
+        </div>
+      </article>
+
+      <article class="parada rama">
+        <div class="hito"><span class="num">B</span><span class="hilo"></span></div>
+        <div class="cuerpo">
+          <span class="chip parcial">La pantalla s&iacute;, el OCR no</span>
+          <h3>V&iacute;a B: traes un examen en papel</h3>
+          <p class="prosa">
+            <strong>No es un paso del camino, es una salida lateral</strong>: cuelga de la alerta y
+            vuelve a ella, no sigue hacia el cr&eacute;dito. La v&iacute;a A vigila las mediciones del d&iacute;a a
+            d&iacute;a; esta atiende al que baj&oacute; al pueblo, se hizo el examen y volvi&oacute; con un papel
+            que nadie le explica. El cat&aacute;logo de 7 marcadores ya sab&iacute;a clasificar, con rango por
+            sexo y fuente citada, pero hasta ahora no ten&iacute;a por d&oacute;nde entrar en la app.
+          </p>
+          <p class="prosa">
+            Dos entradas, y el orden es a prop&oacute;sito: la foto es la que se demuestra, escribir los
+            valores es la que funciona hoy. Una glicemia de 168 sale <em>hiperglicemia</em>, urgencia
+            Prioritaria y "repetir en ayunas y solicitar HbA1c", con el rango 70 a 100 y su fuente
+            al pie. Una hemoglobina de 10.4 se compara contra 12 a 16 si quien entr&oacute; es mujer, no
+            contra el 13 a 16 general.
+          </p>
+          <dl class="detalles">
+            <div class="detalle"><dt>Entra</dt><dd>Una foto del examen, o los valores escritos a mano</dd></div>
+            <div class="detalle"><dt>Decide</dt><dd><em>clasificar()</em> contra el rango del marcador, nunca el modelo</dd></div>
+            <div class="detalle"><dt>Sale del tel&eacute;fono</dt><dd><em>Nada</em></dd></div>
+          </dl>
+        </div>
+        <div class="aparato">
+          <div class="telefono">
+            <div class="pantalla entrada">
+              <p class="b-barra">Tu examen</p>
+              <p class="b-titulo">&iquest;Te hiciste un examen?</p>
+              <p class="b-texto">
+                Tr&aacute;elo y te decimos qu&eacute; dice cada n&uacute;mero. Se lee en este tel&eacute;fono, como todo
+                lo dem&aacute;s.
+              </p>
+              <p class="b-boton">Tomar foto del examen</p>
+              <p class="b-franja">
+                <b>Falta leerla.</b> La lectura autom&aacute;tica de la foto entra en el siguiente
+                bloque. Mientras tanto, escribe abajo los valores que veas en el papel.
+              </p>
+              <p class="b-etiqueta">O escribe los valores</p>
+              <div class="b-marcadores">
+                <span class="b-marcador">
+                  <span class="b-marcador-nombre">glicemia en ayunas<span class="b-marcador-unidad">mg/dL</span></span>
+                  <span class="b-marcador-campo">168</span>
+                </span>
+                <span class="b-marcador">
+                  <span class="b-marcador-nombre">hemoglobina<span class="b-marcador-unidad">g/dL</span></span>
+                  <span class="b-marcador-campo">10.4</span>
+                </span>
+                <span class="b-marcador">
+                  <span class="b-marcador-nombre">plaquetas<span class="b-marcador-unidad">x10^3/&micro;L</span></span>
+                  <span class="b-marcador-campo vacio">--</span>
+                </span>
+              </div>
+              <p class="b-boton">Ver qu&eacute; dicen</p>
+              <p class="b-nota">
+                Solo escribe los que aparezcan en tu papel. Los que dejes vac&iacute;os no se inventan.
+              </p>
+            </div>
+          </div>
+          <p class="pie-aparato">PantallaExamen.tsx</p>
         </div>
       </article>
 
@@ -1297,8 +1406,7 @@
       <p class="eyebrow">El aparato que toque</p>
       <h2>Tres modos, decididos en el arranque</h2>
       <p class="prosa">
-        La demo corre en un iPhone 17 Pro Max. Se intentó un Xiaomi 14T Pro con
-        12 GB y Bare aborta al arrancar. El usuario del brief tiene un Android
+        La demo corre en un Xiaomi 14T Pro con 12 GB, pero el usuario del brief tiene un Android
         de gama media. En vez de prometer una cosa y demostrar otra, la app mide el aparato con
         <code>assessModelFit()</code> antes de descargar nada y elige su modo. En los tres, las
         fotos se borran en el tel&eacute;fono y nunca salen.
@@ -1353,17 +1461,18 @@
           <li><b>Seis historiales sint&eacute;ticos</b> que disparan exactamente lo esperado, el sano incluido</li>
           <li><b>Cinco pantallas en Expo</b>: correo, revisi&oacute;n, alerta, cr&eacute;dito y documentos, encadenadas</li>
           <li><b>El paquete en balboas</b>: un a&ntilde;o de tratamiento con cada l&iacute;nea citada, que es lo que hace el cr&eacute;dito defendible</li>
-          <li><b>La c&aacute;mara</b> de la pantalla de documentos, con permiso y manejo de error</li>
+          <li><b>La c&aacute;mara</b>, en los documentos del cr&eacute;dito y en el examen de laboratorio</li>
+          <li><b>La v&iacute;a B</b>: 7 marcadores con rango por sexo y fuente, y por fin una pantalla que los usa</li>
           <li><b>La pol&iacute;tica de cr&eacute;dito</b> del banco mock, escrita y declarada como juguete</li>
         </ul>
       </div>
       <div class="columna">
         <h3><span class="chip falta">Falta</span></h3>
         <ul>
-          <li><b>El bloque 0</b>: cerrado en iPhone 17 Pro Max (primer token, TTFT 2915 ms CPU). El Xiaomi 14T se abandon&oacute;</li>
+          <li><b>El bloque 0</b>: el tel&eacute;fono todav&iacute;a no ha cargado MedPsy ni soltado el primer token</li>
           <li><b>El modelo en el flujo</b>: el prompt, el schema y el limpiador existen, pero la pantalla a&uacute;n muestra solo las reglas</li>
           <li><b>El log de rendimiento</b>, que es entregable del reto Tether y se hace ahora o no se hace</li>
-          <li><b>La lectura de los documentos</b>: el OCR, la extracci&oacute;n a JSON y el borrado de la foto que la pantalla promete</li>
+          <li><b>La lectura de las fotos</b>: el OCR, la extracci&oacute;n a JSON y el borrado que la pantalla promete. El prompt y el schema del examen ya est&aacute;n escritos</li>
           <li><b>Los dos caminos de salida</b>: el env&iacute;o directo al banco por HTTP y el rodeo por Hyperswarm</li>
           <li><b>La cola en SQLite</b>, la firma, el LoRA y el video</li>
         </ul>
