@@ -20,19 +20,19 @@ Use null if a field is missing. No extra text.`;
 
 export const SYSTEM_EXTRACCION_INGRESOS = `You receive OCR text from a Panama income document (employment letter, payslip, or self-employment statement).
 Reply ONLY with a JSON object with these exact keys:
-- empleador_o_actividad: employer or activity
-- ingreso_mensual_usd: monthly income as a number (B/. 520.00 means 520)
-- tipo: "asalariado" | "independiente" | "jubilado" | "otro"
-- fecha_documento: YYYY-MM-DD if present (convert "28 de agosto de 2026"), else null
-- antiguedad_meses: months at the job if stated, else null
+- empleador_o_actividad: company on the letterhead (e.g. Agroservicios del Istmo, S.A.), not the worker
+- ingreso_mensual_usd: monthly income as a number. "(B/. 520.00)" means 520, ignore the amount in words
+- tipo: "asalariado" | "independiente" | "jubilado" | "otro". A work letter is asalariado
+- fecha_documento: YYYY-MM-DD of the letter (convert "28 de agosto de 2026"), else null
+- antiguedad_meses: months since "desde el …", else null
 - confianza: 0 to 1
 No extra text.`;
 
-export const SYSTEM_EXTRACCION_EXTRACTO = `You receive OCR text from a bank statement.
+export const SYSTEM_EXTRACCION_EXTRACTO = `You receive OCR text from a Panama bank statement.
 Reply ONLY with a JSON object with these exact keys:
-- banco: bank name
-- saldo_promedio_usd: average balance as a number
-- meses_cubiertos: integer 1 to 12
+- banco: bank name in the header (e.g. Banco Istmeno de Ahorros)
+- saldo_promedio_usd: the number next to "Saldo promedio del periodo" (B/. 579.02 means 579.02). NOT saldo final
+- meses_cubiertos: integer from "(3 meses)" or the statement period
 - confianza: 0 to 1
 No extra text.`;
 

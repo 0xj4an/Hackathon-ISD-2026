@@ -126,39 +126,64 @@ function mesDe(s: string): string | undefined {
   return MESES[k] ?? MESES[k.slice(0, 3)];
 }
 
-/** Deja fechas en YYYY-MM-DD. Acepta lo que imprime una cédula panameña. */
-export function aIso(v: unknown): string | undefined {
-  if (v == null || v === "") return undefined;
-  const s = String(v).trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+function isoDe(s: string): string | undefined {
+  if (!s) return undefined;
+  const t = s.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t;
 
-  let m = s.match(/^(\d{1,2})[/\-. ]+([A-Za-zÁÉÍÓÚáéíóúÜü.]{3,})[/\-. ]+(\d{4})$/);
+  let m = t.match(/^(\d{1,2})[/\-. ]+([A-Za-zÁÉÍÓÚáéíóúÜü.]{3,})[/\-. ]+(\d{4})$/);
   if (m) {
     const mes = mesDe(m[2]);
     if (mes) return `${m[3]}-${mes}-${m[1].padStart(2, "0")}`;
   }
 
-  m = s.match(/^(\d{1,2})\s+de\s+([A-Za-zÁÉÍÓÚáéíóú]+)\s+de\s+(\d{4})$/i);
+  m = t.match(/^(\d{1,2})\s+de\s+([A-Za-zÁÉÍÓÚáéíóú]+)\s+de\s+(\d{4})$/i);
   if (m) {
     const mes = mesDe(m[2]);
     if (mes) return `${m[3]}-${mes}-${m[1].padStart(2, "0")}`;
   }
 
-  m = s.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})$/);
+  m = t.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})$/);
   if (m) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
 
-  m = s.match(/^(\d{4})[/\-.](\d{1,2})[/\-.](\d{1,2})$/);
+  m = t.match(/^(\d{4})[/\-.](\d{1,2})[/\-.](\d{1,2})$/);
   if (m) return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
 
   return undefined;
 }
 
+/** Deja fechas en YYYY-MM-DD. Acepta lo que imprime una cédula o una carta laboral. */
+export function aIso(v: unknown): string | undefined {
+  if (v == null || v === "") return undefined;
+  const s = String(v).trim();
+  return isoDe(s)
+    ?? isoDe(s.match(/(\d{1,2}\s+de\s+[A-Za-zÁÉÍÓÚáéíóú]+\s+de\s+\d{4})/i)?.[1] ?? "")
+    ?? isoDe(s.match(/(\d{1,2}[/\-. ]+[A-Za-zÁÉÍÓÚáéíóú.]{3,}[/\-. ]+\d{4})/)?.[1] ?? "");
+}
+
 function aNumero(v: unknown): number | undefined {
   if (typeof v === "number" && Number.isFinite(v)) return v;
   if (typeof v !== "string") return undefined;
-  const n = Number(v.replace(/[^0-9.]/g, ""));
+  let s = v.trim();
+  const money = s.match(/B\/\.?\s*([\d.,]+)/i);
+  if (money) s = money[1];
+  if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) s = s.replace(/,/g, "");
+  else if (/^\d+,\d{1,2}$/.test(s)) s = s.replace(",", ".");
+  else s = s.replace(/[^0-9.]/g, "");
+  const n = Number(s);
   return Number.isFinite(n) ? n : undefined;
 }
+
+function mesesEntre(desdeIso: string, hastaIso: string): number | undefined {
+  const a = new Date(`${desdeIso}T00:00:00Z`);
+  const b = new Date(`${hastaIso}T00:00:00Z`);
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime()) || b <= a) return undefined;
+  let n = (b.getUTCFullYear() - a.getUTCFullYear()) * 12 + (b.getUTCMonth() - a.getUTCMonth());
+  if (b.getUTCDate() < a.getUTCDate()) n--;
+  return n >= 0 && n <= 600 ? n : undefined;
+}
+
+const IGNORAR_LINEA = /muestra sin valor|a quien corresponda|atentamente|documento de prueba|sin valor legal|ruc\b|via interamericana|tel\.|estado de cuenta/i;
 
 function despuesDe(lineas: string[], etiqueta: RegExp): string | undefined {
   const i = lineas.findIndex(l => etiqueta.test(l));
@@ -192,26 +217,62 @@ function rellenarDesdeOcr(clave: ClaveDocumento, o: Record<string, unknown>, ocr
   }
 
   if (clave === "ingresos") {
-    if (o.ingreso_mensual_usd == null) {
-      const m = ocr.match(/B\/\.?\s*([\d.,]+)/i) ?? ocr.match(/\$\s*([\d.,]+)/);
-      if (m) o.ingreso_mensual_usd = aNumero(m[1].replace(",", ""));
+    const emp = lineas.find(l => /s\.?\s*a\.?/i.test(l) && !IGNORAR_LINEA.test(l))
+      ?? lineas.find(l => l.length >= 8 && !IGNORAR_LINEA.test(l) && !/^\d/.test(l) && !/^(sona|por medio)/i.test(l));
+    if (emp && !o.empleador_o_actividad) o.empleador_o_actividad = emp.replace(/,\s*$/, "").trim();
+
+    const sueldo = ocr.match(/salario[^\d]{0,80}\(B\/\.?\s*([\d.,]+)\)/i)
+      ?? ocr.match(/\(B\/\.?\s*([\d.,]+)\)/)
+      ?? ocr.match(/salario[^\d]{0,80}B\/\.?\s*([\d.,]+)/i)
+      ?? ocr.match(/B\/\.?\s*([\d.,]+)/i);
+    if (sueldo) {
+      const n = aNumero(sueldo[1]);
+      if (n != null && n >= 100 && n <= 20000) o.ingreso_mensual_usd = n;
     }
-    if (!o.empleador_o_actividad && lineas[0] && lineas[0].length >= 3) {
-      o.empleador_o_actividad = lineas[0];
-    }
+
     if (!o.tipo && /salario|labora|contrato|emplead/i.test(ocr)) o.tipo = "asalariado";
-    if (!aIso(o.fecha_documento)) {
-      const m = ocr.match(/(\d{1,2}\s+de\s+[A-Za-zÁÉÍÓÚáéíóú]+\s+de\s+\d{4})/);
-      const iso = aIso(m?.[1]);
-      if (iso) o.fecha_documento = iso;
+
+    const fechas = [...ocr.matchAll(/(\d{1,2}\s+de\s+[A-Za-zÁÉÍÓÚáéíóú]+\s+de\s+\d{4})/gi)]
+      .map(m => aIso(m[1]))
+      .filter((x): x is string => Boolean(x));
+    if (fechas[0] && !aIso(o.fecha_documento)) o.fecha_documento = fechas[0];
+
+    if (o.antiguedad_meses == null) {
+      const desde = aIso(ocr.match(/desde\s+el\s+(\d{1,2}\s+de\s+[A-Za-zÁÉÍÓÚáéíóú]+\s+de\s+\d{4})/i)?.[1]);
+      const hasta = aIso(o.fecha_documento) ?? fechas[0];
+      if (desde && hasta) {
+        const n = mesesEntre(desde, hasta);
+        if (n != null) o.antiguedad_meses = n;
+      }
     }
   }
 
   if (clave === "extracto") {
-    if (!o.banco && lineas[0]) o.banco = lineas[0];
-    if (o.saldo_promedio_usd == null) {
+    const bancoLinea = lineas.find(l => /\bbanco\b/i.test(l));
+    if (bancoLinea) {
+      o.banco = bancoLinea
+        .replace(/\s+ESTADO DE CUENTA.*/i, "")
+        .replace(/\s*·.*/, "")
+        .trim();
+    } else if (!o.banco) {
+      const otra = lineas.find(l => l.length >= 6 && !IGNORAR_LINEA.test(l));
+      if (otra) o.banco = otra;
+    }
+
+    const promedio = ocr.match(/saldo\s*promedio[\s\S]{0,60}?B\/\.?\s*([\d.,]+)/i)
+      ?? ocr.match(/promedio[\s\S]{0,40}?B\/\.?\s*([\d.,]+)/i);
+    if (promedio) {
+      const n = aNumero(promedio[1]);
+      if (n != null) o.saldo_promedio_usd = n;
+    } else if (o.saldo_promedio_usd == null) {
       const m = ocr.match(/B\/\.?\s*([\d.,]+)/i);
-      if (m) o.saldo_promedio_usd = aNumero(m[1].replace(",", ""));
+      if (m) o.saldo_promedio_usd = aNumero(m[1]);
+    }
+
+    const meses = ocr.match(/\((\d+)\s*meses?\)/i) ?? ocr.match(/(\d+)\s*meses/i);
+    if (meses) {
+      const n = Number(meses[1]);
+      if (n >= 1 && n <= 12) o.meses_cubiertos = n;
     }
   }
 }
