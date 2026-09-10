@@ -30,7 +30,7 @@ Nada más avanza hasta que esto pase.
 
 - [x] `[J]` **Hecho.** Umbrales revisados y citados, y la cobertura pasó de 4 señales a 14. Ver [`ADR-008`](../.ai/adr/ADR-008-que-variables-vigilamos.md) y [`salud.md`](../.ai/references/salud.md). Cada señal lleva su `fuente` en el código
 - [x] `[J]` **Hecho.** Los costos inventados salieron. Ahora son rangos publicados con fuente (glucosa 6 a 15 USD, ECG 20 a 45), y donde no hay precio citable el campo va ausente y la pantalla no muestra número
-- [ ] `[J]` Añadir el especialista al tipo `Senal`. Hoy no existe, y es la mitad de lo que hace útil la alerta
+- [x] `[J]` **Hecho.** El especialista entró como parte del tipo `Ruta`, junto con qué hacer ahora, qué examen, dónde y qué síntomas obligan a ir de inmediato. Ver `ADR-008`
 - [x] `[J]` **Hecho.** CD4 fuera de la tabla, con filtro de respaldo en el generador del spike
 - [ ] `[J]` `data/`: historial de dos usuarios ficticios, uno sano y uno con hallazgo. **El sano no debe disparar nada**, esa es media demo
 

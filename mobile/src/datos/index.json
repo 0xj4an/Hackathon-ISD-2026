@@ -1,0 +1,62 @@
+[
+  {
+    "id": "A",
+    "nombre": "Sin hallazgos",
+    "caso": "Sana",
+    "descripcion": "Todas las mediciones dentro de rango.",
+    "senales_esperadas": []
+  },
+  {
+    "id": "B",
+    "nombre": "Diabetes sin diagnosticar",
+    "caso": "Diabetes tipo 2 sin diagnosticar",
+    "descripcion": "Glucosa que sube, diastolica alta y perdida de peso involuntaria.",
+    "senales_esperadas": [
+      "GLU_ALTA",
+      "PRES_ALTA",
+      "PESO_BAJA",
+      "IMC_SOBREPESO"
+    ]
+  },
+  {
+    "id": "C",
+    "nombre": "Hipertension no controlada",
+    "caso": "Hipertension no controlada con obesidad",
+    "descripcion": "Sistolica sostenida por encima de 140 y un IMC por encima de 30.",
+    "senales_esperadas": [
+      "PRES_ALTA",
+      "IMC_OBESIDAD"
+    ]
+  },
+  {
+    "id": "D",
+    "nombre": "Cuadro respiratorio agudo",
+    "caso": "Cuadro respiratorio agudo",
+    "descripcion": "Fiebre, respiracion rapida, saturacion baja y pulso acelerado.",
+    "senales_esperadas": [
+      "FIEBRE",
+      "RESP_ALTA",
+      "SAT_BAJA",
+      "TAQUI"
+    ]
+  },
+  {
+    "id": "E",
+    "nombre": "Hipoglucemia",
+    "caso": "Hipoglucemia",
+    "descripcion": "Una lectura de glucosa por debajo de 54.",
+    "senales_esperadas": [
+      "GLU_MUY_BAJA"
+    ]
+  },
+  {
+    "id": "F",
+    "nombre": "Prediabetes",
+    "caso": "Prediabetes",
+    "descripcion": "Glucosa en el limite y sobrepeso. Nada urgente.",
+    "senales_esperadas": [
+      "GLU_LIMITE",
+      "IMC_SOBREPESO"
+    ]
+  }
+]
