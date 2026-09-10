@@ -7,7 +7,7 @@
   "caso": "Hipoglucemia",
   "descripcion": "Un ano en tratamiento con glucosa estable y una lectura reciente por debajo de 54.",
   "contexto": "Esta en tratamiento por diabetes. Se salto el almuerzo trabajando.",
-  "por_que_esta_en_la_demo": "El unico caso de urgencia Inmediata del roster, y el unico que usa la ruta de autocuidado: el mensaje dice que tome azucar AHORA, no solo que algo anda mal. Basta una lectura, no espera tendencia.",
+  "por_que_esta_en_la_demo": "Hipoglucemia nivel 2 (ADA): urgencia Inmediata y ruta de autocuidado. El mensaje dice que tome azucar AHORA. Basta una lectura, no espera tendencia. Se distingue del caso GLU_BAJA (nivel 1).",
   "periodo_dias": 365,
   "senales_esperadas": [
     "GLU_MUY_BAJA"

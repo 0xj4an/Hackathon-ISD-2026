@@ -1,9 +1,10 @@
 # Datos sintéticos
 
-- `usuarios/`: historial de **seis** usuarios ficticios de la demo (generado por
+- `usuarios/`: historial de **nueve** usuarios ficticios de la demo (generado por
   `node data/generar-usuarios.mjs`). Cada uno cubre **~un año** de mediciones con
-  densidades creíbles por variable. El sano no debe disparar ninguna señal: esa
-  mitad de la demo vale tanto como la otra.
+  densidades creíbles por variable. Entre todos ejercitan las **14 señales** de
+  la vía A (`ADR-008`). El sano no debe disparar ninguna señal: esa mitad de la
+  demo vale tanto como la otra.
   Variables, con los tipos de Health Connect que las originarían: glucosa en ayunas
   (`BloodGlucoseRecord`), presión sistólica y diastólica (`BloodPressureRecord`), pulso en
   reposo (`RestingHeartRateRecord`), saturación de oxígeno (`OxygenSaturationRecord`),

@@ -1,4 +1,4 @@
-// Genera el historial de los seis usuarios ficticios de la demo.
+// Genera el historial de los usuarios ficticios de la demo (14 senales ADR-008).
 //
 // Datos 100% sinteticos. Formato normalizado que consume
 // `mobile/src/core/reglas.ts` (el mismo al que traduciria un importador desde
@@ -205,7 +205,7 @@ const USUARIOS = [
     caso: "Hipoglucemia",
     descripcion: "Un ano en tratamiento con glucosa estable y una lectura reciente por debajo de 54.",
     contexto: "Esta en tratamiento por diabetes. Se salto el almuerzo trabajando.",
-    porQue: "El unico caso de urgencia Inmediata del roster, y el unico que usa la ruta de autocuidado: el mensaje dice que tome azucar AHORA, no solo que algo anda mal. Basta una lectura, no espera tendencia.",
+    porQue: "Hipoglucemia nivel 2 (ADA): urgencia Inmediata y ruta de autocuidado. El mensaje dice que tome azucar AHORA. Basta una lectura, no espera tendencia. Se distingue del caso GLU_BAJA (nivel 1).",
     esperadas: ["GLU_MUY_BAJA"],
     build() {
       const estatura = 1.62;
@@ -254,6 +254,98 @@ const USUARIOS = [
         ...serieAnual("peso", { cadaDias: 14, hora: 8 }, () => clamp(cerca(79, 0.55), 77.5, 80.5)),
         { ts: diaAntes(360, 8), tipo: "estatura", valor: estatura },
       ];
+    },
+  },
+  {
+    id: "glu-leve", correo: "alerta@gmail.com", nombre: "Azucar baja (leve)", sexo: "mujer", edad: 41,
+    caso: "Hipoglucemia nivel 1",
+    descripcion: "Un ano estable y una lectura reciente entre 54 y 70. Prioritaria, no inmediata.",
+    contexto: "Trata diabetes con pastillas. Se midio antes de comer porque se sintio rara.",
+    porQue: "Cierra el par con GLU_MUY_BAJA. La app debe distinguir 'tome azucar y vigile' (nivel 1) de 'urgencia ahora' (nivel 2). Sin este caso, la senal GLU_BAJA existia en codigo y nunca se veia en la demo.",
+    esperadas: ["GLU_BAJA"],
+    build() {
+      const estatura = 1.65;
+      const glucosas = serieAnual("glucosa_ayunas", { cadaDias: 3.5, jitter: 0.1, hora: 7 }, () =>
+        clamp(cerca(96, 7), 80, 108));
+      const gluSorted = glucosas.sort((a, b) => a.ts.localeCompare(b.ts));
+      const n = gluSorted.length;
+      // Penultima en 54-70; promedio de 3 < 100 → solo GLU_BAJA.
+      gluSorted[n - 3].valor = 94;
+      gluSorted[n - 2].valor = 62;
+      gluSorted[n - 1].valor = 90;
+      return [
+        ...gluSorted,
+        ...serieAnual("presion_sist", { cadaDias: 14, hora: 9 }, () => normal.sist()),
+        ...serieAnual("presion_diast", { cadaDias: 14, hora: 9 }, () => normal.diast()),
+        ...serieAnual("pulso_reposo", { cadaDias: 7, hora: 8 }, () => normal.pulso()),
+        ...serieAnual("saturacion_o2", { cadaDias: 30, hora: 10 }, () => normal.sat()),
+        ...serieAnual("frecuencia_respiratoria", { cadaDias: 30, hora: 10 }, () => normal.resp()),
+        ...serieAnual("temperatura", { cadaDias: 30, hora: 10 }, () => normal.temp()),
+        ...serieAnual("peso", { cadaDias: 14, hora: 8 }, () => clamp(cerca(60, 0.5), 58.5, 61.5)),
+        { ts: diaAntes(360, 8), tipo: "estatura", valor: estatura },
+      ];
+    },
+  },
+  {
+    id: "sat-critica", correo: "oxigeno@gmail.com", nombre: "Oxigeno critico", sexo: "hombre", edad: 58,
+    caso: "Saturacion critica",
+    descripcion: "Once meses normales y lecturas recientes de oxigeno por debajo de 90.",
+    contexto: "Le prestaron un oximetro en el puesto de salud. Las cifras de hoy lo asustaron.",
+    porQue: "Urgencia Inmediata por una sola lectura < 90. Se distingue de SAT_BAJA (tres tomas < 95). Sin este caso, SAT_CRITICA no aparecia en la demo.",
+    esperadas: ["SAT_CRITICA"],
+    build() {
+      const estatura = 1.72;
+      const base = [
+        ...serieAnual("glucosa_ayunas", { cadaDias: 30, hora: 7 }, () => normal.glucosa()),
+        ...serieAnual("presion_sist", { cadaDias: 14, hora: 9 }, () => normal.sist()),
+        ...serieAnual("presion_diast", { cadaDias: 14, hora: 9 }, () => normal.diast()),
+        ...serieAnual("pulso_reposo", { cadaDias: 7, hora: 8 }, (t, atras) =>
+          atras <= 3 ? clamp(cerca(88, 4), 78, 96) : normal.pulso()),
+        ...serieAnual("saturacion_o2", { cadaDias: 30, hora: 10 }, (t, atras) =>
+          atras <= 4 ? 97 : normal.sat()),
+        ...serieAnual("frecuencia_respiratoria", { cadaDias: 30, hora: 10 }, () => normal.resp()),
+        ...serieAnual("temperatura", { cadaDias: 30, hora: 10 }, () => normal.temp()),
+        ...serieAnual("peso", { cadaDias: 30, hora: 8 }, () => clamp(cerca(71, 0.5), 69.5, 72.5)),
+        { ts: diaAntes(360, 8), tipo: "estatura", valor: estatura },
+      ].filter((m) => {
+        const atras = (HOY.getTime() - Date.parse(m.ts)) / 86400000;
+        if (atras > 4.5) return true;
+        return m.tipo !== "saturacion_o2";
+      });
+      const agudo = serieVentana("saturacion_o2", { desdeAtras: 3, hastaAtras: 0, cadaDias: 1, hora: 10 }, () =>
+        clamp(cerca(87.5, 1.0), 85, 89.5));
+      return [...base, ...agudo];
+    },
+  },
+  {
+    id: "resp-grave", correo: "ahogo@gmail.com", nombre: "Respiracion muy rapida", sexo: "mujer", edad: 36,
+    caso: "Taquipnea grave",
+    descripcion: "Baseline anual normal y tres lecturas recientes por encima de 25 respiraciones por minuto.",
+    contexto: "Siente que no le alcanza el aire. Se midio la respiracion como le ensenaron en el centro.",
+    porQue: "Urgencia Inmediata por una lectura > 25. Se distingue de RESP_ALTA (tres tomas > 20). Completa las 14 senales de la via A en la demo.",
+    esperadas: ["RESP_MUY_ALTA"],
+    build() {
+      const estatura = 1.63;
+      const base = [
+        ...serieAnual("glucosa_ayunas", { cadaDias: 30, hora: 7 }, () => normal.glucosa()),
+        ...serieAnual("presion_sist", { cadaDias: 14, hora: 9 }, () => normal.sist()),
+        ...serieAnual("presion_diast", { cadaDias: 14, hora: 9 }, () => normal.diast()),
+        ...serieAnual("pulso_reposo", { cadaDias: 7, hora: 8 }, (t, atras) =>
+          atras <= 3 ? clamp(cerca(90, 4), 80, 98) : normal.pulso()),
+        ...serieAnual("saturacion_o2", { cadaDias: 30, hora: 10 }, () => normal.sat()),
+        ...serieAnual("frecuencia_respiratoria", { cadaDias: 30, hora: 10 }, (t, atras) =>
+          atras <= 4 ? 15 : normal.resp()),
+        ...serieAnual("temperatura", { cadaDias: 30, hora: 10 }, () => normal.temp()),
+        ...serieAnual("peso", { cadaDias: 30, hora: 8 }, () => clamp(cerca(62, 0.5), 60.5, 63.5)),
+        { ts: diaAntes(360, 8), tipo: "estatura", valor: estatura },
+      ].filter((m) => {
+        const atras = (HOY.getTime() - Date.parse(m.ts)) / 86400000;
+        if (atras > 4.5) return true;
+        return m.tipo !== "frecuencia_respiratoria";
+      });
+      const agudo = serieVentana("frecuencia_respiratoria", { desdeAtras: 3, hastaAtras: 0, cadaDias: 1, hora: 10 }, () =>
+        clamp(cerca(27.5, 1.0), 25.5, 30));
+      return [...base, ...agudo];
     },
   },
 ];

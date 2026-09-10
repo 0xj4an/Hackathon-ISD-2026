@@ -64,5 +64,35 @@
       "GLU_LIMITE",
       "IMC_SOBREPESO"
     ]
+  },
+  {
+    "id": "glu-leve",
+    "correo": "alerta@gmail.com",
+    "nombre": "Azucar baja (leve)",
+    "caso": "Hipoglucemia nivel 1",
+    "descripcion": "Un ano estable y una lectura reciente entre 54 y 70. Prioritaria, no inmediata.",
+    "senales_esperadas": [
+      "GLU_BAJA"
+    ]
+  },
+  {
+    "id": "sat-critica",
+    "correo": "oxigeno@gmail.com",
+    "nombre": "Oxigeno critico",
+    "caso": "Saturacion critica",
+    "descripcion": "Once meses normales y lecturas recientes de oxigeno por debajo de 90.",
+    "senales_esperadas": [
+      "SAT_CRITICA"
+    ]
+  },
+  {
+    "id": "resp-grave",
+    "correo": "ahogo@gmail.com",
+    "nombre": "Respiracion muy rapida",
+    "caso": "Taquipnea grave",
+    "descripcion": "Baseline anual normal y tres lecturas recientes por encima de 25 respiraciones por minuto.",
+    "senales_esperadas": [
+      "RESP_MUY_ALTA"
+    ]
   }
 ]

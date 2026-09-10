@@ -14,6 +14,9 @@ import hipertension from "./datos/hipertension.json";
 import respiratorio from "./datos/respiratorio.json";
 import hipoglucemia from "./datos/hipoglucemia.json";
 import prediabetes from "./datos/prediabetes.json";
+import gluLeve from "./datos/glu-leve.json";
+import satCritica from "./datos/sat-critica.json";
+import respGrave from "./datos/resp-grave.json";
 
 export type Usuario = {
   id: string;
@@ -31,6 +34,7 @@ export type Usuario = {
 
 export const USUARIOS: Usuario[] = [
   sano, diabetes, hipertension, respiratorio, hipoglucemia, prediabetes,
+  gluLeve, satCritica, respGrave,
 ] as unknown as Usuario[];
 
 const normalizar = (correo: string) => correo.trim().toLowerCase();

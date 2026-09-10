@@ -9,11 +9,14 @@ Cada caso de `data/usuarios/` debe producir exactamente las senales que declara.
 | Caso | Esperado | Obtenido | |
 | --- | --- | --- | --- |
 | Diabetes sin diagnosticar | GLU_ALTA, IMC_SOBREPESO, PESO_BAJA, PRES_ALTA | GLU_ALTA, IMC_SOBREPESO, PESO_BAJA, PRES_ALTA | OK |
+| Azucar baja (leve) | GLU_BAJA | GLU_BAJA | OK |
 | Hipertension no controlada | IMC_OBESIDAD, PRES_ALTA | IMC_OBESIDAD, PRES_ALTA | OK |
 | Hipoglucemia | GLU_MUY_BAJA | GLU_MUY_BAJA | OK |
 | Prediabetes | GLU_LIMITE, IMC_SOBREPESO | GLU_LIMITE, IMC_SOBREPESO | OK |
+| Respiracion muy rapida | RESP_MUY_ALTA | RESP_MUY_ALTA | OK |
 | Cuadro respiratorio agudo | FIEBRE, RESP_ALTA, SAT_BAJA, TAQUI | FIEBRE, RESP_ALTA, SAT_BAJA, TAQUI | OK |
 | Sin hallazgos | ninguna | ninguna | OK |
+| Oxigeno critico | SAT_CRITICA | SAT_CRITICA | OK |
 
 **C3c, el caso sano no dispara nada:** OK, cero senales
 
@@ -47,7 +50,7 @@ Toda senal tiene que decir que hacer, no solo que algo anda mal.
 - senales sin `fuente` del umbral: 0, OK
 - costos sin fuente citada: 0, OK
 
-Senales distintas ejercitadas por los casos: **11** (FIEBRE, GLU_ALTA, GLU_LIMITE, GLU_MUY_BAJA, IMC_OBESIDAD, IMC_SOBREPESO, PESO_BAJA, PRES_ALTA, RESP_ALTA, SAT_BAJA, TAQUI).
+Senales distintas ejercitadas por los casos: **14** (FIEBRE, GLU_ALTA, GLU_BAJA, GLU_LIMITE, GLU_MUY_BAJA, IMC_OBESIDAD, IMC_SOBREPESO, PESO_BAJA, PRES_ALTA, RESP_ALTA, RESP_MUY_ALTA, SAT_BAJA, SAT_CRITICA, TAQUI).
 
 ## 4. El paquete de cada caso
 
@@ -58,13 +61,16 @@ la gente no va. Lo unico sin paquete es no tener ningun hallazgo.
 | Caso | Paquete | Total | Credito | |
 | --- | --- | --- | --- | --- |
 | Diabetes sin diagnosticar | Diabetes tipo 2: confirmar y tratar un año | B/. 641 a 920 | si | OK |
+| Azucar baja (leve) | Azúcar baja: estudio inicial | B/. 39 a 90 | si | OK |
 | Hipertension no controlada | Hipertensión: confirmar y controlar un año | B/. 617 a 812 | si | OK |
 | Hipoglucemia | Azúcar peligrosamente baja: urgencia y seguimiento un año | B/. 235 a 530 | si | OK |
 | Prediabetes | Prediabetes: seguimiento por un año | B/. 72 a 170 | si | OK |
+| Respiracion muy rapida | Respiración muy acelerada: urgencia y estudio | B/. 71 a 205 | si | OK |
 | Cuadro respiratorio agudo | Falta de oxígeno: estudio inicial | B/. 48 a 120 | si | OK |
 | Sin hallazgos | sin hallazgos | - | no | OK |
+| Oxigeno critico | Oxígeno crítico: urgencia y estudio | B/. 113 a 310 | si | OK |
 
-Casos que ofrecen credito: **5 de 6**. El unico que no, es el caso sano: no hay nada que atender.
+Casos que ofrecen credito: **8 de 9**. El unico que no, es el caso sano: no hay nada que atender.
 
 Toda senal tiene que tener paquete. Si falta uno, hay un caso donde la app
 detecta algo y no sabe decir cuanto cuesta atenderlo.
