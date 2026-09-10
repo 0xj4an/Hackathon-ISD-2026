@@ -57,7 +57,7 @@ const normal = {
 
 const USUARIOS = [
   {
-    id: "A", nombre: "Sin hallazgos", sexo: "mujer", edad: 34,
+    id: "sano", correo: "control@gmail.com", nombre: "Sin hallazgos", sexo: "mujer", edad: 34,
     caso: "Sana",
     descripcion: "Todas las mediciones dentro de rango.",
     contexto: "Vive en una comunidad rural. Se mide en el puesto de salud cuando baja al pueblo.",
@@ -66,7 +66,7 @@ const USUARIOS = [
     perfil: { ...normal, peso: fijo(58, 0.8), estatura: 1.60 },
   },
   {
-    id: "B", nombre: "Diabetes sin diagnosticar", sexo: "hombre", edad: 52,
+    id: "diabetes", correo: "insulina@gmail.com", nombre: "Diabetes sin diagnosticar", sexo: "hombre", edad: 52,
     caso: "Diabetes tipo 2 sin diagnosticar",
     descripcion: "Glucosa que sube, diastolica alta y perdida de peso involuntaria.",
     contexto: "Trabaja en el campo. Se mide en casa con un glucometro prestado desde que se siente cansado.",
@@ -81,7 +81,7 @@ const USUARIOS = [
     },
   },
   {
-    id: "C", nombre: "Hipertension no controlada", sexo: "mujer", edad: 61,
+    id: "hipertension", correo: "presion@gmail.com", nombre: "Hipertension no controlada", sexo: "mujer", edad: 61,
     caso: "Hipertension no controlada con obesidad",
     descripcion: "Sistolica sostenida por encima de 140 y un IMC por encima de 30.",
     contexto: "Sabe que tiene la presion alta pero hace dos anos que no va a control.",
@@ -94,7 +94,7 @@ const USUARIOS = [
     },
   },
   {
-    id: "D", nombre: "Cuadro respiratorio agudo", sexo: "hombre", edad: 28,
+    id: "respiratorio", correo: "fiebre@gmail.com", nombre: "Cuadro respiratorio agudo", sexo: "hombre", edad: 28,
     caso: "Cuadro respiratorio agudo",
     descripcion: "Fiebre, respiracion rapida, saturacion baja y pulso acelerado.",
     contexto: "Lleva cuatro dias con fiebre. En temporada de dengue, en una zona donde el centro de salud queda a dos horas.",
@@ -110,7 +110,7 @@ const USUARIOS = [
     },
   },
   {
-    id: "E", nombre: "Hipoglucemia", sexo: "mujer", edad: 45,
+    id: "hipoglucemia", correo: "azucar@gmail.com", nombre: "Hipoglucemia", sexo: "mujer", edad: 45,
     caso: "Hipoglucemia",
     descripcion: "Una lectura de glucosa por debajo de 54.",
     contexto: "Esta en tratamiento por diabetes. Se salto el almuerzo trabajando.",
@@ -123,7 +123,7 @@ const USUARIOS = [
     },
   },
   {
-    id: "F", nombre: "Prediabetes", sexo: "hombre", edad: 39,
+    id: "prediabetes", correo: "limite@gmail.com", nombre: "Prediabetes", sexo: "hombre", edad: 39,
     caso: "Prediabetes",
     descripcion: "Glucosa en el limite y sobrepeso. Nada urgente.",
     contexto: "Se hizo un chequeo por el trabajo y quedo con la duda.",
@@ -152,17 +152,17 @@ for (const u of USUARIOS) {
   ].sort((x, y) => x.ts.localeCompare(y.ts));
 
   const doc = {
-    id: u.id, nombre: u.nombre, sexo: u.sexo, edad: u.edad,
+    id: u.id, correo: u.correo, nombre: u.nombre, sexo: u.sexo, edad: u.edad,
     caso: u.caso, descripcion: u.descripcion, contexto: u.contexto,
     por_que_esta_en_la_demo: u.porQue,
     senales_esperadas: u.esperadas,
     mediciones,
   };
-  writeFileSync(resolve(OUT, `${u.id.toLowerCase()}.json`), JSON.stringify(doc, null, 2) + "\n");
-  console.log(`${u.id}  ${u.caso.padEnd(42)} ${mediciones.length} med · ${u.esperadas.length ? u.esperadas.join(", ") : "sin senales"}`);
+  writeFileSync(resolve(OUT, `${u.id}.json`), JSON.stringify(doc, null, 2) + "\n");
+  console.log(`${u.id}  ${u.correo.padEnd(20)} ${u.caso.padEnd(42)} ${mediciones.length} med · ${u.esperadas.length ? u.esperadas.join(", ") : "sin senales"}`);
 }
 
 writeFileSync(resolve(OUT, "index.json"), JSON.stringify(
-  USUARIOS.map(u => ({ id: u.id, nombre: u.nombre, caso: u.caso, descripcion: u.descripcion, senales_esperadas: u.esperadas })),
+  USUARIOS.map(u => ({ id: u.id, correo: u.correo, nombre: u.nombre, caso: u.caso, descripcion: u.descripcion, senales_esperadas: u.esperadas })),
   null, 2) + "\n");
 console.log(`\nindice en data/usuarios/index.json (${USUARIOS.length} usuarios)`);

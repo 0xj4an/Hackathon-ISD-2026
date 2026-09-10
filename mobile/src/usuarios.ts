@@ -8,15 +8,17 @@
  */
 import type { Medicion } from "./core/reglas";
 
-import a from "./datos/a.json";
-import b from "./datos/b.json";
-import c from "./datos/c.json";
-import d from "./datos/d.json";
-import e from "./datos/e.json";
-import f from "./datos/f.json";
+import sano from "./datos/sano.json";
+import diabetes from "./datos/diabetes.json";
+import hipertension from "./datos/hipertension.json";
+import respiratorio from "./datos/respiratorio.json";
+import hipoglucemia from "./datos/hipoglucemia.json";
+import prediabetes from "./datos/prediabetes.json";
 
 export type Usuario = {
   id: string;
+  /** Con este correo se entra al caso. Es de la demo: no hay cuenta ni contraseña. */
+  correo: string;
   nombre: string;
   sexo: "hombre" | "mujer";
   edad: number;
@@ -27,7 +29,11 @@ export type Usuario = {
   mediciones: Medicion[];
 };
 
-export const USUARIOS: Usuario[] = [a, b, c, d, e, f] as unknown as Usuario[];
+export const USUARIOS: Usuario[] = [
+  sano, diabetes, hipertension, respiratorio, hipoglucemia, prediabetes,
+] as unknown as Usuario[];
 
-export const buscarUsuario = (id: string): Usuario | undefined =>
-  USUARIOS.find(u => u.id.toLowerCase() === id.toLowerCase());
+const normalizar = (correo: string) => correo.trim().toLowerCase();
+
+export const buscarPorCorreo = (correo: string): Usuario | undefined =>
+  USUARIOS.find(u => u.correo === normalizar(correo));

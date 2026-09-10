@@ -1,13 +1,15 @@
 [
   {
-    "id": "A",
+    "id": "sano",
+    "correo": "control@gmail.com",
     "nombre": "Sin hallazgos",
     "caso": "Sana",
     "descripcion": "Todas las mediciones dentro de rango.",
     "senales_esperadas": []
   },
   {
-    "id": "B",
+    "id": "diabetes",
+    "correo": "insulina@gmail.com",
     "nombre": "Diabetes sin diagnosticar",
     "caso": "Diabetes tipo 2 sin diagnosticar",
     "descripcion": "Glucosa que sube, diastolica alta y perdida de peso involuntaria.",
@@ -19,7 +21,8 @@
     ]
   },
   {
-    "id": "C",
+    "id": "hipertension",
+    "correo": "presion@gmail.com",
     "nombre": "Hipertension no controlada",
     "caso": "Hipertension no controlada con obesidad",
     "descripcion": "Sistolica sostenida por encima de 140 y un IMC por encima de 30.",
@@ -29,7 +32,8 @@
     ]
   },
   {
-    "id": "D",
+    "id": "respiratorio",
+    "correo": "fiebre@gmail.com",
     "nombre": "Cuadro respiratorio agudo",
     "caso": "Cuadro respiratorio agudo",
     "descripcion": "Fiebre, respiracion rapida, saturacion baja y pulso acelerado.",
@@ -41,7 +45,8 @@
     ]
   },
   {
-    "id": "E",
+    "id": "hipoglucemia",
+    "correo": "azucar@gmail.com",
     "nombre": "Hipoglucemia",
     "caso": "Hipoglucemia",
     "descripcion": "Una lectura de glucosa por debajo de 54.",
@@ -50,7 +55,8 @@
     ]
   },
   {
-    "id": "F",
+    "id": "prediabetes",
+    "correo": "limite@gmail.com",
     "nombre": "Prediabetes",
     "caso": "Prediabetes",
     "descripcion": "Glucosa en el limite y sobrepeso. Nada urgente.",

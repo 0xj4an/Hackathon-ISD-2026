@@ -8,12 +8,12 @@ Cada caso de `data/usuarios/` debe producir exactamente las senales que declara.
 
 | Caso | Esperado | Obtenido | |
 | --- | --- | --- | --- |
-| Sin hallazgos | ninguna | ninguna | OK |
 | Diabetes sin diagnosticar | GLU_ALTA, IMC_SOBREPESO, PESO_BAJA, PRES_ALTA | GLU_ALTA, IMC_SOBREPESO, PESO_BAJA, PRES_ALTA | OK |
 | Hipertension no controlada | IMC_OBESIDAD, PRES_ALTA | IMC_OBESIDAD, PRES_ALTA | OK |
-| Cuadro respiratorio agudo | FIEBRE, RESP_ALTA, SAT_BAJA, TAQUI | FIEBRE, RESP_ALTA, SAT_BAJA, TAQUI | OK |
 | Hipoglucemia | GLU_MUY_BAJA | GLU_MUY_BAJA | OK |
 | Prediabetes | GLU_LIMITE, IMC_SOBREPESO | GLU_LIMITE, IMC_SOBREPESO | OK |
+| Cuadro respiratorio agudo | FIEBRE, RESP_ALTA, SAT_BAJA, TAQUI | FIEBRE, RESP_ALTA, SAT_BAJA, TAQUI | OK |
+| Sin hallazgos | ninguna | ninguna | OK |
 
 **C3c, el caso sano no dispara nada:** OK, cero senales
 
@@ -49,6 +49,23 @@ Toda senal tiene que decir que hacer, no solo que algo anda mal.
 
 Senales distintas ejercitadas por los casos: **11** (FIEBRE, GLU_ALTA, GLU_LIMITE, GLU_MUY_BAJA, IMC_OBESIDAD, IMC_SOBREPESO, PESO_BAJA, PRES_ALTA, RESP_ALTA, SAT_BAJA, TAQUI).
 
+## 4. El paquete y la puerta del credito
+
+Un credito solo se ofrece cuando el costo pesa y hay tratamiento sostenido.
+Ofrecerlo por una consulta suelta, o en una urgencia, seria poner un tramite
+en el camino de alguien que tiene que ir hoy.
+
+| Caso | Paquete | Total | Credito | |
+| --- | --- | --- | --- | --- |
+| Diabetes sin diagnosticar | Confirmar y empezar a tratar la diabetes | B/. 164 a 254 | si | OK |
+| Hipertension no controlada | Confirmar y controlar la presión | B/. 218 a 349 | si | OK |
+| Hipoglucemia | urgencia, va directo | - | no | OK |
+| Prediabetes | Confirmar la glucosa en el límite | B/. 14 a 40 | no | OK |
+| Cuadro respiratorio agudo | Estudiar la falta de oxígeno | B/. 48 a 120 | no | OK |
+| Sin hallazgos | sin hallazgos | - | no | OK |
+
+Casos que ofrecen credito: **2 de 6**. Los demas no lo necesitan o no pueden esperarlo.
+
 ## Resultado
 
-**Todo pasa.** Los casos producen exactamente sus senales declaradas, los marcadores clasifican en los tres estados, y ninguna senal sale sin ruta ni sin fuente.
+**Todo pasa.** Los casos producen exactamente sus senales declaradas, los marcadores clasifican en los tres estados, ninguna senal sale sin ruta ni sin fuente, y el credito solo se ofrece donde el costo pesa y hay tratamiento sostenido.

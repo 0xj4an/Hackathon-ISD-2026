@@ -45,7 +45,7 @@ export default function PantallaUsuarios({ onElegir }: { onElegir: (u: Usuario) 
               style={({ pressed }) => [s.tarjeta, pressed && s.tarjetaPress]}
             >
               <View style={s.fila}>
-                <View style={s.inicial}><Text style={s.inicialTexto}>{u.id}</Text></View>
+                <View style={s.inicial}><Text style={s.inicialTexto}>{u.nombre[0]}</Text></View>
                 <View style={s.textos}>
                   <Text style={s.nombre}>{u.nombre}</Text>
                   <Text style={s.meta}>{u.sexo === "mujer" ? "Mujer" : "Hombre"}, {u.edad} años</Text>

@@ -1,211 +1,212 @@
 {
-  "id": "C",
-  "nombre": "Hipertension no controlada",
-  "sexo": "mujer",
-  "edad": 61,
-  "caso": "Hipertension no controlada con obesidad",
-  "descripcion": "Sistolica sostenida por encima de 140 y un IMC por encima de 30.",
-  "contexto": "Sabe que tiene la presion alta pero hace dos anos que no va a control.",
-  "por_que_esta_en_la_demo": "Hipertension es la enfermedad numero uno de Panama, 42% de la poblacion, y obesidad es el tercer factor que MINSA nombra junto al riesgo de morir por dengue.",
+  "id": "prediabetes",
+  "correo": "limite@gmail.com",
+  "nombre": "Prediabetes",
+  "sexo": "hombre",
+  "edad": 39,
+  "caso": "Prediabetes",
+  "descripcion": "Glucosa en el limite y sobrepeso. Nada urgente.",
+  "contexto": "Se hizo un chequeo por el trabajo y quedo con la duda.",
+  "por_que_esta_en_la_demo": "El caso rutinario, que es el mas comun de todos. Demuestra que la app distingue entre 'anda ya' y 'mencionalo en tu proxima consulta', en vez de alarmar por cualquier cosa.",
   "senales_esperadas": [
-    "PRES_ALTA",
-    "IMC_OBESIDAD"
+    "GLU_LIMITE",
+    "IMC_SOBREPESO"
   ],
   "mediciones": [
     {
       "ts": "2026-01-12T13:00:00.000Z",
       "tipo": "peso",
-      "valor": 83.5
+      "valor": 78.9
     },
     {
       "ts": "2026-01-12T13:00:00.000Z",
       "tipo": "estatura",
-      "valor": 1.58
+      "valor": 1.74
     },
     {
       "ts": "2026-02-11T13:00:00.000Z",
       "tipo": "peso",
-      "valor": 84.3
+      "valor": 78.4
     },
     {
       "ts": "2026-03-13T13:00:00.000Z",
       "tipo": "peso",
-      "valor": 83.8
+      "valor": 79.2
     },
     {
       "ts": "2026-04-12T13:00:00.000Z",
       "tipo": "peso",
-      "valor": 84
+      "valor": 79.3
     },
     {
       "ts": "2026-05-12T13:00:00.000Z",
       "tipo": "peso",
-      "valor": 83.9
+      "valor": 78.9
     },
     {
       "ts": "2026-06-11T13:00:00.000Z",
       "tipo": "peso",
-      "valor": 83.9
+      "valor": 78.8
     },
     {
       "ts": "2026-06-17T13:00:00.000Z",
       "tipo": "glucosa_ayunas",
-      "valor": 92.9
+      "valor": 109.6
     },
     {
       "ts": "2026-06-24T13:00:00.000Z",
       "tipo": "pulso_reposo",
-      "valor": 64.5
+      "valor": 64.4
     },
     {
       "ts": "2026-07-01T13:00:00.000Z",
       "tipo": "glucosa_ayunas",
-      "valor": 85.5
+      "valor": 109.3
     },
     {
       "ts": "2026-07-01T13:00:00.000Z",
       "tipo": "presion_sist",
-      "valor": 147.4
+      "valor": 116.1
     },
     {
       "ts": "2026-07-01T13:00:00.000Z",
       "tipo": "presion_diast",
-      "valor": 88.7
+      "valor": 69.3
     },
     {
       "ts": "2026-07-01T13:00:00.000Z",
       "tipo": "pulso_reposo",
-      "valor": 76.2
+      "valor": 65.9
     },
     {
       "ts": "2026-07-01T13:00:00.000Z",
       "tipo": "saturacion_o2",
-      "valor": 98.6
+      "valor": 98.3
     },
     {
       "ts": "2026-07-01T13:00:00.000Z",
       "tipo": "frecuencia_respiratoria",
-      "valor": 16.3
+      "valor": 17
     },
     {
       "ts": "2026-07-01T13:00:00.000Z",
       "tipo": "temperatura",
-      "valor": 36.8
+      "valor": 36.5
     },
     {
       "ts": "2026-07-08T13:00:00.000Z",
       "tipo": "pulso_reposo",
-      "valor": 74.7
+      "valor": 72.2
     },
     {
       "ts": "2026-07-11T13:00:00.000Z",
       "tipo": "presion_sist",
-      "valor": 147.7
+      "valor": 112.3
     },
     {
       "ts": "2026-07-11T13:00:00.000Z",
       "tipo": "presion_diast",
-      "valor": 85.3
+      "valor": 77.1
     },
     {
       "ts": "2026-07-11T13:00:00.000Z",
+      "tipo": "saturacion_o2",
+      "valor": 96.8
+    },
+    {
+      "ts": "2026-07-11T13:00:00.000Z",
+      "tipo": "peso",
+      "valor": 79
+    },
+    {
+      "ts": "2026-07-15T13:00:00.000Z",
+      "tipo": "glucosa_ayunas",
+      "valor": 109.3
+    },
+    {
+      "ts": "2026-07-15T13:00:00.000Z",
+      "tipo": "pulso_reposo",
+      "valor": 75.1
+    },
+    {
+      "ts": "2026-07-15T13:00:00.000Z",
+      "tipo": "frecuencia_respiratoria",
+      "valor": 16.9
+    },
+    {
+      "ts": "2026-07-15T13:00:00.000Z",
+      "tipo": "temperatura",
+      "valor": 36.8
+    },
+    {
+      "ts": "2026-07-21T13:00:00.000Z",
+      "tipo": "presion_sist",
+      "valor": 115.4
+    },
+    {
+      "ts": "2026-07-21T13:00:00.000Z",
+      "tipo": "presion_diast",
+      "valor": 75
+    },
+    {
+      "ts": "2026-07-21T13:00:00.000Z",
       "tipo": "saturacion_o2",
       "valor": 96.4
     },
     {
-      "ts": "2026-07-11T13:00:00.000Z",
-      "tipo": "peso",
-      "valor": 84
-    },
-    {
-      "ts": "2026-07-15T13:00:00.000Z",
-      "tipo": "glucosa_ayunas",
-      "valor": 92.4
-    },
-    {
-      "ts": "2026-07-15T13:00:00.000Z",
+      "ts": "2026-07-22T13:00:00.000Z",
       "tipo": "pulso_reposo",
-      "valor": 66.2
+      "valor": 73.7
     },
     {
-      "ts": "2026-07-15T13:00:00.000Z",
+      "ts": "2026-07-29T13:00:00.000Z",
+      "tipo": "glucosa_ayunas",
+      "valor": 112.2
+    },
+    {
+      "ts": "2026-07-29T13:00:00.000Z",
+      "tipo": "pulso_reposo",
+      "valor": 67.2
+    },
+    {
+      "ts": "2026-07-29T13:00:00.000Z",
       "tipo": "frecuencia_respiratoria",
-      "valor": 15.9
+      "valor": 13.2
     },
     {
-      "ts": "2026-07-15T13:00:00.000Z",
+      "ts": "2026-07-29T13:00:00.000Z",
       "tipo": "temperatura",
       "valor": 36.7
     },
     {
-      "ts": "2026-07-21T13:00:00.000Z",
-      "tipo": "presion_sist",
-      "valor": 143.4
-    },
-    {
-      "ts": "2026-07-21T13:00:00.000Z",
-      "tipo": "presion_diast",
-      "valor": 88.6
-    },
-    {
-      "ts": "2026-07-21T13:00:00.000Z",
-      "tipo": "saturacion_o2",
-      "valor": 97.5
-    },
-    {
-      "ts": "2026-07-22T13:00:00.000Z",
-      "tipo": "pulso_reposo",
-      "valor": 68.2
-    },
-    {
-      "ts": "2026-07-29T13:00:00.000Z",
-      "tipo": "glucosa_ayunas",
-      "valor": 82
-    },
-    {
-      "ts": "2026-07-29T13:00:00.000Z",
-      "tipo": "pulso_reposo",
-      "valor": 73.8
-    },
-    {
-      "ts": "2026-07-29T13:00:00.000Z",
-      "tipo": "frecuencia_respiratoria",
-      "valor": 14.7
-    },
-    {
-      "ts": "2026-07-29T13:00:00.000Z",
-      "tipo": "temperatura",
-      "valor": 36.5
-    },
-    {
       "ts": "2026-07-31T13:00:00.000Z",
       "tipo": "presion_sist",
-      "valor": 150.3
+      "valor": 119.3
     },
     {
       "ts": "2026-07-31T13:00:00.000Z",
       "tipo": "presion_diast",
-      "valor": 89.6
+      "valor": 78
     },
     {
       "ts": "2026-07-31T13:00:00.000Z",
       "tipo": "saturacion_o2",
-      "valor": 96.6
+      "valor": 98.6
     },
     {
       "ts": "2026-08-05T13:00:00.000Z",
       "tipo": "pulso_reposo",
-      "valor": 64.3
+      "valor": 68.1
     },
     {
       "ts": "2026-08-10T13:00:00.000Z",
       "tipo": "presion_sist",
-      "valor": 144.4
+      "valor": 110.9
     },
     {
       "ts": "2026-08-10T13:00:00.000Z",
       "tipo": "presion_diast",
-      "valor": 90.4
+      "valor": 78.1
     },
     {
       "ts": "2026-08-10T13:00:00.000Z",
@@ -215,127 +216,127 @@
     {
       "ts": "2026-08-10T13:00:00.000Z",
       "tipo": "peso",
-      "valor": 83.5
+      "valor": 78.9
     },
     {
       "ts": "2026-08-12T13:00:00.000Z",
       "tipo": "glucosa_ayunas",
-      "valor": 85.1
+      "valor": 112.5
     },
     {
       "ts": "2026-08-12T13:00:00.000Z",
       "tipo": "pulso_reposo",
-      "valor": 72.4
+      "valor": 74.2
     },
     {
       "ts": "2026-08-12T13:00:00.000Z",
       "tipo": "frecuencia_respiratoria",
-      "valor": 15.3
+      "valor": 16.8
     },
     {
       "ts": "2026-08-12T13:00:00.000Z",
-      "tipo": "temperatura",
-      "valor": 36.7
-    },
-    {
-      "ts": "2026-08-19T13:00:00.000Z",
-      "tipo": "pulso_reposo",
-      "valor": 69.9
-    },
-    {
-      "ts": "2026-08-20T13:00:00.000Z",
-      "tipo": "presion_sist",
-      "valor": 143.2
-    },
-    {
-      "ts": "2026-08-20T13:00:00.000Z",
-      "tipo": "presion_diast",
-      "valor": 89.1
-    },
-    {
-      "ts": "2026-08-20T13:00:00.000Z",
-      "tipo": "saturacion_o2",
-      "valor": 97.1
-    },
-    {
-      "ts": "2026-08-26T13:00:00.000Z",
-      "tipo": "glucosa_ayunas",
-      "valor": 94
-    },
-    {
-      "ts": "2026-08-26T13:00:00.000Z",
-      "tipo": "pulso_reposo",
-      "valor": 74.3
-    },
-    {
-      "ts": "2026-08-26T13:00:00.000Z",
-      "tipo": "frecuencia_respiratoria",
-      "valor": 15.2
-    },
-    {
-      "ts": "2026-08-26T13:00:00.000Z",
       "tipo": "temperatura",
       "valor": 36.6
     },
     {
-      "ts": "2026-08-30T13:00:00.000Z",
-      "tipo": "presion_sist",
-      "valor": 144.6
-    },
-    {
-      "ts": "2026-08-30T13:00:00.000Z",
-      "tipo": "presion_diast",
-      "valor": 89.8
-    },
-    {
-      "ts": "2026-08-30T13:00:00.000Z",
-      "tipo": "saturacion_o2",
-      "valor": 98.4
-    },
-    {
-      "ts": "2026-09-02T13:00:00.000Z",
+      "ts": "2026-08-19T13:00:00.000Z",
       "tipo": "pulso_reposo",
-      "valor": 68
+      "valor": 66.6
     },
     {
-      "ts": "2026-09-09T13:00:00.000Z",
+      "ts": "2026-08-20T13:00:00.000Z",
+      "tipo": "presion_sist",
+      "valor": 117.5
+    },
+    {
+      "ts": "2026-08-20T13:00:00.000Z",
+      "tipo": "presion_diast",
+      "valor": 76.5
+    },
+    {
+      "ts": "2026-08-20T13:00:00.000Z",
+      "tipo": "saturacion_o2",
+      "valor": 97.6
+    },
+    {
+      "ts": "2026-08-26T13:00:00.000Z",
       "tipo": "glucosa_ayunas",
-      "valor": 86.5
+      "valor": 116.8
     },
     {
-      "ts": "2026-09-09T13:00:00.000Z",
-      "tipo": "presion_sist",
-      "valor": 146.3
-    },
-    {
-      "ts": "2026-09-09T13:00:00.000Z",
-      "tipo": "presion_diast",
-      "valor": 86.5
-    },
-    {
-      "ts": "2026-09-09T13:00:00.000Z",
+      "ts": "2026-08-26T13:00:00.000Z",
       "tipo": "pulso_reposo",
-      "valor": 73.4
+      "valor": 75
     },
     {
-      "ts": "2026-09-09T13:00:00.000Z",
-      "tipo": "saturacion_o2",
-      "valor": 96.7
-    },
-    {
-      "ts": "2026-09-09T13:00:00.000Z",
+      "ts": "2026-08-26T13:00:00.000Z",
       "tipo": "frecuencia_respiratoria",
-      "valor": 15.9
+      "valor": 16.1
     },
     {
-      "ts": "2026-09-09T13:00:00.000Z",
+      "ts": "2026-08-26T13:00:00.000Z",
       "tipo": "temperatura",
       "valor": 36.5
     },
     {
+      "ts": "2026-08-30T13:00:00.000Z",
+      "tipo": "presion_sist",
+      "valor": 118.3
+    },
+    {
+      "ts": "2026-08-30T13:00:00.000Z",
+      "tipo": "presion_diast",
+      "valor": 78.1
+    },
+    {
+      "ts": "2026-08-30T13:00:00.000Z",
+      "tipo": "saturacion_o2",
+      "valor": 97.8
+    },
+    {
+      "ts": "2026-09-02T13:00:00.000Z",
+      "tipo": "pulso_reposo",
+      "valor": 73.2
+    },
+    {
+      "ts": "2026-09-09T13:00:00.000Z",
+      "tipo": "glucosa_ayunas",
+      "valor": 111.2
+    },
+    {
+      "ts": "2026-09-09T13:00:00.000Z",
+      "tipo": "presion_sist",
+      "valor": 111.1
+    },
+    {
+      "ts": "2026-09-09T13:00:00.000Z",
+      "tipo": "presion_diast",
+      "valor": 69.8
+    },
+    {
+      "ts": "2026-09-09T13:00:00.000Z",
+      "tipo": "pulso_reposo",
+      "valor": 64.9
+    },
+    {
+      "ts": "2026-09-09T13:00:00.000Z",
+      "tipo": "saturacion_o2",
+      "valor": 96.6
+    },
+    {
+      "ts": "2026-09-09T13:00:00.000Z",
+      "tipo": "frecuencia_respiratoria",
+      "valor": 16.1
+    },
+    {
+      "ts": "2026-09-09T13:00:00.000Z",
+      "tipo": "temperatura",
+      "valor": 36.8
+    },
+    {
       "ts": "2026-09-09T13:00:00.000Z",
       "tipo": "peso",
-      "valor": 84.5
+      "valor": 79.1
     }
   ]
 }

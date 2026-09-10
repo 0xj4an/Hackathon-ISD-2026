@@ -27,10 +27,12 @@ execFileSync(resolve(RAIZ, "mobile/node_modules/.bin/tsc"), [
   "--moduleResolution", "bundler", "--skipLibCheck",
   resolve(RAIZ, "mobile/src/core/reglas.ts"),
   resolve(RAIZ, "mobile/src/core/marcadores.ts"),
+  resolve(RAIZ, "mobile/src/core/paquete.ts"),
 ], { stdio: "pipe" });
 
 const { detectarSenales } = await import(resolve(TMP, "reglas.js"));
 const { MARCADORES, clasificar } = await import(resolve(TMP, "marcadores.js"));
+const { armarPaquete } = await import(resolve(TMP, "paquete.js"));
 
 const lineas = [];
 const di = (s = "") => { console.log(s); lineas.push(s); };
@@ -136,10 +138,51 @@ di(`Senales distintas ejercitadas por los casos: **${unicas.length}** (${unicas.
 
 // ---------------------------------------------------------------- cierre
 di();
+// ---------------------------------------------------------------- 4) paquetes
+di("## 4. El paquete y la puerta del credito");
+di();
+di("Un credito solo se ofrece cuando el costo pesa y hay tratamiento sostenido.");
+di("Ofrecerlo por una consulta suelta, o en una urgencia, seria poner un tramite");
+di("en el camino de alguien que tiene que ir hoy.");
+di();
+di("| Caso | Paquete | Total | Credito | |");
+di("| --- | --- | --- | --- | --- |");
+
+for (const u of usuarios) {
+  const senales = detectarSenales(u.mediciones);
+  const p = armarPaquete(senales);
+  const urgente = senales.some(x => x.urgencia === "Inmediata");
+
+  // Lo que se exige: nunca credito en urgencia, nunca por debajo del minimo,
+  // nunca sin tratamiento sostenido, y toda linea con su fuente.
+  let mal = null;
+  if (!p) {
+    if (senales.length > 0 && !urgente) mal = "hay senales y no hay paquete";
+  } else {
+    if (urgente) mal = "paquete en una urgencia";
+    else if (p.vale_credito && p.meses === 0) mal = "credito sin tratamiento sostenido";
+    else if (p.vale_credito && p.total_max < 100) mal = "credito por debajo del minimo";
+    else if (p.total_max < p.total_min) mal = "rango invertido";
+    else if (p.lineas.some(l => !l.fuente)) mal = "linea sin fuente";
+    else if (p.lineas.some(l => l.max < l.min)) mal = "linea con rango invertido";
+  }
+  if (mal) fallos++;
+
+  const desc = p ? p.titulo : (urgente ? "urgencia, va directo" : "sin hallazgos");
+  const total = p ? `B/. ${p.total_min} a ${p.total_max}` : "-";
+  const cred = p ? (p.vale_credito ? "si" : "no") : "no";
+  di(`| ${u.nombre} | ${desc} | ${total} | ${cred} | ${mal ? "FALLA: " + mal : "OK"} |`);
+}
+di();
+
+const conCredito = usuarios.filter(u => armarPaquete(detectarSenales(u.mediciones))?.vale_credito).length;
+di(`Casos que ofrecen credito: **${conCredito} de ${usuarios.length}**. Los demas no lo necesitan o no pueden esperarlo.`);
+di();
+
 di("## Resultado");
 di();
 di(fallos === 0
-  ? "**Todo pasa.** Los casos producen exactamente sus senales declaradas, los marcadores clasifican en los tres estados, y ninguna senal sale sin ruta ni sin fuente."
+  ? "**Todo pasa.** Los casos producen exactamente sus senales declaradas, los marcadores clasifican en los tres estados, ninguna senal sale sin ruta ni sin fuente, y el credito solo se ofrece donde el costo pesa y hay tratamiento sostenido."
   : `**${fallos} comprobacion(es) fallan.** Ver arriba.`);
 
 writeFileSync(resolve(import.meta.dirname, "resultados.md"), lineas.join("\n") + "\n");

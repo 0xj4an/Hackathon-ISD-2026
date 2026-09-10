@@ -9,6 +9,7 @@
 import { SafeAreaView, ScrollView, Text, View, Pressable, StyleSheet } from "react-native";
 import type { Usuario } from "./usuarios";
 import { detectarSenales, type Senal } from "./core/reglas";
+import { armarPaquete, mensajeCredito, type Paquete } from "./core/paquete";
 
 const COLOR = {
   Inmediata: "#A2402F",
@@ -65,6 +66,57 @@ function Tarjeta({ senal }: { senal: Senal }) {
   );
 }
 
+/**
+ * Lo que cuesta atender todo, junto. Sin este bloque el crédito no se puede
+ * ofrecer con honestidad: nadie sabe por cuánto pedirlo (`ADR-010`).
+ */
+function BloqueP({ paquete, onPedir }: {
+  paquete: Paquete;
+  onPedir?: (min: number, max: number) => void;
+}) {
+  const p = paquete;
+  return (
+    <View style={s.paquete}>
+      <Text style={s.paqueteTitulo}>{p.titulo}</Text>
+
+      {p.lineas.map(l => (
+        <View key={l.concepto} style={s.linea}>
+          <Text style={s.lineaConcepto}>
+            {l.concepto}
+            {l.estimado ? <Text style={s.marcaEstimado}>  estimado</Text> : null}
+          </Text>
+          <Text style={s.lineaMonto}>
+            {l.min === l.max ? `B/. ${l.min}` : `B/. ${l.min} a ${l.max}`}
+          </Text>
+        </View>
+      ))}
+
+      <View style={s.total}>
+        <Text style={s.totalK}>Todo junto</Text>
+        <Text style={s.totalV}>B/. {p.total_min} a {p.total_max}</Text>
+      </View>
+
+      <View style={[s.credito, p.vale_credito ? s.creditoSi : s.creditoNo]}>
+        <Text style={[s.creditoTexto, !p.vale_credito && s.creditoTextoNo]}>
+          {mensajeCredito(p)}
+        </Text>
+      </View>
+
+      {p.vale_credito && onPedir ? (
+        <Pressable
+          onPress={() => onPedir(p.total_min, p.total_max)}
+          accessibilityRole="button"
+          style={s.boton}
+        >
+          <Text style={s.botonTexto}>Pedir el crédito</Text>
+        </Pressable>
+      ) : null}
+
+      <Text style={s.fuente}>{p.nota}</Text>
+    </View>
+  );
+}
+
 const Dato = ({ k, v }: { k: string; v: string }) => (
   <View style={s.dato}>
     <Text style={s.datoK}>{k}</Text>
@@ -73,17 +125,23 @@ const Dato = ({ k, v }: { k: string; v: string }) => (
 );
 
 export default function PantallaAlerta({
-  usuario, onVolver,
-}: { usuario: Usuario; onVolver: () => void }) {
+  usuario, onVolver, onPedirCredito,
+}: {
+  usuario: Usuario;
+  onVolver: () => void;
+  onPedirCredito?: (costoMin: number, costoMax: number) => void;
+}) {
   const orden = { Inmediata: 0, Prioritaria: 1, Rutinaria: 2 } as const;
   const senales = detectarSenales(usuario.mediciones)
     .sort((a, b) => orden[a.urgencia] - orden[b.urgencia]);
+  const paquete = armarPaquete(senales);
+
 
   return (
     <SafeAreaView style={s.pantalla}>
       <ScrollView contentContainerStyle={s.cuerpo}>
         <Pressable onPress={onVolver} accessibilityRole="button" style={s.volver}>
-          <Text style={s.volverTexto}>Volver a los casos</Text>
+          <Text style={s.volverTexto}>Salir</Text>
         </Pressable>
 
         <Text style={s.nombre}>{usuario.nombre}</Text>
@@ -106,6 +164,12 @@ export default function PantallaAlerta({
               {senales.length} {senales.length === 1 ? "señal detectada" : "señales detectadas"}
             </Text>
             {senales.map(x => <Tarjeta key={x.codigo} senal={x} />)}
+            {paquete ? (
+              <>
+                <Text style={s.seccion}>Cuánto cuesta atenderlo</Text>
+                <BloqueP paquete={paquete} onPedir={onPedirCredito} />
+              </>
+            ) : null}
           </>
         )}
 
@@ -157,6 +221,43 @@ const s = StyleSheet.create({
     marginTop: 14, paddingTop: 10, borderTopWidth: 1, borderTopColor: "#EAEEEB",
     fontSize: 11.5, lineHeight: 17, color: "#818C87", fontStyle: "italic",
   },
+  seccion: {
+    fontSize: 13, color: "#4E5A55", fontWeight: "600",
+    marginTop: 18, marginBottom: 12,
+  },
+  paquete: {
+    backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D3DAD6",
+    borderRadius: 4, padding: 16,
+  },
+  paqueteTitulo: { fontSize: 15, fontWeight: "700", color: "#0F1512", marginBottom: 14 },
+  linea: {
+    flexDirection: "row", alignItems: "flex-start", gap: 12,
+    paddingVertical: 6,
+  },
+  lineaConcepto: { flex: 1, fontSize: 13, lineHeight: 19, color: "#2F3733" },
+  marcaEstimado: { fontSize: 10.5, color: "#B77812", fontStyle: "italic" },
+  lineaMonto: {
+    fontSize: 13, color: "#0F1512", fontVariant: ["tabular-nums"], fontWeight: "600",
+  },
+  total: {
+    flexDirection: "row", justifyContent: "space-between", alignItems: "baseline",
+    marginTop: 10, paddingTop: 12, borderTopWidth: 1, borderTopColor: "#D3DAD6",
+  },
+  totalK: { fontSize: 14, fontWeight: "700", color: "#0F1512" },
+  totalV: {
+    fontSize: 16, fontWeight: "700", color: "#0F1512", fontVariant: ["tabular-nums"],
+  },
+  boton: {
+    marginTop: 12, backgroundColor: "#0E6E6C", borderRadius: 3,
+    paddingVertical: 14, alignItems: "center",
+  },
+  botonTexto: { color: "#FFFFFF", fontSize: 15, fontWeight: "700" },
+  credito: { marginTop: 14, padding: 12, borderRadius: 3 },
+  creditoSi: { backgroundColor: "#DCEBEA" },
+  creditoNo: { backgroundColor: "#EAEEEB" },
+  creditoTexto: { fontSize: 13.5, lineHeight: 20, color: "#0E6E6C", fontWeight: "600" },
+  creditoTextoNo: { color: "#4E5A55", fontWeight: "400" },
+
   disclaimer: {
     marginTop: 26, padding: 14, backgroundColor: "#EAEEEB", borderRadius: 3,
     fontSize: 12.5, lineHeight: 19, color: "#4E5A55",
