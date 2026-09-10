@@ -38,10 +38,14 @@ export const COLOR = {
  * La familia de display.
  *
  * El diseño se dibujó con Archivo Black. Meterla de verdad obliga a instalar
- * `expo-font` y a un prebuild, y el bloque 0 (MedPsy cargando en el teléfono)
- * todavía no está cerrado: no se le mete un módulo nativo nuevo a un build que
- * no se ha probado. Mientras tanto el peso 900 del sistema da la Roboto Black
- * de Android, que es una grotesca negra y sostiene la dirección.
+ * `expo-font`, que es módulo nativo, y a otro prebuild. El bloque 0 se acaba de
+ * cerrar en el 17 Pro Max (`48a73a0`) y Android quedó parqueado tras el abort de
+ * Bare: justo después de que un build nativo frágil por fin arranca no es el
+ * momento de meterle una dependencia nueva.
+ *
+ * Mientras tanto el peso 900 del sistema da la SF Pro Black en iOS y la Roboto
+ * Black en Android. Las dos son grotescas negras y sostienen la dirección; no
+ * son Archivo, que es más estrecha y de remates más secos.
  *
  * Para cambiar a Archivo cuando el bloque 0 esté verde:
  *   1. `npx expo install expo-font`
