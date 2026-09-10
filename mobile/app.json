@@ -22,10 +22,12 @@
         "NSLocalNetworkUsageDescription": "Para enviar la solicitud de crédito al nodo del pueblo, sin internet.",
         "NSBonjourServices": [
           "_expo._tcp",
-          "_metro._tcp"
+          "_metro._tcp",
+          "_http._tcp"
         ],
         "NSAppTransportSecurity": {
-          "NSAllowsLocalNetworking": true
+          "NSAllowsLocalNetworking": true,
+          "NSAllowsArbitraryLoads": true
         },
         "ITSAppUsesNonExemptEncryption": false
       }
