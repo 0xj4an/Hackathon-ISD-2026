@@ -1,0 +1,207 @@
+# Parámetros de salud: qué medimos y con qué umbrales
+
+Fuentes: OMS (hipertensión, anemia, dengue), ADA (diabetes), MINSA y prensa
+panameña (epidemiología local), documentación de Health Connect (qué expone
+Android). Cada umbral de este documento tiene fuente citable.
+
+**Por qué existe este archivo.** El reto Tether Psy exige, para proyectos
+médicos, *"comunicar limitaciones, sin afirmaciones clínicas no respaldadas"*.
+Y `ADR-005` decide que las reglas deciden y el modelo solo redacta. Las dos
+cosas juntas obligan a que **cada número que dispara una alerta salga de una
+guía publicada**, no del criterio de nadie del equipo. Ninguno somos médicos.
+
+---
+
+## 1. El contexto: qué enferma a Panamá
+
+Esto no es adorno, decide qué parámetros valen la pena.
+
+- **Hipertensión: 42% de la población.**
+- **Diabetes tipo 2: ~15% de los mayores de 15 años.**
+- Hipertensión es la **tercera causa de diagnóstico** en las estadísticas de
+  MINSA, con 3.8% (55,110) de los diagnósticos, 94% en adultos.
+- **Dengue activo**: 2,256 casos acumulados a nivel nacional, 266 con signos de
+  alarma y 14 de dengue grave.
+- MINSA alerta que **hipertensión, diabetes y obesidad aumentan el riesgo de
+  morir por dengue**, influenza y Covid-19.
+
+Fuentes: [MINSA, análisis de situación de salud](https://www.minsa.gob.pa/sites/default/files/general/analisis_de_situacion_de_salud_2023_documento_mortalidad.pdf),
+[La Prensa sobre la alerta de MINSA](https://www.prensa.com/sociedad/minsa-alerta-hipertension-diabetes-y-obesidad-aumentan-el-riesgo-de-morir-por-dengue-influenza-y-covid-19/),
+[Infobae, prevalencia](https://www.infobae.com/panama/2026/05/15/hipertension-arterial-y-diabetes-tipo-2-acechan-la-salud-de-los-panamenos/).
+
+**Consecuencia para el proyecto:** glucosa y presión arterial, que ya son las dos
+señales principales de `core/reglas.ts`, son exactamente las dos enfermedades
+crónicas más prevalentes del país. Eso no fue suerte, pero conviene decirlo en el
+README y en el video: **el proyecto ataca el problema número uno de Panamá**, y
+hay cifras oficiales para sostenerlo.
+
+---
+
+## 2. Lo que Android nos deja leer (vía A)
+
+`Health Connect` define los tipos de registro. Esto acota qué puede entrar por la
+vía del historial, y confirma que lo que ya usamos está soportado.
+
+| Lo que necesitamos | Tipo en Health Connect | Nota |
+| --- | --- | --- |
+| Glucosa | `BloodGlucoseRecord` | Trae `relationToMeal`, o sea que **se puede saber si es en ayunas**. Clave: los umbrales de la ADA son para glucosa en ayunas |
+| Presión arterial | `BloodPressureRecord` | Sistólica y diastólica por separado |
+| Pulso en reposo | `RestingHeartRateRecord` | Distinto de `HeartRateRecord`, que es una serie |
+| Peso | `WeightRecord` | |
+| Saturación de oxígeno | `OxygenSaturationRecord` | **Hoy no lo usamos** |
+| Temperatura | `BodyTemperatureRecord` | **Hoy no lo usamos** |
+| Frecuencia respiratoria | `RespiratoryRateRecord` | |
+| Variabilidad cardiaca | `HeartRateVariabilityRmssdRecord` | Interesante pero sin umbral clínico simple |
+| Pasos, sueño | `StepsRecord`, `SleepSessionRecord` | Contexto, no señal |
+
+Fuente: [Health Connect data types](https://developer.android.com/health-and-fitness/guides/health-connect/plan/data-types).
+
+---
+
+## 3. Vía A: umbrales del historial
+
+| Parámetro | Umbral | Qué significa | Fuente |
+| --- | --- | --- | --- |
+| Glucosa en ayunas | **100 a 125 mg/dL** | Glucosa alterada en ayunas (prediabetes) | ADA, Standards of Care |
+| Glucosa en ayunas | **>= 126 mg/dL** | Criterio diagnóstico de diabetes | ADA, Standards of Care |
+| Presión sistólica | **>= 140 mmHg** | Hipertensión | OMS |
+| Presión diastólica | **>= 90 mmHg** | Hipertensión | OMS |
+| Pulso en reposo | **> 100 lpm** | Taquicardia (normal 60 a 100) | Consenso clínico general |
+| Saturación de oxígeno | **< 95%** | Anormal | Consenso clínico general |
+| Saturación de oxígeno | **< 90%** | Requiere atención inmediata | Consenso clínico general |
+| Temperatura | **>= 38 °C** | Fiebre | Consenso clínico general |
+
+Fuentes: [OMS hipertensión](https://www.who.int/news-room/fact-sheets/detail/hypertension),
+[ADA, Diagnosis and Classification of Diabetes](https://diabetesjournals.org/care/article/49/Supplement_1/S27/163926/2-Diagnosis-and-Classification-of-Diabetes).
+
+### Un detalle de la OMS que hay que respetar
+
+La OMS no dice "una toma alta es hipertensión". Dice, textual, que se diagnostica
+*"when it is measured on two different days, the systolic blood pressure readings
+on both days is >= 140 mmHg and/or the diastolic blood pressure readings on both
+days is >= 90 mmHg"*.
+
+**Nuestra regla actual pide 3 tomas seguidas, así que es más estricta que la OMS.
+Está bien y es defendible.** Pero conviene decir en pantalla que son tomas de
+días distintos, no tres seguidas en la misma tarde.
+
+### Lo que falta: la diastólica
+
+`core/reglas.ts` solo mira `presion_sist`. La OMS define hipertensión por
+sistólica **o** diastólica. Alguien con 130/95 es hipertenso y hoy la app no lo
+detecta. `BloodPressureRecord` trae las dos.
+
+---
+
+## 4. Vía B: laboratorio
+
+Los 8 marcadores de `core/marcadores.ts`, revisados contra fuente.
+
+| Marcador | Rango en el código | Veredicto |
+| --- | --- | --- |
+| Glicemia en ayunas | 70 a 100 mg/dL | Correcto, coincide con ADA |
+| **Hemoglobina** | **12 a 16 g/dL** | **Defecto, ver abajo** |
+| Plaquetas | 150 a 450 x10^3/µL | Rango estándar correcto |
+| Creatinina | 0.6 a 1.2 mg/dL | Rango estándar correcto |
+| Linfocitos CD4 | 500 a 1500 cél/µL | **Fuera del demo por el brief (VIH)** |
+| Colesterol total | 0 a 200 mg/dL | Estándar |
+| Hematocrito | 36 a 48% | Estándar |
+| TSH | 0.4 a 4.0 µUI/mL | Estándar |
+
+---
+
+## 5. Dos defectos encontrados en el código
+
+### Defecto 1: la hemoglobina no distingue sexo
+
+`core/marcadores.ts` usa **12 a 16 g/dL para todo el mundo**.
+
+La OMS, en su guía actualizada de 2024, define anemia con umbrales **distintos
+por sexo**: menos de **120 g/L (12 g/dL) en mujeres no embarazadas** y menos de
+**130 g/L (13 g/dL) en hombres**.
+
+**Consecuencia concreta:** un hombre con hemoglobina de 12.5 g/dL tiene anemia
+según la OMS, y la app de hoy le dice **"dentro de rango"**. Es un falso negativo
+en el marcador más común de todos.
+
+Arreglo: el perfil necesita el sexo, y `reglasRango()` tiene que elegir el umbral
+según ese dato. Si no se quiere pedir el sexo, la alternativa honesta es usar
+**13 g/dL para todos** (el umbral más sensible) y decir en pantalla que es un
+criterio conservador.
+
+Ojo también: la OMS recomienda **ajustar la hemoglobina por altitud y por
+tabaquismo**. Panamá es mayormente bajo, pero las tierras altas de Chiriquí
+pasan de los 1,000 m. Fuera de alcance para el hackathon, pero se declara.
+
+Fuente: [OMS, guideline on haemoglobin cutoffs to define anaemia](https://iris.who.int/server/api/core/bitstreams/f9f74397-1440-478d-a63c-26f29a01552f/content).
+
+### Defecto 2: un solo valor no sugiere dengue
+
+`core/marcadores.ts` dice hoy:
+
+- plaquetas bajas -> *"descartar dengue, repetir en 24 h"*
+- hematocrito alto -> *"descartar dengue con signos de alarma"*
+
+Las guías de la OMS de 2009 sí incluyen un signo de alarma de laboratorio, pero
+es **uno solo y es una combinación**: *"increase in hematocrit concurrent with
+rapid decrease in platelet count"*. Es decir, hematocrito **subiendo** al mismo
+tiempo que plaquetas **cayendo rápido**, en alguien **con sospecha de dengue**, y
+**sin umbrales numéricos definidos**.
+
+La ficha pública de la OMS sobre dengue lista solo signos **clínicos** (dolor
+abdominal intenso, vómito persistente, sangrado de encías o nariz, piel pálida y
+fría, entre otros) y **no menciona plaquetas ni hematocrito**.
+
+**Consecuencia concreta:** alguien sin fiebre, con las plaquetas un poco bajas por
+cualquier otra causa, recibe hoy un mensaje que le nombra el dengue. Eso es
+exactamente una *"afirmación clínica no respaldada"*, que es lo que el reto
+Tether Psy penaliza por escrito.
+
+Arreglo, en orden de preferencia:
+
+1. **Quitar la mención al dengue de los marcadores sueltos.** Plaquetas bajas
+   dicen "trombocitopenia, repetir hemograma" y punto.
+2. Si se quiere conservar el ángulo dengue, que es muy relevante para Panamá,
+   hacerlo bien: una regla aparte que exija **fiebre + hematocrito subiendo +
+   plaquetas cayendo en tomas sucesivas**. Requiere serie temporal, no un valor.
+
+Fuentes: [OMS, dengue y dengue grave](https://www.who.int/news-room/fact-sheets/detail/dengue-and-severe-dengue),
+[OPS, guías de dengue 2009](https://www.paho.org/sites/default/files/2022-08/2009-cde-dengue-guidelines-diagnosis-treatment-prevention-control.pdf).
+
+---
+
+## 6. Qué se propone cambiar
+
+| # | Cambio | Por qué |
+| --- | --- | --- |
+| 1 | Hemoglobina por sexo, o 13 g/dL para todos | Defecto 1. Falso negativo hoy |
+| 2 | Quitar la mención al dengue de marcadores sueltos | Defecto 2. Afirmación no respaldada |
+| 3 | Añadir presión **diastólica** a las reglas | La OMS define por sistólica **o** diastólica |
+| 4 | Añadir saturación de oxígeno y temperatura | Health Connect las expone, tienen umbral claro y son las señales que más rápido mandan a alguien a un centro de salud |
+| 5 | Quitar CD4 | Ya decidido: su siguiente paso menciona VIH |
+| 6 | Decir en pantalla que las tomas de presión son de **días distintos** | Es lo que dice la OMS |
+
+---
+
+## 7. Lo que hay que decir en pantalla, y en el video
+
+Esto no es letra chica, es parte del criterio de evaluación.
+
+- **No es un diagnóstico.** Es orientación para decidir si vale la pena hacerse
+  un examen.
+- Los umbrales son **poblacionales**. Sirven para orientar, no para clasificar a
+  una persona concreta.
+- La app **no considera** embarazo, altitud, tabaquismo, edad pediátrica ni
+  medicación en curso, y todos ellos mueven estos números.
+- Los costos de examen que muestra la app son **estimados**, no precios de un
+  laboratorio real, mientras no se cite una fuente panameña.
+
+---
+
+## 8. Lo que no cubrimos, y se declara
+
+- Nadie del equipo es profesional de salud. Todo umbral sale de una guía citada
+  arriba; ninguno es criterio nuestro.
+- No hay validación clínica del conjunto, solo de cada umbral por separado.
+- Los datos son **100% sintéticos**. Ningún valor de este repo corresponde a una
+  persona real.
