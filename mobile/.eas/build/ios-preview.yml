@@ -1,0 +1,52 @@
+build:
+  name: iOS ad hoc with Bare addons linked
+  steps:
+    - eas/checkout
+    - eas/use_npm_token
+    - eas/install_node_modules
+    - eas/resolve_build_config
+    - eas/resolve_apple_team_id_from_credentials:
+        id: resolve_apple_team_id_from_credentials
+    - eas/prebuild:
+        inputs:
+          apple_team_id: ${ steps.resolve_apple_team_id_from_credentials.apple_team_id }
+    - run:
+        name: Link Bare native addons
+        command: |
+          set -euo pipefail
+          SRC="qvac/worker.bundle.js"
+          DEST="node_modules/@qvac/sdk/dist/worker.mobile.bundle.js"
+          echo "=== qvac addons manifest ==="
+          cat qvac/addons.manifest.json
+          if [ ! -f "$SRC" ]; then
+            echo "Missing $SRC after prebuild"
+            exit 1
+          fi
+          mkdir -p "$(dirname "$DEST")"
+          if [ ! -f "$DEST" ]; then
+            echo "QVAC plugin did not copy $DEST; copying from $SRC"
+            cp "$SRC" "$DEST"
+          fi
+          ls -la "$SRC" "$DEST"
+          LINKER="node_modules/react-native-bare-kit/ios/link.mjs"
+          if [ ! -f "$LINKER" ]; then
+            echo "Missing $LINKER"
+            exit 1
+          fi
+          node "$LINKER"
+          echo "=== linked addons ==="
+          find node_modules/react-native-bare-kit/ios -name '*.xcframework' -o -name '*.a' -o -name 'addons' | sort | head -80
+    - run:
+        name: Install pods
+        working_directory: ./ios
+        command: pod install
+    - eas/configure_eas_update:
+        inputs:
+          throw_if_not_configured: false
+    - eas/configure_ios_credentials
+    - eas/configure_ios_version
+    - eas/generate_gymfile_from_template:
+        inputs:
+          credentials: ${ eas.job.secrets.buildCredentials }
+    - eas/run_fastlane
+    - eas/find_and_upload_build_artifacts

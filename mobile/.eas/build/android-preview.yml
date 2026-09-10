@@ -1,0 +1,45 @@
+build:
+  name: Android preview APK with Bare addons linked
+  steps:
+    - eas/checkout
+    - eas/use_npm_token
+    - eas/install_node_modules
+    - eas/resolve_build_config
+    - eas/prebuild
+    - run:
+        name: Link Bare native addons
+        command: |
+          set -euo pipefail
+          SRC="qvac/worker.bundle.js"
+          DEST="node_modules/@qvac/sdk/dist/worker.mobile.bundle.js"
+          ADDONS="node_modules/react-native-bare-kit/android/src/main/addons"
+          echo "=== qvac addons manifest ==="
+          cat qvac/addons.manifest.json
+          if [ ! -f "$SRC" ]; then
+            echo "Missing $SRC after prebuild"
+            exit 1
+          fi
+          mkdir -p "$(dirname "$DEST")"
+          cp "$SRC" "$DEST"
+          ls -la "$SRC" "$DEST"
+          LINKER="node_modules/react-native-bare-kit/android/link.mjs"
+          if [ ! -f "$LINKER" ]; then
+            echo "Missing $LINKER"
+            exit 1
+          fi
+          node "$LINKER"
+          echo "=== linked addons ==="
+          find "$ADDONS" -type f | sort
+          COUNT="$(find "$ADDONS" -name '*.so' | wc -l | tr -d ' ')"
+          echo "native .so count=$COUNT"
+          if [ "$COUNT" -lt 5 ]; then
+            echo "Bare addons were not linked (need >= 5 .so)"
+            exit 1
+          fi
+    - eas/configure_eas_update:
+        inputs:
+          throw_if_not_configured: false
+    - eas/inject_android_credentials
+    - eas/configure_android_version
+    - eas/run_gradle
+    - eas/find_and_upload_build_artifacts

@@ -1,0 +1,35 @@
+{
+  "cli": {
+    "version": ">= 24.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "node": "22.21.1"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "config": "android-preview.yml"
+      },
+      "ios": {
+        "simulator": false,
+        "config": "ios-preview.yml"
+      },
+      "node": "22.21.1"
+    },
+    "production": {
+      "autoIncrement": true,
+      "node": "22.21.1"
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
