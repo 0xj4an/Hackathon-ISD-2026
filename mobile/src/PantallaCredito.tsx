@@ -63,16 +63,16 @@ export default function PantallaCredito({
 
       <Etiqueta>Qué te vamos a pedir</Etiqueta>
       <View style={s.filas}>
-        <FilaRuta simbolo="documento" etiqueta="Obligatorio" valor="Una foto de tu cédula" />
-        <FilaRuta simbolo="documento" etiqueta="Obligatorio" valor="Una foto de tu comprobante de ingresos" />
-        <FilaRuta simbolo="moneda" etiqueta="Opcional, baja la tasa" valor="Una foto de tu extracto bancario" ultima />
+        <FilaRuta simbolo="documento" etiqueta="Obligatorio" valor="Cédula: foto o archivo" />
+        <FilaRuta simbolo="documento" etiqueta="Obligatorio" valor="Comprobante de ingresos: foto o archivo" />
+        <FilaRuta simbolo="moneda" etiqueta="Opcional, baja la tasa" valor="Extracto bancario: foto o archivo" ultima />
       </View>
 
       <View style={s.privacidad}>
         <Text style={s.privacidadTitulo}>Qué ve el banco</Text>
         <Text style={s.privacidadTexto}>
-          Las fotos se leen en este teléfono. Al banco solo le llegan los datos escritos y que el
-          préstamo es de salud. No le llega qué se te detectó.
+          Las fotos o archivos se leen en este teléfono y se borra la copia. Al banco solo le
+          llegan los datos escritos y que el préstamo es de salud. No le llega qué se te detectó.
         </Text>
       </View>
 

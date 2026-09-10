@@ -11,9 +11,9 @@ El motor de dominio está terminado y medido: 14 señales con fuente, seis casos
 clínicos, modelo de crédito con scorecard entrenado, y `eval/run.mjs` pasa en
 verde sin tocar un teléfono. MedPsy carga y genera texto en el iPhone.
 
-Lo que falta es unir las dos mitades. **Hoy la app corre entera sobre reglas
-deterministas: ninguna pantalla de producto invoca el modelo.** El único sitio
-donde se llama a `completion()` es `SmokeTest.tsx`.
+Lo que falta es unir las dos mitades. **La alerta de salud sigue saliendo de
+las reglas: ninguna pantalla de producto llama a `completion()` para redactarla.**
+Los documentos sí invocan el modelo: `leerDocumento.ts` corre OCR y MedPsy.
 
 ---
 
@@ -30,21 +30,18 @@ reglas y nunca llama al modelo es un motor de reglas con un smoke test al lado.
 - [ ] El modelo se carga una vez al arrancar, no por pantalla. `ADR-007` dice que la descarga no bloquea el onboarding
 - [ ] `perf/logger.ts` se conecta al flujo de producto. Hoy solo lo importa `SmokeTest.tsx`, así que `perf/perf.jsonl` solo tendría líneas del smoke, y es **entregable obligatorio** de Tether Psy
 
-### 1.2 La rama de documentos es una cáscara
+### 1.2 La rama de documentos ya lee; falta cola y envío
 
-La foto se toma y no se lee. `PantallaDocumentos.tsx` lo dice en su pie:
-*"el documento está tomado, no leído"*. La rama del examen tiene el mismo hueco
-y lo dice en un comentario de `PantallaExamen.tsx`: *"Cuando `ocr()` exista"*.
+`PantallaDocumentos` toma foto o archivo, corre `ocr()` + MedPsy → JSON y borra
+la copia (`leerDocumento.ts`). `PantallaDatos.tsx` (pantalla 11 del mapa, editable)
+y `PantallaCuota.tsx` ya calculan la cuota en el teléfono, sin señal. Falta
+verificar la lectura en el iPhone, y todavía no hay cola ni envío.
 
-Lo que ya no pasa es que el flujo muera ahí: `PantallaDatos.tsx` (la pantalla 11
-del mapa, "lo que se leyó, **editable**") recoge los campos a mano y
-`PantallaCuota.tsx` calcula la cuota en el teléfono, sin señal. Cuando `ocr()`
-exista, esos mismos campos llegan rellenos y con su confianza, y ninguna de las
-dos pantallas cambia. La rama sigue siendo cáscara en lo que importa (no lee, no
-borra, no guarda, no envía), pero ya llega a un número.
+La rama del examen tiene el mismo hueco de lectura y lo dice en un comentario
+de `PantallaExamen.tsx`: *"Cuando `ocr()` exista"*.
 
-- [ ] `ocr()` sobre la foto, extracción a JSON con `SYSTEM_EXTRACCION_*`, validación con `CedulaSchema` e `IngresosSchema`
-- [ ] **Borrar la foto** después de extraer. Cierra C6, y el README ya promete que las fotos no salen del teléfono
+- [~] `ocr()` sobre la foto, extracción a JSON con `SYSTEM_EXTRACCION_*`, validación con `CedulaSchema` e `IngresosSchema`. Código listo; falta verificar en el iPhone
+- [~] **Borrar la foto** después de extraer. El código lo hace; falta verificar en el iPhone (C6)
 - [ ] Persistencia y cola. `expo-sqlite` no se importa en ninguna parte y `pendiente` hoy es solo un estilo de texto
 - [ ] Envío al nodo por HTTP. La app todavía no hace un solo `fetch`
 
@@ -76,7 +73,7 @@ La demo de crédito va por HTTP en la LAN. La regla del hackathon se cumple igua
 - [ ] Guion en `docs/VIDEO.md`
 - [ ] Video <= 5 min, español, enlace sin login. Es lo primero que mira el jurado del reto General
 - [ ] `perf/perf.jsonl` con una línea por inferencia real (ver 1.1)
-- [~] README: falta cerrar la fila "Extracción a JSON" de la tabla de modelos. Hardware, cuantización y base preexistente ya están
+- [x] README: modelo, cuantización, hardware, base preexistente y fila de extracción a JSON
 - [x] **Declarar la base preexistente**: una línea, la plantilla AI Engineering Kit. Omitirlo descalifica
 
 ---
@@ -142,17 +139,17 @@ queda aparcado.
 | [x] C3d | CD4 no aparece en pantalla ni en el video | Fuera del código. Falta revisar el guion cuando exista |
 | [x] C4 | Toda salida del modelo pasa por `limpiarJson()` | Cero `JSON.parse` sueltos en `mobile/src/` |
 | [ ] C5 | La alerta valida contra `AlertaSchema` | **Bloqueado por 1.1**: hoy no hay salida del modelo que validar |
-| [ ] C6 | La foto se borra tras extraer | **Bloqueado por 1.2** |
+| [~] C6 | La foto se borra tras extraer | Código en `leerDocumento.ts`. Falta verificar en el iPhone |
 | [ ] C7 | Ninguna imagen ni dato clínico sale del teléfono | **Bloqueado por 1.2**: la app todavía no envía nada |
 | [ ] C8 | Con Wi-Fi apagado queda `pendiente` y se dice | **Bloqueado por 1.2** |
 | [ ] C9 | Al volver la red, sale y vuelve la respuesta | **Bloqueado por 1.2** |
 | [ ] C10 | `perf.jsonl` con una línea por inferencia | **Bloqueado por 1.1** |
 | [ ] C11 | Tabla base contra LoRA | Solo si se llega al punto 4 |
 | [x] C12 | **Cero llamadas a proveedores de IA remotos** | Verificado en `mobile/src`, `nodo`, `eval`, `data`. Repetir sobre el bundle antes de entregar |
-| [~] C13 | README declara modelo, cuantización, hardware y base | Falta la fila "Extracción a JSON" |
+| [x] C13 | README declara modelo, cuantización, hardware y base | MedPsy Q8_0, OCR_LATIN, extracción = MedPsy, iPhone 17 Pro Max, Kit declarado |
 
-**C12 y C13 descalifican.** Los demás cuestan puntos. Seis de los pendientes
-(C5, C6, C7, C8, C9, C10) los desbloquean los puntos 1.1 y 1.2: son la misma
+**C12 y C13 descalifican.** Los demás cuestan puntos. Cinco de los pendientes
+(C5, C7, C8, C9, C10) los desbloquean los puntos 1.1 y 1.2: son la misma
 tarea vista desde el otro lado.
 
 ---

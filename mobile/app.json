@@ -72,7 +72,8 @@
         {
           "photosPermission": "Para elegir una foto de un documento. No se sube a ningún servidor."
         }
-      ]
+      ],
+      "expo-document-picker"
     ],
     "extra": {
       "eas": {
