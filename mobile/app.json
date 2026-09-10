@@ -16,6 +16,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "xyz.j4an.isdhack",
       "infoPlist": {
+        "CFBundleDisplayName": "Ina Igar",
         "NSCameraUsageDescription": "La app usa la cámara para leer tus documentos en el teléfono. Las fotos no salen del dispositivo.",
         "NSPhotoLibraryUsageDescription": "Para elegir una foto de un documento. No se sube a ningún servidor.",
         "NSMicrophoneUsageDescription": "Permiso pedido por el SDK de cámara. La demo no graba audio.",
