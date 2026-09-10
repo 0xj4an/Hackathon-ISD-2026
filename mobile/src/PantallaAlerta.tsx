@@ -188,7 +188,14 @@ export default function PantallaAlerta({
         </Text>
       </View>
 
-      {peor.ruta.vigilar ? (
+      {/*
+        La franja solo sale en una urgencia. Cada tarjeta ya lleva su propio
+        "ve de inmediato si aparece", así que ponerla siempre repetía el mismo
+        texto dos veces en la misma pantalla: se veía al renderizar. Cuando la
+        señal es Inmediata sí gana el sitio de arriba, porque ahí lo que importa
+        no es la tarjeta sino salir.
+      */}
+      {peor.urgencia === "Inmediata" && peor.ruta.vigilar ? (
         <Franja
           color={COLOR.inmediata}
           titulo="Ve ya si aparece"

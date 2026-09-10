@@ -19,9 +19,18 @@ export type Simbolo =
   | "sinSenal"    // círculo tachado: no hay red
   | "documento";  // hoja con líneas: la cédula, el comprobante
 
-type Props = { simbolo: Simbolo; tamano?: number; color?: string };
+/**
+ * `fondo` es el color que hay detrás del pictograma, y hace falta porque tres
+ * de estos se dibujan calando el fondo: el signo de la alerta, la cruz del
+ * centro de salud y las líneas del documento. Sobre un bloque de color el
+ * pictograma va en blanco, y si el calado también fuera blanco desaparecería,
+ * que es exactamente lo que pasaba: el triángulo salía macizo y sin signo.
+ */
+type Props = { simbolo: Simbolo; tamano?: number; color?: string; fondo?: string };
 
-export default function Pictograma({ simbolo, tamano = 28, color = "#101010" }: Props) {
+export default function Pictograma({
+  simbolo, tamano = 28, color = "#101010", fondo = "#FFFFFF",
+}: Props) {
   const u = tamano / 24; // el dibujo está pensado en una rejilla de 24
   const caja = { width: tamano, height: tamano };
 
@@ -36,8 +45,8 @@ export default function Pictograma({ simbolo, tamano = 28, color = "#101010" }: 
             borderBottomColor: color,
           }}
         />
-        <View style={[s.encima, { top: 10 * u, width: 2.4 * u, height: 6 * u, backgroundColor: "#FFFFFF" }]} />
-        <View style={[s.encima, { top: 17.6 * u, width: 2.4 * u, height: 2.4 * u, backgroundColor: "#FFFFFF" }]} />
+        <View style={[s.encima, { top: 10 * u, width: 2.4 * u, height: 6 * u, backgroundColor: fondo }]} />
+        <View style={[s.encima, { top: 17.6 * u, width: 2.4 * u, height: 2.4 * u, backgroundColor: fondo }]} />
       </View>
     );
   }
@@ -54,8 +63,8 @@ export default function Pictograma({ simbolo, tamano = 28, color = "#101010" }: 
           }}
         />
         <View style={{ width: 17 * u, height: 12 * u, backgroundColor: color, alignItems: "center", justifyContent: "center" }}>
-          <View style={{ width: 9 * u, height: 2.6 * u, backgroundColor: "#FFFFFF" }} />
-          <View style={[s.encima, { width: 2.6 * u, height: 9 * u, backgroundColor: "#FFFFFF" }]} />
+          <View style={{ width: 9 * u, height: 2.6 * u, backgroundColor: fondo }} />
+          <View style={[s.encima, { width: 2.6 * u, height: 9 * u, backgroundColor: fondo }]} />
         </View>
       </View>
     );
@@ -147,9 +156,9 @@ export default function Pictograma({ simbolo, tamano = 28, color = "#101010" }: 
   return (
     <View style={[caja, s.centro]}>
       <View style={{ width: 16 * u, height: 20 * u, backgroundColor: color, paddingTop: 4 * u, alignItems: "center", gap: 2 * u }}>
-        <View style={{ width: 10 * u, height: 2 * u, backgroundColor: "#FFFFFF" }} />
-        <View style={{ width: 10 * u, height: 2 * u, backgroundColor: "#FFFFFF" }} />
-        <View style={{ width: 6 * u, height: 2 * u, backgroundColor: "#FFFFFF", marginRight: 4 * u }} />
+        <View style={{ width: 10 * u, height: 2 * u, backgroundColor: fondo }} />
+        <View style={{ width: 10 * u, height: 2 * u, backgroundColor: fondo }} />
+        <View style={{ width: 6 * u, height: 2 * u, backgroundColor: fondo, marginRight: 4 * u }} />
       </View>
     </View>
   );

@@ -60,7 +60,7 @@ export function Veredicto({
 }) {
   return (
     <View style={[s.veredicto, { backgroundColor: color }]}>
-      {simbolo ? <Pictograma simbolo={simbolo} tamano={54} color={COLOR.sobreColor} /> : null}
+      {simbolo ? <Pictograma simbolo={simbolo} tamano={54} color={COLOR.sobreColor} fondo={color} /> : null}
       <Text style={s.veredictoPalabra}>{palabra}</Text>
       {detalle ? <Text style={s.veredictoDetalle}>{detalle}</Text> : null}
       {children}
@@ -142,7 +142,7 @@ export function Franja({ color = COLOR.tinta, simbolo = "alerta", titulo, texto 
 }) {
   return (
     <View style={[s.franja, { backgroundColor: color }]}>
-      <Pictograma simbolo={simbolo} tamano={24} color={COLOR.sobreColor} />
+      <Pictograma simbolo={simbolo} tamano={24} color={COLOR.sobreColor} fondo={color} />
       <View style={s.franjaTextos}>
         {titulo ? <Text style={s.franjaTitulo}>{titulo}</Text> : null}
         <Text style={[s.franjaTexto, color === COLOR.tinta ? s.franjaTextoApagado : null]}>{texto}</Text>
