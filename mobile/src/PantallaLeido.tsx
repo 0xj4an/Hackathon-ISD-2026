@@ -63,15 +63,15 @@ export default function PantallaLeido({
       <Franja
         color={COLOR.tinta}
         simbolo="sinSenal"
-        titulo="Sin señal"
-        texto="Sale sola cuando haya red o cuando pases cerca del nodo del pueblo."
+        titulo="Sigue en el teléfono"
+        texto="Los campos se quedaron aquí. El siguiente paso calcula la cuota sin mandar nada a un banco."
       />
 
       <Boton
-        texto="Firmar y poner en cola"
+        texto="Ver mi cuota"
         tono="prioritaria"
         onPress={onFirmar}
-        etiqueta="Firmar y poner la solicitud en cola"
+        etiqueta="Ver la cuota calculada en este teléfono"
       />
       <Pie>El banco recibe los campos escritos. Nunca el motivo de salud.</Pie>
     </Pantalla>

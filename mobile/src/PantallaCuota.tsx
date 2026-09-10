@@ -65,16 +65,15 @@ export default function PantallaCuota({
         simbolo="sinSenal"
         titulo="Esto es un estimado"
         texto={
-          "Lo calculó este teléfono con tus documentos, sin conexión. El banco decide " +
-          "cuando reciba la solicitud y puede decidir distinto: él ve tu historial de " +
-          "crédito y aquí no hay forma de consultarlo."
+          "Lo calculó este teléfono con tus documentos, sin conexión. Lo que sigue es la " +
+          "decisión del mismo motor, aquí mismo: el nodo todavía no recibe la solicitud."
         }
       />
 
       <Boton
-        texto="Firmar y enviar"
+        texto="Ver la decisión"
         onPress={onFirmar}
-        etiqueta={`Firmar y enviar la solicitud por ${pre.monto} balboas`}
+        etiqueta={`Ver la decisión para ${pre.monto} balboas`}
       />
     </Pantalla>
   );

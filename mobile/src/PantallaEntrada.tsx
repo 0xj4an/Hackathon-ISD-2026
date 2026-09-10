@@ -9,7 +9,7 @@ import { useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { USUARIOS, buscarPorCorreo, type Usuario } from "./usuarios";
 import { Pantalla, Encabezado, Boton, Etiqueta, Pie } from "./ui/componentes";
-import { COLOR, TIPO, ESPACIO, DISPLAY } from "./ui/tokens";
+import { COLOR, TIPO, ESPACIO, DISPLAY, TOQUE } from "./ui/tokens";
 
 const NO_EXISTE = "No hay ningún historial con ese correo. Revisa cómo lo escribiste.";
 
@@ -122,7 +122,7 @@ const s = StyleSheet.create({
   lista: { flexDirection: "row", flexWrap: "wrap", gap: 8, paddingHorizontal: ESPACIO.borde },
   correo: {
     borderWidth: 2, borderColor: COLOR.tinta, paddingHorizontal: 11,
-    minHeight: 40, justifyContent: "center",
+    minHeight: TOQUE, justifyContent: "center",
   },
   correoPress: { backgroundColor: COLOR.hundido },
   correoTexto: { fontSize: 13, fontWeight: "700", color: COLOR.tinta },

@@ -25,6 +25,7 @@ import { View, Text, StyleSheet } from "react-native";
 import type { Usuario } from "./usuarios";
 import { detectarSenales, type Senal } from "./core/reglas";
 import { armarPaquete, mensajeCredito, type Paquete } from "./core/paquete";
+import { fraseLecturas, fraseMeses, resumenHistorial } from "./historial";
 import {
   Pantalla, Encabezado, Veredicto, BarraVeredicto, Cifra, FilaRuta, FilaLista,
   BandaTotal, Franja, Boton, Etiqueta, LeyendaEstimado, Pie,
@@ -63,6 +64,7 @@ export default function PantallaAlerta({
 
   const peor = senales[0];
   const demas = senales.slice(1);
+  const resumen = resumenHistorial(usuario.mediciones);
 
   if (paso === "ruta") {
     return (
@@ -91,7 +93,8 @@ export default function PantallaAlerta({
     <Alerta
       peor={peor}
       demas={demas}
-      mediciones={usuario.mediciones.length}
+      lecturas={resumen.mediciones}
+      periodo={fraseMeses(resumen)}
       onSalir={onVolver}
       onVerRuta={() => setPaso("ruta")}
     />
@@ -109,8 +112,9 @@ export default function PantallaAlerta({
  * Lo que sí espera al siguiente paso es qué hacer con cada uno, que es una
  * pregunta distinta.
  */
-function Alerta({ peor, demas, mediciones, onSalir, onVerRuta }: {
-  peor: Senal; demas: Senal[]; mediciones: number; onSalir: () => void; onVerRuta: () => void;
+function Alerta({ peor, demas, lecturas, periodo, onSalir, onVerRuta }: {
+  peor: Senal; demas: Senal[]; lecturas: number; periodo: string;
+  onSalir: () => void; onVerRuta: () => void;
 }) {
   return (
     <Pantalla>
@@ -145,7 +149,7 @@ function Alerta({ peor, demas, mediciones, onSalir, onVerRuta }: {
             {demas.length === 1 ? "También encontré esto" : `También encontré estas ${demas.length}`}
           </Etiqueta>
           <Text style={s.deDonde}>
-            En las mismas {mediciones} mediciones. Qué hacer con cada una, en el siguiente paso.
+            En las mismas {lecturas} lecturas. {periodo}. Qué hacer con cada una, en el siguiente paso.
           </Text>
           <View style={s.resumenes}>
             {demas.map(x => <Resumen key={x.codigo} senal={x} />)}
@@ -274,6 +278,7 @@ function Costo({ paquete, onVolver, onPedirCredito }: {
 function Sano({ usuario, onVolver, onSubirExamen }: {
   usuario: Usuario; onVolver: () => void; onSubirExamen?: () => void;
 }) {
+  const resumen = resumenHistorial(usuario.mediciones);
   return (
     <Pantalla>
       <Encabezado meta="Salir" onVolver={onVolver} />
@@ -285,9 +290,10 @@ function Sano({ usuario, onVolver, onSubirExamen }: {
       />
       <Etiqueta>Lo que revisé</Etiqueta>
       <View style={s.sanoBloque}>
-        <Text style={s.sanoTexto}>
-          {usuario.mediciones.length} mediciones de los últimos meses, contra las 14 reglas de
-          referencia. Te aviso solo cuando algo se salga de rango.
+        <Text style={s.sanoTexto}>{fraseLecturas(resumen)}</Text>
+        <Text style={[s.sanoTexto, s.sanoHueco]}>
+          {fraseMeses(resumen)}. Contra las 14 reglas de referencia.
+          Te aviso solo cuando algo se salga de rango.
         </Text>
       </View>
 
@@ -341,6 +347,7 @@ const s = StyleSheet.create({
     paddingHorizontal: ESPACIO.borde, paddingTop: 14,
   },
   sanoTexto: { fontSize: 15, lineHeight: 21, color: COLOR.gris },
+  sanoHueco: { marginTop: 8 },
 
   ruta: { borderTopWidth: 3, borderTopColor: COLOR.tinta },
 

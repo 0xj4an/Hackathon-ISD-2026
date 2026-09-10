@@ -1,8 +1,8 @@
 /**
  * Respuesta del banco. Mock 6 de Señalética.
  *
- * Aquí corre el mismo `decidir()` que el nodo: no hay un segundo motor. El
- * modelo es de juguete y la pantalla lo dice.
+ * Aquí corre el mismo `decidir()` que el nodo: no hay un segundo motor.
+ * El scorecard es de demostración (cartera sintética) y la pantalla lo dice.
  */
 import {
   Pantalla, Encabezado, Veredicto, Cifra, FilaRuta, Franja, Boton, Pie,
@@ -68,8 +68,8 @@ export default function PantallaBanco({
       <Franja
         color={COLOR.tinta}
         simbolo="alerta"
-        titulo="Modelo de juguete"
-        texto="El banco vio nombre, cédula, ingreso y monto. Nunca el motivo de salud. Esta decisión no representa ninguna política real."
+        titulo="Demostración"
+        texto="El banco vio nombre, cédula, ingreso y monto. Nunca el motivo de salud. El scorecard es sintético: no es la política de un banco real."
       />
 
       {ok ? (
@@ -77,7 +77,7 @@ export default function PantallaBanco({
       ) : null}
       <Boton texto="Ahora no" tono="borde" onPress={onVolver} />
       <Pie>
-        El modelo de crédito de este nodo es de juguete, hecho para demostrar el flujo.
+        Mismo motor que el nodo. Cartera sintética, para demostrar el flujo.
       </Pie>
     </Pantalla>
   );

@@ -84,8 +84,8 @@ export default function PantallaCredito({
       <Boton texto="Ahora no" tono="borde" onPress={onVolver} />
 
       <Pie>
-        El modelo de crédito del nodo es de juguete, hecho para demostrar el flujo. No representa
-        ninguna política real.
+        El banco no ve qué se te detectó. El scorecard corre con cartera sintética: demuestra el
+        flujo, no la política de un banco real.
       </Pie>
     </Pantalla>
   );

@@ -15,6 +15,7 @@ import { View, Text, StyleSheet } from "react-native";
 import type { Usuario } from "./usuarios";
 import { detectarSenales } from "./core/reglas";
 import { armarPaquete } from "./core/paquete";
+import { fraseLecturas, fraseMeses, resumenHistorial, yLista } from "./historial";
 import { Pantalla, Encabezado } from "./ui/componentes";
 import { COLOR, TIPO, ESPACIO, DISPLAY } from "./ui/tokens";
 
@@ -28,17 +29,18 @@ export default function PantallaRevision({
 
   const senales = detectarSenales(usuario.mediciones);
   const paquete = armarPaquete(senales);
+  const resumen = resumenHistorial(usuario.mediciones);
 
   const pasos = [
     {
-      titulo: "Leyendo tus mediciones",
-      resultado: `${usuario.mediciones.length} mediciones de los últimos meses`,
+      titulo: "Lo que había en el historial",
+      resultado: `${fraseLecturas(resumen)} ${fraseMeses(resumen)}.`,
     },
     {
       titulo: "Comparando con los rangos de referencia",
       resultado: senales.length === 0
         ? "Nada fuera de rango"
-        : `${senales.length} ${senales.length === 1 ? "cosa fuera de rango" : "cosas fuera de rango"}`,
+        : yLista(senales.map(s => s.titulo)),
     },
     {
       titulo: "Calculando lo que cuesta atenderlo",
@@ -60,8 +62,8 @@ export default function PantallaRevision({
   }, []);
 
   return (
-    <Pantalla scroll={false}>
-      <Encabezado meta="aquí dentro" />
+    <Pantalla>
+      <Encabezado meta="en este teléfono" />
 
       <View style={s.cuerpo}>
         <Text style={s.titular}>Revisando{"\n"}tu historial</Text>
@@ -96,7 +98,7 @@ export default function PantallaRevision({
 }
 
 const s = StyleSheet.create({
-  cuerpo: { flex: 1, paddingHorizontal: ESPACIO.borde, justifyContent: "center", paddingBottom: 40 },
+  cuerpo: { paddingHorizontal: ESPACIO.borde, paddingTop: 12, paddingBottom: 24 },
   titular: { ...DISPLAY, fontSize: 38, lineHeight: 38, letterSpacing: -1.2, color: COLOR.tinta },
   parrafo: { fontSize: 15, lineHeight: 21, color: COLOR.gris, marginTop: 10 },
 
@@ -112,5 +114,5 @@ const s = StyleSheet.create({
   textos: { flex: 1 },
   pasoTitulo: { fontSize: 16, lineHeight: 21, fontWeight: "600", color: COLOR.apagado },
   pasoTituloVivo: { color: COLOR.tinta },
-  pasoResultado: { ...TIPO.denso, fontSize: 14, color: COLOR.rutinaria, marginTop: 3 },
+  pasoResultado: { ...TIPO.denso, fontSize: 14, lineHeight: 19, color: COLOR.rutinaria, marginTop: 3 },
 });
