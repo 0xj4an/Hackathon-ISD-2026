@@ -1,6 +1,10 @@
 # ADR-001: `@qvac/sdk` 0.19, versión exacta, sin `delegate`
 
-- Estado: aceptada
+- Estado: **reemplazada por [`ADR-013`](ADR-013-quedarnos-en-sdk-0.18.2.md)**
+  (2026-09-10). Nunca se aplico: los lockfiles siguen en 0.18.2. Se revirtio al
+  medirse que nuestro transporte por topic no atraviesa NAT, y que `delegate`,
+  lo que 0.19 elimina, es justo la via que no usa topic. Se conserva el archivo
+  porque la decision era razonable con lo que se sabia entonces.
 - Contexto: 0.19 es breaking respecto a 0.18. Textual del CHANGELOG: *"Provider
   mode and DHT delegation are gone. Models load and run locally only."*
   Desaparecen `startQVACProvider`, `stopQVACProvider`, la opción `delegate` de

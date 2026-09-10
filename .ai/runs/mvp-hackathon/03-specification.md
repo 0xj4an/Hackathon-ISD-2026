@@ -289,8 +289,9 @@ Se resuelven con evidencia, no con opinión, antes de construir sobre ellas:
 | D3 | ¿USB / HyperOS / cuenta Mi? | **Cerrado:** ya no usamos el Xiaomi |
 | D4 | Si D1 falla, ¿bajar cuantización o delegar? | Q4_0 primero (entrenable, ~1.1 GB), delegar después. **Q4_K_M nunca**: rompe el LoRA (`ADR-006`) |
 | D6 | ¿Existe constante **Q4_0** de MedPsy 1.7B en el catálogo? | `modelRegistrySearch({ quantization })`. De esto depende el modo ligero de `ADR-006` |
-| D8 | ¿0.19 rompe el pipeline de Expo? | Smoke test en 0.18.2 primero, mover a 0.19, repetir (`ADR-001`) |
-| D9 | ¿Sobrevive la distribución P2P de modelos en 0.19? | Los docs vigentes solo describen HTTP. No bloquea: el nodo sirve el `.gguf` por HTTP en la LAN |
+| ~~D8~~ | ~~¿0.19 rompe el pipeline de Expo?~~ | **Cerrada:** `ADR-013` deja 0.18.2, lo instalado y prebuildeado. No hay migración que probar |
+| ~~D9~~ | ~~¿Sobrevive la distribución P2P de modelos en 0.19?~~ | **No aplica:** nos quedamos en 0.18.2 |
+| D10 | ¿`delegate` de 0.18.2 atraviesa el NAT? | Es la vía sin topic. De eso depende el bonus P2P de `ADR-013`. `provider.js` en la laptop; `composite.js` no corre tal cual |
 | D7 | ¿Un adaptador entrenado sobre Q8_0 carga sobre Q4_0? | Probar con el adaptador del spike. Si no, son dos entrenamientos de ~2 h |
 | D5 | ¿`finetune()` corre en Android? | Prueba corta, solo si todo lo demás está entregable. No se promete en el guion antes |
 

@@ -52,7 +52,12 @@ tras `2b/4` (APK 1.0.2). Se aparca Android. La demo y C1 viven en el iPhone.
 ### Dominio
 
 - [x] `[J]` **Hecho.** `ADR-010` cambió el modelo: se cotiza un paquete por condición a un año, con costos con fuente, en vez de un monto suelto. `mobile/src/core/paquete.ts` y `nodo/credito.mjs` lo implementan
-- [~] `[J]` **Decidido a medias.** Son tres: cédula, comprobante de ingresos y extracto, y los campos están en `mobile/src/core/prompts.ts` y `schemas.ts`. Falta decidir **qué pasa si falta uno**
+- [~] `[J]` **Decidido a medias.** Son tres: cédula, comprobante de ingresos y extracto, y los campos están en `mobile/src/core/prompts.ts` y `schemas.ts`. `ADR-011` añadió los tres que faltaban para medir capacidad de pago: `deudas_mensuales_usd`, `personas_a_cargo` y `ingresos.antiguedad_meses`. Falta decidir **qué pasa si falta uno** y cómo se capturan los dos declarados en pantalla
+- [x] `[J]` **Hecho.** El modelo de crédito de juguete salió. Motor determinista en
+  `mobile/src/core/credito/`: capacidad de pago back-end con piso de subsistencia, scorecard
+  logístico entrenado sobre cartera sintética (AUC 0.723, KS 0.379 en holdout), tasa
+  descompuesta en fondeo, riesgo, opex, capital y margen, y plazo despejado de la cuota. El
+  nodo lo importa sin build. Ver [`ADR-011`](../.ai/adr/ADR-011-el-modelo-de-credito.md)
 - [ ] `[J]` `data/documentos/` **está vacío.** Faltan los tres ficticios renderizados como imagen, con tipografía y ruido. Texto plano perfecto no prueba el OCR
 - [x] `[J]` **Hecho.** 15 lienzos en `docs/design/`, más el comparador de direcciones y el diseño de app
 
@@ -61,7 +66,7 @@ tras `2b/4` (APK 1.0.2). Se aparca Android. La demo y C1 viven en el iPhone.
 - [~] `[A]` **Solo la cámara.** `PantallaDocumentos.tsx` toma la foto con `ImagePicker`. Faltan `ocr()`, la extracción a JSON, **el borrado de la foto** y SQLite: hoy no se usa `expo-sqlite` en ninguna parte
 - [ ] `[A]` Cola en SQLite con estado `pendiente` y envío al nodo. **Sin empezar**: `pendiente` hoy es solo un estilo de texto en pantalla. HTTP primero, que se depura más fácil que Hyperswarm
 - [x] `[A]` **Hecho en la parte de reglas.** `eval/run.mjs` evalúa la vía A (los 6 casos), la vía B (clasificación de los 7 marcadores) y la integridad de las rutas. Determinista, sin teléfono, sale con código 1 si algo falla. La medición del modelo (% JSON, % campos) vive en `spikes/lora-medpsy`
-- [~] `[A]` **Afinado, sin verificar.** `nodo/credito.mjs` ya cotiza el paquete a un año. Falta comprobar que `RespuestaBancoSchema` valida lo que el nodo devuelve de verdad, con el nodo corriendo
+- [x] `[A]` **Verificado.** `eval/credito/contrato.test.mjs` llama al `decidir()` real del nodo y valida su salida contra `RespuestaBancoSchema` en los tres caminos: aprobada, rechazada y revisión. `nodo/credito.mjs` es ahora una cáscara que importa el motor de `mobile/src/core/credito/`
 
 **Al cerrar el bloque:** lanzar el entrenamiento del LoRA y dormir. Con `caffeinate -i`, o el Mac se duerme a mitad como pasó en el spike.
 
@@ -140,7 +145,8 @@ Se cierran con evidencia, no con opinión.
 - [x] D3 ¿Instalar por USB en HyperOS pide cuenta Mi? **Aparcado.** Ya no usamos el Xiaomi. iOS: Modo desarrollador + confiar certificado
 - [x] D4 Si D1 falla en el 14T… **D1 falló ahí; no bajamos cuantización.** Pasamos de aparato. Q8_0 corre en el iPhone. **Q4_K_M nunca**, rompe el LoRA
 - [ ] D6 ¿Existe constante Q4_0 de MedPsy en el catálogo? De eso depende el modo ligero
-- [ ] D8 ¿0.19 rompe el pipeline de Expo? Smoke test en 0.18.2 primero, mover, repetir
-- [ ] D9 ¿Sobrevive la distribución P2P de modelos en 0.19? No bloquea
+- [x] D8 ~~¿0.19 rompe el pipeline de Expo?~~ **Cerrada sin moverse:** `ADR-013` deja el SDK en 0.18.2, que es lo instalado y prebuildeado. No hay migración que probar
+- [x] D9 ~~¿Sobrevive la distribución P2P de modelos en 0.19?~~ **No aplica:** nos quedamos en 0.18.2
+- [ ] D10 ¿`delegate` de 0.18.2 atraviesa el NAT? Es la vía sin topic, y de eso depende el bonus P2P de `ADR-013`. Se prueba con `provider.js` en la laptop (`composite.js` no corre tal cual, ver el ADR)
 - [ ] D7 ¿Un adaptador entrenado sobre Q8_0 carga sobre Q4_0?
 - [ ] D5 ¿`finetune()` corre en Android? Solo si todo lo demás está entregable

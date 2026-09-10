@@ -9,12 +9,12 @@ Fuentes: docs.qvac.tether.io (todas las páginas), qvac.tether.io (blog, changel
 Consecuencias:
 
 1. El Mac tiene instalada **0.18.2** (última con provider mode). Si queremos mostrar delegación P2P nativa hay que **fijar `"@qvac/sdk": "0.18.2"`** en el package.json y no actualizar. Riesgo: sin docs, guiándonos por tipos del paquete y el CHANGELOG; y el jurado técnico de Tether sabe que acaba de quitarlo.
-2. Alternativa segura: delegación a nivel de app. Un peer corre `qvac serve --openai --host 0.0.0.0 --api-key ...` (0.19) y el cliente ligero habla el protocolo OpenAI-compatible por la LAN o por un túnel P2P propio (Hyperswarm + `bare-rpc`, que ya vienen en las dependencias del SDK). La regla del hackathon dice "inferencia en el dispositivo o delegada por P2P": delegar a la laptop del equipo por P2P sigue cumpliendo, aunque el transporte lo pongamos nosotros.
+2. Alternativa segura, **descartada por `ADR-013`: `qvac serve` es de 0.19 y nos quedamos en 0.18.2**. Delegación a nivel de app: un peer corre `qvac serve --openai --host 0.0.0.0 --api-key ...` (0.19) y el cliente ligero habla el protocolo OpenAI-compatible por la LAN o por un túnel P2P propio (Hyperswarm + `bare-rpc`, que ya vienen en las dependencias del SDK). La regla del hackathon dice "inferencia en el dispositivo o delegada por P2P": delegar a la laptop del equipo por P2P sigue cumpliendo, aunque el transporte lo pongamos nosotros.
 3. Lo más sólido para Technical (35%) hoy: **encadenar capacidades on-device** (voz -> LLM con tool calling / JSON schema -> embeddings + RAG -> TTS, y visión/OCR si alcanza) y demostrar arranque con Wi-Fi apagado. La delegación se deja como extra si hay tiempo, no como columna vertebral.
 
 Otras breaking de 0.19: `@qvac/inference` reemplaza a `@qvac/bare-sdk` como motor in-process; `modelConfig.no_mmap` pasa a `load_mode: "none"|"mmap"|"mlock"|"dio"`; `translate` en batch devuelve array; `@qvac/sdk/worker-core` -> `@qvac/sdk/worker-lifecycle`; el paquete de language detection cambia de nombre. Novedades útiles: `assessModelFit()` (dice si un modelo cabe en memoria antes de bajarlo), Parakeet Unified, verificación de checksum para descargas de HF.
 
-**Decisión a tomar hoy:** ¿0.18.2 con delegación nativa, o 0.19.0 sin ella? Recomiendo 0.19.0 salvo que la delegación sea el corazón del pitch.
+**Decidido (`ADR-013`, 10 sep): 0.18.2, con delegación nativa.** Esta nota recomendaba 0.19.0 y `ADR-001` la siguió, pero esa decisión nunca se aplicó y se revirtió: nuestro transporte por topic no atraviesa NAT, `delegate` no usa topic, `ocr()` ya está en 0.18.2, y mover regeneraría el prebuild sin poder verificarlo sin teléfono. Lo de abajo se conserva como registro de lo que 0.19 cambia, no como plan.
 
 ## 1. Arquitectura y ciclo de vida
 

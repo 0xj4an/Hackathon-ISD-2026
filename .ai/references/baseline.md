@@ -20,7 +20,7 @@ Por definir. Restricción base: `@qvac/sdk` levanta un worker Bare y se comunica
 - Chat offline con `LLAMA_3_2_1B_INST_Q4_0`: carga en caliente 2.1 s, primer token 57-130 ms en caliente, 60-200 tok/s. El 1B falla en aritmética, hechos y razonamiento sobre historial largo; sirve para chat acotado, no como enciclopedia.
 - RAG con embeddings (`m2/rag.js`).
 - Descarga y caché de modelos con `downloadAsset()`.
-- Delegación P2P entre pares, probada en 0.18.2. `ADR-001` la descartó: 0.19 eliminó el provider mode y el nodo delega con `qvac serve`.
+- Delegación P2P entre pares, probada en 0.18.2. `ADR-001` la había descartado al mover a 0.19; **`ADR-013` revirtió eso y nos quedamos en 0.18.2**, que la conserva. Es la única vía P2P que no usa descubrimiento por topic (`dht.connect(publicKey)` directo), justo el paso que falla detrás de NAT. Pendiente de correr.
 - Fine tuning LoRA sobre MedPsy 1.7B Q8_0: **sin validar en este repo.** Hubo un spike anterior con buenos indicios, pero se retiró porque no era reproducible aquí. Se rehace desde cero, con los scripts dentro del repo. Hasta que corra, no se planifica como si funcionara.
 
 ## Riesgos y deuda conocida
