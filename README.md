@@ -25,7 +25,7 @@ eso para el video. `npx qvac doctor` valida el entorno.
 ```bash
 # app (demo: iPhone físico)
 cd mobile && npm install && npx expo run:ios --device --configuration Release
-# Android: npx expo run:android --device  — Bare aborta en el 14T; no es el camino de la demo
+# Android: npx expo run:android --device  - Bare aborta en el 14T; no es el camino de la demo
 
 # nodo del corregimiento y banco mock, en dos terminales
 cd nodo && npm install
@@ -45,7 +45,12 @@ que se clasifica están en [`mobile/src/core/marcadores.ts`](mobile/src/core/mar
 ## Seguridad y límites
 - No es un diagnóstico. La alerta es orientativa y lo dice en pantalla. Validación de rangos y consistencia antes de invocar el modelo.
 - El banco recibe solo campos estructurados; nunca imágenes, ni el motivo de salud.
-- El modelo de crédito del nodo "banco" es de juguete, para demostrar el flujo. La firma en pantalla no es firma electrónica legal.
+- El modelo de crédito es propio y determinista: mide capacidad de pago, puntúa con un
+  scorecard y descompone la tasa en sus costos ([`ADR-011`](.ai/adr/ADR-011-el-modelo-de-credito.md)).
+  El scorecard está **entrenado sobre cartera sintética** (`data/cartera-sintetica.mjs`),
+  no sobre datos reales de clientes panameños, y no representa la política de ningún banco.
+  La edad no puntúa. Ningún modelo de lenguaje participa en la decisión.
+- La firma en pantalla no es firma electrónica legal.
 - Datos: 100% sintéticos. Ningún dato real de clientes ni de pacientes.
 
 
