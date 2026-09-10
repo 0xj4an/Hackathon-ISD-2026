@@ -10,12 +10,13 @@
 // de ningun banco real. Se declara en pantalla y en el README.
 
 import { decidir as decidirConMotor } from "../mobile/src/core/credito/motor.ts";
+import { SolicitudSchema } from "../mobile/src/core/schemas.ts";
 
 /**
  * Contexto que solo el banco tiene. En un banco de verdad esto sale de APC
  * Intelidat (Ley 24 de 2002) y de la tesoreria. Aqui se simula, y se dice.
  */
-function contextoDelBanco(sol) {
+function contextoDelBanco(_sol) {
   // Sin consulta real de bureau: la demo no tiene red garantizada y no vamos a
   // inventar un historial que no existe. Cero dias de mora es el supuesto
   // declarado, no un dato.
@@ -24,4 +25,15 @@ function contextoDelBanco(sol) {
 
 export function decidir(sol) {
   return decidirConMotor(sol, contextoDelBanco(sol), new Date());
+}
+
+/** Valida el JSON. Si llega motivo de salud o una foto, `.strict()` tira. */
+export function aceptar(body) {
+  return SolicitudSchema.parse(body);
+}
+
+/** Puerta del banco: valida y recien entonces decide. */
+export function recibir(body) {
+  const sol = aceptar(body);
+  return { sol, respuesta: decidir(sol) };
 }

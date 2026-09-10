@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Landing publica del proyecto. Pagina estatica servida por Node sin dependencias.",
+  "description": "Landing publica del proyecto y back office del banco mock. Node sin dependencias.",
   "scripts": { "start": "node server.js" },
   "engines": { "node": ">=22" }
 }

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Ina Igar · Banco</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --fondo:#FFFFFF; --tinta:#101010; --gris:#6B6B6B; --linea:#E2E2E2; --hundido:#F2F2F2;
+  --ya:#C42B18; --pronto:#A85F00; --calma:#0B7A4B;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);
+  font-family:Archivo,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button,input{font:inherit}
+.w{max-width:720px;margin:0 auto;padding:0 20px}
+h1{margin:0;font-family:"Archivo Black",Archivo,sans-serif;font-weight:400;
+  letter-spacing:-.03em;font-size:clamp(1.8rem,6vw,2.6rem);line-height:.95}
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gris)}
+.btn{display:block;width:100%;border:0;background:var(--tinta);color:#fff;
+  font-family:"Archivo Black",Archivo,sans-serif;letter-spacing:.06em;text-transform:uppercase;
+  font-size:.82rem;padding:16px;cursor:pointer}
+.ghost{background:transparent;color:var(--tinta);border:3px solid var(--tinta);width:auto;padding:10px 14px}
+label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gris);margin:18px 0 8px}
+input{width:100%;border:0;border-bottom:3px solid var(--tinta);background:var(--hundido);
+  padding:14px 12px;color:var(--tinta);outline:none}
+.hint{margin-top:18px;color:var(--gris);font-size:.9rem}
+.hint b{color:var(--tinta)}
+.err{margin-top:14px;color:var(--ya);font-weight:700;min-height:1.2em}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:28px 0 8px}
+.aviso{background:var(--hundido);padding:14px 16px;margin:18px 0 8px;font-size:.9rem;color:var(--gris)}
+.vacio{padding:48px 0;color:var(--gris)}
+.card{border-top:8px solid var(--linea);padding:18px 0 22px;border-bottom:1px solid var(--linea)}
+.card.aprobada{border-top-color:var(--calma)}
+.card.rechazada{border-top-color:var(--ya)}
+.card.revision,.card.pendiente{border-top-color:var(--pronto)}
+.fila{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.decision{font-family:"Archivo Black",Archivo,sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:1.15rem}
+.quien{font-weight:700;margin-top:6px}
+.meta{color:var(--gris);font-size:.88rem;margin-top:2px}
+.nums{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.nums .k{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gris)}
+.nums .v{font-family:"Archivo Black",Archivo,sans-serif;font-size:1.15rem;letter-spacing:-.03em;margin-top:2px}
+.motivo{margin-top:14px;font-size:.92rem;color:var(--gris)}
+.badge{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gris)}
+@media(max-width:560px){.nums{grid-template-columns:repeat(2,1fr)}}
+#login{max-width:420px;margin:0 auto;padding:56px 20px 80px}
+</style>
+</head>
+<body>
+
+<section id="login" hidden>
+  <p class="eyebrow">Back office</p>
+  <h1 style="margin-top:12px">Banco</h1>
+  <p style="margin:14px 0 0;color:var(--gris)">Solo JSON. Sin fotos, sin motivo de salud.</p>
+  <form id="form">
+    <label for="email">Correo</label>
+    <input id="email" type="email" autocomplete="username" inputmode="email" required>
+    <p class="err" id="err"></p>
+    <button class="btn" type="submit">Entrar</button>
+  </form>
+  <p class="hint">Demo del jurado: <b>banco@gmail.com</b></p>
+  <p class="hint"><a href="/">← Volver a Ina Igar</a></p>
+</section>
+
+<section id="panel" hidden>
+  <div class="w">
+    <header>
+      <div>
+        <p class="eyebrow">Ina Igar</p>
+        <h1 style="margin-top:8px">Banco</h1>
+      </div>
+      <button class="btn ghost" id="salir" type="button">Salir</button>
+    </header>
+    <p id="aviso" class="aviso" hidden></p>
+    <div id="lista"></div>
+  </div>
+</section>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const money = (n) => n == null ? "—" : `B/. ${Number(n).toFixed(n % 1 ? 2 : 0)}`;
+const pct = (n) => n == null ? "—" : `${Number(n).toFixed(1)}%`;
+const el = (tag, cls, text) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+};
+
+async function api(path, opts) {
+  const r = await fetch(path, { credentials: "same-origin", ...opts });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(data.motivo || "error"), { status: r.status });
+  return data;
+}
+
+function pintar(data) {
+  const lista = $("lista");
+  const aviso = $("aviso");
+  aviso.hidden = false;
+  if (data.origen === "demo") {
+    aviso.textContent = "El banco no está en línea. Estas tres son solicitudes de demostración, no llegan del teléfono.";
+  } else if (!data.filas.length) {
+    aviso.textContent = "Todavía no llega ninguna. El teléfono las deja en el nodo del pueblo; él se las lleva al banco.";
+  } else {
+    aviso.textContent = `${data.filas.length} solicitud${data.filas.length === 1 ? "" : "es"} decididas por el nodo banco.`;
+  }
+  lista.replaceChildren();
+  if (!data.filas.length) {
+    lista.append(el("p", "vacio", "Vacío."));
+    return;
+  }
+  for (const f of data.filas) {
+    const r = f.respuesta || { decision: "pendiente", motivo: "en camino" };
+    const d = r.decision || "pendiente";
+    const card = el("article", `card ${d}`);
+    const fila = el("div", "fila");
+    fila.append(el("span", "decision", d));
+    fila.append(el("span", "badge", `${f.extracto ? "con extracto" : "sin extracto"}${r.grado ? " · " + r.grado : ""}`));
+    card.append(fila);
+    card.append(el("div", "quien", f.nombre || "sin nombre"));
+    card.append(el("div", "meta", `${f.cedula || ""} · ${f.tipo || ""} · ingreso ${money(f.ingreso)}`));
+    const nums = el("div", "nums");
+    for (const [k, v] of [
+      ["Monto", money(r.monto_aprobado_usd ?? f.monto)],
+      ["Plazo", r.plazo_meses ? `${r.plazo_meses} m` : "—"],
+      ["Tasa", pct(r.tasa_anual_pct)],
+      ["Cuota", money(r.cuota_mensual_usd)],
+    ]) {
+      const box = el("div");
+      box.append(el("div", "k", k), el("div", "v", v));
+      nums.append(box);
+    }
+    card.append(nums);
+    card.append(el("p", "motivo", r.motivo || ""));
+    lista.append(card);
+  }
+}
+
+async function cargar() {
+  pintar(await api("/admin/solicitudes"));
+}
+
+function loginOn() {
+  $("login").hidden = false;
+  $("panel").hidden = true;
+}
+function panelOn() {
+  $("login").hidden = true;
+  $("panel").hidden = false;
+}
+
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("err").textContent = "";
+  try {
+    await api("/admin/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: $("email").value }),
+    });
+    panelOn();
+    await cargar();
+  } catch (err) {
+    $("err").textContent = err.message;
+  }
+});
+
+$("salir").addEventListener("click", async () => {
+  await api("/admin/logout", { method: "POST" });
+  loginOn();
+});
+
+(async () => {
+  try {
+    const s = await api("/admin/sesion");
+    if (s.ok) { panelOn(); await cargar(); }
+    else loginOn();
+  } catch { loginOn(); }
+})();
+</script>
+</body>
+</html>

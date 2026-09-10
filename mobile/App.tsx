@@ -9,15 +9,16 @@
 // lateral: la persona trae un examen de laboratorio en papel y la app se lo lee.
 // Vuelve a la alerta, no sigue hacia el crédito.
 //
-// Firmar y enviar corre `decidir()` aquí mismo, con bureau de demo en mora 0.
-// La cola SQLite y el HTTP al nodo siguen pendientes.
+// Firmar entrega al nodo del pueblo (LAN, sin internet). El nodo envía y
+// recibe del banco. Si el nodo no está, queda pendiente y reintenta.
+// Las fotos no salen del teléfono.
 // `PantallaDatos` sigue en el repo (deudas y personas a cargo, pantalla 11 del
 // mapa) pero el camino de la demo pasa por lo leído → cuota → banco.
 //
 // Para depurar el bloque 0 en un teléfono nuevo, cambiar el import por
 // `./src/SmokeTest` y montarlo directo: aísla si el problema es el teléfono,
 // Expo o el SDK, en vez de nuestro código.
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PantallaEntrada from "./src/PantallaEntrada";
 import PantallaSalud from "./src/PantallaSalud";
 import PantallaRevision from "./src/PantallaRevision";
@@ -28,7 +29,9 @@ import PantallaCuota from "./src/PantallaCuota";
 import PantallaBanco from "./src/PantallaBanco";
 import PantallaExamen from "./src/PantallaExamen";
 import { solicitudDeLectura, type LecturaCredito } from "./src/lectura";
-import { decidir, type Respuesta, type Solicitud } from "./src/core/credito/motor";
+import { consultarRespuesta, enviarSolicitud } from "./src/nodo";
+import type { Respuesta } from "./src/core/credito/motor";
+import type { Solicitud } from "./src/core/schemas";
 import type { Usuario } from "./src/usuarios";
 
 /** Lo que cuesta el paquete, y el monto que la persona decidió pedir. */
@@ -46,12 +49,18 @@ export default function App() {
   const [lectura, setLectura] = useState<LecturaCredito | null>(null);
   const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
   const [respuesta, setRespuesta] = useState<Respuesta | null>(null);
+  const [enviando, setEnviando] = useState(false);
+  const [pendiente, setPendiente] = useState(false);
+  const [aviso, setAviso] = useState<string | undefined>();
 
   const soltarCredito = () => {
     setPaso("captura");
     setLectura(null);
     setSolicitud(null);
     setRespuesta(null);
+    setEnviando(false);
+    setPendiente(false);
+    setAviso(undefined);
   };
 
   const salir = () => {
@@ -62,6 +71,56 @@ export default function App() {
     setEnExamen(false);
     soltarCredito();
   };
+
+  const mandar = async (sol: Solicitud) => {
+    if (enviando) return;
+    setEnviando(true);
+    const r = await enviarSolicitud(sol);
+    setEnviando(false);
+    if (r.ok) {
+      setPendiente(false);
+      setAviso(undefined);
+      setRespuesta(r.respuesta);
+      setPaso("banco");
+      return;
+    }
+    setPendiente(true);
+    setAviso(r.enNodo
+      ? r.detalle
+      : `Sin el nodo del pueblo. La solicitud queda pendiente. ${r.detalle}`);
+  };
+
+  useEffect(() => {
+    if (!pendiente || !solicitud) return;
+    let vivo = true;
+    let ocupado = false;
+    const tick = async () => {
+      if (ocupado) return;
+      ocupado = true;
+      const vista = await consultarRespuesta(solicitud.id);
+      if (vivo && vista) {
+        setPendiente(false);
+        setAviso(undefined);
+        setRespuesta(vista);
+        setPaso("banco");
+        ocupado = false;
+        return;
+      }
+      const r = await enviarSolicitud(solicitud);
+      ocupado = false;
+      if (!vivo) return;
+      if (r.ok) {
+        setPendiente(false);
+        setAviso(undefined);
+        setRespuesta(r.respuesta);
+        setPaso("banco");
+      } else if (r.enNodo) {
+        setAviso(r.detalle);
+      }
+    };
+    const id = setInterval(tick, 4000);
+    return () => { vivo = false; clearInterval(id); };
+  }, [pendiente, solicitud]);
 
   // Fuera del camino de la demo a proposito: los registros son para nosotros,
   // no para el usuario, y no aparecen en el flujo que se graba.
@@ -144,10 +203,10 @@ export default function App() {
     return (
       <PantallaCuota
         solicitud={solicitud}
-        onFirmar={() => {
-          setRespuesta(decidir(solicitud, { bureau: { peor_mora_dias: 0 } }));
-          setPaso("banco");
-        }}
+        enviando={enviando}
+        pendiente={pendiente}
+        aviso={aviso}
+        onFirmar={() => { void mandar(solicitud); }}
         onVolver={() => setPaso("leido")}
       />
     );

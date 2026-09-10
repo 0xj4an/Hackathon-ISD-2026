@@ -1,62 +1,248 @@
-// Nodo P2P: rol "banco" decide; rol "corregimiento" reenvía (store-and-forward) hacia el banco cuando lo alcanza.
-// Transporte: Hyperswarm (Pears). Solo viajan JSON de solicitud/respuesta; nunca imágenes ni datos de salud.
+// El telefono no habla con el banco. Habla con este proceso (corregimiento)
+// por HTTP en la LAN, sin internet. Este proceso es quien envia y recibe
+// del banco cuando tiene salida.
+//
+//   telefono --LAN--> nodo pueblo :8788 --(cuando hay salida)--> banco :8787
+//
+// Hyperswarm entre pueblo y banco se intenta; si no hay peer (NAT), se usa
+// HTTP al banco desde aqui. El telefono nunca ve esa pata.
 import Hyperswarm from "hyperswarm";
 import crypto from "hypercore-crypto";
 import b4a from "b4a";
 import { createServer } from "node:http";
 import { mkdirSync, writeFileSync, readdirSync, readFileSync, existsSync } from "node:fs";
-import { decidir } from "./credito.mjs";
+import { aceptar, recibir } from "./credito.mjs";
 
 const ROL = process.env.ROL || "banco";
+const PORT = Number(process.env.PORT || (ROL === "corregimiento" ? 8788 : 8787));
+const BANCO_URL = (process.env.BANCO_URL || "http://127.0.0.1:8787").replace(/\/$/, "");
 const TOPIC_NAME = process.env.TOPIC || "isd-hackathon-credito-salud-v1";
-const topic = crypto.hash(b4a.from(TOPIC_NAME));
-const STATE = new URL(`./state/${ROL}/`, import.meta.url).pathname; mkdirSync(STATE, { recursive: true });
+const STATE = new URL(`./state/${ROL}/`, import.meta.url).pathname;
+mkdirSync(STATE, { recursive: true });
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), `[${ROL}]`, ...a);
 
+const LIMITE = 32_000;
 const swarm = new Hyperswarm();
 const peers = new Set();
+const topic = crypto.hash(b4a.from(TOPIC_NAME));
+const enviarPeer = (sock, obj) => sock.write(JSON.stringify(obj) + "\n");
+
+function cors(res) {
+  res.setHeader("access-control-allow-origin", "*");
+  res.setHeader("access-control-allow-methods", "GET, POST, OPTIONS");
+  res.setHeader("access-control-allow-headers", "content-type");
+}
+
+function json(res, code, body) {
+  cors(res);
+  res.statusCode = code;
+  res.setHeader("content-type", "application/json");
+  res.end(JSON.stringify(body));
+}
+
+function leerCuerpo(req) {
+  return new Promise((resolve, reject) => {
+    let b = "";
+    req.on("data", (d) => {
+      b += d;
+      if (b.length > LIMITE) {
+        req.destroy();
+        reject(Object.assign(new Error("demasiado grande"), { code: 413 }));
+      }
+    });
+    req.on("end", () => resolve(b));
+    req.on("error", reject);
+  });
+}
+
+function guardar(id, nombre, dato) {
+  writeFileSync(`${STATE}${id}${nombre}`, JSON.stringify(dato, null, 2));
+}
+
+function leerRespuesta(id) {
+  const f = `${STATE}${id}.respuesta.json`;
+  return existsSync(f) ? JSON.parse(readFileSync(f, "utf8")) : null;
+}
+
+function pendientes() {
+  return readdirSync(STATE)
+    .filter((f) => f.endsWith(".json") && !f.includes(".respuesta"))
+    .map((f) => f.replace(".json", ""))
+    .filter((id) => !existsSync(`${STATE}${id}.respuesta.json`))
+    .map((id) => JSON.parse(readFileSync(`${STATE}${id}.json`, "utf8")));
+}
+
+/** Lo que ve el back office. JSON financiero, sin fotos ni motivo de salud. */
+function listar() {
+  return readdirSync(STATE)
+    .filter((f) => f.endsWith(".json") && !f.includes(".respuesta"))
+    .map((f) => {
+      const id = f.replace(".json", "");
+      const sol = JSON.parse(readFileSync(`${STATE}${id}.json`, "utf8"));
+      return {
+        id,
+        creada: sol.creada,
+        nombre: sol.cedula?.nombre,
+        cedula: sol.cedula?.numero,
+        ingreso: sol.ingresos?.ingreso_mensual_usd,
+        tipo: sol.ingresos?.tipo,
+        monto: sol.monto_solicitado_usd,
+        deudas: sol.deudas_mensuales_usd ?? 0,
+        extracto: Boolean(sol.extracto),
+        respuesta: leerRespuesta(id),
+      };
+    })
+    .sort((a, b) => String(b.creada ?? "").localeCompare(String(a.creada ?? "")));
+}
+
+function transito(sol) {
+  return {
+    solicitud_id: sol.id,
+    decision: "pendiente",
+    motivo: "en el nodo del pueblo; él se la lleva al banco",
+    ts: new Date().toISOString(),
+  };
+}
+
+function comoBanco(raw) {
+  const { sol, respuesta } = recibir(JSON.parse(raw));
+  guardar(sol.id, ".json", sol);
+  guardar(sol.id, ".respuesta.json", respuesta);
+  log(`decidida ${sol.id} ${respuesta.decision} ${respuesta.monto_aprobado_usd ?? ""}`);
+  return { sol, respuesta };
+}
+
+async function comoCartero(raw) {
+  const sol = aceptar(JSON.parse(raw));
+  guardar(sol.id, ".json", sol);
+  log(`recibida ${sol.id} monto ${sol.monto_solicitado_usd}`);
+  const dest = [...peers];
+  if (dest.length) {
+    for (const p of dest) enviarPeer(p, { tipo: "solicitud", data: sol });
+    log(`reenvio P2P ${sol.id} a ${dest.length} peer(s)`);
+  }
+  try {
+    await empujarHttp(sol);
+  } catch (e) {
+    log(`banco HTTP no alcanzó ${sol.id}: ${e.message}`);
+  }
+  return { sol, respuesta: leerRespuesta(sol.id) ?? transito(sol) };
+}
+
+async function empujarHttp(sol) {
+  const r = await fetch(`${BANCO_URL}/solicitud`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(sol),
+    signal: AbortSignal.timeout(4000),
+  });
+  const data = await r.json();
+  if (!data?.decision || data.decision === "pendiente") return;
+  guardar(sol.id, ".respuesta.json", data);
+  log(`respuesta HTTP ${sol.id} ${data.decision}`);
+  for (const p of peers) enviarPeer(p, { tipo: "respuesta", data });
+}
+
+async function reenviarPendientes(sock) {
+  if (ROL !== "corregimiento") return;
+  for (const sol of pendientes()) {
+    const dest = sock ? [sock] : [...peers];
+    if (dest.length) {
+      for (const p of dest) enviarPeer(p, { tipo: "solicitud", data: sol });
+      log(`reenvio P2P ${sol.id} a ${dest.length} peer(s)`);
+    }
+    try {
+      await empujarHttp(sol);
+    } catch (e) {
+      log(`banco HTTP no alcanzó ${sol.id}: ${e.message}`);
+    }
+  }
+}
+
+async function onMensaje(msg, sock, id) {
+  if (msg.tipo === "solicitud") {
+    try {
+      if (ROL === "banco") {
+        const { respuesta } = comoBanco(JSON.stringify(msg.data));
+        enviarPeer(sock, { tipo: "respuesta", data: respuesta });
+      } else {
+        const { sol, respuesta } = await comoCartero(JSON.stringify(msg.data));
+        enviarPeer(sock, { tipo: "ack", solicitud_id: sol.id, data: respuesta });
+      }
+    } catch (e) {
+      log(`p2p rechazo de ${id}: ${e.message}`);
+      enviarPeer(sock, { tipo: "respuesta", data: { decision: "revision", motivo: "solicitud invalida" } });
+    }
+  } else if (msg.tipo === "respuesta") {
+    const sid = msg.data?.solicitud_id;
+    if (!sid) return;
+    guardar(sid, ".respuesta.json", msg.data);
+    log(`respuesta P2P ${sid} ${msg.data.decision}`);
+    for (const p of peers) if (p !== sock) enviarPeer(p, msg);
+  } else if (msg.tipo === "consulta") {
+    const r = leerRespuesta(msg.solicitud_id);
+    if (r) enviarPeer(sock, { tipo: "respuesta", data: r });
+  }
+}
+
 swarm.on("connection", (sock, info) => {
   const id = b4a.toString(info.publicKey, "hex").slice(0, 8);
-  peers.add(sock); log(`peer conectado ${id}`);
+  peers.add(sock);
+  log(`peer conectado ${id}`);
   let buf = "";
-  sock.on("data", (d) => { buf += b4a.toString(d); let i; while ((i = buf.indexOf("\n")) >= 0) { const line = buf.slice(0, i); buf = buf.slice(i + 1); if (line.trim()) onMensaje(JSON.parse(line), sock, id); } });
+  sock.on("data", (d) => {
+    buf += b4a.toString(d);
+    let i;
+    while ((i = buf.indexOf("\n")) >= 0) {
+      const line = buf.slice(0, i);
+      buf = buf.slice(i + 1);
+      if (line.trim()) void onMensaje(JSON.parse(line), sock, id);
+    }
+  });
   sock.on("close", () => { peers.delete(sock); log(`peer cerrado ${id}`); });
   sock.on("error", (e) => log("error peer", e.message));
-  if (ROL === "corregimiento") reenviarPendientes(sock);
+  if (ROL === "corregimiento") void reenviarPendientes(sock);
 });
-const enviar = (sock, obj) => sock.write(JSON.stringify(obj) + "\n");
 
-function onMensaje(msg, sock, id) {
-  if (msg.tipo === "solicitud") {
-    log(`solicitud ${msg.data.id} de ${id} (monto ${msg.data.monto_solicitado_usd})`);
-    writeFileSync(`${STATE}${msg.data.id}.json`, JSON.stringify(msg.data, null, 2));
-    if (ROL === "banco") { const r = decidir(msg.data); writeFileSync(`${STATE}${msg.data.id}.respuesta.json`, JSON.stringify(r, null, 2)); enviar(sock, { tipo: "respuesta", data: r }); log(`respuesta ${r.decision} ${r.monto_aprobado_usd ?? ""}`); }
-    else { enviar(sock, { tipo: "ack", solicitud_id: msg.data.id, nota: "recibida en el nodo del corregimiento; se reenviará al banco" }); reenviarPendientes(); }
-  } else if (msg.tipo === "respuesta") {
-    log(`respuesta del banco para ${msg.data.solicitud_id}: ${msg.data.decision}`);
-    writeFileSync(`${STATE}${msg.data.solicitud_id}.respuesta.json`, JSON.stringify(msg.data, null, 2));
-    for (const p of peers) if (p !== sock) enviar(p, msg); // devolver al teléfono si sigue conectado
-  } else if (msg.tipo === "consulta") {
-    const f = `${STATE}${msg.solicitud_id}.respuesta.json`;
-    if (existsSync(f)) enviar(sock, { tipo: "respuesta", data: JSON.parse(readFileSync(f, "utf8")) });
+createServer(async (req, res) => {
+  cors(res);
+  if (req.method === "OPTIONS") { res.statusCode = 204; res.end(); return; }
+
+  if (req.method === "GET" && (req.url === "/" || req.url === "/salud")) {
+    json(res, 200, { ok: true, rol: ROL, peers: peers.size });
+    return;
   }
-}
-function reenviarPendientes(sock) {
-  if (ROL !== "corregimiento") return;
-  for (const f of readdirSync(STATE)) {
-    if (!f.endsWith(".json") || f.includes(".respuesta")) continue;
-    const id = f.replace(".json", ""); if (existsSync(`${STATE}${id}.respuesta.json`)) continue;
-    const data = JSON.parse(readFileSync(`${STATE}${f}`, "utf8"));
-    for (const p of sock ? [sock] : peers) enviar(p, { tipo: "solicitud", data });
+
+  if (req.method === "GET" && req.url === "/solicitudes") {
+    json(res, 200, listar());
+    return;
   }
-}
 
-// HTTP local (misma LAN) como transporte alterno para el demo cuando "hay señal".
-createServer((req, res) => {
-  if (req.method === "POST" && req.url === "/solicitud") { let b = ""; req.on("data", d => b += d); req.on("end", () => { const data = JSON.parse(b); writeFileSync(`${STATE}${data.id}.json`, b); const r = ROL === "banco" ? decidir(data) : { solicitud_id: data.id, decision: "revision", motivo: "en tránsito al banco", ts: new Date().toISOString() }; if (ROL === "banco") writeFileSync(`${STATE}${data.id}.respuesta.json`, JSON.stringify(r)); res.setHeader("content-type", "application/json"); res.end(JSON.stringify(r)); }); return; }
-  if (req.method === "GET" && req.url?.startsWith("/respuesta/")) { const f = `${STATE}${req.url.split("/")[2]}.respuesta.json`; res.setHeader("content-type", "application/json"); res.end(existsSync(f) ? readFileSync(f) : JSON.stringify({ decision: "pendiente" })); return; }
-  res.statusCode = 404; res.end();
-}).listen(Number(process.env.PORT || 8787), "0.0.0.0", () => log(`HTTP en :${process.env.PORT || 8787}`));
+  if (req.method === "GET" && req.url?.startsWith("/respuesta/")) {
+    const id = req.url.split("/")[2];
+    json(res, 200, leerRespuesta(id) ?? { decision: "pendiente" });
+    return;
+  }
 
-await swarm.join(topic, { server: true, client: true }).flushed();
-log(`rol=${ROL} topic=${TOPIC_NAME} key=${b4a.toString(swarm.keyPair.publicKey, "hex").slice(0, 16)}… esperando peers`);
+  if (req.method === "POST" && req.url === "/solicitud") {
+    try {
+      const raw = await leerCuerpo(req);
+      const { respuesta } = ROL === "banco" ? comoBanco(raw) : await comoCartero(raw);
+      json(res, 200, respuesta);
+    } catch (e) {
+      const code = e.code === 413 ? 413 : e?.name === "ZodError" || e instanceof SyntaxError ? 400 : 500;
+      log(`rechazo ${code} ${e.message ?? e}`);
+      json(res, code, { decision: "revision", motivo: "solicitud invalida" });
+    }
+    return;
+  }
+
+  res.statusCode = 404;
+  res.end();
+}).listen(PORT, "0.0.0.0", () => log(`HTTP en :${PORT}`));
+
+if (ROL === "corregimiento") setInterval(() => { void reenviarPendientes(); }, 4000);
+
+swarm.join(topic, { server: true, client: true }).flushed().then(() => {
+  log(`p2p topic=${TOPIC_NAME} key=${b4a.toString(swarm.keyPair.publicKey, "hex").slice(0, 16)}…`);
+}).catch((e) => log("p2p join", e.message));

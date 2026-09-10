@@ -2,8 +2,7 @@
  * Lo que queda de los documentos una vez leídos y borradas las copias.
  * Es lo que viaja entre captura, revisión y el motor de crédito.
  */
-import type { Cedula, Ingresos, Extracto } from "./core/schemas";
-import type { Solicitud } from "./core/credito/motor";
+import type { Cedula, Extracto, Ingresos, Solicitud } from "./core/schemas";
 
 export type LecturaCredito = {
   cedula: Cedula;
@@ -12,28 +11,18 @@ export type LecturaCredito = {
   fotosBorradas: number;
 };
 
+/** Arma el JSON que sale del teléfono. Solo campos de SolicitudSchema. */
 export function solicitudDeLectura(monto: number, lectura: LecturaCredito): Solicitud {
   return {
     id: crypto.randomUUID(),
+    creada: new Date().toISOString(),
+    proposito: "salud",
     monto_solicitado_usd: monto,
+    cedula: lectura.cedula,
+    ingresos: lectura.ingresos,
     deudas_mensuales_usd: 0,
     personas_a_cargo: 0,
-    cedula: {
-      fecha_nacimiento: lectura.cedula.fecha_nacimiento,
-      fecha_expiracion: lectura.cedula.fecha_expiracion,
-      confianza: lectura.cedula.confianza,
-    },
-    ingresos: {
-      ingreso_mensual_usd: lectura.ingresos.ingreso_mensual_usd,
-      tipo: lectura.ingresos.tipo,
-      antiguedad_meses: lectura.ingresos.antiguedad_meses,
-      confianza: lectura.ingresos.confianza,
-    },
-    extracto: lectura.extracto
-      ? {
-          saldo_promedio_usd: lectura.extracto.saldo_promedio_usd,
-          meses_cubiertos: lectura.extracto.meses_cubiertos,
-        }
-      : undefined,
+    extracto: lectura.extracto,
+    estado: "pendiente",
   };
 }

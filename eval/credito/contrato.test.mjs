@@ -3,7 +3,7 @@
 // el CHECKLIST: que `RespuestaBancoSchema` valide lo que el banco devuelve.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { decidir } from "../../nodo/credito.mjs";
+import { decidir, recibir } from "../../nodo/credito.mjs";
 import { SolicitudSchema, RespuestaBancoSchema } from "../../mobile/src/core/schemas.ts";
 
 const SOLICITUD = {
@@ -45,4 +45,16 @@ test("valida tambien cuando rechaza y cuando manda a revision", () => {
   assert.equal(revision.decision, "revision");
   assert.doesNotThrow(() => RespuestaBancoSchema.parse(rechazo));
   assert.doesNotThrow(() => RespuestaBancoSchema.parse(revision));
+});
+
+test("recibir valida y decide en un paso", () => {
+  const { sol, respuesta } = recibir(SOLICITUD);
+  assert.equal(sol.proposito, "salud");
+  assert.equal(respuesta.decision, "aprobada");
+  assert.doesNotThrow(() => RespuestaBancoSchema.parse(respuesta));
+});
+
+test("recibir rechaza motivo de salud y foto", () => {
+  assert.throws(() => recibir({ ...SOLICITUD, motivo_de_salud: "diabetes tipo 2" }));
+  assert.throws(() => recibir({ ...SOLICITUD, foto_cedula_b64: "xxxx" }));
 });

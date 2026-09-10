@@ -31,6 +31,11 @@ test("las deudas y las personas a cargo tienen valor por defecto", () => {
   assert.equal(s.personas_a_cargo, 0);
 });
 
+test("campos de más no pasan: ni motivo de salud ni foto", () => {
+  assert.throws(() => SolicitudSchema.parse({ ...BASE, motivo_de_salud: "diabetes tipo 2" }));
+  assert.throws(() => SolicitudSchema.parse({ ...BASE, foto_cedula_b64: "xxxx" }));
+});
+
 test("la respuesta del banco acepta grado, componentes y factores", () => {
   const r = RespuestaBancoSchema.parse({
     solicitud_id: BASE.id, decision: "aprobada", monto_aprobado_usd: 920,

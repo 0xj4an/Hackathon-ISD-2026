@@ -19,8 +19,11 @@
         "NSCameraUsageDescription": "La app usa la cámara para leer tus documentos en el teléfono. Las fotos no salen del dispositivo.",
         "NSPhotoLibraryUsageDescription": "Para elegir una foto de un documento. No se sube a ningún servidor.",
         "NSMicrophoneUsageDescription": "Permiso pedido por el SDK de cámara. La demo no graba audio.",
-        "NSLocalNetworkUsageDescription": "Para cargar el JavaScript de desarrollo desde el Mac (Metro).",
+        "NSLocalNetworkUsageDescription": "Para enviar la solicitud de crédito al nodo del pueblo, sin internet.",
         "NSBonjourServices": ["_expo._tcp", "_metro._tcp"],
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        },
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -53,6 +56,7 @@
             "deploymentTarget": "17.0"
           },
           "android": {
+            "usesCleartextTraffic": true,
             "minSdkVersion": 29,
             "enableProguardInReleaseBuilds": false,
             "enableShrinkResourcesInReleaseBuilds": false,

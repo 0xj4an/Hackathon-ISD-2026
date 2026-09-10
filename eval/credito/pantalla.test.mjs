@@ -54,3 +54,18 @@ test("un ingreso que no alcanza no revienta, explica", () => {
   assert.match(pre.motivo, /cuota maxima/);
   assert.equal(pre.capacidad.cuota_max, 0);
 });
+
+test("lo que arma la lectura es una solicitud que el banco acepta", async () => {
+  const { solicitudDeLectura } = await import("../../mobile/src/lectura.ts");
+  const { SolicitudSchema } = await import("../../mobile/src/core/schemas.ts");
+  const sol = solicitudDeLectura(920, {
+    cedula: { numero: "8-123-4567", nombre: "Ana Perez", fecha_nacimiento: "1990-05-04",
+              fecha_expiracion: "2030-01-01", confianza: 0.9 },
+    ingresos: { empleador_o_actividad: "Finca La Union", ingreso_mensual_usd: 520,
+                tipo: "asalariado", antiguedad_meses: 36, confianza: 0.9 },
+    fotosBorradas: 2,
+  });
+  assert.equal(sol.proposito, "salud");
+  assert.doesNotThrow(() => SolicitudSchema.parse(sol));
+  assert.equal("motivo_de_salud" in sol, false);
+});

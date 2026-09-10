@@ -95,7 +95,7 @@ export const SolicitudSchema = z.object({
   extracto: ExtractoSchema.optional(),
   firma_hash: z.string().optional(),
   estado: z.enum(["borrador", "pendiente", "enviada", "respondida", "aceptada", "rechazada"]),
-});
+}).strict();
 export type Solicitud = z.infer<typeof SolicitudSchema>;
 
 /** Por que salio esta decision. Lo que un banco llama adverse action. */

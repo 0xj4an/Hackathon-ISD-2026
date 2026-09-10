@@ -19,11 +19,14 @@ import {
 import { COLOR } from "./ui/tokens";
 
 export default function PantallaCuota({
-  solicitud, onFirmar, onVolver,
+  solicitud, onFirmar, onVolver, enviando, pendiente, aviso,
 }: {
   solicitud: Solicitud;
   onFirmar: () => void;
   onVolver: () => void;
+  enviando?: boolean;
+  pendiente?: boolean;
+  aviso?: string;
 }) {
   const pre = preCalificar(solicitud);
   const techo = `B/. ${pre.capacidad.cuota_max.toFixed(2)}`;
@@ -63,17 +66,17 @@ export default function PantallaCuota({
       <Franja
         color={COLOR.tinta}
         simbolo="sinSenal"
-        titulo="Esto es un estimado"
-        texto={
-          "Lo calculó este teléfono con tus documentos, sin conexión. Lo que sigue es la " +
-          "decisión del mismo motor, aquí mismo: el nodo todavía no recibe la solicitud."
-        }
+        titulo={pendiente ? "Queda pendiente" : "Esto es un estimado"}
+        texto={aviso ?? (
+          "Lo calculó este teléfono con tus documentos, sin internet. Al firmar " +
+          "va al nodo del pueblo, en esta red local. Él se la lleva al banco."
+        )}
       />
 
       <Boton
-        texto="Ver la decisión"
-        onPress={onFirmar}
-        etiqueta={`Ver la decisión para ${pre.monto} balboas`}
+        texto={enviando ? "Enviando…" : pendiente ? "Reintentar" : "Firmar y enviar"}
+        onPress={enviando ? () => {} : onFirmar}
+        etiqueta={`Firmar y enviar la solicitud por ${pre.monto} balboas`}
       />
     </Pantalla>
   );

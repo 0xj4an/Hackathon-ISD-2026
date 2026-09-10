@@ -44,8 +44,13 @@ section{padding:88px 0 0}
 
 /* hero */
 header{padding:36px 0 0}
+.hero-top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .tag{display:inline-block;background:var(--tinta);color:#fff;font-size:.72rem;font-weight:700;
   letter-spacing:.14em;text-transform:uppercase;padding:9px 13px}
+.btn-admin{font-family:"Archivo Black",Archivo,sans-serif;font-size:.72rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--tinta);text-decoration:none;border:3px solid var(--tinta);
+  padding:9px 13px;white-space:nowrap}
+.btn-admin:hover{background:var(--tinta);color:#fff}
 .marca{margin-top:34px}
 .gunagaya{margin-top:12px;font-size:.9rem;font-weight:700;letter-spacing:.14em;
   text-transform:uppercase;color:var(--gris)}
@@ -147,7 +152,10 @@ footer a{color:#fff}
 <div class="w">
 
 <header>
-  <span class="tag">Decentralized AI Hackathon · ISD Summit 2026</span>
+  <div class="hero-top">
+    <span class="tag">Decentralized AI Hackathon · ISD Summit 2026</span>
+    <a class="btn-admin" href="/admin">Admin del banco</a>
+  </div>
   <h1 class="marca">Ina Igar</h1>
   <p class="gunagaya">"camino de la medicina" · gunagaya</p>
 
@@ -314,7 +322,7 @@ footer a{color:#fff}
       <li>Los umbrales son <b>poblacionales</b>: orientan, no clasifican a una persona concreta.</li>
       <li>No considera embarazo, altitud, tabaquismo, edad pediátrica ni medicación en curso, y todos ellos mueven estos números.</li>
       <li>Los precios son de <b>consulta privada</b>. En un centro del MINSA puede costar menos o nada.</li>
-      <li>El modelo de crédito del nodo es <b>de juguete</b>, para demostrar el flujo.</li>
+      <li>El modelo de crédito está entrenado sobre <b>cartera sintética</b>: no representa la política de ningún banco real. Tiene elegibilidad, capacidad de pago, scorecard y precio.</li>
       <li><b>El borrado de la foto está escrito pero sin verificar en el teléfono.</b> El código lee el documento y borra el archivo; que de verdad no quede rastro en el iPhone es una comprobación pendiente, y hasta hacerla no se da por buena.</li>
       <li><b>El adaptador LoRA está entrenado pero no integrado.</b> Vive en <code>spikes/</code> con su script reproducible, y todavía no lee documentos dentro de la app.</li>
       <li>Nadie del equipo es profesional de salud. Cada umbral sale de una guía citada, ninguno es criterio nuestro.</li>
@@ -363,7 +371,7 @@ footer a{color:#fff}
 
 <footer>
   <div class="w">
-    <p><b>Ina Igar</b> · Decentralized AI Hackathon, ISD Summit 2026, Panamá · Equipo 0xj4an y Artur · Licencia MIT</p>
+    <p><b>Ina Igar</b> · Decentralized AI Hackathon, ISD Summit 2026, Panamá · Equipo 0xj4an y Artur · Licencia MIT · <a href="/admin">Admin del banco</a></p>
     <p>Construido con <a href="https://docs.qvac.tether.io">QVAC</a> de Tether. Toda la inferencia en el dispositivo o delegada por P2P.</p>
   </div>
 </footer>
