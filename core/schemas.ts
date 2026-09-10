@@ -4,7 +4,9 @@ import { z } from "zod";
 export const AlertaSchema = z.object({
   senal: z.string().describe("Qué se observa en las mediciones, en lenguaje simple"),
   examen_sugerido: z.string(),
-  costo_estimado_usd: z.number().min(0).max(2000),
+  /** Rango, no un número exacto: los precios de laboratorio varían por sede. Ausente si no hay precio con fuente. */
+  costo_min_usd: z.number().min(0).max(2000).optional(),
+  costo_max_usd: z.number().min(0).max(2000).optional(),
   urgencia: z.enum(["Rutinaria", "Prioritaria", "Inmediata"]),
   mensaje: z.string().describe("Texto en español para la persona, máx 3 frases"),
   disclaimer: z.string(),

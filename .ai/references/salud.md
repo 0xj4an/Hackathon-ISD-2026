@@ -170,16 +170,53 @@ Fuentes: [OMS, dengue y dengue grave](https://www.who.int/news-room/fact-sheets/
 
 ---
 
-## 6. Qué se propone cambiar
+## 6. Qué se cambió
 
-| # | Cambio | Por qué |
+Los seis, aplicados. `core/marcadores.ts` y `core/reglas.ts` compilan en estricto
+y las reglas están probadas caso por caso.
+
+| # | Cambio | Estado |
 | --- | --- | --- |
-| 1 | Hemoglobina por sexo, o 13 g/dL para todos | Defecto 1. Falso negativo hoy |
-| 2 | Quitar la mención al dengue de marcadores sueltos | Defecto 2. Afirmación no respaldada |
-| 3 | Añadir presión **diastólica** a las reglas | La OMS define por sistólica **o** diastólica |
-| 4 | Añadir saturación de oxígeno y temperatura | Health Connect las expone, tienen umbral claro y son las señales que más rápido mandan a alguien a un centro de salud |
-| 5 | Quitar CD4 | Ya decidido: su siguiente paso menciona VIH |
-| 6 | Decir en pantalla que las tomas de presión son de **días distintos** | Es lo que dice la OMS |
+| 1 | Hemoglobina por sexo, 13 g/dL cuando no se conoce | **Hecho.** `porSexo` en el marcador, `clasificar(m, valor, sexo?)` |
+| 2 | Quitar la mención al dengue de marcadores sueltos | **Hecho.** Plaquetas y hematocrito dicen lo que la lectura muestra |
+| 3 | Presión **diastólica** en las reglas | **Hecho.** `PRES_ALTA` dispara por sistólica **o** diastólica |
+| 4 | Saturación de oxígeno y temperatura | **Hecho.** `SAT_CRITICA`, `SAT_BAJA` y `FIEBRE` |
+| 5 | Quitar CD4 | **Hecho.** Fuera de la tabla, con filtro de respaldo en el generador |
+| 6 | Tomas de presión en **días distintos** | **Hecho.** Está en el texto del examen sugerido |
+
+### Casos probados
+
+| Caso | Resultado |
+| --- | --- |
+| 130/95 | `PRES_ALTA` por diastólica. **Antes no se detectaba** |
+| 145/85 | `PRES_ALTA` por sistólica |
+| 120/78 | Sin señales |
+| Saturación 88% | `SAT_CRITICA`, urgencia Inmediata |
+| Saturación 93, 92, 94 | `SAT_BAJA`, urgencia Prioritaria |
+| Saturación 97, 98, 97 | Sin señales |
+| Temperatura 38.6 | `FIEBRE` |
+| Temperatura 36.9 | Sin señales |
+| Glucosa 130 de promedio | `GLU_ALTA` con costo 6 a 15 USD citado |
+| **Usuario sano completo** | **Sin señales** (criterio C3c) |
+
+## 6b. Los costos, con fuente
+
+Los valores de antes (25, 8, 40 y 15 USD) estaban inventados y salían en
+pantalla. Ahora son **rangos publicados**, y el tipo `CostoEstimado` obliga a
+llevar la fuente pegada al número.
+
+| Examen | Rango | Fuente |
+| --- | --- | --- |
+| Glucosa en ayunas | 6 a 15 USD | Rangos de laboratorios en Panamá, [chequeandome.com.pa](https://chequeandome.com.pa/blog/laboratoriopreciosdeexamenespanama/) |
+| Electrocardiograma | 20 a 45 USD | Clínicas en Panamá: trazo desde ~28, informado por cardiología ~45 |
+
+Donde no hay precio publicado que citar, **el campo `costo` va ausente y la
+pantalla no muestra número**. El prompt se lo dice al modelo explícito: *"El
+costo viene dado en los datos de entrada. Cópialo tal cual. Si no viene, usa
+null en ambos: no inventes precios."*
+
+Los rangos son aproximados y varían por laboratorio, sede y promoción. Eso se
+dice en pantalla, no solo aquí.
 
 ---
 
