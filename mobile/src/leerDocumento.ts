@@ -4,7 +4,7 @@
  *
  * El lote importa: si OCR y MedPsy conviven, el detector (CRAFT) se queda sin
  * grafo (`ggml_galloc_alloc_graph`) en la segunda página. Aquí el OCR corre
- * solo, se suelta, y MedPsy entra después.
+ * solo, se suelta entre foto y foto, y MedPsy entra después, sin LoRA.
  *
  * No hay SQLite aquí. La cola durable de la solicitud de crédito está en
  * `cola.ts` (SQLite). Aquí solo queda el JSON validado en memoria del flujo.
@@ -113,6 +113,24 @@ function esJpegOPng(b64: string): boolean {
   return t.startsWith("/9j/") || t.startsWith("iVBORw0KGgo");
 }
 
+function esFalloGrafo(err: unknown): boolean {
+  const t = (err instanceof Error ? err.message : String(err)).toLowerCase();
+  return (
+    t.includes("galloc")
+    || t.includes("alloc_graph")
+    || t.includes("stepdetection")
+    || t.includes("demasiado grande para el lector")
+    || t.includes("invalid input")
+    || t.includes("invalid image")
+    || t.includes("invalid_image")
+  );
+}
+
+/** El unload nativo no libera Metal en el mismo tick. Sin esta pausa, la página 2 hereda el grafo roto. */
+function cederRam(): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, 160));
+}
+
 export function mensajeLectura(err: unknown): string {
   const raw = err instanceof Error ? err.message : String(err);
   const t = raw.toLowerCase();
@@ -218,6 +236,28 @@ async function ocrImagen(uri: string): Promise<{ texto: string; confianza?: numb
   return { texto, confianza, stats };
 }
 
+async function ocrPagina(
+  uri: string,
+  onProgreso?: (p: ProgresoLectura) => void,
+): Promise<{ texto: string; confianza?: number; stats: unknown }> {
+  const intentar = async () => {
+    await asegurarOcr(onProgreso);
+    return ocrImagen(uri);
+  };
+  try {
+    return await intentar();
+  } catch (err) {
+    if (!esFalloGrafo(err)) throw err;
+    recordError("ocr.grafo", err);
+    await soltarOcr();
+    await cederRam();
+    return await intentar();
+  } finally {
+    await soltarOcr();
+    await cederRam();
+  }
+}
+
 function uint8ToBase64(bytes: Uint8Array): string {
   const CHUNK = 0x8000;
   let bin = "";
@@ -237,6 +277,7 @@ async function extraerConLlm(clave: ClaveDocumento, textoOcr: string, confianzaO
     task: "extraccion",
     temp: 0.1,
     predict: 220,
+    conLora: false,
   });
 }
 
@@ -278,8 +319,8 @@ function fallo(clave: ClaveDocumento, error: string, textoOcr = "", borrada = fa
 }
 
 /**
- * Achica, lee el texto de todas, suelta el OCR, extrae con MedPsy, borra copias.
- * Nunca deja el detector y MedPsy cargados a la vez.
+ * Achica, lee el texto de cada foto con el detector fresco, extrae con MedPsy
+ * base (sin LoRA), borra copias. Nunca deja el detector y MedPsy a la vez.
  */
 export async function leerDocumentos(
   entradas: EntradaDocumento[],
@@ -300,16 +341,17 @@ export async function leerDocumentos(
     for (const e of entradas) {
       onProgreso?.(e.clave, { paso: "ocr", detalle: `Achicando ${NOMBRE[e.clave]}` });
       const chica = await achicar(e.uri);
+      if (chica !== e.uri) borrarCopia(e.uri);
       trabajos.push({ clave: e.clave, original: e.uri, chica });
     }
 
-    await soltarMedPsy();
-    await asegurarOcr(aviso);
+    await soltarMedPsy(true);
+    await cederRam();
     for (const t of trabajos) {
       onProgreso?.(t.clave, { paso: "ocr", detalle: `Leyendo ${NOMBRE[t.clave]}` });
       const tOcr = Date.now();
       try {
-        const ocr = await ocrImagen(t.chica);
+        const ocr = await ocrPagina(t.chica, aviso);
         await recordInference({
           task: "ocr",
           model: OCR_NOMBRE,
@@ -336,7 +378,10 @@ export async function leerDocumentos(
 
     const conTexto = trabajos.filter(t => t.ocr && !t.error);
     if (conTexto.length > 0) {
-      await asegurarMedPsy(p => aviso({ paso: "extraccion", pct: p.pct, detalle: p.detalle }));
+      await asegurarMedPsy(
+        p => aviso({ paso: "extraccion", pct: p.pct, detalle: p.detalle }),
+        { conLora: false },
+      );
       for (const t of conTexto) {
         const ocr = t.ocr;
         if (!ocr) continue;
@@ -353,7 +398,7 @@ export async function leerDocumentos(
           t.error = mensajeLectura(err);
         }
       }
-      await soltarMedPsy();
+      await soltarMedPsy(true);
     }
 
     for (const t of trabajos) {
@@ -391,14 +436,14 @@ export async function leerOcrDeUri(
   uri: string,
   onProgreso?: (p: ProgresoLectura) => void,
 ): Promise<{ texto: string; confianza?: number; stats: unknown }> {
-  await soltarMedPsy();
+  await soltarMedPsy(true);
+  await cederRam();
   onProgreso?.({ paso: "ocr", detalle: "Achicando la foto" });
   const chica = await achicar(uri);
-  await asegurarOcr(onProgreso);
   onProgreso?.({ paso: "ocr", detalle: "Leyendo el texto del papel" });
   const tOcr = Date.now();
   try {
-    const ocr = await ocrImagen(chica);
+    const ocr = await ocrPagina(chica, onProgreso);
     await recordInference({
       task: "ocr",
       model: OCR_NOMBRE,
