@@ -10,10 +10,12 @@ import {
 import { COLOR, DISPLAY, ESPACIO, TIPO } from "./ui/tokens";
 
 export default function PantallaDesembolso({
-  respuesta, destino, onListo,
+  respuesta, destino, constancia, onListo,
 }: {
   respuesta: Respuesta;
   destino: string;
+  /** Hash corto del trazo (demo local; no sale al banco). */
+  constancia?: string;
   onListo: () => void;
 }) {
   const monto = respuesta.monto_aprobado_usd ?? 0;
@@ -42,6 +44,12 @@ export default function PantallaDesembolso({
             <Text style={s.cajaNota}>
               Cuota B/. {respuesta.cuota_mensual_usd.toFixed(2)} · {respuesta.plazo_meses} meses
             </Text>
+          </>
+        ) : null}
+        {constancia ? (
+          <>
+            <View style={s.sep} />
+            <Text style={s.cajaNota}>Constancia del trazo · {constancia}</Text>
           </>
         ) : null}
       </View>

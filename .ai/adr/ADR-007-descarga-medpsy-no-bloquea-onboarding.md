@@ -1,57 +1,45 @@
-# ADR-007: La descarga de MedPsy no bloquea el onboarding
+# ADR-007: La app es usable sin MedPsy en RAM (carga perezosa)
 
-- Estado: aceptada
-- Contexto: MedPsy 1.7B Q8_0 pesa **2.1 GB**. En el smoke de iOS Bare arranca
-  (`2b/4`) y `loadModel` se queda en `descarga 0%` mientras bajan los pesos. En
-  Android todavía no llegamos a esa fase (abort de Bare). Si la primera pantalla
-  espera a `loadModel`, el usuario rural ve un splash de minutos o un cuelgue.
+- Estado: aceptada en lo esencial; **boot `downloadAsset` no implementado**
+  (actualizado 10 sep 2026)
+- Contexto: MedPsy 1.7B Q8_0 pesa **2.1 GB**. Si la primera pantalla espera a
+  `loadModel`, el usuario ve un splash de minutos. QVAC en background llama
+  `suspend()` y pausa descargas.
 
-  QVAC en móvil, al irse a background, llama `suspend()` y **pausa** descargas.
-  No hay una vía documentada para bajar 2.1 GB con la app cerrada o el teléfono
-  bloqueado.
+## Decisión (lo que corre hoy)
 
-## Decisión
+La app es usable **sin MedPsy en RAM**. Las reglas, el historial, la cola y el
+crédito no dependen del LLM.
 
-La app es usable **sin MedPsy en RAM**. Los pesos se bajan con `downloadAsset()`
-en primer plano, sin bloquear navegación. `loadModel()` solo cuando hace falta
-inferencia.
-
-| Qué | Cuándo corre |
+| Qué | Cuándo corre (código actual) |
 | --- | --- |
-| Perfil, historial, laboratorio, reglas, cola SQLite, fotos | Siempre. Las reglas de `ADR-005` no necesitan el LLM |
-| `downloadAsset(MedPsy)` | Al arranque si `getModelInfo()` dice que no está en caché. Barra persistente, progreso frecuente, Wi-Fi, “mantén la app abierta” |
-| `loadModel` + `completion` | Al pulsar explicar alerta o extraer JSON, y solo si el asset ya está |
-| OCR (`OCR_LATIN`) | Independiente y más chico; no espera a los 2.1 GB |
-| Demo / pueblo | Pre-descarga o nodo que reparte el `.gguf` por LAN (`A6b`, `ADR-001` uso 1) |
+| Perfil, historial, reglas, cola SQLite, fotos, OCR | Siempre (`App.tsx` no espera al modelo) |
+| `downloadAsset` + `loadModel` | **Lazy**, dentro de `asegurarMedPsy()` en la primera inferencia (alerta, docs o lab) |
+| Tras usar | `soltarMedPsy` / `unloadModel` suelta RAM (alerta, docs, lab) |
+| `nodo-offline` o fallo local | Texto a `/inferir`; la UI sigue con fallback de reglas si aplica |
+| Barra global al arranque / `getModelInfo` en boot | **No implementado** |
 
-No metemos los 2.1 GB en el APK. No añadimos un segundo modelo “rápido” que
-rompa `ADR-002`. No prometemos descarga con la app en segundo plano.
+No metemos los 2.1 GB en el APK. No hay segundo modelo “rápido” (`ADR-002`).
+La primera corrida con wifi descarga al caché de QVAC; hacerlo **antes** de la
+demo, no delante del jurado (README).
 
-## Qué haremos (cuando Android arranque Bare)
+## Qué quedó fuera (aspiración del ADR original)
 
-1. Un proveedor de arranque: `getModelInfo` → si falta, `downloadAsset` en
-   paralelo al onboarding; barra global cada 1%.
-2. Las pantallas de ficha y mediciones no esperan al modelo. Si la señal ya
-   existe y MedPsy no está, se muestra la alerta por reglas y el texto de
-   MedPsy queda pendiente.
-3. `loadModel` se llama una vez, al primer uso de inferencia, no al splash.
-4. En el evento: caché caliente en el **iPhone 17 Pro Max** antes de grabar.
+1. Proveedor de arranque: `getModelInfo` → `downloadAsset` en paralelo al
+   onboarding con barra global cada 1%.
+2. Mantener el modelo caliente en RAM durante toda la sesión de demo.
 
-Android sigue abortando Bare en el 14T (`libbare-kit` / `js_callback_s::on_call`)
-aunque `2b/4` esté bien. No se invierte más EAS ahí hasta tener `bare:E` en
-logcat. La barra de descarga de este ADR aplica al iPhone.
+CHECKLIST 1.1 lo marca abierto con honestidad. No reabrir el ADR solo por eso.
 
 ## Alternativas consideradas
 
-- **Splash hasta 100%.** Simple y pésima UX; parece un crash.
-- **Meter el GGUF en el binario.** Choca con tamaño de Play/EAS y con “la
-  inteligencia llega al pueblo”, no al APK.
-- **Background fetch nativo.** El worklet de QVAC no sigue descargando
-  suspendido; reanuda al volver (caché resumable). Útil, no es segundo plano.
-- **Q4 de entrada.** Eso es `ADR-006` (modo ligero), no un truco de UX. Sigue
-  haciendo falta no bloquear la UI.
+- **Splash hasta 100%.** Simple y pésima UX.
+- **GGUF en el binario.** Choca con tamaño de tienda y con “la inteligencia
+  llega al pueblo”.
+- **Background fetch.** El worklet no sigue descargando suspendido.
 
 ## Reabrir si
 
-QVAC documenta una descarga que sobrevive `suspend()`, o el catálogo deja un
-MedPsy entrenable claramente más chico y `ADR-006` lo adopta como default.
+QVAC documenta descarga que sobrevive `suspend()`, o hace falta warm-load
+medido para el video (TTFT / UX). Entonces se implementa el boot download sin
+cambiar la regla “usable sin MedPsy en RAM”.

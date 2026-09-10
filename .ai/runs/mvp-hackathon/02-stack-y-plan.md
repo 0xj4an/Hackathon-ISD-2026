@@ -1,5 +1,7 @@
 # Stack y plan de implementacion · MVP hackathon
 
+> **Histórico.** El plan por bloques ya no es la fuente de verdad operativa; ver `docs/CHECKLIST.md` y ADRs. Transporte de demo = HTTP, no Hyperswarm.
+
 Clasificacion: `architectural`.
 
 Referencias: `01-idea-validation.md` (decision de idea), `docs/BRIEF.md`,

@@ -159,7 +159,7 @@ function Alerta({ peor, demas, lecturas, periodo, mensaje, fallo, redactando, on
         palabra={peor.titulo}
         detalle={mensaje ?? (redactando
           ? (saltarMedPsyLocal()
-            ? "Este teléfono no carga el modelo. Pidiendo el texto al pueblo…"
+            ? "Este teléfono no carga el modelo. Delegando al nodo…"
             : "El modelo está explicando esto en el teléfono.")
           : undefined)}
         mayusculas={false}

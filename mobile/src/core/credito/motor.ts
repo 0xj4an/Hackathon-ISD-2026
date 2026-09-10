@@ -20,6 +20,7 @@ export type Solicitud = EntradaScorecard & {
   id?: string;
   cedula: { fecha_nacimiento: string; fecha_expiracion?: string; confianza?: number };
   ingresos: EntradaScorecard["ingresos"] & { confianza?: number };
+  extracto?: EntradaScorecard["extracto"] & { confianza?: number; banco?: string };
   personas_a_cargo?: number;
 };
 
@@ -49,6 +50,7 @@ export type Respuesta = {
   grado?: "A" | "B" | "C" | "D" | "E";
   pd_pct?: number;
   tasa_componentes?: Componentes;
+  bajo_costo?: boolean;
   factores: Factor[];
   politica_version: string;
   motivo: string;
@@ -60,7 +62,7 @@ function elegibilidad(
   sol: Solicitud, hoy: Date, pol: Politica,
 ): { decision: "revision" | "rechazada"; motivo: string } | null {
   const v = pol.valores;
-  const conf = Math.min(sol.cedula.confianza ?? 1, sol.ingresos.confianza ?? 1);
+  const conf = Math.min(sol.cedula.confianza ?? 0, sol.ingresos.confianza ?? 0);
   if (conf < v.confianza_min) {
     return { decision: "revision", motivo: "documentos poco legibles; un agente los revisara" };
   }
@@ -77,17 +79,26 @@ function elegibilidad(
   return null;
 }
 
+/** Extracto ilegible no debe subir grado/tasa: se ignora en el scorecard. */
+function conExtractoUtil(sol: Solicitud, pol: Politica): Solicitud {
+  const min = pol.valores.confianza_min;
+  if (!sol.extracto || (sol.extracto.confianza ?? 0) >= min) return sol;
+  const { extracto: _drop, ...rest } = sol;
+  return rest;
+}
+
 function nucleo(sol: Solicitud, hoy: Date, pol: Politica, modelo: Modelo, castigoPd: number) {
+  const limpio = conExtractoUtil(sol, pol);
   const cap = capacidadDePago({
-    ingreso_mensual_usd: sol.ingresos.ingreso_mensual_usd,
-    tipo: sol.ingresos.tipo,
-    deudas_mensuales_usd: sol.deudas_mensuales_usd ?? 0,
-    personas_a_cargo: sol.personas_a_cargo ?? 0,
+    ingreso_mensual_usd: limpio.ingresos.ingreso_mensual_usd,
+    tipo: limpio.ingresos.tipo,
+    deudas_mensuales_usd: limpio.deudas_mensuales_usd ?? 0,
+    personas_a_cargo: limpio.personas_a_cargo ?? 0,
   }, pol);
-  const vars = variablesDe(sol, hoy);
+  const vars = variablesDe(limpio, hoy);
   const punt = evaluar(vars, modelo);
   const pd = Math.min(1, punt.pd + castigoPd);
-  const est = estructurar(pd, sol.monto_solicitado_usd, cap, pol);
+  const est = estructurar(pd, limpio.monto_solicitado_usd, cap, pol);
   return { cap, vars, punt, pd, est };
 }
 
@@ -159,6 +170,7 @@ export function decidir(
     grado: punt.grado,
     pd_pct: Math.round(pd * 1000) / 10,
     tasa_componentes: est.componentes,
+    bajo_costo: est.bajo_costo,
     factores,
     motivo: est.recortado
       ? `monto ajustado a tu capacidad de pago: la cuota maxima es B/. ${cap.cuota_max.toFixed(2)}`

@@ -1,8 +1,10 @@
 # Especificación · MVP hackathon
 
+> **Histórico.** Ante conflicto mandan BRIEF, CHECKLIST, ADRs vigentes (006/007/009/011/013) y el código. Modos reales: `local-wifi` / `local-offline` / `nodo-offline`. SDK 0.18.2. Demo = HTTP.
+
 Referencias: `01-idea-validation.md` (decisión de idea), `02-stack-y-plan.md`
 (stack, plan por bloques, LoRA), `docs/BRIEF.md`, `references/retos.md`.
-Decisiones difíciles de revertir: `adr/ADR-001` a `ADR-005`.
+Decisiones difíciles de revertir: `adr/` (hasta ADR-013; 001 reemplazada).
 
 ---
 

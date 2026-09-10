@@ -10,6 +10,7 @@ import { completarMedPsy, soltarMedPsy } from "./medpsy";
 import { saltarMedPsyLocal } from "./modo";
 import { LORA_LAB_VERSION } from "./lora";
 import {
+  borrarUriFoto,
   leerOcrDeUri,
   mensajeLectura,
   soltarLectores,
@@ -52,7 +53,7 @@ export async function leerExamenFoto(
     aviso({
       paso: "extraccion",
       detalle: saltarMedPsyLocal()
-        ? "Texto al pueblo para sacar marcadores"
+        ? "Delegando al nodo para sacar marcadores"
         : `MedPsy + LoRA sacando marcadores (${LORA_LAB_VERSION})`,
     });
     const bruto = await completarMedPsy({
@@ -100,6 +101,7 @@ export async function leerExamenFoto(
       err instanceof Error ? (err.stack ?? err.message) : String(err),
     );
   } finally {
+    borrarUriFoto(uri);
     await soltarLectores();
     await soltarMedPsy(true);
   }

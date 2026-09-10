@@ -260,6 +260,11 @@ function borrarCopia(uri: string): boolean {
   return false;
 }
 
+/** Borra copia de trabajo `file://`. Galería (`ph://`/`content://`) se salta. */
+export function borrarUriFoto(uri: string): boolean {
+  return borrarCopia(uri);
+}
+
 type Trabajo = {
   clave: ClaveDocumento;
   original: string;

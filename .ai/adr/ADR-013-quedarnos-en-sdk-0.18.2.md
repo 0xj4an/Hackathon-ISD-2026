@@ -82,11 +82,11 @@ no está bloqueada por el SDK: está bloqueada porque las pantallas descartan el
 `assessModelFit()`, que dice si un modelo cabe **antes** de bajar 2.1 GB. Era el
 argumento más fuerte de `ADR-001` y es una pérdida real.
 
-En su lugar: `getSystemResources()`, que sí está en 0.18.2, y el dato de que el
-aparato de la demo (iPhone 17 Pro Max) tiene memoria de sobra contra un modelo
-de 2.1 GB, medido: MedPsy Q8_0 carga en CPU con TTFT de 2915 ms. La decisión de
-[`ADR-006`](ADR-006-tres-modos-segun-el-telefono.md) entre modo completo, ligero
-y delegado se toma con eso. Es menos cómodo, no es un bloqueo.
+En su lugar: telemetría con `getSystemResources()` en `perf/logger.ts`, y el
+dato de que el aparato de la demo (iPhone 17 Pro Max) carga MedPsy Q8_0 en CPU
+(TTFT 2915 ms). Los modos de producto son el picker
+`local-wifi` / `local-offline` / `nodo-offline` de [`ADR-006`](ADR-006-tres-modos-segun-el-telefono.md),
+no un auto-selector por RAM.
 
 ## Por qué no mover ahora, aunque quisiéramos
 
@@ -111,10 +111,11 @@ mismo estado. A esta altura del calendario eso no se paga.
 `ADR-001` advirtió que el jurado técnico de Tether sabe que quitaron `delegate`
 en 0.19 y puede preguntar por qué estamos en una versión superada.
 
-La respuesta es verdad y es buena: usamos 0.18.2 **porque** trae la delegación
-P2P nativa, que es lo que la rúbrica premia y lo que 0.19 eliminó. No es quedarse
-atrás, es elegir la versión que hace lo que el reto pide. Eso se dice en el
-README y en el video, no se esconde.
+La respuesta honesta: nos quedamos en 0.18.2 porque **ya está prebuildeada y
+medida en el iPhone**, trae `ocr()`, y mover a 0.19 regenera nativo sin tiempo
+de revalidar. El camino de demo es **HTTP** (banco / pueblo `/inferir`), no
+QVAC `delegate` ni Hyperswarm — README y VIDEO lo dicen así. `delegate` queda
+como capacidad latente del SDK, no como promesa de la demo.
 
 ## Consecuencias
 

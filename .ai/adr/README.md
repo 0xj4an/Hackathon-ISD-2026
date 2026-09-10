@@ -12,8 +12,8 @@ condición que justificaría reabrirla. Estas son las decisiones del MVP que
 | [ADR-003](ADR-003-lora-entrena-extraccion.md) | El LoRA entrena extracción, no solo triaje |
 | [ADR-004](ADR-004-core-dentro-de-mobile.md) | `core/` dentro de `mobile/src/`, sin monorepo |
 | [ADR-005](ADR-005-las-reglas-deciden-el-modelo-explica.md) | Las reglas deciden, el modelo explica |
-| [ADR-006](ADR-006-tres-modos-segun-el-telefono.md) | Tres modos según la RAM del teléfono |
-| [ADR-007](ADR-007-descarga-medpsy-no-bloquea-onboarding.md) | La descarga de MedPsy no bloquea el onboarding |
+| [ADR-006](ADR-006-tres-modos-segun-el-telefono.md) | Tres modos de demo: `local-wifi` / `local-offline` / `nodo-offline` |
+| [ADR-007](ADR-007-descarga-medpsy-no-bloquea-onboarding.md) | Usable sin MedPsy en RAM (carga perezosa; boot download pendiente) |
 | [ADR-008](ADR-008-que-variables-vigilamos.md) | Qué variables vigilamos y con qué umbrales |
 | [ADR-009](ADR-009-medpsy-infiere-en-ingles.md) | MedPsy infiere en inglés |
 | [ADR-010](ADR-010-el-paquete-y-cuando-ofrecer-credito.md) | El paquete completo a un año, y el crédito siempre |

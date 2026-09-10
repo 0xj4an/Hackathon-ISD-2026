@@ -70,6 +70,10 @@ en la demo el banco es Railway.
 
 ## Hyperswarm entre dos procesos del mismo Mac: NO conecta
 
+(Documentado abajo.) Railway pone `SKIP_P2P=1` y ni lo intenta. En laptop,
+`npm run corregimiento` **sí** intenta Hyperswarm salvo que pongas
+`SKIP_P2P=1` — el teléfono no usa ese camino; la demo es HTTP.
+
 Cero conexiones tras dos minutos, con el código de `nodo/` y también con una
 prueba mínima de dos peers y un topic aislado.
 

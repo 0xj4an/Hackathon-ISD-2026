@@ -96,7 +96,7 @@ Después el modelo redacta el mensaje. La primera carga en CPU puede tardar
 
 | Si ves | Qué es |
 | --- | --- |
-| Un párrafo en español sobre qué hacer, y el pie de disclaimer | **Éxito.** Lee el disclaimer en voz alta (ensayo del video) |
+| Un párrafo de MedPsy (inglés) sobre qué hacer, y el pie de disclaimer en español | **Éxito.** Lee el disclaimer en voz alta (ensayo del video) |
 | Las reglas y un fallo (“MedPsy no cargó…”, etc.) | El modelo no redactó. Anotar el texto. Las reglas solas no cierran este paso |
 | “Bajando MedPsy” y se queda | Caché vacía + avión. Parar, wifi, bajar, repetir |
 

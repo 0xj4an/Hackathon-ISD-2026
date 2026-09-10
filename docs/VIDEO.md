@@ -46,7 +46,7 @@ Luego corte al teléfono en la mano. Nada de la app todavía en ese plano.
 > volver. Mucha gente no baja. No porque no quiera: porque no sabe si vale la
 > pena, y porque no sabe cuánto va a costar.
 >
-> Ina Igar significa "camino de la medicina" en gunagaya, la lengua del pueblo
+> Ina Igar significa "Camino de la medicina" en gunagaya, la lengua del pueblo
 > Guna. Es una app que responde esas dos preguntas sin internet, dentro del
 > teléfono.
 
@@ -66,9 +66,9 @@ luego el texto de MedPsy.
 >
 > Encuentra cuatro cosas. Y esto es importante: **quién decide no es el modelo,
 > son reglas con umbrales de la OMS y la Asociación Americana de Diabetes,
-> citados uno por uno en el código.** El modelo solo explica en español lo que
-> las reglas encontraron. Un modelo de lenguaje no debería decidir si alguien
-> tiene diabetes.
+> citados uno por uno en el código.** El modelo solo redacta el mensaje (en
+> inglés, ADR-009); la pantalla y el disclaimer están en español. Un modelo de
+> lenguaje no debería decidir si alguien tiene diabetes.
 
 **Plano obligatorio:** el aviso de la pantalla, leído completo:
 
@@ -120,10 +120,11 @@ prueba de que corre local, y no se puede fingir.
 
 **Por qué así:** es el corazón del reto General, "IA donde la nube no llega".
 
-### 2:50 a 3:25 · El crédito
+### 2:50 a 3:40 · El crédito
 
-**Se ve:** elegir el monto. Firmar. Pendiente sin nodo **o** respuesta del banco
-si en esa toma hubo wifi al final.
+**Se ve:** elegir el monto → documentos → cuota (envío) → respuesta del banco →
+**trazo con el dedo** → desembolso simulado. Pendiente sin nodo **o** banco si
+hubo wifi.
 
 **Se dice:**
 
@@ -131,12 +132,10 @@ si en esa toma hubo wifi al final.
 > pagar el máximo o lo justo.
 >
 > La solicitud intenta el banco por wifi. Si no hay internet, queda en el nodo
-> del pueblo, o pendiente en el teléfono. El motor ya calculó la cuota aquí:
-> 12 meses, 17.4% anual, unos 84 balboas al mes sobre 920.
+> del pueblo, o pendiente en el teléfono. El motor ya calculó la cuota aquí.
 >
-> Esa cuota cabe en el 30% del ingreso. No es un modelo de juguete: tiene
-> elegibilidad, capacidad de pago, scorecard, el precio descompuesto, y
-> clasificación de cartera por el Acuerdo 4-2013.
+> Si el banco aprueba, firma con el dedo. **No es firma electrónica legal**;
+> la app lo dice. El desembolso de la demo es simulado.
 
 **Si la cola sin señal llegó a funcionar en cámara**, 15 segundos: pendiente →
 red → sale sola.

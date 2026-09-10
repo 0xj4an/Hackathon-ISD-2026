@@ -129,8 +129,8 @@ que permite cobrar menos. El número lo demuestra sin discurso.
 
 **Los montos chicos salen bajo costo y el banco absorbe la diferencia.** No se
 rechazan: el crédito pequeño se sostiene con el grande dentro de la misma
-cartera. Es decisión de producto, no accidente aritmético, y por eso la respuesta
-marca `bajo_costo` en vez de esconderlo.
+cartera. Es decisión de producto. La respuesta marca `bajo_costo` cuando aplica
+(`Respuesta` / `RespuestaBancoSchema`).
 
 ## La vista del banco
 
@@ -174,8 +174,10 @@ que el modelo cierra sobre sí mismo.
 - `nodo/credito.mjs` pasa de tener la política a ser una cáscara de doce líneas.
 - `eval/run.mjs` gana la sección 5, que verifica monotonía, invariantes y que el
   precio cubra la pérdida en cada corrida.
-- `PantallaCuota.tsx` existe pero **no está cableada**: mostrar una cuota exige
-  que los documentos ya estén leídos, y la extracción es trabajo del Bloque 2.
+- `PantallaCuota.tsx` está cableada en `App.tsx` tras leer documentos
+  (`paso === "cuota"` → envío → banco → firma → desembolso simulado).
+  `deudas_mensuales_usd` y `personas_a_cargo` salen en **0** desde
+  `lectura.ts` en el camino de demo (`PantallaDatos` sigue huérfana).
 - El eval compila con `--rewriteRelativeImportExtensions`, porque dentro de
   `credito/` los imports llevan extensión `.ts` para que Node los lea sin build.
 

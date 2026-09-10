@@ -13,7 +13,11 @@ import { aceptar, recibir } from "./credito.mjs";
 const ROL = process.env.ROL || "banco";
 const PORT = Number(process.env.PORT || (ROL === "corregimiento" ? 8788 : 8787));
 const BANCO_URL = (process.env.BANCO_URL || "http://127.0.0.1:8787").replace(/\/$/, "");
-const SKIP_P2P = process.env.SKIP_P2P === "1" || Boolean(process.env.RAILWAY_ENVIRONMENT);
+// Demo = HTTP. P2P solo si alguien lo pide explícito (ENABLE_P2P=1).
+const SKIP_P2P = process.env.ENABLE_P2P !== "1"
+  || process.env.SKIP_P2P === "1"
+  || Boolean(process.env.RAILWAY_ENVIRONMENT);
+const NODO_TOKEN = process.env.NODO_TOKEN || "";
 const TOPIC_NAME = process.env.TOPIC || "isd-hackathon-credito-salud-v1";
 const STATE = new URL(`./state/${ROL}/`, import.meta.url).pathname;
 mkdirSync(STATE, { recursive: true });
@@ -26,7 +30,7 @@ const enviarPeer = (sock, obj) => sock.write(JSON.stringify(obj) + "\n");
 function cors(res) {
   res.setHeader("access-control-allow-origin", "*");
   res.setHeader("access-control-allow-methods", "GET, POST, OPTIONS");
-  res.setHeader("access-control-allow-headers", "content-type");
+  res.setHeader("access-control-allow-headers", "content-type, x-nodo-token");
 }
 
 function json(res, code, body) {
@@ -34,6 +38,12 @@ function json(res, code, body) {
   res.statusCode = code;
   res.setHeader("content-type", "application/json");
   res.end(JSON.stringify(body));
+}
+
+/** Si NODO_TOKEN está definido, exige header x-nodo-token. Sin token = LAN abierta (demo). */
+function autorizado(req) {
+  if (!NODO_TOKEN) return true;
+  return req.headers["x-nodo-token"] === NODO_TOKEN;
 }
 
 function leerCuerpo(req, max = LIMITE) {
@@ -68,18 +78,20 @@ function pendientes() {
     .map((id) => JSON.parse(readFileSync(`${STATE}${id}.json`, "utf8")));
 }
 
-/** Lo que ve el back office. JSON financiero, sin fotos ni motivo de salud. */
+/** Lo que ve el back office. Sin cédula ni nombre completos. */
 function listar() {
   return readdirSync(STATE)
     .filter((f) => f.endsWith(".json") && !f.includes(".respuesta"))
     .map((f) => {
       const id = f.replace(".json", "");
       const sol = JSON.parse(readFileSync(`${STATE}${id}.json`, "utf8"));
+      const ced = String(sol.cedula?.numero ?? "");
       return {
         id,
         creada: sol.creada,
-        nombre: sol.cedula?.nombre,
-        cedula: sol.cedula?.numero,
+        // Redactado: solo iniciales / últimos dígitos para el mock admin.
+        nombre: iniciales(sol.cedula?.nombre),
+        cedula: ced ? `***${ced.slice(-4)}` : undefined,
         ingreso: sol.ingresos?.ingreso_mensual_usd,
         tipo: sol.ingresos?.tipo,
         monto: sol.monto_solicitado_usd,
@@ -89,6 +101,16 @@ function listar() {
       };
     })
     .sort((a, b) => String(b.creada ?? "").localeCompare(String(a.creada ?? "")));
+}
+
+function iniciales(nombre) {
+  if (!nombre || typeof nombre !== "string") return undefined;
+  return nombre
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((p) => `${p[0]?.toUpperCase() ?? ""}.`)
+    .join(" ");
 }
 
 function transito(sol) {
@@ -213,11 +235,22 @@ createServer(async (req, res) => {
   if (req.method === "OPTIONS") { res.statusCode = 204; res.end(); return; }
 
   if (req.method === "GET" && (req.url === "/" || req.url === "/salud")) {
-    json(res, 200, { ok: true, rol: ROL, peers: peers.size, inferir: ROL === "corregimiento" });
+    json(res, 200, {
+      ok: true,
+      rol: ROL,
+      peers: peers.size,
+      inferir: ROL === "corregimiento",
+      p2p: !SKIP_P2P,
+      auth: Boolean(NODO_TOKEN),
+    });
     return;
   }
 
   if (req.method === "GET" && req.url === "/solicitudes") {
+    if (!autorizado(req)) {
+      json(res, 401, { motivo: "token requerido" });
+      return;
+    }
     json(res, 200, listar());
     return;
   }
@@ -229,6 +262,10 @@ createServer(async (req, res) => {
   }
 
   if (req.method === "POST" && req.url === "/solicitud") {
+    if (!autorizado(req)) {
+      json(res, 401, { motivo: "token requerido" });
+      return;
+    }
     try {
       const raw = await leerCuerpo(req);
       const { respuesta } = ROL === "banco" ? comoBanco(raw) : await comoCartero(raw);
@@ -246,6 +283,10 @@ createServer(async (req, res) => {
       json(res, 404, { motivo: "solo el pueblo infiere" });
       return;
     }
+    if (!autorizado(req)) {
+      json(res, 401, { motivo: "token requerido" });
+      return;
+    }
     try {
       const raw = await leerCuerpo(req, 200_000);
       const { inferir } = await import("./inferir.mjs");
@@ -261,7 +302,7 @@ createServer(async (req, res) => {
 
   res.statusCode = 404;
   res.end();
-}).listen(PORT, "0.0.0.0", () => log(`HTTP en :${PORT}`));
+}).listen(PORT, "0.0.0.0", () => log(`HTTP en :${PORT} p2p=${SKIP_P2P ? "off" : "on"}`));
 
 if (ROL === "corregimiento") setInterval(() => { void reenviarPendientes(); }, 4000);
 

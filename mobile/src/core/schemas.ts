@@ -93,7 +93,7 @@ export const SolicitudSchema = z.object({
   /** Escala el minimo vital del hogar. */
   personas_a_cargo: z.number().int().min(0).max(15).default(0),
   extracto: ExtractoSchema.optional(),
-  firma_hash: z.string().optional(),
+  firma_hash: z.string().optional(), // opcional; la demo guarda el hash solo en UI de desembolso
   estado: z.enum(["borrador", "pendiente", "enviada", "respondida", "aceptada", "rechazada"]),
 }).strict();
 export type Solicitud = z.infer<typeof SolicitudSchema>;
@@ -108,7 +108,7 @@ export const FactorSchema = z.object({
 
 /** 4) Respuesta del banco (nodo mock). */
 export const RespuestaBancoSchema = z.object({
-  solicitud_id: z.string().uuid(),
+  solicitud_id: z.string().uuid().optional(),
   decision: z.enum(["aprobada", "rechazada", "revision"]),
   monto_aprobado_usd: z.number().optional(),
   plazo_meses: z.number().int().optional(),
@@ -120,6 +120,7 @@ export const RespuestaBancoSchema = z.object({
     fondeo: z.number(), riesgo: z.number(), opex: z.number(),
     capital: z.number(), margen: z.number(),
   }).optional(),
+  bajo_costo: z.boolean().optional(),
   factores: z.array(FactorSchema).default([]),
   politica_version: z.string().optional(),
   motivo: z.string(),

@@ -1,9 +1,9 @@
 # Brief del proyecto · Decentralized AI Hackathon · ISD Summit 2026
 
-Nombre: **Ina Igar** ("camino de la medicina" en gunagaya). Equipo: 0xj4an y Artur.
+Nombre: **Ina Igar** ("Camino de la medicina" en gunagaya). Equipo: 0xj4an y Artur.
 
 ## Una frase
-Una app para personas en zonas rurales de Panamá con señal intermitente, que detecta en el teléfono una señal de riesgo de salud, explica en español qué examen conviene y cuánto cuesta, y permite solicitar un crédito de salud fotografiando los documentos **sin que ninguna imagen salga del dispositivo**: la solicitud queda en cola y viaja al banco con wifi (directo) o, sin internet, por el nodo del pueblo.
+Una app para personas en zonas rurales de Panamá con señal intermitente, que detecta en el teléfono una señal de riesgo de salud, muestra en español qué examen conviene y cuánto cuesta (MedPsy redacta el mensaje en inglés, `ADR-009`), y permite solicitar un crédito de salud fotografiando los documentos **sin que ninguna imagen salga del dispositivo**: la solicitud queda en cola y viaja al banco con wifi (directo) o, sin internet, por el nodo del pueblo.
 
 ## Retos a los que aplica
 - **General** (podio 6,000): conectividad intermitente, datos sensibles, trabajo en campo. Transporte de demo: HTTP (wifi al banco o LAN al nodo); Hyperswarm P2P no conectó en las pruebas y no se promete.
@@ -11,14 +11,14 @@ Una app para personas en zonas rurales de Panamá con señal intermitente, que d
 - **Caja de Ahorros** (1,500): inclusión financiera con conectividad intermitente; documentos y trámites leídos en el dispositivo; la ejecución local como ventaja (el asesor nunca ve la cédula ni el extracto).
 
 ## Flujo de usuario (el que se graba)
-1. **Alerta local.** Un dataset sintético de mediciones (glucosa, presión, pulso, saturación, frecuencia respiratoria, temperatura, peso y estatura) dispara una de las 14 reglas de `ADR-008`; MedPsy 1.7B **solo redacta** en español lo que las reglas ya decidieron. Sin diagnóstico.
+1. **Alerta local.** Un dataset sintético de mediciones dispara una de las 14 reglas de `ADR-008`; MedPsy 1.7B **solo redacta** el mensaje (prompts en inglés, `ADR-009`); la UI y el disclaimer van en español. Sin diagnóstico.
 2. **Resultado.** El historial siempre se lee (alerta o en orden). Desde ahí se puede pedir crédito si hay paquete, y/o subir un examen de laboratorio. Si el examen sale fuera de rango, también se puede pedir crédito. El banco **nunca** recibe el motivo de salud.
 3. **Documentos en el dispositivo (crédito).** Foto de cédula, ingresos y extracto. OCR (`OCR_LATIN`) → MedPsy base → JSON → **las fotos se borran**.
 4. **Examen de laboratorio.** Opción tras el resultado: foto del papel → OCR → **MedPsy + LoRA `lab-v3`** → `clasificar()` contra el catálogo. El adaptador solo corre aquí; cédula/ingresos/alerta siguen en MedPsy base.
 5. **Cola offline.** La solicitud va a SQLite (`cola.ts`) si no hay salida. Al reabrir, se retoma en cuota.
 6. **Envío.** Mismo JSON, nunca fotos. Con wifi (modo `local-wifi`): al banco remoto. Sin internet (`local-offline` / `nodo-offline`): LAN al nodo del pueblo.
 7. **Respuesta del banco.** Railway corre el mismo motor que `preCalificar()` en el teléfono. Cartera sintética, declarada.
-8. **Firma.** Trazo en pantalla (no es firma electrónica legal; se declara).
+8. **Firma y cierre.** Trazo en pantalla (no es firma electrónica legal; se declara) → desembolso **simulado** → Listo.
 
 ## Arquitectura
 ```

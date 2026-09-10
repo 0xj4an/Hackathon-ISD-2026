@@ -98,7 +98,7 @@ export function parsearLaboratorio(bruto: string, textoOcr?: string): LabParse {
   if (typeof o.confianza === "number" && o.confianza > 1 && o.confianza <= 100) {
     o.confianza = o.confianza / 100;
   }
-  if (typeof o.confianza !== "number" || !Number.isFinite(o.confianza)) o.confianza = 0.7;
+  if (typeof o.confianza !== "number" || !Number.isFinite(o.confianza)) o.confianza = 0;
 
   if (Array.isArray(o.lecturas)) {
     o.lecturas = o.lecturas.map((l) => {

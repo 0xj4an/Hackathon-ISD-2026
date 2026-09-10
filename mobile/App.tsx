@@ -59,6 +59,7 @@ export default function App() {
   const [lectura, setLectura] = useState<LecturaCredito | null>(null);
   const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
   const [respuesta, setRespuesta] = useState<Respuesta | null>(null);
+  const [firmaHash, setFirmaHash] = useState<string | undefined>();
   const [enviando, setEnviando] = useState(false);
   const [pendiente, setPendiente] = useState(false);
   const [aviso, setAviso] = useState<string | undefined>();
@@ -69,6 +70,7 @@ export default function App() {
     setLectura(null);
     setSolicitud(null);
     setRespuesta(null);
+    setFirmaHash(undefined);
     setEnviando(false);
     setPendiente(false);
     setAviso(undefined);
@@ -288,6 +290,7 @@ export default function App() {
       <PantallaDesembolso
         respuesta={respuesta}
         destino={destino}
+        constancia={firmaHash}
         onListo={() => {
           // Sale del caso entero. Si solo soltamos crédito, cae otra vez en Alerta.
           salir();
@@ -300,7 +303,10 @@ export default function App() {
     return (
       <PantallaFirma
         respuesta={respuesta}
-        onConfirmar={() => setPaso("desembolso")}
+        onConfirmar={hash => {
+          setFirmaHash(hash);
+          setPaso("desembolso");
+        }}
         onVolver={() => setPaso("banco")}
       />
     );

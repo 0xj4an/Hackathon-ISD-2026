@@ -63,7 +63,7 @@ export default function PantallaRevision({
 
   return (
     <Pantalla>
-      <Encabezado meta="en este teléfono" />
+      <Encabezado meta="En este teléfono" />
 
       <View style={s.cuerpo}>
         <Text style={s.titular}>Revisando{"\n"}tu historial</Text>

@@ -12,7 +12,7 @@ export default function PantallaUsuarios({ onElegir }: { onElegir: (u: Usuario) 
     <SafeAreaView style={s.pantalla}>
       <ScrollView contentContainerStyle={s.cuerpo}>
         <Text style={s.marca}>Ina Igar</Text>
-        <Text style={s.sub}>camino de la medicina</Text>
+        <Text style={s.sub}>Camino de la medicina</Text>
         <Text style={s.titulo}>Elige un historial</Text>
 
         <View style={s.aviso}>

@@ -19,15 +19,19 @@
 
 `mobile/src/core/reglas.ts` decide, en código determinista, **qué** señal existe, **qué**
 examen corresponde, **cuánto** cuesta y **qué** urgencia tiene. El LLM recibe la
-señal ya decidida y solo la redacta en español sencillo.
+señal ya decidida y solo redacta el `mensaje`. Los prompts de MedPsy van en
+**inglés** (`ADR-009`); la UI y el pie de disclaimer van en español
+(`PantallaAlerta`).
 
 El prompt lo dice explícito (`mobile/src/core/prompts.ts`): no diagnosticar, no nombrar
-enfermedades como certeza, no dar tratamiento, máximo 3 frases. El disclaimer se
-pasa como literal para que el modelo no lo reescriba.
+enfermedades como certeza, no dar tratamiento. El disclaimer se pasa como literal
+para que el modelo no lo reescriba. Tras parsear, el código **vuelve a fijar**
+ruta/costo/urgencia/fuente desde las reglas (`alerta.ts`).
 
-Lo mismo aplica al crédito: `nodo/credito.mjs` decide con aritmética (cuota
-máxima 30% del ingreso), no con un modelo. Y `mobile/src/core/validaciones.ts` valida el
-JSON extraído en código, nunca confiando en la salida del LLM.
+Lo mismo aplica al crédito: el motor en `mobile/src/core/credito/` (vía
+`nodo/credito.mjs`) decide con scorecard y aritmética, no con un LLM
+(`ADR-011`). Y `mobile/src/core/validaciones.ts` valida el JSON extraído en
+código, nunca confiando ciegamente en la salida del modelo.
 
 ## Alternativas consideradas
 

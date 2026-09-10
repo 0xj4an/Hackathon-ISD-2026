@@ -2,44 +2,54 @@
  * Demo: capacidad × red. Independiente del tronco de producto
  * (historial → resultado → crédito/examen).
  *
- *   local-wifi     MedPsy aquí + envío al banco
- *   local-offline  MedPsy aquí + pueblo/pendiente
- *   nodo-offline   texto a /inferir + pueblo/pendiente
+ *   local-wifi     MedPsy local + envío al banco
+ *   local-offline  MedPsy local + pueblo/pendiente
+ *   nodo-offline   delegar al nodo (/inferir) + pueblo/pendiente
  */
 import { USUARIOS, type Usuario } from "./usuarios";
 import { COLOR } from "./ui/tokens";
 
 export type ModoId = "local-wifi" | "local-offline" | "nodo-offline";
 
-export const MODOS: {
+export type Modo = {
   id: ModoId;
-  titulo: string;
+  wifi: string;
+  modelo: string;
   detalle: string;
   franja: string;
   color: string;
-}[] = [
+};
+
+export const MODOS: Modo[] = [
   {
     id: "local-wifi",
-    titulo: "Modelo aquí · hay wifi",
+    wifi: "WiFi disponible",
+    modelo: "Modelo local",
     detalle: "MedPsy en este teléfono. El crédito sale directo al banco.",
-    franja: "Modelo aquí y wifi. El banco está al alcance.",
+    franja: "WiFi disponible · modelo local. El banco está al alcance.",
     color: COLOR.rutinaria,
   },
   {
     id: "local-offline",
-    titulo: "Modelo aquí · sin wifi",
+    wifi: "WiFi no disponible",
+    modelo: "Modelo local",
     detalle: "MedPsy en este teléfono. Sin internet: pueblo o pendiente.",
-    franja: "Modelo aquí, sin wifi. El JSON no va a Railway.",
+    franja: "WiFi no disponible · modelo local. El crédito va al pueblo o queda pendiente.",
     color: COLOR.prioritaria,
   },
   {
     id: "nodo-offline",
-    titulo: "Modelo en el nodo · sin wifi",
-    detalle: "Este teléfono no corre MedPsy. Texto al pueblo si hay LAN.",
-    franja: "Sin modelo en el aparato. Pide el texto al pueblo.",
+    wifi: "WiFi no disponible",
+    modelo: "Delegar al nodo",
+    detalle: "MedPsy no corre aquí. La inferencia se delega al nodo si hay LAN.",
+    franja: "WiFi no disponible · delegar al nodo.",
     color: COLOR.inmediata,
   },
 ];
+
+export function etiquetaModo(m: Modo): string {
+  return `${m.wifi} + ${m.modelo}`;
+}
 
 const CASO = "diabetes";
 let activo: ModoId = "local-wifi";
@@ -69,6 +79,7 @@ export function sinWifiDemo(): boolean {
   return activo === "local-offline" || activo === "nodo-offline";
 }
 
-export function fichaModo(): (typeof MODOS)[number] {
-  return MODOS.find(e => e.id === activo) ?? MODOS[0];
+export function fichaModo(): Modo & { titulo: string } {
+  const m = MODOS.find(e => e.id === activo) ?? MODOS[0];
+  return { ...m, titulo: etiquetaModo(m) };
 }

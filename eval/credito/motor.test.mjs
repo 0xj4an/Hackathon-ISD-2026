@@ -42,6 +42,16 @@ test("con extracto mejora el grado y baja la tasa", () => {
                                           meses_cubiertos: 6, confianza: 0.9 } }, {}, HOY);
   assert.equal(r.grado, "A");
   assert.equal(r.tasa_anual_pct, 10.60);
+  assert.equal(typeof r.bajo_costo, "boolean");
+});
+
+test("extracto ilegible no mejora el grado", () => {
+  const base = decidir(SOL, {}, HOY);
+  const r = decidir({ ...SOL, extracto: { banco: "X", saldo_promedio_usd: 208,
+                                          meses_cubiertos: 6, confianza: 0.1 } }, {}, HOY);
+  assert.equal(r.decision, "aprobada");
+  assert.equal(r.grado, base.grado);
+  assert.equal(r.tasa_anual_pct, base.tasa_anual_pct);
 });
 
 test("documento ilegible va a revision, no a rechazo", () => {

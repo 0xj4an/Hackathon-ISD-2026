@@ -125,7 +125,7 @@ async function completarEnNodo(opts: {
   predict?: number;
   onProgreso?: (p: ProgresoMedPsy) => void;
 }): Promise<string> {
-  opts.onProgreso?.({ detalle: "El teléfono no pudo. Pidiendo al nodo del pueblo…" });
+  opts.onProgreso?.({ detalle: "El teléfono no pudo. Delegando al nodo…" });
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 180_000);
   try {

@@ -240,7 +240,7 @@ export default function PantallaExamen({
         <Text style={s.titular}>¿Te hiciste{"\n"}un examen?</Text>
         <Text style={s.parrafo}>
           {saltarMedPsyLocal()
-            ? "Foto o archivo se leen aquí. El texto (nunca la imagen) va al pueblo, sin LoRA."
+            ? "Foto o archivo: OCR aquí, inferencia delegada al nodo (nunca la imagen)."
             : "Tráelo en foto o archivo y te decimos qué dice cada número. Se lee en este teléfono."}
         </Text>
       </View>
@@ -250,14 +250,14 @@ export default function PantallaExamen({
       {leyendo ? (
         <Franja
           color={COLOR.prioritaria}
-          titulo={saltarMedPsyLocal() ? "OCR aquí · texto al pueblo" : `MedPsy + LoRA · ${LORA_LAB_VERSION}`}
+          titulo={saltarMedPsyLocal() ? "OCR aquí · delegar al nodo" : `MedPsy + LoRA · ${LORA_LAB_VERSION}`}
           texto={progreso || "Leyendo el examen"}
         />
       ) : null}
 
       <Boton
         texto={leyendo
-          ? (saltarMedPsyLocal() ? "Leyendo…" : "Leyendo con LoRA…")
+          ? (saltarMedPsyLocal() ? "Delegando al nodo…" : "Leyendo con LoRA…")
           : "Tomar foto del examen"}
         onPress={() => { void tomarFoto(); }}
       />
@@ -301,7 +301,7 @@ export default function PantallaExamen({
       <Pie>
         Solo escribe los que aparezcan en tu papel. Los que dejes vacíos no se inventan.
         {saltarMedPsyLocal()
-          ? "En este modo la imagen no carga LoRA: OCR aquí, texto al pueblo."
+          ? "En este modo la imagen no carga LoRA: OCR aquí, inferencia delegada al nodo."
           : `Foto o archivo usan MedPsy + LoRA (${LORA_LAB_VERSION}); escribir a mano no.`}
       </Pie>
     </Pantalla>

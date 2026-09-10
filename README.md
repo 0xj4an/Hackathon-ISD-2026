@@ -10,7 +10,7 @@ La inferencia intenta MedPsy en el teléfono con [`@qvac/sdk`](https://docs.qvac
 ## Modelos (nombres honestos)
 | Uso | Modelo | Cuantización | Tamaño |
 |---|---|---|---|
-| Alerta de salud en español | MedPsy 1.7B (`HEALTHCARE_1_7B_MEDICAL_Q8_0`) | Q8_0 | 2.1 GB |
+| Alerta de salud (mensaje MedPsy en inglés, UI en español) | MedPsy 1.7B (`HEALTHCARE_1_7B_MEDICAL_Q8_0`) | Q8_0 | 2.1 GB |
 | OCR de documentos | `OCR_LATIN` | - | - |
 | Extracción a JSON (cédula, ingresos, extracto) | El mismo MedPsy 1.7B, sobre el texto de `OCR_LATIN` (`ADR-002`) | Q8_0 | 2.1 GB |
 | Extracción de laboratorio (examen) | MedPsy + LoRA `lab-v3` (`mobile/assets/models/lora-lab-v3.gguf`) | Q8_0 + LoRA | 2.1 GB + 33 MB |
@@ -54,13 +54,23 @@ extracción OCR/LLM se mide aparte en el spike
 - No es un diagnóstico. La alerta es orientativa y lo dice en pantalla. Validación de rangos y consistencia antes de invocar el modelo.
 - El banco recibe solo campos estructurados; nunca imágenes, ni el motivo de salud.
 - El modelo de crédito corre en el banco remoto, con el mismo código que el teléfono usa para precalificar ([`ADR-011`](.ai/adr/ADR-011-el-modelo-de-credito.md)). Scorecard sobre cartera sintética, declarado. La edad no puntúa. Ningún modelo de lenguaje participa en la decisión.
-- La firma en pantalla no es firma electrónica legal.
+- La firma en pantalla es un trazo con el dedo tras la aprobación; no es firma electrónica legal (se declara en UI). Luego hay un desembolso **simulado**.
 - Datos: 100% sintéticos. Ningún dato real de clientes ni de pacientes.
+
+## Modos de demo (`ADR-006`)
+
+Elegidos a mano en la entrada, no por RAM automática:
+
+| Modo | Modelo | Crédito |
+|---|---|---|
+| `local-wifi` | MedPsy en el teléfono | Banco remoto primero |
+| `local-offline` | MedPsy en el teléfono | Pueblo / cola (sin Railway) |
+| `nodo-offline` | Texto a `/inferir` en el pueblo | Pueblo / cola |
 
 
 ## El nombre
 
-**Ina Igar** significa "camino de la medicina" en gunagaya, la lengua del pueblo Guna de Panamá. `ina` es medicina o planta medicinal; `igar` es camino, vía, y también lección o tratado: el saber y la ruta en la misma palabra. Es exactamente lo que hace la app, porque cada detección devuelve una ruta.
+**Ina Igar** significa "Camino de la medicina" en gunagaya, la lengua del pueblo Guna de Panamá. `ina` es medicina o planta medicinal; `igar` es camino, vía, y también lección o tratado: el saber y la ruta en la misma palabra. Es exactamente lo que hace la app, porque cada detección devuelve una ruta.
 
 Los significados salen del diccionario escolar *Gayamar sabga* (gunagaya-español) de Reuter Orán B. y Aiban Wagua, publicado por el Proyecto de Implementación de la Educación Bilingüe Intercultural en los Territorios Gunas de Panamá. No es una palabra nuestra: es prestada, y se cita.
 

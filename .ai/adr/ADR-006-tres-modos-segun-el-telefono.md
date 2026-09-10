@@ -1,68 +1,58 @@
-# ADR-006: Tres modos de ejecución según el teléfono que toque
+# ADR-006: Tres modos de demo (wifi × dónde corre el modelo)
 
-- Estado: aceptada
-- Contexto: la demo corre en un **iPhone 17 Pro Max** (MedPsy Q8_0, CPU, TTFT
-  2915 ms). Se intentó el Xiaomi 14T Pro (Dimensity 9300+, 12 GB, HyperOS 3) y
-  Bare aborta al `worklet.start`. El usuario objetivo del brief sigue siendo
-  "una persona en zona rural de Panamá con Android de **gama media**". No son
-  el mismo aparato, y los docs de QVAC son explícitos:
-  *"Below 4 GB, most LLMs will fail to load"*.
+- Estado: aceptada (reescrita 10 sep 2026 para coincidir con el código)
+- Contexto: la demo corre en un **iPhone 17 Pro Max** (MedPsy Q8_0, CPU). Se
+  intentó el Xiaomi 14T Pro y Bare aborta. El usuario del brief sigue siendo
+  rural con Android de gama media. Hace falta mostrar, en el mismo build, tres
+  caminos honestos de **red × cómputo** sin mentir sobre Q4 automático ni sobre
+  QVAC `delegate`.
 
-  `ADR-002` fijó MedPsy 1.7B **Q8_0**, que pesa 2.1 GB. Esa decisión se validó
-  contra el teléfono de la demo, no contra el del usuario. Es un hueco de
-  razonamiento, y además un riesgo de credibilidad: un jurado técnico nota de
-  inmediato una demo en gama alta que promete gama media.
+  Una versión anterior de este ADR hablaba de modos **Completo / Ligero /
+  Delegado** elegidos con `getSystemResources()` y MedPsy Q4_0. Eso **no se
+  implementó**. Queda como aspiración en "Reabrir si".
 
 ## Decisión
 
-La app decide su modo en arranque con `getSystemResources()`, que ya existe en
-0.18.2 y que `mobile/App.tsx` ya llama.
+La persona elige el modo en `PantallaEntrada` (`mobile/src/modo.ts`). No hay
+detección automática de RAM al arrancar. `getSystemResources()` solo se usa en
+`mobile/src/perf/logger.ts` para telemetría.
 
-| Modo | Cuándo | Qué corre en el teléfono |
+| Modo | Inferencia | Envío del crédito |
 | --- | --- | --- |
-| **Completo** | RAM holgada (el iPhone 17 Pro Max y similares) | MedPsy Q8_0 (2.1 GB) más el adaptador. Autónomo total |
-| **Ligero** | RAM ajustada | MedPsy **Q4_0** (~1.1 GB) más el adaptador. Autónomo total |
-| **Delegado** | RAM insuficiente | Solo OCR en el teléfono. El LLM corre en el nodo del corregimiento, por HTTP en la LAN (texto, nunca fotos). QVAC `delegate` no atraviesa NAT; no es este modo |
+| **`local-wifi`** | MedPsy en el teléfono; si falla, texto a `/inferir` | Primero banco remoto (Railway); si no, pueblo / cola |
+| **`local-offline`** | MedPsy en el teléfono; si falla, texto a `/inferir` | Sin Railway: LAN al pueblo o cola SQLite |
+| **`nodo-offline`** | Sin MedPsy local: OCR aquí, texto al pueblo (`/inferir`) | Igual que offline: pueblo o cola |
 
-En los tres modos las fotos se borran en el teléfono y nunca salen. En modo
-delegado viaja **texto**, nunca imágenes, y sigue cumpliendo el reglamento
-("en el dispositivo o en el nodo local; nunca un proveedor remoto").
+En los tres modos las fotos no salen del teléfono. A `/inferir` y a
+`/solicitud` viaja **texto/JSON**, nunca imagen. QVAC `delegate` y Hyperswarm
+**no** son el camino de la demo (HTTP).
+
+El hardware de grabación es siempre MedPsy **Q8_0** en el iPhone. El modo no
+cambia la cuantización; cambia si el LLM corre aquí o en el nodo, y si el JSON
+sale a Railway.
 
 ## Alternativas consideradas
 
-- **Solo Q8_0 y asumir gama alta.** Es lo que había. Demo bonita, promesa que no
-  se sostiene, y contradice el usuario que el propio brief define.
-- **Solo Q4_K_M**, que es la cuantización que el blog de MedPsy recomienda
-  (~1.2 GB, pierde menos de un punto de score). **Descartada: no es entrenable.**
-  `finetune()` solo acepta F32, F16, Q4_0, Q8_0, TQ1_0 y TQ2_0, y Q4_K_M no está
-  en esa lista. Elegirla mata el LoRA de `ADR-003`.
-- **Bajar todo a Q4_0 y olvidarse del modo completo.** Más simple, pero
-  desperdicia el hardware de la demo y regala calidad sin necesidad. Q8_0 es
-  descrita como "exactly lossless" (66.31 contra 66.31).
-- **Delegar siempre.** Mata el argumento del proyecto, que es que la inteligencia
-  vive en el bolsillo.
+- **Auto-modo por RAM (Q8 / Q4 / nodo).** Mejor para el brief de gama media, pero
+  exige constante Q4_0 entrenable, segundo LoRA eventual y wiring que no
+  llegó a tiempo. Queda en "Reabrir si".
+- **Solo `local-wifi`.** Más simple; no muestra el caso sin internet ni el
+  pueblo prestando cómputo.
+- **QVAC `delegate`.** No atraviesa NAT de forma fiable en nuestras pruebas;
+  el README no lo promete (`ADR-013`, CHECKLIST 1.3).
 
 ## Consecuencias
 
-- **El nodo del corregimiento gana su tercera razón de existir**: reparte los
-  pesos, hace de cartero, y ahora también presta cómputo al teléfono que no
-  alcanza. Deja de ser un adorno del pitch.
-- Hay que confirmar que existe una constante Q4_0 de MedPsy 1.7B en el catálogo.
-  Si no existe, el modo ligero se cae y quedan dos modos.
-- El adaptador LoRA se entrena sobre una cuantización concreta. Hay que verificar
-  si un adaptador entrenado sobre Q8_0 carga sobre Q4_0; si no, son dos
-  entrenamientos, y con ~2 h cada uno eso cabe pero hay que planearlo.
-- **El README declara los tres modos y en cuál se grabó el vídeo.** El reto
-  Tether Psy exige "nombres honestos de modelo, cuantización y hardware de
-  ejecución": decir "corre en un teléfono" mientras se demuestra en un buque
-  insignia es exactamente lo que ese criterio penaliza.
-- Mejora el pitch en vez de debilitarlo: **la app se adapta al aparato que le
-  toque**, que es lo que "Sovereign Intelligence at the Edge" significa cuando
-  el edge es real y no un laboratorio.
+- README, BRIEF y CHECKLIST hablan de `local-wifi` / `local-offline` /
+  `nodo-offline`, no de Completo/Ligero/Delegado.
+- El pitch honesto: **demo en iPhone Q8**; el brief de Android gama media sigue
+  abierto vía modo `nodo-offline` (OCR local + LLM en el pueblo).
+- `npm run corregimiento` puede intentar Hyperswarm salvo `SKIP_P2P=1`; Railway
+  ya lo salta. El teléfono no usa Hyperswarm.
 
 ## Reabrir si
 
-El bloque 0 muestra que el iPhone 17 Pro Max no carga Q8_0 con holgura (load
-~94 s en CPU), en cuyo caso el modo completo desaparece y Q4_0 pasa a ser el
-único local. O si no existe constante Q4_0 entrenable, en cuyo caso los modos
-son completo y delegado, sin escalón intermedio.
+Existe constante **Q4_0** entrenable de MedPsy 1.7B y se mide que cabe en
+Android de gama media, o QVAC documenta un selector de fit fiable. Entonces se
+puede reintroducir detección por `getSystemResources()` / `assessModelFit()`
+sin romper el picker de demo.

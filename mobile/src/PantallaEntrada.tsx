@@ -6,7 +6,7 @@ import { useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { USUARIOS, buscarPorCorreo, type Usuario } from "./usuarios";
 import {
-  MODOS, fijarModo, usuarioDelModo, type ModoId,
+  MODOS, fijarModo, usuarioDelModo, etiquetaModo, type ModoId,
 } from "./modo";
 import { Pantalla, Encabezado, Boton, Pie } from "./ui/componentes";
 import { COLOR, TIPO, ESPACIO, DISPLAY, TOQUE } from "./ui/tokens";
@@ -50,14 +50,15 @@ export default function PantallaEntrada({
   };
 
   const casoActivo = USUARIOS.find(u => u.correo === correo.trim().toLowerCase());
+  const modoActivo = MODOS.find(e => e.id === modoSel) ?? MODOS[0];
   const demoResumen = [
-    MODOS.find(e => e.id === modoSel)?.titulo ?? modoSel,
+    etiquetaModo(modoActivo),
     casoActivo ? (CASO_CORTO[casoActivo.id] ?? casoActivo.id) : "correo libre",
   ].join(" · ");
 
   return (
     <Pantalla>
-      <Encabezado meta="camino de la medicina" />
+      <Encabezado meta="Camino de la medicina" />
 
       <View style={s.arriba}>
         <Text style={s.titular}>Entra con{"\n"}tu correo</Text>
@@ -90,11 +91,11 @@ export default function PantallaEntrada({
           onPress={() => setDemoAbierta(v => !v)}
           accessibilityRole="button"
           accessibilityState={{ expanded: demoAbierta }}
-          accessibilityLabel="Controles solo para demo o showcase"
+          accessibilityLabel="Controles solo para demostración"
           style={({ pressed }) => [s.demoCabecera, pressed && s.press]}
         >
           <View style={s.demoCabeceraTextos}>
-            <Text style={s.demoBadge}>Solo para demo / showcase</Text>
+            <Text style={s.demoBadge}>Solo para demostración</Text>
             <Text style={s.demoResumen} numberOfLines={2}>{demoResumen}</Text>
           </View>
           <Text style={s.demoChevron}>{demoAbierta ? "▴" : "▾"}</Text>
@@ -103,7 +104,7 @@ export default function PantallaEntrada({
         {demoAbierta ? (
           <View style={s.demoCuerpo}>
             <Text style={s.demoAyuda}>
-              Modo del teléfono (modelo × wifi) y caso sintético. El historial se lee siempre; el examen se ofrece después del resultado.
+              WiFi y dónde corre el modelo. El historial se lee siempre; el examen se ofrece después del resultado.
             </Text>
 
             <Text style={s.demoEtiqueta}>Modo · el teléfono</Text>
@@ -116,7 +117,7 @@ export default function PantallaEntrada({
                     onPress={() => setModoSel(e.id)}
                     accessibilityRole="button"
                     accessibilityState={{ selected: puesto }}
-                    accessibilityLabel={`${e.titulo}. ${e.detalle}`}
+                    accessibilityLabel={`${etiquetaModo(e)}. ${e.detalle}`}
                     style={({ pressed }) => [
                       s.modo,
                       puesto && { borderColor: e.color, backgroundColor: COLOR.hundido },
@@ -125,7 +126,11 @@ export default function PantallaEntrada({
                   >
                     <View style={[s.marca, { backgroundColor: e.color }]} />
                     <View style={s.modoTextos}>
-                      <Text style={s.modoTitulo}>{e.titulo}</Text>
+                      <View style={s.modoLineas}>
+                        <Text style={s.modoWifi}>{e.wifi}</Text>
+                        <Text style={s.modoMas}>+</Text>
+                        <Text style={s.modoModelo}>{e.modelo}</Text>
+                      </View>
                       <Text style={s.modoDetalle}>{e.detalle}</Text>
                     </View>
                   </Pressable>
@@ -228,12 +233,15 @@ const s = StyleSheet.create({
     borderColor: COLOR.separador,
     backgroundColor: COLOR.fondo,
     paddingHorizontal: 10,
-    paddingVertical: 9,
+    paddingVertical: 10,
     minHeight: TOQUE,
   },
   marca: { width: 10, height: 10 },
-  modoTextos: { flex: 1, gap: 2, minWidth: 0 },
-  modoTitulo: { fontSize: 13.5, fontWeight: "700", color: COLOR.tinta },
+  modoTextos: { flex: 1, gap: 4, minWidth: 0 },
+  modoLineas: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 6 },
+  modoWifi: { fontSize: 13.5, fontWeight: "800", color: COLOR.tinta },
+  modoMas: { fontSize: 12, fontWeight: "700", color: COLOR.apagado },
+  modoModelo: { fontSize: 13.5, fontWeight: "800", color: COLOR.tinta },
   modoDetalle: { fontSize: 12, lineHeight: 16, color: COLOR.gris },
 
   puesto: { backgroundColor: COLOR.hundido, borderColor: COLOR.tinta },

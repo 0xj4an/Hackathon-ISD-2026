@@ -56,9 +56,16 @@ En [`lora-medpsy/RESULTADOS.md`](lora-medpsy/RESULTADOS.md): tres corridas
 documentadas. La 3 alinea la tarea de laboratorio con la app (JSON válido de
 lab 5% → 68%). Los números crudos de la última corrida quedan en
 `lora-medpsy/out/resultados.json` (no versionado). El adaptador de la corrida 3
-vive en el producto como `mobile/assets/models/lora-lab-v3.gguf` (solo vía B).
+vive en el producto como `mobile/assets/models/lora-lab-v3.gguf` (**solo examen
+de laboratorio**; cédula/ingresos/alerta siguen en MedPsy base).
+
+## Delegate (no es producto)
+
+`delegate-provider.mjs` / `delegate-consumer.mjs` y `qvac.relays.config.json`
+son ensayos de QVAC `delegate`. **No** están en el camino de la demo (HTTP
+banco/pueblo). No usarlos en el video ni citarlos como entregable.
 
 ## Qué no está versionado
 
-- `node_modules/`: 5.7 GB, lo reconstruye `npm install`.
+- `node_modules/`: lo reconstruye `npm install`.
 - `lora-medpsy/out/`: el adaptador `.gguf` y los checkpoints, los regenera el spike.

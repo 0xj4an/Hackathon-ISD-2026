@@ -61,11 +61,12 @@ aparato.
 `PantallaDocumentos` toma foto o archivo, corre `ocr()` + MedPsy → JSON y borra
 la copia (`leerDocumento.ts`). MedPsy es local primero; si no carga, el texto
 va al pueblo. Sigue `PantallaLeido`, la cuota con `preCalificar()` y el envío: al banco remoto si hay wifi (`local-wifi`), al nodo del pueblo si
-no. HTTP medido desde laptop ([`PRUEBA-NODO.md`](PRUEBA-NODO.md)); desde el
+no. Tras aprobación: `PantallaFirma` (trazo) → `PantallaDesembolso` (simulado).
+HTTP medido desde laptop ([`PRUEBA-NODO.md`](PRUEBA-NODO.md)); desde el
 iPhone, no.
 
 `PantallaDatos.tsx` (editable, deudas y personas a cargo) sigue en el repo; el
-camino de la demo no pasa por ella.
+camino de la demo no pasa por ella (`lectura.ts` manda deudas/personas en 0).
 
 La rama del examen ya tiene foto → OCR → MedPsy+LoRA → `clasificar()`
 (`PantallaExamen` / `leerExamen.ts`). Si hay hallazgos fuera de rango, ofrece
@@ -87,6 +88,9 @@ Entrada ya no elige Historial|Examen como vías paralelas.
   Falta verificar en el iPhone (C8/C9)
 - [~] Envío: al banco (Railway) si modo `local-wifi`; al pueblo si offline.
   Código en `envio.ts`; medido sin teléfono; falta el iPhone
+- [x] Firma con trazo + disclaimer legal (`PantallaFirma`) y desembolso
+  simulado (`PantallaDesembolso`) tras aprobación. Falta verlo en el iPhone
+  en la misma corrida de demo
 
 Material listo: `data/documentos/` tiene ocho ficticios (nítido y difícil de
 cédula, ingresos, extracto y examen) más `esperado.json`.
@@ -165,7 +169,7 @@ JSON válido **5% → 68%**. Adaptador en la app como
 - [x] `eval/credito/*.test.mjs` (58 tests) llama al motor real y valida contrato/schemas; `eval/salud/alerta.test.mjs` y `eval/nodo/inferir.test.mjs` en verde
 - [x] El nodo importa el motor de crédito en vez de tener su propia política
 - [x] Trece `Pantalla*.tsx`; navegación en `App.tsx` (Entrada → … → Banco; Examen y Registro laterales)
-- [x] La cuota se calcula **en el teléfono y sin señal**: `PantallaLeido` muestra lo extraído, `PantallaCuota` corre `preCalificar()` y `PantallaBanco` muestra `decidir()`
+- [x] La cuota se calcula **en el teléfono y sin señal**: `PantallaLeido` muestra lo extraído, `PantallaCuota` corre `preCalificar()` y `PantallaBanco` muestra `decidir()`; si aprueba, firma y desembolso simulado
 - [x] `data/generar-usuarios.mjs` produce el formato normalizado; casos embebidos en `mobile/src/datos/`
 - [x] `core/` unificado en `mobile/src/core/`, sin duplicado en la raíz
 - [x] Sentry cableado (init compartido, breadcrumbs, hooks EAS)

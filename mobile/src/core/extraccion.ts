@@ -289,7 +289,7 @@ function normalizar(
   if (typeof o.confianza === "number" && o.confianza > 1 && o.confianza <= 100) {
     o.confianza = o.confianza / 100;
   }
-  if (typeof o.confianza !== "number" || !Number.isFinite(o.confianza)) o.confianza = 0.7;
+  if (typeof o.confianza !== "number" || !Number.isFinite(o.confianza)) o.confianza = 0;
 
   if (clave === "cedula") {
     const numero = tomar(o, ["numero", "cedula", "numero_cedula", "id"]);
