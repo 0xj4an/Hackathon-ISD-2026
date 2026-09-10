@@ -37,7 +37,8 @@ El reglamento pide cosas concretas, y cada una necesita su plano:
 ### 0:00 a 0:35 · El problema (hooks)
 
 **Se ve:** open de 35 s, cine + documental. **No empieza con el logo.** Primer
-fotograma: **4 de cada 10 adultos**. A los 2.5 s: tienen presión alta. Luego
+fotograma: **4 de cada 10 adultos**. A los 2.5 s: tienen una condición no
+diagnosticada. Luego
 un examen es un viaje. Nombre a los ~24 s. Corte duro al teléfono (sin fundido).
 Beats: `media_lab/.ai/runs/2026-09-10-ina-igar/07-open-35s.md`. El animático
 [`intro.html`](intro.html) (22 s, marca primero) queda obsoleto para este corte.
