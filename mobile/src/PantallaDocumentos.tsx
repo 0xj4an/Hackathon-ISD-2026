@@ -1,5 +1,5 @@
 /**
- * Carga de documentos: foto o archivo, se leen aquí, queda el JSON, se borra la copia.
+ * Carga de documentos: primero las fotos, luego se achican y se leen juntas.
  *
  * SQLite no entra todavía. El JSON vive en esta pantalla hasta que confirmemos
  * si la cola lo necesita.
@@ -11,7 +11,7 @@ import * as DocumentPicker from "expo-document-picker";
 import { Pantalla, Encabezado, BarraVeredicto, Franja, Etiqueta, Pie, Boton } from "./ui/componentes";
 import Pictograma from "./ui/Pictograma";
 import { COLOR, TIPO, ESPACIO, DISPLAY, TOQUE } from "./ui/tokens";
-import { leerDocumento, mensajeLectura, soltarLectores, type ProgresoLectura } from "./leerDocumento";
+import { leerDocumentos, mensajeLectura, soltarLectores, type ProgresoLectura } from "./leerDocumento";
 import type { ClaveDocumento } from "./core/extraccion";
 import type { Problema } from "./core/validaciones";
 import { CedulaSchema, IngresosSchema, ExtractoSchema } from "./core/schemas";
@@ -27,6 +27,7 @@ type Documento = {
 
 type EstadoDoc =
   | { fase: "vacio" }
+  | { fase: "enCola"; uri: string }
   | { fase: "leyendo"; detalle: string; pct?: number }
   | {
       fase: "listo";
@@ -99,6 +100,11 @@ export default function PantallaDocumentos({
   const [estados, setEstados] = useState<Record<ClaveDocumento, EstadoDoc>>(() => semilla(lecturaInicial));
   const [error, setError] = useState("");
   const ocupado = Object.values(estados).some(e => e.fase === "leyendo");
+  const hayCola = DOCUMENTOS.some(d => estados[d.clave].fase === "enCola");
+  const cedulaOk = estados.cedula.fase === "enCola" || estados.cedula.fase === "listo";
+  const ingresosOk = estados.ingresos.fase === "enCola" || estados.ingresos.fase === "listo";
+  const puedenLeer = cedulaOk && ingresosOk && hayCola;
+  const obligatoriosListos = estados.cedula.fase === "listo" && estados.ingresos.fase === "listo";
 
   useEffect(() => {
     return () => {
@@ -114,29 +120,50 @@ export default function PantallaDocumentos({
     setEstado(clave, { fase: "leyendo", detalle: p.detalle, pct: p.pct });
   };
 
-  const procesar = async (clave: ClaveDocumento, uri: string) => {
+  const guardar = (clave: ClaveDocumento, uri: string) => {
     setError("");
-    setEstado(clave, { fase: "leyendo", detalle: "Preparando la lectura" });
+    setEstado(clave, { fase: "enCola", uri });
+  };
+
+  const leerLote = async () => {
+    if (ocupado || !puedenLeer) return;
+    const entradas = DOCUMENTOS.flatMap(d => {
+      const e = estados[d.clave];
+      return e.fase === "enCola" ? [{ clave: d.clave, uri: e.uri }] : [];
+    });
+    if (entradas.length === 0) return;
+    setError("");
+    for (const e of entradas) {
+      setEstado(e.clave, { fase: "leyendo", detalle: "Preparando la lectura" });
+    }
     try {
-      const r = await leerDocumento(clave, uri, p => marcarProgreso(clave, p));
-      if (r.ok) {
-        setEstado(clave, {
-          fase: "listo",
-          datos: r.datos as Record<string, unknown>,
-          problemas: r.problemas,
-          borrada: r.borrada,
-        });
-      } else {
-        setEstado(clave, {
-          fase: "error",
-          mensaje: r.error,
-          crudo: r.crudo,
-          textoOcr: r.textoOcr,
-        });
+      const r = await leerDocumentos(entradas, marcarProgreso);
+      for (const e of entradas) {
+        const x = r[e.clave];
+        if (!x) {
+          setEstado(e.clave, { fase: "error", mensaje: "No se pudo leer el documento." });
+          continue;
+        }
+        if (x.ok) {
+          setEstado(e.clave, {
+            fase: "listo",
+            datos: x.datos as Record<string, unknown>,
+            problemas: x.problemas,
+            borrada: x.borrada,
+          });
+        } else {
+          setEstado(e.clave, {
+            fase: "error",
+            mensaje: x.error,
+            crudo: x.crudo,
+            textoOcr: x.textoOcr,
+          });
+        }
       }
     } catch (err) {
       recordError("PantallaDocumentos", err);
-      setEstado(clave, { fase: "error", mensaje: mensajeLectura(err) });
+      const mensaje = mensajeLectura(err);
+      for (const e of entradas) setEstado(e.clave, { fase: "error", mensaje });
     }
   };
 
@@ -148,7 +175,7 @@ export default function PantallaDocumentos({
       if (!permiso.granted) return setError(SIN_CAMARA);
       const foto = await ImagePicker.launchCameraAsync(CAPTURA);
       if (foto.canceled || !foto.assets[0]?.uri) return;
-      await procesar(clave, foto.assets[0].uri);
+      guardar(clave, foto.assets[0].uri);
     } catch {
       setError(FALLO_CAMARA);
     }
@@ -169,7 +196,7 @@ export default function PantallaDocumentos({
         setError(NO_IMAGEN);
         return;
       }
-      await procesar(clave, asset.uri);
+      guardar(clave, asset.uri);
     } catch (err) {
       recordError("documentPicker", err);
       try {
@@ -180,14 +207,14 @@ export default function PantallaDocumentos({
         }
         const galeria = await ImagePicker.launchImageLibraryAsync(CAPTURA);
         if (galeria.canceled || !galeria.assets[0]?.uri) return;
-        await procesar(clave, galeria.assets[0].uri);
+        guardar(clave, galeria.assets[0].uri);
       } catch {
         setError(FALLO_ARCHIVO);
       }
     }
   };
 
-  const faltan = DOCUMENTOS.filter(d => d.obligatorio && estados[d.clave].fase !== "listo").length;
+  const faltanObligatorios = DOCUMENTOS.filter(d => d.obligatorio && estados[d.clave].fase === "vacio").length;
 
   const continuar = () => {
     const ced = estados.cedula;
@@ -217,8 +244,8 @@ export default function PantallaDocumentos({
       <View style={s.arriba}>
         <Text style={s.titular}>Se leen{"\n"}aquí dentro</Text>
         <Text style={s.parrafo}>
-          Hacen falta dos documentos, y un tercero que es opcional. Toma una foto o
-          súbelos desde tus archivos. No viajan a ningún lado.
+          Primero junta las fotos. Después se achican y se leen juntas, aquí
+          dentro. No viajan a ningún lado.
         </Text>
       </View>
 
@@ -241,23 +268,36 @@ export default function PantallaDocumentos({
       <View style={s.privacidad}>
         <Text style={s.privacidadTitulo}>Qué pasa con las fotos</Text>
         <Text style={s.privacidadTexto}>
-          Se leen en este teléfono para sacar los datos escritos y se borra la copia.
-          Ninguna imagen viaja al banco. Lo que queda es el JSON.
+          Se achican, se leen en este teléfono y se borra la copia. Ninguna
+          imagen viaja al banco. Lo que queda es el JSON.
         </Text>
       </View>
 
-      {faltan === 0 ? (
+      {ocupado ? (
+        <Text style={s.estado}>Leyendo las fotos. Un momento.</Text>
+      ) : obligatoriosListos && !hayCola ? (
         <Boton
           texto="Ver lo que se leyó"
           tono="rutinaria"
           onPress={continuar}
           etiqueta="Ver los datos leídos y las fotos borradas"
         />
+      ) : puedenLeer ? (
+        <Boton
+          texto="Leer las fotos"
+          tono="prioritaria"
+          onPress={() => void leerLote()}
+          etiqueta="Achicar y leer las fotos juntas"
+        />
       ) : (
         <>
           <Etiqueta>Estado</Etiqueta>
           <Text style={s.estado}>
-            Faltan {faltan} {faltan === 1 ? "documento" : "documentos"} obligatorios.
+            {DOCUMENTOS.some(d => estados[d.clave].fase === "error")
+              ? "Repite la foto que falló y léelas de nuevo."
+              : faltanObligatorios === 0
+                ? "Falta marcar las fotos para leerlas."
+                : `Faltan ${faltanObligatorios} ${faltanObligatorios === 1 ? "documento" : "documentos"} obligatorios.`}
           </Text>
         </>
       )}
@@ -281,8 +321,9 @@ function FilaDocumento({
 }) {
   const listo = estado.fase === "listo";
   const error = estado.fase === "error";
+  const enCola = estado.fase === "enCola";
   const simbolo = listo ? "listo" : error ? "alerta" : "documento";
-  const color = listo ? COLOR.rutinaria : error ? COLOR.inmediata : COLOR.tinta;
+  const color = listo ? COLOR.rutinaria : error ? COLOR.inmediata : enCola ? COLOR.prioritaria : COLOR.tinta;
 
   return (
     <View style={[s.fila, ultima ? null : s.separador]}>
@@ -292,6 +333,8 @@ function FilaDocumento({
           <Text style={s.nombre}>{doc.nombre}</Text>
           {listo && typeof estado.datos.confianza === "number" ? (
             <Text style={s.pct}>{Math.round(estado.datos.confianza * 100)}%</Text>
+          ) : enCola ? (
+            <Text style={s.opcional}>Lista</Text>
           ) : doc.obligatorio ? null : (
             <Text style={s.opcional}>Opcional</Text>
           )}
@@ -300,6 +343,8 @@ function FilaDocumento({
           <Text style={s.ayuda}>
             {estado.detalle}{estado.pct != null ? ` · ${estado.pct}%` : ""}
           </Text>
+        ) : enCola ? (
+          <Text style={s.ayuda}>Foto lista. Se achica y se lee con las demás.</Text>
         ) : listo || error ? null : (
           <Text style={s.ayuda}>{doc.ayuda}</Text>
         )}
@@ -334,10 +379,10 @@ function FilaDocumento({
               accessibilityRole="button"
               accessibilityLabel={`${estado.fase === "vacio" ? "Tomar" : "Repetir"} la foto de ${doc.nombre}`}
               style={({ pressed }) => [
-                s.accion, listo && s.accionListo, pressed && s.accionPress, bloqueado && s.accionOff,
+                s.accion, (listo || enCola) && s.accionListo, pressed && s.accionPress, bloqueado && s.accionOff,
               ]}
             >
-              <Text style={[s.accionTexto, listo && s.accionTextoListo]}>
+              <Text style={[s.accionTexto, (listo || enCola) && s.accionTextoListo]}>
                 {estado.fase === "vacio" ? "Tomar foto" : "Otra foto"}
               </Text>
             </Pressable>
@@ -347,10 +392,10 @@ function FilaDocumento({
               accessibilityRole="button"
               accessibilityLabel={`Subir ${doc.nombre} desde archivos`}
               style={({ pressed }) => [
-                s.accion, listo && s.accionListo, pressed && s.accionPress, bloqueado && s.accionOff,
+                s.accion, (listo || enCola) && s.accionListo, pressed && s.accionPress, bloqueado && s.accionOff,
               ]}
             >
-              <Text style={[s.accionTexto, listo && s.accionTextoListo]}>
+              <Text style={[s.accionTexto, (listo || enCola) && s.accionTextoListo]}>
                 {estado.fase === "vacio" ? "Subir archivo" : "Otro archivo"}
               </Text>
             </Pressable>
