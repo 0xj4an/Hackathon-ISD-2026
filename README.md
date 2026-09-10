@@ -12,7 +12,8 @@ La inferencia intenta MedPsy en el teléfono con [`@qvac/sdk`](https://docs.qvac
 |---|---|---|---|
 | Alerta de salud en español | MedPsy 1.7B (`HEALTHCARE_1_7B_MEDICAL_Q8_0`) | Q8_0 | 2.1 GB |
 | OCR de documentos | `OCR_LATIN` | - | - |
-| Extracción a JSON | El mismo MedPsy 1.7B, sobre el texto de `OCR_LATIN` (`ADR-002`) | Q8_0 | 2.1 GB |
+| Extracción a JSON (cédula, ingresos, extracto) | El mismo MedPsy 1.7B, sobre el texto de `OCR_LATIN` (`ADR-002`) | Q8_0 | 2.1 GB |
+| Extracción de laboratorio (vía B) | MedPsy + LoRA `lab-v3` (`mobile/assets/models/lora-lab-v3.gguf`) | Q8_0 + LoRA | 2.1 GB + 33 MB |
 
 Hardware de **demo**: iPhone 17 Pro Max, iOS 26.6.1, MedPsy Q8_0 en CPU (TTFT 2915 ms, 9 sep 2026). El Xiaomi 14T Pro (HyperOS 3 / Android 16) aborta en `libbare-kit.so` al arrancar Bare; no es el aparato de la grabación. El usuario del brief sigue siendo rural con Android de gama media (`ADR-006`). Log: [`perf/`](perf/).
 
@@ -38,9 +39,16 @@ Hacerlo con wifi antes de la demo, no delante del jurado.
 
 ## Evaluación reproducible
 
-`eval/` (pendiente) corre un set de casos sintéticos contra el flujo y reporta
-% de JSON válido y % de campos correctos. Los rangos de referencia contra los
-que se clasifica están en [`mobile/src/core/marcadores.ts`](mobile/src/core/marcadores.ts).
+```bash
+node eval/run.mjs                  # reglas, paquetes, crédito → eval/resultados.md
+node --test eval/credito/*.test.mjs
+node --test eval/salud/alerta.test.mjs eval/nodo/inferir.test.mjs
+```
+
+Eso mide el dominio (14 señales, 9 casos, contrato del banco). La calidad de
+extracción OCR/LLM se mide aparte en el spike
+[`spikes/lora-medpsy/`](spikes/lora-medpsy/) (`RESULTADOS.md`). Rangos de lab:
+[`mobile/src/core/marcadores.ts`](mobile/src/core/marcadores.ts).
 
 ## Seguridad y límites
 - No es un diagnóstico. La alerta es orientativa y lo dice en pantalla. Validación de rangos y consistencia antes de invocar el modelo.

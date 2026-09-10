@@ -379,6 +379,38 @@ export async function leerDocumento(
   return x;
 }
 
+/**
+ * Solo OCR de una foto (vía B). Suelta MedPsy antes: detector y LLM no caben.
+ */
+export async function leerOcrDeUri(
+  uri: string,
+  onProgreso?: (p: ProgresoLectura) => void,
+): Promise<{ texto: string; confianza?: number; stats: unknown }> {
+  await soltarMedPsy();
+  onProgreso?.({ paso: "ocr", detalle: "Achicando la foto" });
+  const chica = await achicar(uri);
+  await asegurarOcr(onProgreso);
+  onProgreso?.({ paso: "ocr", detalle: "Leyendo el texto del papel" });
+  const tOcr = Date.now();
+  try {
+    const ocr = await ocrImagen(chica);
+    await recordInference({
+      task: "ocr",
+      model: OCR_NOMBRE,
+      quant: "-",
+      lora: null,
+      ctx_size: 0,
+      device_cfg: "cpu",
+      ttft_ms: null,
+      load_ms: Date.now() - tOcr,
+      stats: ocr.stats ?? {},
+    });
+    return ocr;
+  } finally {
+    if (chica !== uri) borrarCopia(chica);
+  }
+}
+
 /** Libera RAM al salir de la pantalla. Los pesos siguen en caché. */
 export async function soltarLectores(): Promise<void> {
   await soltarOcr();

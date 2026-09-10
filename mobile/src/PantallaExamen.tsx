@@ -1,22 +1,16 @@
 /**
  * Vía B: la persona trae un examen de laboratorio y la app se lo lee.
  *
- * Es la otra mitad del proyecto. La vía A vigila las mediciones del día a día;
- * esta atiende al que bajó al pueblo, se hizo el examen y volvió con un papel
- * que nadie le explica. El catálogo de `marcadores.ts` ya sabía clasificar, pero
- * hasta ahora no tenía por dónde entrar.
- *
- * Dos caminos de entrada, y el orden importa: la foto es el que se demuestra, y
- * escribir los valores es el que funciona hoy. Cuando `ocr()` exista, la foto
- * llenará estos mismos campos con `SYSTEM_EXTRACCION_LABORATORIO` y el resto de
- * la pantalla no cambia. Quién está alto o bajo lo decide `clasificar()` contra
- * su rango citado, nunca el modelo (`ADR-005`).
+ * Foto → OCR → MedPsy + LoRA lab → clasificar() (`ADR-005`). Escribir a mano
+ * sigue disponible si la foto falla.
  */
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
+import { View, Text, TextInput, StyleSheet } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import type { Usuario } from "./usuarios";
 import { MARCADORES, clasificar, buscarMarcador, type LecturaLab } from "./core/marcadores";
+import { leerExamenFoto } from "./leerExamen";
+import { LORA_LAB_VERSION } from "./lora";
 import {
   Pantalla, Encabezado, BarraVeredicto, Veredicto, Franja, Boton, Etiqueta, Pie,
 } from "./ui/componentes";
@@ -25,8 +19,6 @@ import { COLOR, COLOR_URGENCIA, VERBO_URGENCIA, TIPO, ESPACIO, DISPLAY, TOQUE } 
 const SIN_PERMISO = "Sin permiso de cámara no podemos leer el examen. Actívalo y vuelve a intentar.";
 const FALLO = "No se pudo abrir la cámara. Intenta otra vez.";
 const NADA = "Escribe al menos un valor, el que aparezca en tu examen.";
-const PENDIENTE =
-  "La lectura automática de la foto entra en el siguiente bloque. Mientras tanto, escribe abajo los valores que veas en el papel.";
 
 const ORDEN = { Inmediata: 0, Prioritaria: 1, Rutinaria: 2 } as const;
 
@@ -35,18 +27,36 @@ export default function PantallaExamen({
 }: { usuario: Usuario; onVolver: () => void }) {
   const [valores, setValores] = useState<Record<string, string>>({});
   const [lecturas, setLecturas] = useState<LecturaLab[] | null>(null);
-  const [fotoTomada, setFotoTomada] = useState(false);
+  const [leyendo, setLeyendo] = useState(false);
+  const [progreso, setProgreso] = useState("");
+  const [conLora, setConLora] = useState<string | null>(null);
   const [error, setError] = useState("");
 
-  const tomarFoto = async () => {
+  const tomarYLeer = async () => {
     setError("");
     try {
       const permiso = await ImagePicker.requestCameraPermissionsAsync();
       if (!permiso.granted) return setError(SIN_PERMISO);
-      const foto = await ImagePicker.launchCameraAsync({ quality: 0.7 });
-      if (foto.canceled) return;
-      setFotoTomada(true);
+      const foto = await ImagePicker.launchCameraAsync({
+        quality: 0.7,
+        preferredAssetRepresentationMode:
+          ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
+      });
+      if (foto.canceled || !foto.assets[0]?.uri) return;
+
+      setLeyendo(true);
+      setProgreso("Preparando…");
+      const r = await leerExamenFoto(foto.assets[0].uri, usuario.sexo, p => {
+        setProgreso(p.detalle + (p.pct != null ? ` · ${p.pct}%` : ""));
+      });
+      setLeyendo(false);
+      setProgreso("");
+      if (!r.ok) return setError(r.error);
+      setConLora(r.lora);
+      setLecturas(r.lecturas);
     } catch {
+      setLeyendo(false);
+      setProgreso("");
       setError(FALLO);
     }
   };
@@ -62,6 +72,7 @@ export default function PantallaExamen({
     }
     if (salida.length === 0) return setError(NADA);
     setError("");
+    setConLora(null);
     setLecturas(salida.sort((a, b) => ORDEN[a.urgencia] - ORDEN[b.urgencia]));
   };
 
@@ -76,7 +87,7 @@ export default function PantallaExamen({
           <Veredicto
             color={COLOR.rutinaria}
             palabra="Todo en rango"
-            detalle={`Los ${lecturas.length} valores que escribiste están dentro de lo esperado.`}
+            detalle={`Los ${lecturas.length} valores están dentro de lo esperado.`}
             simbolo="listo"
           />
         ) : (
@@ -111,11 +122,16 @@ export default function PantallaExamen({
           })}
         </View>
 
-        <Boton texto="Escribir otros valores" tono="borde" onPress={() => setLecturas(null)} />
+        <Boton
+          texto="Leer otro examen"
+          tono="borde"
+          onPress={() => { setLecturas(null); setConLora(null); }}
+        />
 
         <Pie>
           Los rangos salen del catálogo de marcadores, cada uno con su fuente. Esto es orientación
-          automática y local, no un diagnóstico. Confirma con un profesional de salud.
+          automática y local, no un diagnóstico.
+          {conLora ? ` Extracción con MedPsy + ${conLora}.` : ""}
         </Pie>
       </Pantalla>
     );
@@ -135,10 +151,18 @@ export default function PantallaExamen({
       </View>
 
       {error ? <Franja color={COLOR.inmediata} titulo="No se pudo" texto={error} /> : null}
+      {leyendo ? (
+        <Franja
+          color={COLOR.prioritaria}
+          titulo="Leyendo en el teléfono"
+          texto={progreso || `MedPsy + ${LORA_LAB_VERSION}`}
+        />
+      ) : null}
 
-      <Boton texto={fotoTomada ? "Foto tomada. Repetir" : "Tomar foto del examen"} onPress={tomarFoto} />
-
-      {fotoTomada ? <Franja color={COLOR.prioritaria} titulo="Falta leerla" texto={PENDIENTE} /> : null}
+      <Boton
+        texto={leyendo ? "Leyendo…" : "Tomar foto del examen"}
+        onPress={() => { if (!leyendo) void tomarYLeer(); }}
+      />
 
       <Etiqueta>O escribe los valores</Etiqueta>
       <View style={s.lista}>
@@ -158,6 +182,7 @@ export default function PantallaExamen({
               placeholderTextColor="#9A9A9A"
               keyboardType="decimal-pad"
               inputMode="decimal"
+              editable={!leyendo}
               accessibilityLabel={`Valor de ${m.nombre} en ${m.unidad}`}
               style={s.campo}
             />
@@ -169,6 +194,7 @@ export default function PantallaExamen({
 
       <Pie>
         Solo escribe los que aparezcan en tu papel. Los que dejes vacíos no se inventan.
+        La foto usa el adaptador {LORA_LAB_VERSION}; reemplazable sin tocar MedPsy.
       </Pie>
     </Pantalla>
   );

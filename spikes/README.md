@@ -52,8 +52,11 @@ es el formato, es el contenido.
 
 ### Resultados
 
-En `lora-medpsy/RESULTADOS.md` cuando la corrida termine. Los números crudos
-quedan además en `lora-medpsy/out/resultados.json` (no versionado).
+En [`lora-medpsy/RESULTADOS.md`](lora-medpsy/RESULTADOS.md): tres corridas
+documentadas. La 3 alinea la tarea de laboratorio con la app (JSON válido de
+lab 5% → 68%). Los números crudos de la última corrida quedan en
+`lora-medpsy/out/resultados.json` (no versionado). El adaptador de la corrida 3
+vive en el producto como `mobile/assets/models/lora-lab-v3.gguf` (solo vía B).
 
 ## Qué no está versionado
 

@@ -20,7 +20,10 @@
         "NSPhotoLibraryUsageDescription": "Para elegir una foto de un documento. No se sube a ningún servidor.",
         "NSMicrophoneUsageDescription": "Permiso pedido por el SDK de cámara. La demo no graba audio.",
         "NSLocalNetworkUsageDescription": "Para enviar la solicitud de crédito al nodo del pueblo, sin internet.",
-        "NSBonjourServices": ["_expo._tcp", "_metro._tcp"],
+        "NSBonjourServices": [
+          "_expo._tcp",
+          "_metro._tcp"
+        ],
         "NSAppTransportSecurity": {
           "NSAllowsLocalNetworking": true
         },
@@ -85,7 +88,8 @@
           "photosPermission": "Para elegir una foto de un documento. No se sube a ningún servidor."
         }
       ],
-      "expo-document-picker"
+      "expo-document-picker",
+      "expo-asset"
     ],
     "extra": {
       "eas": {
