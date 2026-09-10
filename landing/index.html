@@ -4,183 +4,157 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Ina Igar, camino de la medicina en gunagaya. Salud y credito donde no llega la senal. Toda la inferencia corre en el telefono con QVAC. ISD Summit 2026, Panama.">
-<meta name="color-scheme" content="light dark">
+<meta name="color-scheme" content="light">
 <meta property="og:title" content="Ina Igar">
 <meta property="og:description" content="Salud y credito donde no llega la senal. La inteligencia vive en el bolsillo, no en la nube.">
 <meta property="og:type" content="website">
-<style>*{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Ina Igar</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&display=swap">
 <style>
+/*
+  Senaletica: la direccion visual de Ina Igar, decidida en ADR-012.
+  No es una interfaz, es un letrero. Bloques de color a sangre, una palabra por
+  bloque, y un solo color de senal a la vez. Los tokens son los mismos que los de
+  la app, en mobile/src/ui/tokens.ts: si aqui y alla no coinciden, manda el codigo.
+*/
 :root{
-  --bg:#F4F6F4; --surface:#FFFFFF; --sunk:#EAEEEB;
-  --ink:#0F1512; --soft:#4E5A55; --faint:#818C87; --line:#D3DAD6;
-  --amber:#B77812; --amber-soft:#F7EBD5;
-  --teal:#0E6E6C; --teal-soft:#DCEBEA;
-  --clay:#A2402F; --clay-soft:#F3DED9;
-  --sh:0 1px 2px rgba(15,21,18,.05),0 10px 30px rgba(15,21,18,.05);
+  --fondo:#FFFFFF; --tinta:#101010; --gris:#6B6B6B; --linea:#E2E2E2; --hundido:#F2F2F2;
+  --ya:#C42B18; --pronto:#A85F00; --calma:#0B7A4B;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0A100E; --surface:#131B18; --sunk:#0E1512;
-  --ink:#E8EDEA; --soft:#A3B0AB; --faint:#727E79; --line:#26312D;
-  --amber:#E8A33D; --amber-soft:#2B1F0B;
-  --teal:#45BDB7; --teal-soft:#0C2422;
-  --clay:#E0705C; --clay-soft:#2B1410;
-  --sh:0 1px 2px rgba(0,0,0,.5),0 10px 30px rgba(0,0,0,.35);
-}}
-:root[data-theme="dark"]{
-  --bg:#0A100E; --surface:#131B18; --sunk:#0E1512;
-  --ink:#E8EDEA; --soft:#A3B0AB; --faint:#727E79; --line:#26312D;
-  --amber:#E8A33D; --amber-soft:#2B1F0B;
-  --teal:#45BDB7; --teal-soft:#0C2422;
-  --clay:#E0705C; --clay-soft:#2B1410;
-  --sh:0 1px 2px rgba(0,0,0,.5),0 10px 30px rgba(0,0,0,.35);
-}
-
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);margin:0;
+body{margin:0;background:var(--fondo);color:var(--tinta);
   font-family:Archivo,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
-.w{max-width:1000px;margin:0 auto;padding:0 28px}
-.narrow{max-width:70ch}
-
-h1,h2,h3{margin:0;text-wrap:balance}
-h1{font-family:"Instrument Serif",Georgia,serif;font-weight:400;
-  font-size:clamp(3.6rem,11vw,7.5rem);line-height:.9;letter-spacing:-.03em}
-h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;
-  font-size:clamp(2rem,4.6vw,3.2rem);line-height:1.05;letter-spacing:-.01em}
-h3{font-size:1.05rem;font-weight:600;line-height:1.3}
+  font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.w{max-width:1080px;margin:0 auto;padding:0 24px}
+h1,h2,h3{margin:0;font-family:"Archivo Black",Archivo,sans-serif;font-weight:400;
+  letter-spacing:-.03em;text-wrap:balance}
+h1{font-size:clamp(2.9rem,7.4vw,5.4rem);line-height:.95}
+h2{font-size:clamp(1.9rem,4vw,2.9rem);line-height:1.02}
+h3{font-size:1.12rem;letter-spacing:-.01em}
 p{margin:0}
-em{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-size:1.1em}
+b,strong{font-weight:700}
+a{color:var(--pronto)}
+a:hover{color:var(--tinta)}
 
-.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
-.eyebrow{font-family:"JetBrains Mono",monospace;font-size:.68rem;
-  text-transform:uppercase;letter-spacing:.18em;color:var(--faint)}
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gris)}
+section{padding:88px 0 0}
+.head{display:flex;flex-direction:column;gap:14px;margin-bottom:32px}
+.note{color:var(--gris);max-width:68ch}
 
-/* threshold rule: la firma visual */
-.thr{height:1px;background:var(--line);position:relative;margin:0}
-.thr::after{content:"";position:absolute;left:0;top:-2px;width:56px;height:5px;background:var(--amber)}
+/* hero */
+header{padding:36px 0 0}
+.tag{display:inline-block;background:var(--tinta);color:#fff;font-size:.72rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;padding:9px 13px}
+.marca{margin-top:34px}
+.gunagaya{margin-top:12px;font-size:.9rem;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gris)}
+.bloque{background:var(--pronto);color:#fff;margin-top:38px;padding:40px 34px}
+.bloque .lede{font-family:"Archivo Black",Archivo,sans-serif;letter-spacing:-.03em;
+  font-size:clamp(1.7rem,3.6vw,2.7rem);line-height:1.06;max-width:20ch}
+.bloque .sub{margin-top:16px;font-size:1.06rem;font-weight:600;max-width:52ch;line-height:1.45}
 
-header{padding:110px 0 0}
-.pending{font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--faint);margin-top:14px}
-.tag{display:inline-block;font-family:"JetBrains Mono",monospace;font-size:.7rem;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--amber);
-  border:1px solid var(--amber);padding:6px 12px;border-radius:2px;margin-bottom:30px}
-.lede{font-size:clamp(1.2rem,2.4vw,1.55rem);line-height:1.45;color:var(--soft);
-  max-width:34ch;margin-top:30px}
-.lede b{color:var(--ink);font-weight:600}
-.hero-fig{margin:56px 0 0}
-.hero-fig svg{display:block;width:100%;height:auto}
+/* cifras */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:3px solid var(--tinta)}
+.stat{padding:26px 22px 26px 0;border-right:1px solid var(--linea)}
+.stat:last-child{border-right:0}
+.stat .n{font-family:"Archivo Black",Archivo,sans-serif;font-size:3.5rem;line-height:1;letter-spacing:-.04em}
+.stat .l{margin-top:10px;font-size:.96rem;color:var(--gris);line-height:1.4}
+@media(max-width:760px){.stats{grid-template-columns:1fr}.stat{border-right:0;border-bottom:1px solid var(--linea)}}
 
-section{padding:96px 0 0}
-.head{display:flex;flex-direction:column;gap:14px;margin-bottom:36px}
-.note{color:var(--soft);max-width:66ch}
+/* dos mitades */
+.halves{display:grid;grid-template-columns:1fr 1fr;border-top:3px solid var(--tinta)}
+.half{padding:28px 26px 30px 0;border-right:1px solid var(--linea);display:flex;flex-direction:column;gap:12px}
+.half:last-child{border-right:0;padding-left:26px}
+.half .n{font-family:"Archivo Black",Archivo,sans-serif;font-size:1.5rem;color:var(--pronto)}
+.half p{color:var(--gris);font-size:1rem;line-height:1.5}
+@media(max-width:760px){.halves{grid-template-columns:1fr}.half{border-right:0;border-bottom:1px solid var(--linea);padding-left:0}.half:last-child{padding-left:0}}
 
-/* stat row */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
-  border:1px solid var(--line);border-radius:3px;overflow:hidden}
-.stat{background:var(--surface);padding:28px 24px}
-.stat .n{font-family:"Instrument Serif",Georgia,serif;font-size:3.4rem;line-height:1;
-  color:var(--amber);letter-spacing:-.02em}
-.stat .l{margin-top:10px;font-size:.94rem;color:var(--soft)}
-@media(max-width:720px){.stats{grid-template-columns:1fr}}
+/* el paquete */
+.paquete{border-top:3px solid var(--tinta)}
+.prow{display:grid;grid-template-columns:1fr 150px;gap:20px;padding:14px 0;
+  border-bottom:1px solid var(--linea);align-items:center}
+.prow .c{font-size:1rem;font-weight:600}
+.prow .v{font-family:"Archivo Black",Archivo,sans-serif;font-size:1.05rem;text-align:right;white-space:nowrap}
+.prow.med{background:var(--hundido);padding-left:14px;padding-right:14px}
+.prow .fuente{display:block;font-size:.78rem;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--calma);margin-top:3px}
+.total{background:var(--tinta);color:#fff;padding:20px 24px;display:flex;
+  align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.total .k{font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#B0B0B0}
+.total .v{font-family:"Archivo Black",Archivo,sans-serif;font-size:2.5rem;letter-spacing:-.04em;line-height:1}
 
-/* two halves */
-.halves{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.half{background:var(--surface);border:1px solid var(--line);border-radius:3px;
-  padding:30px 28px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:12px}
-.half .eyebrow{color:var(--amber)}
-.half p{color:var(--soft);font-size:.97rem}
-@media(max-width:760px){.halves{grid-template-columns:1fr}}
-
-/* signals */
+/* reglas */
 .tier{margin-bottom:34px}
-.tier-h{display:flex;align-items:baseline;gap:14px;margin-bottom:14px;
-  padding-bottom:10px;border-bottom:1px solid var(--line)}
-.tier-h .k{font-family:"Instrument Serif",Georgia,serif;font-size:1.7rem}
-.tier-h .c{font-family:"JetBrains Mono",monospace;font-size:.72rem;color:var(--faint);
-  letter-spacing:.1em;text-transform:uppercase;margin-left:auto}
-.sig{display:grid;grid-template-columns:210px 1fr;gap:20px;padding:15px 0;
-  border-bottom:1px solid var(--line)}
-.sig:last-child{border-bottom:0}
-.sig .what{font-weight:600;font-size:.98rem}
-.sig .when{font-family:"JetBrains Mono",monospace;font-size:.78rem;color:var(--faint);margin-top:4px}
-.sig .route{font-size:.94rem;color:var(--soft)}
-.sig .route b{color:var(--ink);font-weight:600}
-.sig .watch{display:block;margin-top:6px;font-size:.86rem;color:var(--clay)}
+.tier-h{display:flex;align-items:baseline;gap:16px;padding-bottom:12px}
+.tier-h .k{font-family:"Archivo Black",Archivo,sans-serif;font-size:1.5rem;text-transform:uppercase}
+.tier-h .c{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gris);margin-left:auto}
+.sig{display:grid;grid-template-columns:230px 1fr;gap:22px;padding:15px 0 15px 16px;
+  border-bottom:1px solid var(--linea);border-left:10px solid var(--linea)}
+.sig:first-of-type{border-top:3px solid var(--tinta)}
+.sig .what{font-weight:700;font-size:1.02rem}
+.sig .when{font-size:.86rem;font-weight:600;color:var(--gris);margin-top:3px}
+.sig .route{font-size:.98rem;color:var(--gris);line-height:1.45}
+.sig .route b{color:var(--tinta)}
+.sig .watch{display:block;margin-top:6px;font-size:.9rem;color:var(--ya);font-weight:600}
+.tier.now .tier-h .k{color:var(--ya)} .tier.now .sig{border-left-color:var(--ya)}
+.tier.soon .tier-h .k{color:var(--pronto)} .tier.soon .sig{border-left-color:var(--pronto)}
+.tier.later .tier-h .k{color:var(--calma)} .tier.later .sig{border-left-color:var(--calma)}
 @media(max-width:700px){.sig{grid-template-columns:1fr;gap:8px}}
-.tier.now .tier-h .k{color:var(--clay)}
-.tier.soon .tier-h .k{color:var(--amber)}
-.tier.later .tier-h .k{color:var(--teal)}
 
-/* privacy split */
+/* privacidad */
 .split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.box{border-radius:3px;padding:26px;border:1px solid var(--line);background:var(--surface)}
-.box.stay{border-color:var(--teal);background:var(--teal-soft)}
-.box.leave{background:var(--sunk)}
+.box{padding:26px 24px}
+.box.stay{background:var(--calma);color:#fff}
+.box.leave{background:var(--hundido)}
 .box h3{margin-bottom:14px}
-.box.stay h3{color:var(--teal)}
-.box ul{margin:0;padding-left:18px;color:var(--soft);font-size:.95rem}
-.box li{margin-bottom:6px}
-.box .foot{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);
-  font-size:.88rem;color:var(--clay);font-weight:600}
+.box ul{margin:0;padding-left:18px;font-size:.98rem;line-height:1.6}
+.box.leave ul{color:var(--gris)}
+.box .foot{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.28);font-size:.9rem;font-weight:700}
+.box.leave .foot{border-top-color:var(--linea);color:var(--gris);font-weight:400}
 @media(max-width:760px){.split{grid-template-columns:1fr}}
 
-/* tech list */
-.tech{display:flex;flex-direction:column;border:1px solid var(--line);
-  border-radius:3px;overflow:hidden;box-shadow:var(--sh)}
-.trow{display:grid;grid-template-columns:190px 1fr;gap:20px;padding:17px 24px;
-  background:var(--surface);border-bottom:1px solid var(--line)}
-.trow:last-child{border-bottom:0}
-.trow .k{font-family:"JetBrains Mono",monospace;font-size:.78rem;color:var(--amber);
-  letter-spacing:.06em;text-transform:uppercase;padding-top:3px}
-.trow .v{font-size:.96rem;color:var(--soft)}
-.trow .v b{color:var(--ink);font-weight:600}
+/* tecnica */
+.tech{border-top:3px solid var(--tinta)}
+.trow{display:grid;grid-template-columns:210px 1fr;gap:24px;padding:18px 0;border-bottom:1px solid var(--linea)}
+.trow .k{font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gris);padding-top:3px}
+.trow .v{font-size:1rem;color:var(--gris);line-height:1.5}
+.trow .v b{color:var(--tinta)}
 @media(max-width:700px){.trow{grid-template-columns:1fr;gap:6px}}
 
-/* tracks */
-.tracks{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.track{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:26px 22px}
-.track .p{font-family:"Instrument Serif",Georgia,serif;font-size:2.2rem;color:var(--amber);line-height:1}
-.track h3{margin:10px 0 8px}
-.track p{font-size:.92rem;color:var(--soft)}
+/* limites */
+.limits{background:var(--hundido);padding:30px 28px}
+.limits ul{margin:0;padding-left:18px;color:var(--gris);font-size:.98rem;line-height:1.6}
+.limits li{margin-bottom:9px}
+.limits li:last-child{margin-bottom:0}
+
+/* retos */
+.tracks{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.track{border-top:3px solid var(--tinta);padding:22px 0 0}
+.track .p{font-family:"Archivo Black",Archivo,sans-serif;font-size:2.3rem;line-height:1;letter-spacing:-.04em}
+.track h3{margin:12px 0 8px}
+.track p{font-size:.94rem;color:var(--gris);line-height:1.5}
 @media(max-width:760px){.tracks{grid-template-columns:1fr}}
 
-/* limits */
-.limits{background:var(--sunk);border:1px solid var(--line);border-radius:3px;padding:30px 28px}
-.limits ul{margin:14px 0 0;padding-left:18px;color:var(--soft);font-size:.95rem}
-.limits li{margin-bottom:8px}
-
-footer{padding:90px 0 110px;color:var(--faint);font-size:.9rem}
-footer a{color:var(--amber)}
+footer{margin-top:96px;background:var(--tinta);color:#B0B0B0;padding:44px 0 56px;font-size:.92rem}
+footer .w{display:flex;flex-direction:column;gap:10px}
+footer b{color:#fff}
+footer a{color:#fff}
 </style>
+</head>
+<body>
 
 <div class="w">
 
 <header>
   <span class="tag">Decentralized AI Hackathon · ISD Summit 2026</span>
-  <h1>Ina Igar</h1>
-  <p class="pending">"camino de la medicina" · gunagaya</p>
-  <p class="lede">Salud y crédito <b>donde no llega la señal</b>. La inteligencia vive en el bolsillo, no en la nube. Y ahí se queda.</p>
+  <h1 class="marca">Ina Igar</h1>
+  <p class="gunagaya">"camino de la medicina" · gunagaya</p>
 
-  <figure class="hero-fig">
-    <svg viewBox="0 0 1000 200" role="img" aria-label="Una serie de mediciones de glucosa que sube durante varios dias hasta cruzar la linea de referencia de 126, momento en el que se dispara una alerta.">
-      <defs>
-        <marker id="dot" viewBox="0 0 6 6" refX="3" refY="3" markerWidth="6" markerHeight="6">
-          <circle cx="3" cy="3" r="2.2" fill="var(--amber)"/>
-        </marker>
-      </defs>
-      <line x1="0" y1="96" x2="1000" y2="96" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 4"/>
-      <text x="0" y="86" font-size="11" fill="var(--faint)" font-family="JetBrains Mono, monospace">REFERENCIA 126 mg/dL</text>
-      <polyline points="20,168 90,160 160,164 230,150 300,152 370,138 440,132 510,120 580,112 650,100 720,88 790,74 860,66"
-        fill="none" stroke="var(--amber)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-      <circle cx="860" cy="66" r="5" fill="var(--amber)"/>
-      <circle cx="860" cy="66" r="13" fill="none" stroke="var(--amber)" stroke-width="1.5" opacity=".45"/>
-      <text x="884" y="62" font-size="14" fill="var(--ink)" font-weight="600">Cruzó el umbral</text>
-      <text x="884" y="82" font-size="12.5" fill="var(--soft)">y el teléfono lo notó solo</text>
-    </svg>
-  </figure>
+  <div class="bloque">
+    <p class="lede">Salud y crédito donde no llega la señal</p>
+    <p class="sub">La inteligencia vive en el bolsillo, no en la nube. Y ahí se queda.</p>
+  </div>
 </header>
 
 <section>
@@ -203,55 +177,83 @@ footer a{color:var(--amber)}
   </div>
   <div class="halves">
     <div class="half">
-      <span class="eyebrow">Primera mitad</span>
+      <span class="n">01</span>
       <h3>Se da cuenta y te lo explica</h3>
-      <p>Lee tu historial de Google Health o Apple Health, o el resultado de un examen de laboratorio. Reglas escritas a mano deciden si algo se salió de rango. El modelo solo lo redacta en español sencillo: qué se observó, qué toca hacer, a quién ver y cuánto cuesta.</p>
+      <p>Lee tu historial de mediciones, o el resultado de un examen de laboratorio que traes en papel. Reglas escritas a mano deciden si algo se salió de rango. El modelo solo lo redacta: qué se observó, qué conviene hacer, a quién ver y cuánto cuesta.</p>
     </div>
     <div class="half">
-      <span class="eyebrow">Segunda mitad</span>
-      <h3>Te ayuda a pagarlo</h3>
-      <p>Si el examen cuesta, fotografías la cédula y el comprobante de ingresos. El teléfono los lee, extrae los campos y <b>borra las fotos</b>. La solicitud espera en cola y viaja al banco cuando hay red, o por P2P al nodo del pueblo. El banco nunca se entera del motivo de salud.</p>
+      <span class="n">02</span>
+      <h3>Te dice cuánto cuesta, y te ayuda a pagarlo</h3>
+      <p>Fotografías la cédula y el comprobante de ingresos, y el teléfono los lee. La solicitud espera en cola y viaja al banco cuando hay red, o por P2P al nodo del pueblo. El banco nunca se entera del motivo de salud.</p>
     </div>
   </div>
 </section>
 
 <section>
   <div class="head">
-    <span class="eyebrow">14 señales sobre 9 variables</span>
-    <h2>Cada detección tiene una ruta</h2>
-    <p class="note">No basta con avisar que algo anda mal. Cada señal dice qué hacer <em>ahora</em>, qué examen, dónde, con quién, y qué síntomas obligan a salir corriendo aunque la ruta diga otra cosa. Cada umbral sale de una guía publicada: OMS, ADA, MINSA.</p>
+    <span class="eyebrow">Lo que nadie te dice</span>
+    <h2>El examen cuesta B/. 15.<br>Tratarse cuesta B/. 920.</h2>
+    <p class="note">Cotizar "una consulta y un examen" esconde el costo real de una enfermedad crónica. Ina Igar cotiza el año completo: diagnóstico, equipo, exámenes de seguimiento, consultas de control y el medicamento de todos los días. Ahí cambia la conclusión, porque lo que pesa no son los exámenes.</p>
+  </div>
+
+  <div class="paquete">
+    <div class="prow"><div class="c">Consulta de medicina general, para el diagnóstico</div><div class="v">8 a 25</div></div>
+    <div class="prow"><div class="c">Glucosa en ayunas en laboratorio</div><div class="v">6 a 15</div></div>
+    <div class="prow"><div class="c">Hemoglobina glicosilada, 4 veces en el año</div><div class="v">60 a 120</div></div>
+    <div class="prow"><div class="c">Perfil lipídico, creatinina y fondo de ojo, 1 vez al año</div><div class="v">63 a 135</div></div>
+    <div class="prow"><div class="c">Glucómetro, tiras y lancetas para el año</div><div class="v">100 a 170</div></div>
+    <div class="prow med">
+      <div class="c">Metformina 850 mg, dos al día durante un año. 730 tabletas
+        <span class="fuente">Precio tope oficial, Decreto Ejecutivo 36 de 2025</span>
+      </div>
+      <div class="v">380</div>
+    </div>
+    <div class="prow"><div class="c">Consultas de control, 3 en el año</div><div class="v">24 a 75</div></div>
+  </div>
+
+  <div class="total">
+    <span class="k">Diabetes tipo 2, año completo</span>
+    <span class="v">B/. 641 a 920</span>
+  </div>
+
+  <p class="note" style="margin-top:24px">La pastilla diaria es el <b>41% del total</b>. En hipertensión, donde el año sale entre B/. 617 y B/. 812, el enalapril es el <b>59%</b>. Por eso el crédito se ofrece siempre que haya algo que atender, sin monto mínimo y sin excepción por urgencia: la atención que la gente no puede pagar es justo la que no va a buscar.</p>
+</section>
+
+<section>
+  <div class="head">
+    <span class="eyebrow">14 reglas sobre 9 variables</span>
+    <h2>Cada hallazgo tiene una ruta</h2>
+    <p class="note">No basta con avisar que algo anda mal. Cada regla dice qué hacer ahora, qué examen, dónde, con quién, y qué síntomas obligan a salir corriendo aunque la ruta diga otra cosa. Cada umbral sale de una guía publicada: OMS, ADA, MINSA.</p>
   </div>
 
   <div class="tier now">
-    <div class="tier-h"><span class="k">Anda ya</span><span class="c">3 señales · una lectura basta</span></div>
-    <div class="sig"><div><div class="what">Azúcar muy baja</div><div class="when">&lt; 54 mg/dL</div></div><div class="route">Tomar azúcar de absorción rápida <b>ahora mismo</b> y salir al centro de salud.<span class="watch">Vigilar: confusión, temblor, sudor frío o desmayo</span></div></div>
-    <div class="sig"><div><div class="what">Oxígeno muy bajo</div><div class="when">&lt; 90%</div></div><div class="route">Centro de salud, ahora. <b>Urgencias.</b><span class="watch">Vigilar: falta de aire en reposo o labios azulados</span></div></div>
-    <div class="sig"><div><div class="what">Respiración muy rápida</div><div class="when">&gt; 25 por minuto</div></div><div class="route">Centro de salud, ahora. <b>Urgencias.</b><span class="watch">Vigilar: falta de aire o dolor en el pecho</span></div></div>
+    <div class="tier-h"><span class="k">Anda ya</span><span class="c">3 reglas · una lectura basta</span></div>
+    <div class="sig"><div><div class="what">Azúcar muy baja</div><div class="when">menos de 54 mg/dL</div></div><div class="route">Tomar azúcar de absorción rápida <b>ahora mismo</b> y salir al centro de salud.<span class="watch">Vigilar: confusión, temblor, sudor frío o desmayo</span></div></div>
+    <div class="sig"><div><div class="what">Oxígeno muy bajo</div><div class="when">menos de 90%</div></div><div class="route">Centro de salud, ahora. <b>Urgencias.</b><span class="watch">Vigilar: falta de aire en reposo o labios azulados</span></div></div>
+    <div class="sig"><div><div class="what">Respiración muy rápida</div><div class="when">más de 25 por minuto</div></div><div class="route">Centro de salud, ahora. <b>Urgencias.</b><span class="watch">Vigilar: falta de aire o dolor en el pecho</span></div></div>
   </div>
 
   <div class="tier soon">
-    <div class="tier-h"><span class="k">Anda pronto</span><span class="c">8 señales</span></div>
+    <div class="tier-h"><span class="k">Anda pronto</span><span class="c">8 reglas</span></div>
     <div class="sig"><div><div class="what">Azúcar baja</div><div class="when">54 a 70 mg/dL</div></div><div class="route">Azúcar de absorción rápida en casa. Consulta si se repite.</div></div>
-    <div class="sig"><div><div class="what">Azúcar alta</div><div class="when">promedio de 3 tomas &ge; 126</div></div><div class="route">Glucosa en laboratorio para confirmar, <b>B/. 6 a 15</b>. Luego medicina general, que puede derivar a endocrinología.<span class="watch">Vigilar: sed intensa, orinar mucho, bajar de peso sin querer</span></div></div>
-    <div class="sig"><div><div class="what">Presión alta</div><div class="when">&ge; 140 o &ge; 90, en 3 tomas</div></div><div class="route">Toma de presión en días distintos, en el centro de salud. Medicina general, puede derivar a cardiología.<span class="watch">Vigilar: dolor de cabeza fuerte, visión borrosa o dolor en el pecho</span></div></div>
-    <div class="sig"><div><div class="what">Pulso acelerado</div><div class="when">&gt; 100 en reposo, 5 días</div></div><div class="route">Electrocardiograma, <b>B/. 20 a 45</b>. Medicina general, puede derivar a cardiología.<span class="watch">Vigilar: dolor en el pecho, desmayo o falta de aire</span></div></div>
-    <div class="sig"><div><div class="what">Oxígeno bajo</div><div class="when">&lt; 95% en 3 lecturas</div></div><div class="route">Medición con oxímetro en el centro de salud. Puede derivar a neumología.</div></div>
-    <div class="sig"><div><div class="what">Fiebre</div><div class="when">&ge; 38 °C</div></div><div class="route">Hidratarse y reposo. Consulta en el centro de salud.<span class="watch">Vigilar: dolor abdominal intenso, vómito persistente o sangrado. Con cualquiera, ir de inmediato</span></div></div>
-    <div class="sig"><div><div class="what">Respiración rápida</div><div class="when">&gt; 20 por minuto, 3 lecturas</div></div><div class="route">Consulta en el centro de salud.</div></div>
-    <div class="sig"><div><div class="what">Estás bajando de peso</div><div class="when">&gt; 5% en medio año</div></div><div class="route">Consulta. Si la pérdida no fue intencional, amerita estudio.</div></div>
+    <div class="sig"><div><div class="what">Azúcar alta</div><div class="when">promedio de 3 tomas, 126 o más</div></div><div class="route">Glucosa en laboratorio para confirmar, <b>B/. 6 a 15</b>. Luego medicina general, que puede derivar a endocrinología.<span class="watch">Vigilar: sed intensa, orinar mucho, bajar de peso sin querer</span></div></div>
+    <div class="sig"><div><div class="what">Presión alta</div><div class="when">140 o más, o 90 o más, en 3 tomas</div></div><div class="route">Toma de presión en días distintos, en el centro de salud. Medicina general, puede derivar a cardiología.<span class="watch">Vigilar: dolor de cabeza fuerte, visión borrosa o dolor en el pecho</span></div></div>
+    <div class="sig"><div><div class="what">Pulso acelerado</div><div class="when">más de 100 en reposo, 5 días</div></div><div class="route">Electrocardiograma, <b>B/. 20 a 45</b>. Medicina general, puede derivar a cardiología.<span class="watch">Vigilar: dolor en el pecho, desmayo o falta de aire</span></div></div>
+    <div class="sig"><div><div class="what">Oxígeno bajo</div><div class="when">menos de 95% en 3 lecturas</div></div><div class="route">Medición con oxímetro en el centro de salud. Puede derivar a neumología.</div></div>
+    <div class="sig"><div><div class="what">Fiebre</div><div class="when">38 grados o más</div></div><div class="route">Hidratarse y reposo. Consulta en el centro de salud.<span class="watch">Vigilar: dolor abdominal intenso, vómito persistente o sangrado. Con cualquiera, ir de inmediato</span></div></div>
+    <div class="sig"><div><div class="what">Respiración rápida</div><div class="when">más de 20 por minuto, 3 lecturas</div></div><div class="route">Consulta en el centro de salud.</div></div>
+    <div class="sig"><div><div class="what">Estás bajando de peso</div><div class="when">más del 5% en medio año</div></div><div class="route">Consulta. Si la pérdida no fue intencional, amerita estudio.</div></div>
   </div>
 
   <div class="tier later">
-    <div class="tier-h"><span class="k">Menciónalo en tu próxima consulta</span><span class="c">3 señales</span></div>
+    <div class="tier-h"><span class="k">Sin prisa</span><span class="c">3 reglas</span></div>
     <div class="sig"><div><div class="what">Azúcar en el límite</div><div class="when">promedio 100 a 125</div></div><div class="route">Glucosa en ayunas en laboratorio, <b>B/. 6 a 15</b>.</div></div>
-    <div class="sig"><div><div class="what">Obesidad</div><div class="when">IMC &ge; 30</div></div><div class="route">Glucosa y perfil lipídico. Medicina general, puede derivar a nutrición.</div></div>
-    <div class="sig"><div><div class="what">Sobrepeso</div><div class="when">IMC &ge; 25</div></div><div class="route">Consulta con medicina general o nutrición.</div></div>
+    <div class="sig"><div><div class="what">Peso muy alto para la estatura</div><div class="when">índice de masa corporal 30 o más</div></div><div class="route">Glucosa y perfil lipídico. Medicina general, puede derivar a nutrición.</div></div>
+    <div class="sig"><div><div class="what">Peso alto para la estatura</div><div class="when">índice de masa corporal 25 o más</div></div><div class="route">Consulta con medicina general o nutrición.</div></div>
   </div>
 
   <p class="note">Y 7 marcadores más para exámenes de laboratorio: glicemia, hemoglobina, plaquetas, creatinina, colesterol, hematocrito y TSH.</p>
 </section>
-
-<div class="thr"></div>
 
 <section>
   <div class="head">
@@ -265,10 +267,10 @@ footer a{color:var(--amber)}
         <li>Las fotos de la cédula y del comprobante de ingresos</li>
         <li>Tu historial de salud completo</li>
         <li>Los resultados de laboratorio</li>
-        <li>La alerta y su explicación</li>
+        <li>El hallazgo y su explicación</li>
         <li>La inteligencia artificial entera, 2.1 GB</li>
       </ul>
-      <p class="foot">Las fotos además se borran apenas se leen</p>
+      <p class="foot">Ninguna imagen viaja al banco</p>
     </div>
     <div class="box leave">
       <h3>Lo único que ve el banco</h3>
@@ -277,9 +279,9 @@ footer a{color:var(--amber)}
         <li>Número de cédula</li>
         <li>Cuánto gana al mes</li>
         <li>Cuánto pide prestado</li>
-        <li>Motivo: <span class="mono">"salud"</span>, sin un detalle más</li>
+        <li>Motivo: "salud", sin un detalle más</li>
       </ul>
-      <p class="foot" style="color:var(--faint);font-weight:400">Nunca sabe qué examen necesitas</p>
+      <p class="foot">Nunca sabe qué examen necesitas</p>
     </div>
   </div>
 </section>
@@ -291,10 +293,10 @@ footer a{color:var(--amber)}
   </div>
   <div class="tech">
     <div class="trow"><div class="k">En el dispositivo</div><div class="v">Toda la inferencia con <b>@qvac/sdk</b>. Ninguna llamada a un proveedor de IA remoto, en ningún flujo. La nube solo para lo que no es IA.</div></div>
-    <div class="trow"><div class="k">El modelo</div><div class="v"><b>MedPsy 1.7B Q8_0</b>, el modelo médico de Tether. 2.1 GB viviendo en el teléfono. Cargó en 25 s y corrió en GPU a 30.7 tokens por segundo, con 119 ms hasta el primer token.</div></div>
+    <div class="trow"><div class="k">Medido, no prometido</div><div class="v"><b>MedPsy 1.7B Q8_0</b>, 2.1 GB, cargado en un iPhone 17 Pro Max: primer token en <b>2915 ms</b> en CPU. Metal todavía no está medido, y por eso no se anuncia.</div></div>
     <div class="trow"><div class="k">Las reglas deciden</div><div class="v">El modelo <b>no decide</b> qué es anormal, solo lo redacta. Los umbrales están en código auditable y cada uno cita su guía. Un modelo pequeño inventa rangos de referencia: lo vimos hacerlo.</div></div>
-    <div class="trow"><div class="k">Entrenado en el borde</div><div class="v">Un adaptador <b>LoRA</b> propio, entrenado sobre el mismo modelo, para que un 1.7B lea documentos tan bien como uno mucho más grande.</div></div>
-    <div class="trow"><div class="k">Se adapta al teléfono</div><div class="v">Tres modos según la memoria disponible: completo, ligero, o delegando el trabajo pesado al nodo del pueblo por P2P. La app se acomoda al aparato que haya en vez de exigir uno caro.</div></div>
+    <div class="trow"><div class="k">Los precios se citan</div><div class="v">Los medicamentos salen del <b>Decreto Ejecutivo 36 de 2025</b>, que fija precios tope en Panamá. Donde no hay precio publicado que citar, la línea sale marcada como estimación nuestra, y se estima alto.</div></div>
+    <div class="trow"><div class="k">Un solo motor</div><div class="v">El teléfono y el nodo del banco corren <b>el mismo código</b> de crédito, no dos copias. Si dieran números distintos nadie se enteraría hasta la demo.</div></div>
     <div class="trow"><div class="k">El nodo del pueblo</div><div class="v">Una laptop donde el corresponsal bancario. <b>Reparte el modelo</b> por wifi local a los teléfonos que no pueden bajar 2.1 GB por datos móviles, presta cómputo al que no alcanza, y lleva solicitudes al banco.</div></div>
   </div>
 </section>
@@ -307,10 +309,13 @@ footer a{color:var(--amber)}
   <div class="limits">
     <ul>
       <li><b>No es un diagnóstico.</b> Es orientación para decidir si vale la pena hacerse un examen, y lo dice en pantalla.</li>
+      <li><b>No receta nada.</b> El paquete estima lo que suele costar el tratamiento habitual de una condición. Qué tomar lo decide un médico.</li>
       <li>Los umbrales son <b>poblacionales</b>: orientan, no clasifican a una persona concreta.</li>
       <li>No considera embarazo, altitud, tabaquismo, edad pediátrica ni medicación en curso, y todos ellos mueven estos números.</li>
-      <li>Los precios están en <b>balboas</b> (B/.), que está a la par con el dólar, y son rangos publicados de laboratorios y clínicas <b>privadas</b>. Se cotiza lo privado a propósito: es el peor caso para el bolsillo, y en un centro de salud del MINSA puede costar menos o nada. Donde no hay precio con fuente, no mostramos número.</li>
+      <li>Los precios son de <b>consulta privada</b>. En un centro del MINSA puede costar menos o nada.</li>
       <li>El modelo de crédito del nodo es <b>de juguete</b>, para demostrar el flujo.</li>
+      <li><b>La lectura de documentos todavía no está construida.</b> La cámara toma la foto; el OCR y el borrado son el siguiente bloque, y hasta que existan la app dice "foto tomada", no "leída".</li>
+      <li><b>El adaptador LoRA está entrenado pero no integrado.</b> Vive en <code>spikes/</code> con su script reproducible, y todavía no lee documentos dentro de la app.</li>
       <li>Nadie del equipo es profesional de salud. Cada umbral sale de una guía citada, ninguno es criterio nuestro.</li>
       <li>Los datos son <b>100% sintéticos</b>. Ningún valor corresponde a una persona real.</li>
     </ul>
@@ -347,19 +352,20 @@ footer a{color:var(--amber)}
     <h2>Ina Igar es una palabra prestada</h2>
   </div>
   <div class="limits">
-    <p style="font-size:1.05rem"><b>Ina</b> es medicina o planta medicinal. <b>Igar</b> es camino y vía, y también lección y tratado: el saber y la ruta en la misma palabra. Juntas, <em>el camino de la medicina</em>.</p>
-    <p class="note" style="margin-top:16px">Están en gunagaya, la lengua del pueblo Guna de Panamá. Los significados salen del diccionario escolar <em>Gayamar sabga</em> de Reuter Orán B. y Aiban Wagua, del Proyecto de Educación Bilingüe Intercultural en los Territorios Gunas de Panamá.</p>
+    <p style="font-size:1.06rem;line-height:1.55"><b>Ina</b> es medicina o planta medicinal. <b>Igar</b> es camino y vía, y también lección y tratado: el saber y la ruta en la misma palabra. Juntas, el camino de la medicina.</p>
+    <p class="note" style="margin-top:16px">Están en gunagaya, la lengua del pueblo Guna de Panamá. Los significados salen del diccionario escolar <b>Gayamar sabga</b> de Reuter Orán B. y Aiban Wagua, del Proyecto de Educación Bilingüe Intercultural en los Territorios Gunas de Panamá.</p>
     <p class="note" style="margin-top:14px">No es una palabra nuestra. Es prestada, y por eso se cita. Los pueblos de las comarcas, con señal intermitente y el centro de salud lejos, son las personas para las que esto se construyó.</p>
   </div>
 </section>
 
-<footer>
-  <div class="thr" style="margin-bottom:34px"></div>
-  <p><span class="mono">Ina Igar</span> · Decentralized AI Hackathon, ISD Summit 2026, Panamá · Equipo 0xj4an y Artur · Licencia MIT</p>
-  <p style="margin-top:8px">Construido con <a href="https://docs.qvac.tether.io">QVAC</a> de Tether. Toda la inferencia en el dispositivo o delegada por P2P.</p>
-</footer>
-
 </div>
+
+<footer>
+  <div class="w">
+    <p><b>Ina Igar</b> · Decentralized AI Hackathon, ISD Summit 2026, Panamá · Equipo 0xj4an y Artur · Licencia MIT</p>
+    <p>Construido con <a href="https://docs.qvac.tether.io">QVAC</a> de Tether. Toda la inferencia en el dispositivo o delegada por P2P.</p>
+  </div>
+</footer>
 
 </body>
 </html>
