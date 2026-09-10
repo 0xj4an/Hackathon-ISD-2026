@@ -1,6 +1,14 @@
 import { Component, type ReactNode } from "react";
 import { SafeAreaView, Text } from "react-native";
 import { registerRootComponent } from "expo";
+import * as Sentry from "@sentry/react-native";
+
+Sentry.init({
+  dsn: "https://f0fa21d5e86f121f6900b1a131703422@o4512063261179904.ingest.us.sentry.io/4512063272648704",
+  sendDefaultPii: true,
+  tracesSampleRate: 1.0,
+  enableLogs: true,
+});
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);
 // It also ensures that whether you load the app in Expo Go or in a native build,
@@ -11,6 +19,12 @@ class ErrorDeArranque extends Component<{ children: ReactNode }, { error: Error 
 
   static getDerivedStateFromError(error: Error) {
     return { error };
+  }
+
+  componentDidCatch(error: Error, info: { componentStack?: string | null }) {
+    Sentry.captureException(error, {
+      contexts: { react: { componentStack: info.componentStack ?? undefined } },
+    });
   }
 
   render() {
@@ -48,8 +62,9 @@ try {
       </ErrorDeArranque>
     );
   }
-  registerRootComponent(Raiz);
+  registerRootComponent(Sentry.wrap(Raiz));
 } catch (err) {
+  Sentry.captureException(err);
   const mensaje = err instanceof Error ? err.message : String(err);
   registerRootComponent(pantallaRota(mensaje));
 }

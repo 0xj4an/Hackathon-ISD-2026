@@ -47,6 +47,14 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "organization": "0xj4an",
+          "project": "react-native"
+        }
+      ],
       "@qvac/sdk/expo-plugin",
       "./plugins/withQvacBareLink",
       [
