@@ -16,9 +16,10 @@ export type Marcador = {
   /** Umbrales por sexo, solo donde la guía los define distintos. */
   porSexo?: Partial<Record<Sexo, { min: number; max: number }>>;
   hallazgoAlto: string;
-  hallazgoBajo: string;
+  /** Ausente en marcadores sin límite inferior con sentido clínico, como el colesterol. */
+  hallazgoBajo?: string;
   pasoAlto: string;
-  pasoBajo: string;
+  pasoBajo?: string;
   /** De dónde sale el rango. Va al README y, si aplica, a la pantalla. */
   fuente: string;
 };
@@ -43,7 +44,9 @@ export const MARCADORES: Marcador[] = [
 
   { codigo: "CREA", nombre: "creatinina", unidad: "mg/dL", min: 0.6, max: 1.2, hallazgoAlto: "creatinina elevada", hallazgoBajo: "creatinina baja", pasoAlto: "solicitar TFG y control de presión", pasoBajo: "sin acción específica", fuente: "Rango de referencia estándar" },
 
-  { codigo: "COL", nombre: "colesterol total", unidad: "mg/dL", min: 0, max: 200, hallazgoAlto: "hipercolesterolemia", hallazgoBajo: "normal", pasoAlto: "perfil lipídico completo", pasoBajo: "sin acción específica", fuente: "Rango de referencia estándar" },
+  // Sin límite inferior: en colesterol total, menos es mejor. Antes tenía
+  // min 0 y hallazgoBajo "normal", que es un parche y clasificaba raro.
+  { codigo: "COL", nombre: "colesterol total", unidad: "mg/dL", min: 0, max: 200, hallazgoAlto: "hipercolesterolemia", pasoAlto: "perfil lipídico completo", fuente: "Rango de referencia estándar. No tiene límite inferior clínico" },
 
   // Mismo caso que plaquetas: la mención al dengue sale.
   { codigo: "HTO", nombre: "hematocrito", unidad: "%", min: 36, max: 48, hallazgoAlto: "hemoconcentración", hallazgoBajo: "hematocrito bajo", pasoAlto: "evaluar hidratación y repetir", pasoBajo: "correlacionar con hemoglobina", fuente: "Rango de referencia estándar de hemograma" },
@@ -78,7 +81,8 @@ export function rangoDe(m: Marcador, sexo?: Sexo): { min: number; max: number } 
 /** Clasifica un valor contra su rango. Las reglas deciden, el modelo solo explica (ADR-005). */
 export function clasificar(m: Marcador, valor: number, sexo?: Sexo): LecturaLab {
   const { min, max } = rangoDe(m, sexo);
-  const dentro = valor >= min && valor <= max;
+  // Sin `hallazgoBajo`, no existe el estado "bajo": solo se sale de rango por arriba.
+  const dentro = valor <= max && (valor >= min || m.hallazgoBajo === undefined);
   const desvio = valor > max ? valor / max : valor < min ? valor / min : 1;
   const urgencia: LecturaLab["urgencia"] = dentro
     ? "Rutinaria"
@@ -92,8 +96,8 @@ export function clasificar(m: Marcador, valor: number, sexo?: Sexo): LecturaLab 
     valor,
     unidad: m.unidad,
     rango: `${min}-${max}`,
-    hallazgo: dentro ? "dentro de rango" : valor > max ? m.hallazgoAlto : m.hallazgoBajo,
+    hallazgo: dentro ? "dentro de rango" : valor > max ? m.hallazgoAlto : (m.hallazgoBajo ?? "dentro de rango"),
     urgencia,
-    siguiente_paso: dentro ? "control habitual" : valor > max ? m.pasoAlto : m.pasoBajo,
+    siguiente_paso: dentro ? "control habitual" : valor > max ? m.pasoAlto : (m.pasoBajo ?? "control habitual"),
   };
 }

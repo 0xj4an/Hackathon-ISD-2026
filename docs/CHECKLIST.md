@@ -56,7 +56,7 @@ Nada más avanza hasta que esto pase.
 
 - [ ] `[A]` Cámara, `ocr()`, `SYSTEM_EXTRACCION_CEDULA`, `CedulaSchema`, **borrar la foto**, guardar JSON en SQLite
 - [ ] `[A]` Cola en SQLite con estado `pendiente` y envío al nodo. HTTP primero, que se depura más fácil que Hyperswarm
-- [ ] `[A]` `eval/` y `eval/run.mjs`: % de JSON parseable y % de campos exactos, por tarea. **Correrlo contra el modelo base antes del LoRA** para tener la línea base
+- [x] `[A]` **Hecho en la parte de reglas.** `eval/run.mjs` evalúa la vía A (los 6 casos), la vía B (clasificación de los 7 marcadores) y la integridad de las rutas. Determinista, sin teléfono, sale con código 1 si algo falla. La medición del modelo (% JSON, % campos) vive en `spikes/lora-medpsy`
 - [ ] `[A]` Afinar `nodo/credito.mjs` y verificar que `RespuestaBancoSchema` valida lo que el nodo devuelve de verdad
 
 **Al cerrar el bloque:** lanzar el entrenamiento del LoRA y dormir. Con `caffeinate -i`, o el Mac se duerme a mitad como pasó en el spike.
