@@ -1,5 +1,5 @@
 /**
- * Reglas de detección sobre el historial de mediciones (vía A).
+ * Reglas de detección sobre el historial de mediciones.
  *
  * El LLM NO decide la señal, solo la explica (`ADR-005`). Cada umbral y cada
  * precio de este archivo sale de una fuente citada en `.ai/references/salud.md`.

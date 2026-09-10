@@ -19,9 +19,9 @@ documentos sintéticos listos con su ground truth.
 
 En código, la rama de salud ya pide a MedPsy la redacción (`redactarAlerta` →
 `SYSTEM_ALERTA` + `AlertaSchema`), la de documentos lee con OCR + MedPsy
-(`leerDocumento.ts`), el envío HTTP camino A/B existe, la cola SQLite guarda
+(`leerDocumento.ts`), el envío HTTP banco/pueblo existe, la cola SQLite guarda
 la solicitud pendiente (`cola.ts`), y `perf/logger` escribe desde esos flujos.
-La vía B de examen lee foto con OCR + **MedPsy + LoRA `lab-v3`**
+El examen lee foto con OCR + **MedPsy + LoRA `lab-v3`**
 (`leerExamen.ts`, asset en `mobile/assets/models/`). Spike medido en
 `spikes/lora-medpsy/RESULTADOS.md` (lab JSON 5% → 68%).
 
@@ -60,44 +60,46 @@ aparato.
 
 `PantallaDocumentos` toma foto o archivo, corre `ocr()` + MedPsy → JSON y borra
 la copia (`leerDocumento.ts`). MedPsy es local primero; si no carga, el texto
-va al pueblo. Sigue `PantallaLeido`, la cuota con `preCalificar()` y el envío:
-**camino A** al banco remoto si hay wifi, **camino B** al nodo del pueblo si
-no. HTTP A/B medido desde laptop ([`PRUEBA-NODO.md`](PRUEBA-NODO.md)); desde el
+va al pueblo. Sigue `PantallaLeido`, la cuota con `preCalificar()` y el envío: al banco remoto si hay wifi (`local-wifi`), al nodo del pueblo si
+no. HTTP medido desde laptop ([`PRUEBA-NODO.md`](PRUEBA-NODO.md)); desde el
 iPhone, no.
 
 `PantallaDatos.tsx` (editable, deudas y personas a cargo) sigue en el repo; el
 camino de la demo no pasa por ella.
 
-La rama del examen (vía B) ya tiene foto → OCR → MedPsy+LoRA → `clasificar()`
-(`PantallaExamen` / `leerExamen.ts`). Entrada manual sigue de respaldo.
+La rama del examen ya tiene foto → OCR → MedPsy+LoRA → `clasificar()`
+(`PantallaExamen` / `leerExamen.ts`). Si hay hallazgos fuera de rango, ofrece
+crédito vía `armarPaqueteDesdeLab`. Entrada manual sigue de respaldo. El
+historial se lee siempre; el examen es opción tras el resultado (alerta o en orden).
+Entrada ya no elige Historial|Examen como vías paralelas.
 
 - [~] `ocr()` sobre la foto, extracción a JSON con `SYSTEM_EXTRACCION_*`,
   validación con `CedulaSchema` e `IngresosSchema`. Código listo; falta
   verificar en el iPhone
-- [~] Examen vía B con LoRA `lab-v3`. Código + asset en la app; falta rebuild
+- [~] Examen con LoRA `lab-v3`. Código + asset en la app; falta rebuild
   nativo y corrida en el iPhone
+- [~] Crédito tras examen si hay hallazgos (`armarPaqueteDesdeLab`). Código listo;
+  falta verificar en el iPhone
 - [~] **Borrar la foto** después de extraer. El código lo hace; falta verificar
   en el iPhone (C6)
 - [x] Persistencia y cola. `expo-sqlite` en `colaSqlite.ts`; una pendiente a la
   vez. Si falla el envío, se guarda y al reabrir la app se vuelve a `PantallaCuota`.
   Falta verificar en el iPhone (C8/C9)
-- [~] Envío: camino A al banco (Railway) si hay wifi; camino B al pueblo si no.
+- [~] Envío: al banco (Railway) si modo `local-wifi`; al pueblo si offline.
   Código en `envio.ts`; medido sin teléfono; falta el iPhone
 
-Material listo: `data/documentos/` tiene los seis ficticios (nítido y difícil)
+Material listo: `data/documentos/` tiene ocho ficticios (nítido y difícil de
+cédula, ingresos, extracto y examen) más `esperado.json`.
 más `esperado.json`. Cada corrida en el iPhone se anota en
 [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
 
-### 1.3 P2P no conecta
+### 1.3 P2P no conecta — cerrado para la demo
 
 Hyperswarm entre dos procesos del Mac no conecta (NAT, `firewalled`, sin mDNS).
-La demo de crédito va por HTTP en la LAN. Inferencia: MedPsy en el teléfono;
-si no puede, HTTP de texto al pueblo. QVAC `delegate` no es el plan (NAT).
+La demo de crédito va por HTTP (banco o pueblo). Inferencia: MedPsy en el teléfono;
+si no puede, HTTP de texto al pueblo. QVAC `delegate` no es el plan.
 
-- [ ] Decidir: o se hace andar el transporte, o el guion del video no promete P2P
-  y se explica por qué. Lo segundo es honesto y barato; lo primero suma en
-  Technical. El guion ya advierte no decir “Hyperswarm P2P” si la demo salió
-  por HTTP
+- [x] Decisión: el guion y el README **no prometen** Hyperswarm P2P ni `delegate`
 - [x] El video no promete QVAC `delegate`. El respaldo de MedPsy es HTTP al pueblo
 
 ---
@@ -128,7 +130,7 @@ si no puede, HTTP de texto al pueblo. QVAC `delegate` no es el plan (NAT).
 
 ---
 
-## 4. LoRA (en producto para vía B; falta iPhone)
+## 4. LoRA (en producto para examen; falta iPhone)
 
 Tres corridas en `spikes/lora-medpsy/RESULTADOS.md`. Corrida 3: laboratorio
 JSON válido **5% → 68%**. Adaptador en la app como
@@ -149,17 +151,17 @@ JSON válido **5% → 68%**. Adaptador en la app como
 - [x] Costos con fuente en rangos publicados; donde no hay precio citable, el campo va ausente y la pantalla no muestra número
 - [x] El especialista entró en el tipo `Ruta`, con qué hacer ahora, qué examen, dónde y qué síntomas obligan a ir de inmediato
 - [x] CD4 fuera, con filtro de respaldo en el generador del spike
-- [x] Nueve casos clínicos en `data/usuarios/` con historial de ~un año. Cubren las 14 señales de vía A. El sano da cero señales. **8 de 9** ofrecen crédito
+- [x] Nueve casos clínicos en `data/usuarios/` con historial de ~un año. Cubren las 14 señales del historial. El sano da cero señales. **8 de 9** ofrecen crédito
 - [x] Modelo de crédito real ([`ADR-011`](../.ai/adr/ADR-011-el-modelo-de-credito.md)): capacidad de pago con piso de subsistencia, scorecard logístico sobre cartera sintética (AUC 0.723, KS 0.379 en holdout), tasa descompuesta y plazo despejado de la cuota
 - [x] Paquete por condición a un año en vez de un monto suelto ([`ADR-010`](../.ai/adr/ADR-010-el-paquete-y-cuando-ofrecer-credito.md))
 - [x] 15 lienzos en `docs/design/` y dirección visual decidida ([`ADR-012`](../.ai/adr/ADR-012-senaletica-y-el-modo-denso.md))
-- [x] `data/documentos/`: seis imágenes sintéticas (nítida y difícil de cada documento) más `esperado.json`
+- [x] `data/documentos/`: ocho imágenes sintéticas (nítida y difícil de cédula, ingresos, extracto y examen) más `esperado.json`
 - [~] Los tres documentos y sus campos están decididos, y `PantallaDatos.tsx` ya captura `deudas_mensuales_usd` y `personas_a_cargo`. Falta **qué pasa si falta uno** y meter Datos en el camino de la demo si se quiere
 
 ### Implementación
 
 - [x] Las dos vías de detección en `mobile/src/core/`, evaluadas por `eval/run.mjs`
-- [x] `eval/run.mjs` cubre vía A, vía B e integridad de rutas. Determinista, sin teléfono, exit 1 si algo falla
+- [x] `eval/run.mjs` cubre historial, laboratorio e integridad de rutas. Determinista, sin teléfono, exit 1 si algo falla
 - [x] `eval/credito/*.test.mjs` (58 tests) llama al motor real y valida contrato/schemas; `eval/salud/alerta.test.mjs` y `eval/nodo/inferir.test.mjs` en verde
 - [x] El nodo importa el motor de crédito en vez de tener su propia política
 - [x] Trece `Pantalla*.tsx`; navegación en `App.tsx` (Entrada → … → Banco; Examen y Registro laterales)
@@ -188,8 +190,8 @@ queda aparcado.
 | --- | --- | --- |
 | [x] C1 | MedPsy carga en el iPhone y produce texto | `load_ms` 93722, TTFT 2915 ms CPU, 56 tokens |
 | [ ] C2 | TTFT con `gpu` y `cpu`, se usa el mejor | Solo `cpu`. Falta Metal |
-| [x] C3 | La vía A dispara con el caso con hallazgo | `eval/run.mjs` exit 0 |
-| [x] C3b | La vía B clasifica en los tres estados | Los 7 marcadores |
+| [x] C3 | El historial dispara con el caso con hallazgo | `eval/run.mjs` exit 0 |
+| [x] C3b | El laboratorio clasifica en los tres estados | Los 7 marcadores |
 | [x] C3c | **El sano no dispara ninguna alerta** | Cero señales |
 | [x] C3d | CD4 no aparece en pantalla ni en el video | Fuera del código. Revisar guion al grabar |
 | [x] C4 | Toda salida del modelo pasa por `limpiarJson()` | Cero `JSON.parse` sueltos en `mobile/src/` |
@@ -199,7 +201,7 @@ queda aparcado.
 | [~] C8 | Con Wi-Fi apagado queda `pendiente` y se dice | Código: SQLite + UI. Falta iPhone |
 | [~] C9 | Al volver la red, sale y vuelve la respuesta | Poll + cola durable. Falta iPhone |
 | [ ] C10 | `perf.jsonl` con una línea por inferencia | Logger cableado; falta export de corrida real |
-| [~] C11 | Tabla base contra LoRA | Spike 5%→68% + adaptador en app (vía B). Falta verlo en iPhone |
+| [~] C11 | Tabla base contra LoRA | Spike 5%→68% + adaptador en app (examen). Falta verlo en iPhone |
 | [x] C12 | **Cero llamadas a proveedores de IA remotos** | Verificado en `mobile/src`, `nodo`, `eval`, `data`. Repetir sobre el bundle antes de entregar |
 | [x] C13 | README declara modelo, cuantización, hardware y base | MedPsy Q8_0, OCR_LATIN, extracción = MedPsy, iPhone 17 Pro Max, Kit declarado |
 
@@ -215,5 +217,5 @@ ahora es **1.2 en el iPhone** (OCR + envío E2E) y la cola durable (C8/C9).
 - [ ] D2 ¿`gpu` o `cpu`? Solo CPU medido. Falta Metal en el iPhone
 - [ ] D5 ¿`finetune()` corre en el dispositivo? Solo si todo lo demás está entregable
 - [ ] D7 ¿Un adaptador entrenado sobre Q8_0 carga sobre Q4_0?
-- [ ] D11 ¿Se recupera el transporte P2P, o el video no lo promete? Ver 1.3
-  (guion ya recomienda no prometerlo si la demo fue HTTP)
+- [x] D11 ¿Se recupera el transporte P2P, o el video no lo promete? **No se
+  recupera.** Demo = HTTP. Guion/README no prometen Hyperswarm ni `delegate`.

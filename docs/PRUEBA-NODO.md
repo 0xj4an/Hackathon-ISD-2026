@@ -2,29 +2,29 @@
 
 Para `[A]`. Lo medido se dice medido. Lo que no se probó, lo dice.
 
-Hay **dos caminos de crédito**, el mismo JSON, nunca fotos. El motor corre solo
+Hay **dos destinos de crédito**, el mismo JSON, nunca fotos. El motor corre solo
 en el banco remoto.
 
 ```
-Camino A (wifi/datos, el teléfono no necesita al pueblo):
+Con wifi (modo local-wifi):
   teléfono --HTTPS--> https://banco-production-3755.up.railway.app
 
-Camino B (sin internet):
+Sin internet (local-offline / nodo-offline):
   teléfono --LAN :8788--> pueblo --HTTP--> el mismo banco
 ```
 
-No confundir con las **vías de salud** (vía A = historial, vía B = examen en
-papel) ni con la **inferencia**: MedPsy en el teléfono; si no carga, POST de
-texto a `:8788/inferir`. Eso no es el camino B del crédito. QVAC `delegate`
+No confundir con el **examen de laboratorio** (opción tras el resultado del
+historial) ni con la **inferencia**: MedPsy en el teléfono; si no carga, POST de
+texto a `:8788/inferir`. Eso no es el envío del crédito. QVAC `delegate`
 no es el plan: no atraviesa NAT.
 
-El objetivo de la escena sin señal es el camino B: el teléfono le habla a la
+El objetivo de la escena sin señal es el envío al pueblo: el teléfono le habla a la
 laptop **sin internet y sin nube**. HTTP en la LAN está medido. Hyperswarm entre
 dos procesos del mismo Mac **no ha conectado nunca**.
 
 ---
 
-## Camino A: el teléfono habla con Railway
+## Al banco: el teléfono habla con Railway
 
 Con wifi o datos, `enviarSolicitud` hace POST a `urlBanco()` (Railway). El pueblo
 no entra. Comprobarlo sin el teléfono:
@@ -42,7 +42,7 @@ no hay respuesta final, cae a B.
 
 ---
 
-## Camino B: HTTP en la LAN, medido
+## Al pueblo: HTTP en la LAN, medido
 
 Probado el 9 de septiembre y **vuelto a probar el 10**. Hoy el pueblo no decide:
 recibe y reenvía. Arranque:
@@ -99,10 +99,11 @@ documentan cómo desplegarlo**. No es un plan.
 
 ## Cómo se cuenta en el video
 
-- Camino A: **"con wifi, el teléfono habla directo con el banco"**.
-- Camino B: **"sin internet, los aparatos se hablan en la red local y el pueblo
+- Banco: **"con wifi, el teléfono habla directo con el banco"**.
+- Pueblo: **"sin internet, los aparatos se hablan en la red local y el pueblo
   se lo lleva al banco"**.
 - Decirle **"Hyperswarm P2P"** a un POST HTTP no lo sería.
+- Tampoco **"delegate"** si el respaldo fue `POST /inferir`.
 
 Lo que se afirme en el video tiene que ser lo que corrió en el video.
 
@@ -129,8 +130,7 @@ antes de escribir. Un POST con esos campos extra responde 400.
 
 ## Pendiente de verificar
 
-- [ ] Camino A en el iPhone: wifi encendido, POST a Railway, decisión en pantalla.
-- [ ] Camino B en el iPhone: wifi apagado / solo LAN, POST al pueblo `:8788`.
+- [ ] Envío al banco en el iPhone: wifi encendido, POST a Railway, decisión en pantalla.
+- [ ] Envío al pueblo en el iPhone: wifi apagado / solo LAN, POST al pueblo `:8788`.
 - [ ] Inferencia: MedPsy local; si el teléfono no puede, POST `/inferir` (texto).
-- [ ] Cola en SQLite. Hoy `pendiente` es estado en memoria; `expo-sqlite` está
-      en `package.json` y no se usa. Eso cierra `C8` y `C9`.
+- [ ] Cola en SQLite (`colaSqlite.ts`). Cierra `C8` y `C9` en el aparato.

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Pueblo (camino B LAN :8788, y /inferir si el teléfono no carga MedPsy) y banco. El motor vive en mobile/src/core/credito/. HTTP es el camino que vale.",
+  "description": "Pueblo (LAN :8788, y /inferir si el teléfono no carga MedPsy) y banco. El motor vive en mobile/src/core/credito/. HTTP es el transporte de la demo.",
   "scripts": {
     "start": "ROL=banco PORT=8787 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON index.mjs",
     "banco": "ROL=banco PORT=8787 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON index.mjs",

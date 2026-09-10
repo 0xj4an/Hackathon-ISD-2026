@@ -19,6 +19,7 @@
  * común, para que la persona sepa a qué se enfrenta. Qué tomar, en qué dosis y
  * por cuánto tiempo lo decide un médico, y la pantalla lo dice.
  */
+import type { LecturaLab } from "./marcadores";
 import type { Senal } from "./reglas";
 
 export type LineaCosto = {
@@ -247,6 +248,15 @@ const PAQUETES: Record<string, Omit<Paquete, "total_min" | "total_max">> = {
       { concepto: "Consulta de nutrición", min: 20, max: 45, fuente: `${SIN_PRECIO} con consulta especializada en Panamá`, estimado: true },
     ],
   },
+  LAB_SEGUIMIENTO: {
+    titulo: "Seguimiento de laboratorio",
+    meses: 0,
+    nota: "Hay valores fuera de rango. Esto estima consulta y control; no es un diagnóstico.",
+    lineas: [
+      CONSULTA,
+      { concepto: "Control de laboratorio", min: 15, max: 40, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
+    ],
+  },
 };
 
 /** Orden de prioridad: si un caso dispara varias, gana el paquete más completo. */
@@ -266,6 +276,42 @@ export function armarPaquete(senales: Senal[]): Paquete | null {
   const total_min = Math.round(base.lineas.reduce((a, l) => a + l.min, 0));
   const total_max = Math.round(base.lineas.reduce((a, l) => a + l.max, 0));
 
+  return { ...base, total_min, total_max };
+}
+
+const PRIORIDAD_LAB = [
+  "GLU_MUY_BAJA", "GLU_ALTA", "GLU_BAJA", "GLU_LIMITE", "LAB_SEGUIMIENTO",
+];
+
+/** Código de paquete a partir de lecturas de lab fuera de rango. */
+function codigoDesdeLab(lecturas: LecturaLab[]): string | null {
+  const fuera = lecturas.filter(l => l.hallazgo !== "dentro de rango");
+  if (fuera.length === 0) return null;
+
+  const codigos = new Set<string>();
+  for (const l of fuera) {
+    const esGlu = /glicemia/i.test(l.marcador);
+    if (esGlu) {
+      if (l.valor >= 126) codigos.add("GLU_ALTA");
+      else if (l.valor >= 100) codigos.add("GLU_LIMITE");
+      else if (l.valor < 54) codigos.add("GLU_MUY_BAJA");
+      else if (l.valor < 70) codigos.add("GLU_BAJA");
+      else codigos.add("LAB_SEGUIMIENTO");
+    } else {
+      codigos.add("LAB_SEGUIMIENTO");
+    }
+  }
+
+  return PRIORIDAD_LAB.find(c => codigos.has(c)) ?? "LAB_SEGUIMIENTO";
+}
+
+export function armarPaqueteDesdeLab(lecturas: LecturaLab[]): Paquete | null {
+  const codigo = codigoDesdeLab(lecturas);
+  if (!codigo) return null;
+  const base = PAQUETES[codigo];
+  if (!base) return null;
+  const total_min = Math.round(base.lineas.reduce((a, l) => a + l.min, 0));
+  const total_max = Math.round(base.lineas.reduce((a, l) => a + l.max, 0));
   return { ...base, total_min, total_max };
 }
 

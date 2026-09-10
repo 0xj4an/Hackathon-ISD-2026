@@ -69,11 +69,11 @@
 <body>
 <header>
   <h1>De la entrada al banco</h1>
-  <p class="sub">Cada flecha curva y cruza solo las cajas de su ruta. Verde la óptima, ámbar la media, roja la más difícil.</p>
+  <p class="sub">Historial siempre. Después: crédito y/o examen. Los colores son el modo del teléfono (modelo × wifi).</p>
   <div class="ley">
-    <span class="chip a">óptima · wifi + modelo en el teléfono</span>
-    <span class="chip b">media · sin wifi + modelo en el teléfono</span>
-    <span class="chip c">difícil · sin wifi + modelo en el nodo</span>
+    <span class="chip a">local-wifi · modelo aquí + banco</span>
+    <span class="chip b">local-offline · modelo aquí + pueblo</span>
+    <span class="chip c">nodo-offline · texto al nodo + pueblo</span>
   </div>
 </header>
 <div class="lienzo">
@@ -104,11 +104,11 @@
   <div class="etapa">
     <div class="nom">¿el teléfono?</div>
     <div class="ops">
-      <div class="op a" data-nodo="a">wifi · modelo aquí</div>
+      <div class="op a" data-nodo="a">local-wifi</div>
       <div class="o">o</div>
-      <div class="op b" data-nodo="b">sin wifi · modelo aquí</div>
+      <div class="op b" data-nodo="b">local-offline</div>
       <div class="o">o</div>
-      <div class="op c" data-nodo="c">sin wifi · modelo en el nodo</div>
+      <div class="op c" data-nodo="c">nodo-offline</div>
     </div>
   </div>
 
@@ -137,11 +137,11 @@
   </div>
 
   <div class="etapa">
-    <div class="nom">¿qué se lee?</div>
+    <div class="nom">resultado</div>
     <div class="ops" data-nodo="all">
-      <div class="op neutro">Historial → alerta</div>
-      <div class="o">o</div>
-      <div class="op neutro">Examen → foto</div>
+      <div class="op neutro">Alerta o en orden</div>
+      <div class="o">y</div>
+      <div class="op neutro">Examen opcional</div>
     </div>
   </div>
 
@@ -183,13 +183,13 @@
   </div>
 
   <div class="etapa">
-    <div class="nom">¿hay wifi?</div>
+    <div class="nom">¿dónde va el JSON?</div>
     <div class="ops">
       <div class="op a" data-nodo="a">JSON al banco</div>
       <div class="o">o</div>
-      <div class="op b" data-nodo="b">JSON al nodo o espera</div>
+      <div class="op b" data-nodo="b">JSON al pueblo o espera</div>
       <div class="o">o</div>
-      <div class="op c" data-nodo="c">JSON al nodo o espera</div>
+      <div class="op c" data-nodo="c">JSON al pueblo o espera</div>
     </div>
   </div>
 

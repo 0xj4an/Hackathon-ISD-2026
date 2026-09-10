@@ -51,7 +51,7 @@ di("Generado por `node eval/run.mjs`. Determinista: mismo resultado en cada corr
 di();
 
 // ---------------------------------------------------------------- 1) usuarios
-di("## 1. Deteccion por historial (via A)");
+di("## 1. Deteccion por historial");
 di();
 di("Cada caso de `data/usuarios/` debe producir exactamente las senales que declara.");
 di();
@@ -79,7 +79,7 @@ di(`**C3c, el caso sano no dispara nada:** ${senalesSano === 0 ? "OK, cero senal
 
 // ---------------------------------------------------------------- 2) marcadores
 di();
-di("## 2. Clasificacion de laboratorio (via B)");
+di("## 2. Clasificacion de laboratorio");
 di();
 di("Cada marcador debe clasificar alto, bajo y dentro de rango. Se prueban tres");
 di("valores por marcador: justo por encima del maximo, justo por debajo del minimo,");

@@ -322,7 +322,7 @@ const USUARIOS = [
     caso: "Taquipnea grave",
     descripcion: "Baseline anual normal y tres lecturas recientes por encima de 25 respiraciones por minuto.",
     contexto: "Siente que no le alcanza el aire. Se midio la respiracion como le ensenaron en el centro.",
-    porQue: "Urgencia Inmediata por una lectura > 25. Se distingue de RESP_ALTA (tres tomas > 20). Completa las 14 senales de la via A en la demo.",
+    porQue: "Urgencia Inmediata por una lectura > 25. Se distingue de RESP_ALTA (tres tomas > 20). Completa las 14 senales del historial en la demo.",
     esperadas: ["RESP_MUY_ALTA"],
     build() {
       const estatura = 1.63;

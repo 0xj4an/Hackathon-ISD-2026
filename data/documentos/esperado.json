@@ -16,5 +16,54 @@
     "banco": "Banco Istmeno de Ahorros",
     "saldo_promedio_usd": 579.02,
     "meses_cubiertos": 3
+  },
+  "examen": {
+    "laboratorio": "Laboratorio Clinico San Marcos",
+    "fecha": "2026-09-08",
+    "paciente": "MARIELA DEL CARMEN QUIROS BATISTA",
+    "lecturas": [
+      {
+        "codigo": "GLU",
+        "nombre": "glicemia en ayunas",
+        "valor": 168,
+        "unidad": "mg/dL"
+      },
+      {
+        "codigo": "HB",
+        "nombre": "hemoglobina",
+        "valor": 13.2,
+        "unidad": "g/dL"
+      },
+      {
+        "codigo": "PLQ",
+        "nombre": "plaquetas",
+        "valor": 245,
+        "unidad": "x10^3/µL"
+      },
+      {
+        "codigo": "CREA",
+        "nombre": "creatinina",
+        "valor": 0.9,
+        "unidad": "mg/dL"
+      },
+      {
+        "codigo": "COL",
+        "nombre": "colesterol total",
+        "valor": 218,
+        "unidad": "mg/dL"
+      },
+      {
+        "codigo": "HTO",
+        "nombre": "hematocrito",
+        "valor": 40,
+        "unidad": "%"
+      },
+      {
+        "codigo": "TSH",
+        "nombre": "TSH",
+        "valor": 2.1,
+        "unidad": "µUI/mL"
+      }
+    ]
   }
 }

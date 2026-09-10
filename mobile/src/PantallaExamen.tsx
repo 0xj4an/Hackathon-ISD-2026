@@ -1,31 +1,47 @@
 /**
- * Vía B: la persona trae un examen de laboratorio y la app se lo lee.
- *
- * Foto → OCR → MedPsy + LoRA lab → clasificar() (`ADR-005`). Escribir a mano
- * sigue disponible si la foto falla.
+ * Examen de laboratorio: foto → OCR → MedPsy+LoRA → clasificar().
+ * Si hay hallazgos fuera de rango, se puede pedir crédito.
  */
 import { useState } from "react";
 import { View, Text, TextInput, StyleSheet } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
 import type { Usuario } from "./usuarios";
 import { MARCADORES, clasificar, buscarMarcador, type LecturaLab } from "./core/marcadores";
+import { armarPaqueteDesdeLab, mensajeCredito } from "./core/paquete";
 import { leerExamenFoto } from "./leerExamen";
 import { LORA_LAB_VERSION } from "./lora";
-import { fichaEscenario, saltarMedPsyLocal } from "./escenario";
+import { fichaModo, saltarMedPsyLocal } from "./modo";
+import { recordError } from "./perf/logger";
 import {
   Pantalla, Encabezado, BarraVeredicto, Veredicto, Franja, Boton, Etiqueta, Pie,
 } from "./ui/componentes";
 import { COLOR, COLOR_URGENCIA, VERBO_URGENCIA, TIPO, ESPACIO, DISPLAY, TOQUE } from "./ui/tokens";
 
 const SIN_PERMISO = "Sin permiso de cámara no podemos leer el examen. Actívalo y vuelve a intentar.";
-const FALLO = "No se pudo abrir la cámara. Intenta otra vez.";
+const FALLO_CAMARA = "No se pudo abrir la cámara. Intenta otra vez.";
+const FALLO_ARCHIVO = "No se pudo abrir el archivo. Prueba con una foto JPG o PNG.";
+const NO_IMAGEN = "Por ahora solo fotos (JPG o PNG). Si es un PDF, sácale una foto.";
 const NADA = "Escribe al menos un valor, el que aparezca en tu examen.";
+
+/** JPEG compatible: el OCR de QVAC no abre HEIC por defecto en iOS. */
+const CAPTURA: ImagePicker.ImagePickerOptions = {
+  mediaTypes: ["images"],
+  quality: 0.7,
+  exif: false,
+  preferredAssetRepresentationMode:
+    ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
+};
 
 const ORDEN = { Inmediata: 0, Prioritaria: 1, Rutinaria: 2 } as const;
 
 export default function PantallaExamen({
-  usuario, onVolver,
-}: { usuario: Usuario; onVolver: () => void }) {
+  usuario, onVolver, onPedirCredito,
+}: {
+  usuario: Usuario;
+  onVolver: () => void;
+  onPedirCredito?: (costoMin: number, costoMax: number) => void;
+}) {
   const [valores, setValores] = useState<Record<string, string>>({});
   const [lecturas, setLecturas] = useState<LecturaLab[] | null>(null);
   const [leyendo, setLeyendo] = useState(false);
@@ -33,32 +49,72 @@ export default function PantallaExamen({
   const [conLora, setConLora] = useState<string | null>(null);
   const [error, setError] = useState("");
 
-  const tomarYLeer = async () => {
+  const leerUri = async (uri: string) => {
+    setLeyendo(true);
+    setProgreso("Preparando…");
+    try {
+      const r = await leerExamenFoto(uri, usuario.sexo, p => {
+        setProgreso(p.detalle + (p.pct != null ? ` · ${p.pct}%` : ""));
+      });
+      if (!r.ok) setError(r.error);
+      else {
+        setConLora(r.lora);
+        setLecturas(r.lecturas);
+      }
+    } finally {
+      setLeyendo(false);
+      setProgreso("");
+    }
+  };
+
+  const tomarFoto = async () => {
+    if (leyendo) return;
     setError("");
     try {
       const permiso = await ImagePicker.requestCameraPermissionsAsync();
       if (!permiso.granted) return setError(SIN_PERMISO);
-      const foto = await ImagePicker.launchCameraAsync({
-        quality: 0.7,
-        preferredAssetRepresentationMode:
-          ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
-      });
+      const foto = await ImagePicker.launchCameraAsync(CAPTURA);
       if (foto.canceled || !foto.assets[0]?.uri) return;
-
-      setLeyendo(true);
-      setProgreso("Preparando…");
-      const r = await leerExamenFoto(foto.assets[0].uri, usuario.sexo, p => {
-        setProgreso(p.detalle + (p.pct != null ? ` · ${p.pct}%` : ""));
-      });
-      setLeyendo(false);
-      setProgreso("");
-      if (!r.ok) return setError(r.error);
-      setConLora(r.lora);
-      setLecturas(r.lecturas);
+      await leerUri(foto.assets[0].uri);
     } catch {
       setLeyendo(false);
       setProgreso("");
-      setError(FALLO);
+      setError(FALLO_CAMARA);
+    }
+  };
+
+  const subirArchivo = async () => {
+    if (leyendo) return;
+    setError("");
+    try {
+      const pick = await DocumentPicker.getDocumentAsync({
+        type: ["image/jpeg", "image/png", "image/heic", "image/heif", "image/webp"],
+        copyToCacheDirectory: true,
+      });
+      if (pick.canceled || !pick.assets[0]) return;
+      const asset = pick.assets[0];
+      const mime = (asset.mimeType ?? "").toLowerCase();
+      if (mime && !mime.startsWith("image/")) {
+        setError(NO_IMAGEN);
+        return;
+      }
+      await leerUri(asset.uri);
+    } catch (err) {
+      recordError("examen.documentPicker", err);
+      try {
+        const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permiso.granted) {
+          setError("Sin permiso para leer tus archivos o la galería. Actívalo y vuelve a intentar.");
+          return;
+        }
+        const galeria = await ImagePicker.launchImageLibraryAsync(CAPTURA);
+        if (galeria.canceled || !galeria.assets[0]?.uri) return;
+        await leerUri(galeria.assets[0].uri);
+      } catch {
+        setLeyendo(false);
+        setProgreso("");
+        setError(FALLO_ARCHIVO);
+      }
     }
   };
 
@@ -80,10 +136,11 @@ export default function PantallaExamen({
   if (lecturas) {
     const peor = lecturas[0].urgencia;
     const fuera = lecturas.filter(l => l.hallazgo !== "dentro de rango");
+    const paquete = armarPaqueteDesdeLab(lecturas);
     return (
       <Pantalla>
         <Encabezado meta="Volver" onVolver={onVolver} />
-        <Franja color={fichaEscenario().color} titulo={fichaEscenario().titulo} texto={fichaEscenario().franja} />
+        <Franja color={fichaModo().color} titulo={fichaModo().titulo} texto={fichaModo().franja} />
 
         {fuera.length === 0 ? (
           <Veredicto
@@ -132,6 +189,17 @@ export default function PantallaExamen({
           })}
         </View>
 
+        {paquete && onPedirCredito ? (
+          <>
+            <Text style={s.credito}>{mensajeCredito(paquete)}</Text>
+            <Boton
+              texto="Pedir un crédito de salud"
+              tono="prioritaria"
+              onPress={() => onPedirCredito(paquete.total_min, paquete.total_max)}
+            />
+          </>
+        ) : null}
+
         <Boton
           texto="Leer otro examen"
           tono="borde"
@@ -149,7 +217,7 @@ export default function PantallaExamen({
   return (
     <Pantalla>
       <Encabezado meta="Volver" onVolver={onVolver} />
-      <Franja color={fichaEscenario().color} titulo={fichaEscenario().titulo} texto={fichaEscenario().franja} />
+      <Franja color={fichaModo().color} titulo={fichaModo().titulo} texto={fichaModo().franja} />
 
       <BarraVeredicto color={COLOR.prioritaria} texto="Tu examen" />
 
@@ -157,8 +225,8 @@ export default function PantallaExamen({
         <Text style={s.titular}>¿Te hiciste{"\n"}un examen?</Text>
         <Text style={s.parrafo}>
           {saltarMedPsyLocal()
-            ? "La foto se lee aquí. El texto (nunca la imagen) va al pueblo, sin LoRA."
-            : "Tráelo y te decimos qué dice cada número. Se lee en este teléfono."}
+            ? "Foto o archivo se leen aquí. El texto (nunca la imagen) va al pueblo, sin LoRA."
+            : "Tráelo en foto o archivo y te decimos qué dice cada número. Se lee en este teléfono."}
         </Text>
       </View>
 
@@ -175,7 +243,12 @@ export default function PantallaExamen({
         texto={leyendo
           ? (saltarMedPsyLocal() ? "Leyendo…" : "Leyendo con LoRA…")
           : "Tomar foto del examen"}
-        onPress={() => { if (!leyendo) void tomarYLeer(); }}
+        onPress={() => { void tomarFoto(); }}
+      />
+      <Boton
+        texto="Subir archivo"
+        tono="borde"
+        onPress={() => { void subirArchivo(); }}
       />
 
       <Etiqueta>O escribe los valores</Etiqueta>
@@ -212,8 +285,8 @@ export default function PantallaExamen({
       <Pie>
         Solo escribe los que aparezcan en tu papel. Los que dejes vacíos no se inventan.
         {saltarMedPsyLocal()
-          ? "En este escenario la foto no carga LoRA: OCR aquí, texto al pueblo."
-          : `La foto usa MedPsy + LoRA (${LORA_LAB_VERSION}); escribir a mano no.`}
+          ? "En este modo la imagen no carga LoRA: OCR aquí, texto al pueblo."
+          : `Foto o archivo usan MedPsy + LoRA (${LORA_LAB_VERSION}); escribir a mano no.`}
       </Pie>
     </Pantalla>
   );
@@ -223,6 +296,10 @@ const s = StyleSheet.create({
   arriba: { paddingHorizontal: ESPACIO.borde, paddingTop: 18, paddingBottom: 16, gap: 10 },
   titular: { ...DISPLAY, fontSize: 34, lineHeight: 35, letterSpacing: -1.2, color: COLOR.tinta },
   parrafo: { fontSize: 15, lineHeight: 21, color: COLOR.gris },
+  credito: {
+    fontSize: 15, lineHeight: 21, fontWeight: "600", color: COLOR.tinta,
+    paddingHorizontal: ESPACIO.borde, marginTop: 18, marginBottom: 8,
+  },
 
   lista: { borderTopWidth: 3, borderTopColor: COLOR.tinta },
   separador: { borderBottomWidth: 1, borderBottomColor: COLOR.separador },

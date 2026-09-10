@@ -1,5 +1,5 @@
 /**
- * Vía B: foto del examen → OCR → MedPsy+LoRA → clasificar().
+ * Examen de laboratorio: foto → OCR → MedPsy+LoRA → clasificar().
  *
  * El modelo solo transcribe. Rangos y urgencia salen de `marcadores.ts`.
  */
@@ -7,7 +7,7 @@ import { SYSTEM_EXTRACCION_LABORATORIO } from "./core/prompts";
 import { parsearLaboratorio } from "./core/laboratorio";
 import { buscarMarcador, clasificar, type LecturaLab, type Sexo } from "./core/marcadores";
 import { completarMedPsy, soltarMedPsy } from "./medpsy";
-import { saltarMedPsyLocal } from "./escenario";
+import { saltarMedPsyLocal } from "./modo";
 import { LORA_LAB_VERSION } from "./lora";
 import {
   leerOcrDeUri,

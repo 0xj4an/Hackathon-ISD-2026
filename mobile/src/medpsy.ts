@@ -5,12 +5,12 @@
  * la foto) va al nodo del pueblo. OCR vive aparte: detector y LLM a la vez
  * se quedan sin grafo.
  *
- * El LoRA de lab es opcional y reemplazable (`lora.ts`). Solo la vía B lo pide.
+ * El LoRA de lab es opcional y reemplazable (`lora.ts`). Solo el examen de laboratorio lo pide.
  */
 import { getAppLogger, recordError, recordInference, type InferenceTask } from "./perf/logger";
 import { LORA_LAB_VERSION, rutaLoraLab } from "./lora";
 import { urlNodo } from "./nodoUrl";
-import { saltarMedPsyLocal } from "./escenario";
+import { saltarMedPsyLocal } from "./modo";
 
 const CTX = 2048;
 const MEDPSY = "HEALTHCARE_1_7B_MEDICAL_Q8_0";

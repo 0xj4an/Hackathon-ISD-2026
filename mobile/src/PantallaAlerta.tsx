@@ -1,5 +1,5 @@
 /**
- * La vía A en tres pasos: qué te pasa, qué conviene hacer, y cuánto cuesta.
+ * Resultado del historial en tres pasos: qué te pasa, qué conviene hacer, y cuánto cuesta.
  *
  * Las señales las deciden las reglas de `core/reglas.ts`, no el modelo
  * (`ADR-005`). Esta pantalla muestra esas reglas de inmediato. MedPsy entra
@@ -18,14 +18,14 @@
  * pantalla de scroll.
  *
  * Los tres pasos viven en este archivo y no en `App.tsx` a propósito: son un
- * solo asunto, la vía A, y el enrutado de arriba no tiene por qué enterarse.
+ * solo asunto (el resultado del historial), y el enrutado de arriba no tiene por qué enterarse.
  */
 import { useEffect, useMemo, useState } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import type { Usuario } from "./usuarios";
 import { detectarSenales, type Senal } from "./core/reglas";
 import { redactarAlerta } from "./redactarAlerta";
-import { fichaEscenario, saltarMedPsyLocal } from "./escenario";
+import { fichaModo, saltarMedPsyLocal } from "./modo";
 import { armarPaquete, mensajeCredito, type Paquete } from "./core/paquete";
 import { fraseLecturas, fraseMeses, resumenHistorial } from "./historial";
 import {
@@ -151,7 +151,7 @@ function Alerta({ peor, demas, lecturas, periodo, mensaje, fallo, redactando, on
   return (
     <Pantalla>
       <Encabezado meta="Salir" onVolver={onSalir} />
-      <Franja color={fichaEscenario().color} titulo={fichaEscenario().titulo} texto={fichaEscenario().franja} />
+      <Franja color={fichaModo().color} titulo={fichaModo().titulo} texto={fichaModo().franja} />
 
       <Veredicto
         color={COLOR_URGENCIA[peor.urgencia]}
@@ -349,7 +349,7 @@ function Sano({ usuario, onVolver, onSubirExamen }: {
   return (
     <Pantalla>
       <Encabezado meta="Salir" onVolver={onVolver} />
-      <Franja color={fichaEscenario().color} titulo={fichaEscenario().titulo} texto={fichaEscenario().franja} />
+      <Franja color={fichaModo().color} titulo={fichaModo().titulo} texto={fichaModo().franja} />
       <Veredicto
         color={COLOR.rutinaria}
         palabra={"Todo\nen orden"}

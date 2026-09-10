@@ -3,9 +3,9 @@
 > Decentralized AI Hackathon · ISD Summit 2026 · Panamá. Equipo: 0xj4an y Artur.
 > Retos: General · Tether QVAC Psy · Caja de Ahorros.
 
-App Expo para zonas rurales de Panamá: detecta una señal de riesgo de salud, explica qué examen conviene y permite solicitar un crédito fotografiando documentos. Las fotos nunca salen del teléfono. El JSON va al banco remoto por **camino A** (wifi/datos, directo a Railway) o por **camino B** (sin internet: LAN al nodo del pueblo, y él al banco). **La demo se graba en un iPhone 17 Pro Max**; el usuario del brief es rural con Android. El Xiaomi 14T Pro se descartó porque Bare aborta al arrancar.
+App Expo para zonas rurales de Panamá: detecta una señal de riesgo de salud, explica qué examen conviene y permite solicitar un crédito fotografiando documentos. Las fotos nunca salen del teléfono. El JSON va al banco remoto con wifi (modo `local-wifi`) o, sin internet, por LAN al nodo del pueblo (`local-offline` / `nodo-offline`). **La demo se graba en un iPhone 17 Pro Max**; el usuario del brief es rural con Android. El Xiaomi 14T Pro se descartó porque Bare aborta al arrancar.
 
-La inferencia intenta MedPsy en el teléfono con [`@qvac/sdk`](https://docs.qvac.tether.io) **0.18.2**. Si el modelo no carga, el **texto** (nunca la foto) va al nodo del pueblo por LAN. Ningún proveedor de IA remoto.
+La inferencia intenta MedPsy en el teléfono con [`@qvac/sdk`](https://docs.qvac.tether.io) **0.18.2**. Si el modelo no carga (o modo `nodo-offline`), el **texto** (nunca la foto) va al nodo del pueblo por LAN (`/inferir`). Ningún proveedor de IA remoto. Hyperswarm P2P y QVAC `delegate` no son el camino de la demo.
 
 ## Modelos (nombres honestos)
 | Uso | Modelo | Cuantización | Tamaño |
@@ -13,7 +13,7 @@ La inferencia intenta MedPsy en el teléfono con [`@qvac/sdk`](https://docs.qvac
 | Alerta de salud en español | MedPsy 1.7B (`HEALTHCARE_1_7B_MEDICAL_Q8_0`) | Q8_0 | 2.1 GB |
 | OCR de documentos | `OCR_LATIN` | - | - |
 | Extracción a JSON (cédula, ingresos, extracto) | El mismo MedPsy 1.7B, sobre el texto de `OCR_LATIN` (`ADR-002`) | Q8_0 | 2.1 GB |
-| Extracción de laboratorio (vía B) | MedPsy + LoRA `lab-v3` (`mobile/assets/models/lora-lab-v3.gguf`) | Q8_0 + LoRA | 2.1 GB + 33 MB |
+| Extracción de laboratorio (examen) | MedPsy + LoRA `lab-v3` (`mobile/assets/models/lora-lab-v3.gguf`) | Q8_0 + LoRA | 2.1 GB + 33 MB |
 
 Hardware de **demo**: iPhone 17 Pro Max, iOS 26.6.1, MedPsy Q8_0 en CPU (TTFT 2915 ms, 9 sep 2026). El Xiaomi 14T Pro (HyperOS 3 / Android 16) aborta en `libbare-kit.so` al arrancar Bare; no es el aparato de la grabación. El usuario del brief sigue siendo rural con Android de gama media (`ADR-006`). Log: [`perf/`](perf/).
 
@@ -28,7 +28,7 @@ eso para el video. `npx qvac doctor` valida el entorno.
 cd mobile && npm install && npx expo run:ios --device --configuration Release
 # Android: npx expo run:android --device  - Bare aborta en el 14T; no es el camino de la demo
 
-# camino B: nodo del pueblo (apunta al banco en Railway)
+# camino: nodo del pueblo (apunta al banco en Railway)
 cd nodo && npm install && npm run corregimiento
 # el banco remoto ya está en https://banco-production-3755.up.railway.app
 # opcional, banco local: npm run banco
@@ -71,7 +71,7 @@ Los significados salen del diccionario escolar *Gayamar sabga* (gunagaya-españo
 ## Contexto compartido del equipo
 - `docs/CHECKLIST.md`: **el plan de trabajo que se sigue**, por bloques y con criterios de aceptación.
 - `docs/PRUEBA-TELEFONO.md`: lo que se vio en el iPhone físico, incluidas las fallas.
-- `docs/PRUEBA-NODO.md`: camino A (Railway) y camino B (LAN), medido, no recordado.
+- `docs/PRUEBA-NODO.md`: envío al banco (Railway) y al pueblo (LAN), medido, no recordado.
 - `docs/BRIEF.md`: qué construimos, flujo y arquitectura.
 - `.ai/`: contexto estable (reglas del hackathon, los 5 retos, referencia del SDK QVAC, línea base) y decisiones.
 - `spikes/`: experimentos de validación con sus scripts, para que el jurado pueda repetirlos. `spikes/README.md` explica cómo.

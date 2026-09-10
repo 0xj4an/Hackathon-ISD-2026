@@ -57,7 +57,7 @@ export type Ingresos = z.infer<typeof IngresosSchema>;
 export type Extracto = z.infer<typeof ExtractoSchema>;
 
 /**
- * Examen de laboratorio fotografiado (vía B). El modelo transcribe lo que dice
+ * Examen de laboratorio fotografiado. El modelo transcribe lo que dice
  * el papel y nada más: quién está alto o bajo lo decide `clasificar()` de
  * `marcadores.ts` contra su rango citado.
  */

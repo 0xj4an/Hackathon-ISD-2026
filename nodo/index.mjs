@@ -1,11 +1,11 @@
 // Dos roles, el mismo binario. El motor corre solo con ROL=banco.
 //
-//   camino A: telefono --wifi/HTTPS--> banco remoto (Railway). Este proceso
-//             no interviene. El telefono no necesita al pueblo.
-//   camino B: telefono --LAN :8788--> este proceso (ROL=corregimiento)
-//             --HTTP--> banco remoto, cuando el pueblo tiene salida.
-//   inferir:  el telefono corre MedPsy; si no puede, POST /inferir (texto).
-//             Solo ROL=corregimiento. Las fotos no viajan.
+//   banco:  telefono --wifi/HTTPS--> banco remoto (Railway). Este proceso
+//           no interviene cuando hay salida. El telefono no necesita al pueblo.
+//   pueblo: telefono --LAN :8788--> este proceso (ROL=corregimiento)
+//           --HTTP--> banco remoto, cuando el pueblo tiene salida.
+//   inferir: el telefono corre MedPsy; si no puede, POST /inferir (texto).
+//            Solo ROL=corregimiento. Las fotos no viajan.
 import { createServer } from "node:http";
 import { mkdirSync, writeFileSync, readdirSync, readFileSync, existsSync } from "node:fs";
 import { aceptar, recibir } from "./credito.mjs";

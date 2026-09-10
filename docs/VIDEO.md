@@ -10,7 +10,7 @@ jurado del reto General, el del podio de 6,000.
 en la grabación, no se menciona. Un jurado técnico revisa el repo después.
 
 **Camino de la grabación (prioridad):** Caso diabetes → alerta MedPsy → crédito
-con **modo avión** → documentos → cuota. **Plano corto de vía B** (foto de
+con **modo avión** → documentos → cuota. **Plano corto de examen** (foto de
 examen + franja `MedPsy + LoRA`) si el rebuild con el `.gguf` ya está en el
 iPhone; si no, se omite y el LoRA se deja en el repo / `RESULTADOS.md`.
 
@@ -22,13 +22,13 @@ El reglamento pide cosas concretas, y cada una necesita su plano:
 
 | Lo que piden | Cómo se ve |
 | --- | --- |
-| Un modelo Psy con función central | MedPsy redacta la alerta; MedPsy (+ LoRA en vía B) lee documentos / lab |
+| Un modelo Psy con función central | MedPsy redacta la alerta; MedPsy (+ LoRA en examen) lee documentos / lab |
 | Flujo de usuario completo, no una llamada al SDK | De abrir la app a la respuesta del banco (o pendiente sin nodo) |
 | Toda la inferencia en el dispositivo | Modo avión encendido durante alerta y lectura |
 | Comunicar limitaciones (proyectos médicos) | El aviso en pantalla, leído en voz alta |
 | Registro de rendimiento estructurado | Pantalla de registros / `perf.jsonl` con TTFT real |
 | Hardware honesto | Se nombra el iPhone y se dice que el usuario es rural con Android |
-| Calidad de dominio medible | `eval/run.mjs` en verde; LoRA lab 5%→68% si se muestra la tabla o la vía B |
+| Calidad de dominio medible | `eval/run.mjs` en verde; LoRA lab 5%→68% si se muestra la tabla o el examen |
 
 ---
 
@@ -223,7 +223,7 @@ vuelve a verificar antes de grabar.
 - [ ] Ensayar el flujo completo **tres veces seguidas** con el teléfono
       ([`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md)).
 - [ ] Modelo ya descargado. Los 2.1 GB no se bajan en cámara.
-- [ ] Rebuild nativo con `lora-lab-v3.gguf` si se va a filmar vía B.
+- [ ] Rebuild nativo con `lora-lab-v3.gguf` si se va a filmar el examen.
 - [ ] Modo avión listo, y comprobado que la app funciona así.
 - [ ] `perf.jsonl` con líneas de verdad (alerta, ocr, extracción).
 - [ ] Batería arriba del 50%.
@@ -231,8 +231,11 @@ vuelve a verificar antes de grabar.
 
 ## Lo que NO se dice
 
-- **"Hyperswarm P2P"** si la demo salió por HTTP. Camino A: "el teléfono habla
-  con el banco, con wifi". Camino B: "sin internet, el pueblo se lo lleva".
+- **"Hyperswarm P2P"** si la demo salió por HTTP. Con wifi: "el teléfono habla
+  con el banco". Sin internet: "el pueblo se lo lleva". Tampoco digas
+  **delegate** si el respaldo fue HTTP `/inferir`.
+- **"A" o "B" frente al jurado** para salud o transporte: di "historial", "examen",
+  "banco", "pueblo".
   Inferencia: "el teléfono intenta el modelo; si no puede, le pide el texto al
   nodo". Ver [`PRUEBA-NODO.md`](PRUEBA-NODO.md).
 - **"Diagnostica"**, "detecta enfermedades", "sabe qué tienes". Detecta valores
@@ -246,4 +249,4 @@ vuelve a verificar antes de grabar.
 - Quién narra, y si es voz en vivo o grabada aparte.
 - Mezcla: pantalla para el detalle, mano para el modo avión.
 - Dónde se sube. Tiene que abrir sin login.
-- Si en la toma de 5 min cabe vía B completa, o solo el banner + un marcador.
+- Si en la toma de 5 min cabe el examen completo, o solo el banner + un marcador.

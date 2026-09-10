@@ -107,7 +107,7 @@ function pintar(data) {
   if (data.origen === "demo") {
     aviso.textContent = "El banco no está en línea. Estas tres son solicitudes de demostración, no llegan del teléfono.";
   } else if (!data.filas.length) {
-    aviso.textContent = "Todavía no llega ninguna. Con wifi el teléfono llega directo (camino A). Sin internet, el pueblo se las trae (camino B).";
+    aviso.textContent = "Todavía no llega ninguna. Con wifi el teléfono llega directo al banco. Sin internet, el pueblo se las trae.";
   } else {
     aviso.textContent = `${data.filas.length} solicitud${data.filas.length === 1 ? "" : "es"} decididas por el banco remoto.`;
   }

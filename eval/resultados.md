@@ -2,7 +2,7 @@
 
 Generado por `node eval/run.mjs`. Determinista: mismo resultado en cada corrida.
 
-## 1. Deteccion por historial (via A)
+## 1. Deteccion por historial
 
 Cada caso de `data/usuarios/` debe producir exactamente las senales que declara.
 
@@ -20,7 +20,7 @@ Cada caso de `data/usuarios/` debe producir exactamente las senales que declara.
 
 **C3c, el caso sano no dispara nada:** OK, cero senales
 
-## 2. Clasificacion de laboratorio (via B)
+## 2. Clasificacion de laboratorio
 
 Cada marcador debe clasificar alto, bajo y dentro de rango. Se prueban tres
 valores por marcador: justo por encima del maximo, justo por debajo del minimo,

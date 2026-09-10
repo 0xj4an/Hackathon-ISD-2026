@@ -137,7 +137,7 @@ Código por delante de la evidencia en el aparato. Ver [`CHECKLIST.md`](CHECKLIS
   no se listó el contenedor.
 - Cola SQLite durable: código en `cola.ts` / `colaSqlite.ts`. Falta ver en el
   iPhone que sobrevive un kill y que al volver la red sale sola.
-- HTTP camino A/B **desde el iPhone** (sí medido desde laptop en
+- HTTP banco/pueblo **desde el iPhone** (sí medido desde laptop en
   [`PRUEBA-NODO.md`](PRUEBA-NODO.md)).
 - Alerta redactada por MedPsy **vista en el iPhone** (código: `redactarAlerta`).
 - `perf.jsonl` exportado de una corrida de producto (logger ya cableado).

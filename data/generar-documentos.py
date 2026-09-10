@@ -154,6 +154,23 @@ MOVIMIENTOS = [
 # bajar la tasa de 12.5% a 9.5%: el numero tiene que ser cierto.
 SALDO_PROMEDIO = round(sum(float(m[3]) for m in MOVIMIENTOS) / len(MOVIMIENTOS), 2)
 
+# Informe de lab para la via B (OCR + MedPsy + LoRA). Nombres y unidades como
+# en mobile/src/core/marcadores.ts. Valores elegidos: GLU alta dispara hallazgo
+# en la demo; el resto mezcla dentro/fuera de rango para ejercitar clasificar().
+EXAMEN_LECTURAS = [
+    ("GLU", "glicemia en ayunas", 168, "mg/dL"),
+    ("HB", "hemoglobina", 13.2, "g/dL"),
+    ("PLQ", "plaquetas", 245, "x10^3/µL"),
+    ("CREA", "creatinina", 0.9, "mg/dL"),
+    ("COL", "colesterol total", 218, "mg/dL"),
+    ("HTO", "hematocrito", 40, "%"),
+    ("TSH", "TSH", 2.1, "µUI/mL"),
+]
+EXAMEN_FECHA = "2026-09-08"
+EXAMEN_LAB = "Laboratorio Clinico San Marcos"
+EXAMEN_PACIENTE = "MARIELA DEL CARMEN QUIROS BATISTA"
+EXAMEN_CEDULA = "8-912-2044"
+
 
 def extracto():
     """Extracto bancario. La altura se recorta al contenido."""
@@ -200,6 +217,55 @@ def extracto():
     return img.crop((0, 0, 1240, y + 86))
 
 
+def examen():
+    """Informe de laboratorio A4. Sin rangos ni 'alto/bajo': eso lo decide clasificar()."""
+    img = Image.new("RGB", (1240, 1100), (252, 252, 250))
+    d = ImageDraw.Draw(img)
+
+    d.rectangle([0, 0, 1239, 120], fill=(226, 232, 228))
+    texto(d, (110, 28), EXAMEN_LAB.upper(), fuente("sans_bold", 34))
+    texto(d, (110, 74), "INFORME DE RESULTADOS  ·  " + AVISO, fuente("sans", 17), TENUE)
+
+    cab = [
+        ("Paciente", EXAMEN_PACIENTE),
+        ("Cedula", EXAMEN_CEDULA),
+        ("Fecha", EXAMEN_FECHA),
+        ("Solicitud", "Perfil basico - muestra en ayunas"),
+    ]
+    y = 160
+    for k, v in cab:
+        texto(d, (110, y), k, fuente("sans", 20), TENUE)
+        texto(d, (320, y), v, fuente("sans_bold", 22))
+        y += 40
+
+    y += 20
+    d.line([110, y, 1130, y], fill=(120, 125, 132), width=2)
+    y += 16
+    for x, t in ((110, "PRUEBA"), (620, "RESULTADO"), (900, "UNIDAD")):
+        texto(d, (x, y), t, fuente("sans_bold", 20), TENUE)
+    y += 36
+    d.line([110, y, 1130, y], fill=(190, 194, 200), width=1)
+    y += 18
+
+    for _codigo, nombre, valor, unidad in EXAMEN_LECTURAS:
+        texto(d, (110, y), nombre, fuente("sans", 24))
+        if isinstance(valor, float) and not valor.is_integer():
+            num = f"{valor:.1f}"
+        else:
+            num = str(int(valor) if isinstance(valor, float) and valor.is_integer() else valor)
+        texto(d, (620, y), num, fuente("mono_bold", 26))
+        texto(d, (900, y), unidad, fuente("mono", 22), TENUE)
+        y += 48
+
+    y += 24
+    d.line([110, y, 1130, y], fill=(120, 125, 132), width=2)
+    texto(d, (110, y + 20), "Documento de prueba. Sin valor clinico ni legal.",
+          fuente("sans", 18), TENUE)
+    texto(d, (110, y + 50), "Los rangos de referencia no se imprimen: los aplica la app.",
+          fuente("sans", 18), TENUE)
+    return img.crop((0, 0, 1240, y + 100))
+
+
 # ------------------------------------------------------------------- ruido
 
 def desgastar(img, rng, fuerte):
@@ -239,7 +305,12 @@ def guardar(img, nombre, rng, fuerte):
 
 def main():
     SALIDA.mkdir(parents=True, exist_ok=True)
-    docs = {"cedula": cedula(), "ingresos": ingresos(), "extracto": extracto()}
+    docs = {
+        "cedula": cedula(),
+        "ingresos": ingresos(),
+        "extracto": extracto(),
+        "examen": examen(),
+    }
 
     generados = []
     for nombre, img in docs.items():
@@ -271,10 +342,24 @@ def main():
             "saldo_promedio_usd": SALDO_PROMEDIO,
             "meses_cubiertos": 3,
         },
+        "examen": {
+            "laboratorio": EXAMEN_LAB,
+            "fecha": EXAMEN_FECHA,
+            "paciente": EXAMEN_PACIENTE,
+            "lecturas": [
+                {
+                    "codigo": c,
+                    "nombre": n,
+                    "valor": v,
+                    "unidad": u,
+                }
+                for c, n, v, u in EXAMEN_LECTURAS
+            ],
+        },
     }
     (SALIDA / "esperado.json").write_text(
         json.dumps(esperado, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"\n  esperado.json           verdad de referencia de los 3 documentos")
+    print(f"\n  esperado.json           verdad de referencia (cedula, ingresos, extracto, examen)")
     print(f"  {len(generados)} imagenes en data/documentos/")
 
 

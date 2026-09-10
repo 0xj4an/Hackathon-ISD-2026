@@ -380,7 +380,7 @@ export async function leerDocumento(
 }
 
 /**
- * Solo OCR de una foto (vía B). Suelta MedPsy antes: detector y LLM no caben.
+ * Solo OCR de una foto. Suelta MedPsy antes: detector y LLM no caben.
  */
 export async function leerOcrDeUri(
   uri: string,

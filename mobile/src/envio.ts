@@ -1,17 +1,14 @@
 /**
- * Transporte del crédito. Tres vocabularios, no mezclarlos:
+ * Transporte del crédito.
  *
- *   vía A / vía B     salud: historial vs foto de laboratorio
- *   camino A / B      crédito: wifi → banco; si no hay red → pueblo, y él envía
- *   inferencia        MedPsy en el teléfono; si no carga, texto al pueblo
- *
- * Camino A primero: POST al banco por wifi/datos. Camino B si A no responde:
- * el JSON queda en el pueblo (:8788) y él lo lleva al banco. Nunca fotos.
+ *   local-wifi: intenta banco, luego pueblo.
+ *   *-offline: solo pueblo / pendiente.
+ * Inferencia (MedPsy /inferir) es otra tubería. Nunca fotos.
  */
 import { urlBanco } from "./bancoUrl";
 import { urlNodo } from "./nodoUrl";
 import { Sentry } from "./sentry";
-import { sinWifiDemo } from "./escenario";
+import { sinWifiDemo } from "./modo";
 import type { Respuesta } from "./core/credito/motor";
 import type { Solicitud } from "./core/schemas";
 
@@ -19,9 +16,9 @@ export { urlBanco };
 export { urlNodo };
 
 export type Envio =
-  | { ok: true; camino: "A" | "B"; respuesta: Respuesta }
-  | { ok: false; camino: "B"; pendiente: true; detalle: string }
-  | { ok: false; camino: null; pendiente: false; detalle: string };
+  | { ok: true; envio: "banco" | "pueblo"; respuesta: Respuesta }
+  | { ok: false; envio: "pueblo"; pendiente: true; detalle: string }
+  | { ok: false; envio: null; pendiente: false; detalle: string };
 
 function esFinal(r: { decision?: string } | null): r is Respuesta {
   return r?.decision === "aprobada" || r?.decision === "rechazada" || r?.decision === "revision";
@@ -46,7 +43,6 @@ async function pedir(url: string, init: RequestInit, ms: number): Promise<Respue
     }
     return await r.json() as Respuesta;
   } catch (err) {
-    // Abort/red caída son esperados offline — no captureException.
     if (err instanceof Error && err.name !== "AbortError") {
       Sentry.addBreadcrumb({
         category: "envio",
@@ -73,16 +69,16 @@ function post(sol: Solicitud) {
 export async function enviarSolicitud(sol: Solicitud): Promise<Envio> {
   if (!sinWifiDemo()) {
     const a = await pedir(`${urlBanco()}/solicitud`, post(sol), 8000);
-    if (esFinal(a)) return { ok: true, camino: "A", respuesta: a };
+    if (esFinal(a)) return { ok: true, envio: "banco", respuesta: a };
   }
 
   const nodo = urlNodo();
   const b = await pedir(`${nodo}/solicitud`, post(sol), 8000);
-  if (esFinal(b)) return { ok: true, camino: "B", respuesta: b };
+  if (esFinal(b)) return { ok: true, envio: "pueblo", respuesta: b };
   if (b?.decision === "pendiente") {
-    return { ok: false, camino: "B", pendiente: true, detalle: "En el nodo del pueblo. Él se la lleva al banco." };
+    return { ok: false, envio: "pueblo", pendiente: true, detalle: "En el nodo del pueblo. Él se la lleva al banco." };
   }
-  return { ok: false, camino: null, pendiente: false, detalle: "Sin red y sin el nodo del pueblo." };
+  return { ok: false, envio: null, pendiente: false, detalle: "Sin red y sin el nodo del pueblo." };
 }
 
 /** Misma prioridad: banco remoto, luego pueblo. */

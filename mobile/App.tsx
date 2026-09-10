@@ -5,15 +5,12 @@
 // del crédito, se leen los documentos, se revisa lo leído, se ve la cuota y el
 // banco responde. El correo no es un login: es la llave del caso de la demo.
 //
-// De la alerta cuelga la vía B, que no es un paso del camino sino una salida
-// lateral: la persona trae un examen de laboratorio en papel y la app se lo lee.
-// Vuelve a la alerta, no sigue hacia el crédito.
+// Tras el resultado (alerta o en orden) se puede pedir crédito y/o subir un
+// examen. Si el lab sale fuera de rango, también se puede pedir crédito.
 //
-// Firmar intenta el banco remoto si hay wifi (camino A). Si no hay internet,
-// deja el JSON en el nodo del pueblo (camino B). Si tampoco hay nodo, la
-// solicitud queda en SQLite (`cola`) y se reintenta al volver la red.
-// Las fotos no salen. La alerta y la extracción intentan MedPsy en el
-// teléfono; si el modelo no carga, el texto va al pueblo.
+// Firmar: modo local-wifi intenta el banco; modos offline van al pueblo.
+// Si tampoco hay nodo, la solicitud queda en SQLite (`cola`).
+// Las fotos no salen. MedPsy en el teléfono; si no, texto al pueblo (/inferir).
 // `PantallaDatos` sigue en el repo (deudas y personas a cargo, pantalla 11 del
 // mapa) pero el camino de la demo pasa por lo leído → cuota → banco.
 //
@@ -42,7 +39,7 @@ import { marcarPasoSentry, marcarUsuarioSentry } from "./src/sentry";
 import type { Respuesta } from "./src/core/credito/motor";
 import type { Solicitud } from "./src/core/schemas";
 import { buscarPorCorreo, type Usuario } from "./src/usuarios";
-import { fijarEscenario, fijarViaSalud, resetEscenario } from "./src/escenario";
+import { fijarModo, resetModo } from "./src/modo";
 
 /** Lo que cuesta el paquete, y el monto que la persona decidió pedir. */
 type Credito = { min: number; max: number; monto?: number };
@@ -54,7 +51,6 @@ export default function App() {
   const [revisado, setRevisado] = useState(false);
   const [credito, setCredito] = useState<Credito | null>(null);
   const [enExamen, setEnExamen] = useState(false);
-  const [pendienteExamen, setPendienteExamen] = useState(false);
   const [enRegistro, setEnRegistro] = useState(false);
   const [paso, setPaso] = useState<PasoCredito>("captura");
   const [lectura, setLectura] = useState<LecturaCredito | null>(null);
@@ -76,13 +72,12 @@ export default function App() {
   };
 
   const salir = () => {
-    resetEscenario();
+    resetModo();
     setUsuario(null);
     setConectado(false);
     setRevisado(false);
     setCredito(null);
     setEnExamen(false);
-    setPendienteExamen(false);
     soltarCredito();
   };
 
@@ -212,10 +207,8 @@ export default function App() {
   if (!usuario) {
     return (
       <PantallaEntrada
-        onEntrar={(u, e, via) => {
-          fijarEscenario(e);
-          fijarViaSalud(via);
-          setPendienteExamen(via === "examen");
+        onEntrar={(u, m) => {
+          fijarModo(m);
           setUsuario(u);
         }}
         onRegistro={() => setEnRegistro(true)}
@@ -240,19 +233,22 @@ export default function App() {
     return (
       <PantallaRevision
         usuario={usuario}
-        onListo={() => {
-          setRevisado(true);
-          if (pendienteExamen) {
-            setEnExamen(true);
-            setPendienteExamen(false);
-          }
-        }}
+        onListo={() => setRevisado(true)}
       />
     );
   }
 
   if (enExamen) {
-    return <PantallaExamen usuario={usuario} onVolver={() => setEnExamen(false)} />;
+    return (
+      <PantallaExamen
+        usuario={usuario}
+        onVolver={() => setEnExamen(false)}
+        onPedirCredito={(min, max) => {
+          setEnExamen(false);
+          setCredito({ min, max });
+        }}
+      />
+    );
   }
 
   if (!credito) {

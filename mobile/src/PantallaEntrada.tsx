@@ -1,18 +1,14 @@
 /**
- * Entrada a la app: primero el login, después los controles de demo.
- *
- * El correo es lo que manda en el primer viewport. Escenario, vía y caso son
- * herramientas de showcase: viven abajo, más quietas, y se abren solo si hace
- * falta enseñar una toma distinta.
+ * Entrada: correo primero; abajo, controles de demo (modo + caso).
+ * El historial se lee siempre; el examen se ofrece tras el resultado.
  */
 import { useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { USUARIOS, buscarPorCorreo, type Usuario } from "./usuarios";
 import {
-  ESCENARIOS, VIAS_SALUD, fijarEscenario, fijarViaSalud, usuarioDelEscenario,
-  type EscenarioId, type ViaSalud,
-} from "./escenario";
-import { Pantalla, Encabezado, Boton, Etiqueta, Pie } from "./ui/componentes";
+  MODOS, fijarModo, usuarioDelModo, type ModoId,
+} from "./modo";
+import { Pantalla, Encabezado, Boton, Pie } from "./ui/componentes";
 import { COLOR, TIPO, ESPACIO, DISPLAY, TOQUE } from "./ui/tokens";
 
 const NO_EXISTE = "No hay ningún historial con ese correo. Revisa cómo lo escribiste.";
@@ -32,22 +28,20 @@ const CASO_CORTO: Record<string, string> = {
 export default function PantallaEntrada({
   onEntrar, onRegistro,
 }: {
-  onEntrar: (u: Usuario, escenario: EscenarioId, via: ViaSalud) => void;
+  onEntrar: (u: Usuario, modo: ModoId) => void;
   onRegistro?: () => void;
 }) {
-  const [correo, setCorreo] = useState(usuarioDelEscenario().correo);
+  const [correo, setCorreo] = useState(usuarioDelModo().correo);
   const [error, setError] = useState("");
-  const [escena, setEscena] = useState<EscenarioId>("A");
-  const [via, setVia] = useState<ViaSalud>("historial");
+  const [modoSel, setModoSel] = useState<ModoId>("local-wifi");
   const [demoAbierta, setDemoAbierta] = useState(false);
 
   const entrar = () => {
-    const usuario = buscarPorCorreo(correo) ?? (correo.trim() === "" ? usuarioDelEscenario() : undefined);
+    const usuario = buscarPorCorreo(correo) ?? (correo.trim() === "" ? usuarioDelModo() : undefined);
     if (!usuario) return setError(NO_EXISTE);
     setError("");
-    fijarEscenario(escena);
-    fijarViaSalud(via);
-    onEntrar(usuario, escena, via);
+    fijarModo(modoSel);
+    onEntrar(usuario, modoSel);
   };
 
   const escribir = (texto: string) => {
@@ -57,8 +51,7 @@ export default function PantallaEntrada({
 
   const casoActivo = USUARIOS.find(u => u.correo === correo.trim().toLowerCase());
   const demoResumen = [
-    ESCENARIOS.find(e => e.id === escena)?.titulo ?? escena,
-    VIAS_SALUD.find(v => v.id === via)?.titulo ?? via,
+    MODOS.find(e => e.id === modoSel)?.titulo ?? modoSel,
     casoActivo ? (CASO_CORTO[casoActivo.id] ?? casoActivo.id) : "correo libre",
   ].join(" · ");
 
@@ -71,7 +64,6 @@ export default function PantallaEntrada({
         <Text style={s.parrafo}>Tu historial se queda en este teléfono. Nada de esto viaja.</Text>
       </View>
 
-      <Etiqueta>Correo</Etiqueta>
       <View style={s.campoCaja}>
         <TextInput
           value={correo}
@@ -111,51 +103,31 @@ export default function PantallaEntrada({
         {demoAbierta ? (
           <View style={s.demoCuerpo}>
             <Text style={s.demoAyuda}>
-              Escenario del teléfono, vía de lectura y caso sintético. Para el jurado o la toma, no para el usuario final.
+              Modo del teléfono (modelo × wifi) y caso sintético. El historial se lee siempre; el examen se ofrece después del resultado.
             </Text>
 
-            <Text style={s.demoEtiqueta}>Escenario · el teléfono</Text>
-            <View style={s.escenarios}>
-              {ESCENARIOS.map(e => {
-                const puesto = escena === e.id;
+            <Text style={s.demoEtiqueta}>Modo · el teléfono</Text>
+            <View style={s.modos}>
+              {MODOS.map(e => {
+                const puesto = modoSel === e.id;
                 return (
                   <Pressable
                     key={e.id}
-                    onPress={() => setEscena(e.id)}
+                    onPress={() => setModoSel(e.id)}
                     accessibilityRole="button"
                     accessibilityState={{ selected: puesto }}
                     accessibilityLabel={`${e.titulo}. ${e.detalle}`}
                     style={({ pressed }) => [
-                      s.escena,
+                      s.modo,
                       puesto && { borderColor: e.color, backgroundColor: COLOR.hundido },
                       pressed && s.press,
                     ]}
                   >
                     <View style={[s.marca, { backgroundColor: e.color }]} />
-                    <View style={s.escenaTextos}>
-                      <Text style={s.escenaTitulo}>{e.titulo}</Text>
-                      <Text style={s.escenaDetalle}>{e.detalle}</Text>
+                    <View style={s.modoTextos}>
+                      <Text style={s.modoTitulo}>{e.titulo}</Text>
+                      <Text style={s.modoDetalle}>{e.detalle}</Text>
                     </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            <Text style={s.demoEtiqueta}>Qué se lee</Text>
-            <View style={s.vias}>
-              {VIAS_SALUD.map(v => {
-                const puesto = via === v.id;
-                return (
-                  <Pressable
-                    key={v.id}
-                    onPress={() => setVia(v.id)}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: puesto }}
-                    accessibilityLabel={`${v.titulo}: ${v.detalle}`}
-                    style={({ pressed }) => [s.via, puesto && s.puesto, pressed && s.press]}
-                  >
-                    <Text style={s.viaTitulo}>{v.titulo}</Text>
-                    <Text style={s.viaDetalle}>{v.detalle}</Text>
                   </Pressable>
                 );
               })}
@@ -247,8 +219,8 @@ const s = StyleSheet.create({
     paddingHorizontal: 14, marginTop: 10, marginBottom: 8,
   },
 
-  escenarios: { paddingHorizontal: 14, gap: 6, marginBottom: 8 },
-  escena: {
+  modos: { paddingHorizontal: 14, gap: 6, marginBottom: 8 },
+  modo: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
@@ -260,30 +232,9 @@ const s = StyleSheet.create({
     minHeight: TOQUE,
   },
   marca: { width: 10, height: 10 },
-  escenaTextos: { flex: 1, gap: 2, minWidth: 0 },
-  escenaTitulo: { fontSize: 13.5, fontWeight: "700", color: COLOR.tinta },
-  escenaDetalle: { fontSize: 12, lineHeight: 16, color: COLOR.gris },
-
-  vias: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    paddingHorizontal: 14,
-    marginBottom: 8,
-  },
-  via: {
-    flexGrow: 1,
-    flexBasis: 140,
-    borderWidth: 1,
-    borderColor: COLOR.separador,
-    backgroundColor: COLOR.fondo,
-    paddingHorizontal: 10,
-    paddingVertical: 9,
-    minHeight: TOQUE,
-    gap: 3,
-  },
-  viaTitulo: { fontSize: 14, fontWeight: "700", color: COLOR.tinta },
-  viaDetalle: { fontSize: 12, lineHeight: 16, color: COLOR.gris },
+  modoTextos: { flex: 1, gap: 2, minWidth: 0 },
+  modoTitulo: { fontSize: 13.5, fontWeight: "700", color: COLOR.tinta },
+  modoDetalle: { fontSize: 12, lineHeight: 16, color: COLOR.gris },
 
   puesto: { backgroundColor: COLOR.hundido, borderColor: COLOR.tinta },
   press: { opacity: 0.85 },
