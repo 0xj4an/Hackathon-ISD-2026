@@ -10,7 +10,10 @@
       "android": {
         "buildType": "apk"
       },
-      "node": "22.21.1"
+      "node": "22.21.1",
+      "env": {
+        "SENTRY_ALLOW_FAILURE": "true"
+      }
     },
     "preview": {
       "distribution": "internal",

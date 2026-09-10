@@ -6,7 +6,10 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "eas-build-on-success": "npx sentry-eas-build-on-success",
+    "eas-build-on-error": "npx sentry-eas-build-on-error",
+    "eas-build-on-complete": "npx sentry-eas-build-on-complete"
   },
   "dependencies": {
     "@qvac/sdk": "0.18.2",
