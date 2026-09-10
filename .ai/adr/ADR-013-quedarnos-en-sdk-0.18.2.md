@@ -83,7 +83,8 @@ no está bloqueada por el SDK: está bloqueada porque las pantallas descartan el
 argumento más fuerte de `ADR-001` y es una pérdida real.
 
 En su lugar: `getSystemResources()`, que sí está en 0.18.2, y el dato de que el
-14T Pro lleva 12 GB de RAM contra un modelo de 2.1 GB. La decisión de
+aparato de la demo (iPhone 17 Pro Max) tiene memoria de sobra contra un modelo
+de 2.1 GB, medido: MedPsy Q8_0 carga en CPU con TTFT de 2915 ms. La decisión de
 [`ADR-006`](ADR-006-tres-modos-segun-el-telefono.md) entre modo completo, ligero
 y delegado se toma con eso. Es menos cómodo, no es un bloqueo.
 
@@ -96,9 +97,14 @@ trabajo" puso la secuencia correcta:
 > 1. Correr el smoke test tal como está, en 0.18.2. Coste cero, ya está compilado.
 > 2. Con esa base buena, mover a 0.19 y repetir el smoke test.
 
-**El paso 1 nunca ocurrió**, porque el teléfono no ha aparecido en `adb devices`.
-Mover hoy sería romper el único estado compilado que existe para reconstruirlo
-sin poder verificarlo. A esta altura del calendario eso no se paga.
+**El paso 1 ya ocurrió, y en otro aparato:** MedPsy carga en un iPhone 17 Pro
+Max con build local de Xcode (TTFT 2915 ms, CPU, Q8_0). El Xiaomi 14T Pro se
+abandonó porque Bare aborta en `libbare-kit.so` al arrancar el worklet.
+
+Eso refuerza la decisión en vez de debilitarla: el único build que funciona hoy
+está compilado contra 0.18.2, y es local, no de EAS. Mover a 0.19 obliga a
+regenerar el proyecto nativo y a recompilar por Xcode, sin garantía de volver al
+mismo estado. A esta altura del calendario eso no se paga.
 
 ## El contraargumento, y la respuesta
 

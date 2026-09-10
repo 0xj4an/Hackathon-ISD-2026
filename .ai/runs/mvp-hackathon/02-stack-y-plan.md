@@ -55,6 +55,16 @@ de subir a 4B, se hace que el 1.7B rinda en un esquema estrecho.
 
 ### Telefono objetivo: Xiaomi 14T Pro
 
+> **SUPERADO (10 sep).** Todo lo de esta seccion, y las trampas de HyperOS, adb
+> y Mali que vienen despues, quedaron sin efecto: **Bare aborta en
+> `libbare-kit.so` al arrancar el worklet en HyperOS 3 / Android 16**, asi que
+> el 14T Pro se abandono. La demo corre en un **iPhone 17 Pro Max** con build
+> local de Xcode (`expo run:ios`), no por EAS. Medido: MedPsy Q8_0 en CPU,
+> TTFT 2915 ms. El usuario del brief sigue siendo rural con Android de gama
+> media; lo que cambio es el aparato de la grabacion, no a quien va dirigida la
+> app. Se conserva el texto porque explica por que se eligio el modelo y la
+> cuantizacion que seguimos usando.
+
 Y el riesgo de RAM practicamente desaparece. Specs confirmadas:
 
 | | |
@@ -475,6 +485,10 @@ menciona Android ni iOS**. Es la misma clase de dato no corroborado que ya
 causo un error en este plan, asi que: **no se promete en el guion del video
 hasta verlo correr.**
 
+> **La prueba se hizo y salio que no.** El obstaculo era el soporte del SDK, no
+> el hardware: Bare aborta en `libbare-kit.so` en HyperOS 3. La demo corre en un
+> iPhone 17 Pro Max.
+
 Lo que si cambio a favor: el Xiaomi 14T Pro tiene Dimensity 9300+ y 12 GB de
 RAM. Si el obstaculo fuera hardware, este telefono lo pasa. El obstaculo es
 saber si el SDK lo soporta, y eso se resuelve con una prueba de 20 minutos, no
@@ -493,7 +507,7 @@ ya existe.
 
 | # | Riesgo | Mitigacion |
 | --- | --- | --- |
-| 1 | El telefono no aparece en `adb` o Expo no compila. En Xiaomi, la opcion de instalar por USB puede pedir cuenta Mi | Es el bloque 0 entero. Sin esto no hay proyecto. |
+| 1 | ~~El telefono no aparece en `adb` o Expo no compila. En Xiaomi, la opcion de instalar por USB puede pedir cuenta Mi~~ **Se materializo, y peor: el 14T Pro compila e instala, pero Bare aborta en `libbare-kit.so` al arrancar el worklet** | Resuelto cambiando de aparato: iPhone 17 Pro Max con build local de Xcode. MedPsy carga, TTFT 2915 ms en CPU |
 | 2 | La descarga de 2.1 GB pasa en el evento o grabando | Pre-descargar con `downloadAsset()` antes de moverse |
 | 3 | Sin `perf.jsonl` ni `eval/` | Se construyen en los bloques 1 y 2, no al final |
 | 4 | Metro no resuelve `core/` | Opcion A: mover a `mobile/src/core/` |

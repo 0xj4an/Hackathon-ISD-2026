@@ -53,5 +53,7 @@ Un solo modelo cargado: `HEALTHCARE_1_7B_MEDICAL_Q8_0` (MedPsy 1.7B, Q8_0,
 El eval del bloque 4 muestra que ni con adaptador el 1.7B llega a un umbral
 usable de extracción. En ese caso se añade un segundo modelo mayor solo para
 extracción, se acepta el coste de memoria y el LoRA se queda únicamente en el
-triaje. El Xiaomi 14T Pro tiene 12 GB, así que cargar dos modelos es viable
-aunque no sea deseable.
+triaje. El aparato de la demo (iPhone 17 Pro Max) tiene memoria de sobra,
+así que cargar dos modelos es viable aunque no sea deseable. El argumento se
+escribió pensando en los 12 GB del Xiaomi 14T Pro, que se abandonó porque Bare
+aborta al arrancar; no cambia la conclusión.
