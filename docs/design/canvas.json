@@ -1,0 +1,191 @@
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "Flujo en Senaletica"
+    },
+    {
+      "id": "page-2",
+      "name": "Direcciones descartadas"
+    },
+    {
+      "id": "page-3",
+      "name": "Mapa del flujo"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "page": "page-1",
+      "title": "1 · Alerta",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 874
+    },
+    {
+      "file": "Senales.dc.html",
+      "page": "page-1",
+      "title": "2 · Las 4 señales",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 874
+    },
+    {
+      "file": "Paquete.dc.html",
+      "page": "page-1",
+      "title": "3 · El paquete",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 874
+    },
+    {
+      "file": "Urgencia.dc.html",
+      "page": "page-1",
+      "title": "4 · Urgencia con su costo",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 874
+    },
+    {
+      "file": "Documentos.dc.html",
+      "page": "page-1",
+      "title": "5 · Documentos y cola",
+      "x": 0,
+      "y": 994,
+      "w": 390,
+      "h": 874
+    },
+    {
+      "file": "Banco.dc.html",
+      "page": "page-1",
+      "title": "6 · Respuesta del banco",
+      "x": 470,
+      "y": 994,
+      "w": 390,
+      "h": 874
+    },
+    {
+      "file": "Sano.dc.html",
+      "page": "page-1",
+      "title": "7 · Sin hallazgos",
+      "x": 940,
+      "y": 994,
+      "w": 390,
+      "h": 874
+    },
+    {
+      "file": "Sistema.dc.html",
+      "page": "page-1",
+      "title": "El sistema",
+      "x": 1410,
+      "y": 994,
+      "w": 760,
+      "h": 940
+    },
+    {
+      "file": "AAlerta.dc.html",
+      "page": "page-2",
+      "title": "A · Alerta",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 874
+    },
+    {
+      "file": "ADocumentos.dc.html",
+      "page": "page-2",
+      "title": "A · Documentos",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 874
+    },
+    {
+      "file": "ASistema.dc.html",
+      "page": "page-2",
+      "title": "A · Sistema",
+      "x": 940,
+      "y": 0,
+      "w": 720,
+      "h": 740
+    },
+    {
+      "file": "CAlerta.dc.html",
+      "page": "page-2",
+      "title": "C · Alerta",
+      "x": 0,
+      "y": 994,
+      "w": 390,
+      "h": 874
+    },
+    {
+      "file": "CDocumentos.dc.html",
+      "page": "page-2",
+      "title": "C · Documentos",
+      "x": 470,
+      "y": 994,
+      "w": 390,
+      "h": 874
+    },
+    {
+      "file": "CSistema.dc.html",
+      "page": "page-2",
+      "title": "C · Sistema",
+      "x": 940,
+      "y": 994,
+      "w": 720,
+      "h": 740
+    },
+    {
+      "file": "Mapa.dc.html",
+      "page": "page-3",
+      "title": "Mapa del flujo",
+      "x": 0,
+      "y": 0,
+      "w": 1500,
+      "h": 1180
+    }
+  ],
+  "annotations": [
+    {
+      "id": "elegida",
+      "page": "page-1",
+      "x": -430,
+      "y": 0,
+      "w": 390,
+      "text": "Señalética, elegida.\n\nEl orden: la alerta lleva al paquete, y el paquete siempre ofrece crédito. ADR-010 quitó la puerta que había: se ofrece a cualquier monto y también en urgencias.\n\nTodo el contenido sale de correr el código: detectarSenales() y armarPaquete() sobre data/usuarios/, y decidir() de nodo/credito.mjs para la respuesta del banco."
+    },
+    {
+      "id": "denso",
+      "page": "page-1",
+      "x": -430,
+      "y": 330,
+      "w": 390,
+      "text": "La prueba que B tenía que pasar.\n\nEl paquete real de diabetes son 10 líneas. Cabe: el veredicto se encoge a barra, el cuerpo baja a 13 px y el total negro toma el relevo como elemento dominante.\n\nEsa regla está en la hoja del sistema, a la derecha."
+    },
+    {
+      "id": "urgencia",
+      "page": "page-1",
+      "x": -430,
+      "y": 700,
+      "w": 390,
+      "text": "La pantalla 4 es el corazón del asunto.\n\nEn una urgencia el paquete no compite con la instrucción: la señal va primero (come azúcar ya), el costo debajo, y la nota abre con \"primero la atención\".\n\nAntes hubo una versión que callaba el número en urgencias. Se descartó: la atención de urgencia es justo lo que la gente no puede pagar, y por eso no va."
+    },
+    {
+      "id": "descartadas",
+      "page": "page-2",
+      "x": -430,
+      "y": 0,
+      "w": 390,
+      "text": "Las dos que no se eligieron, guardadas por si hace falta volver.\n\nA · Cartilla: papel institucional, serif para el hallazgo.\nC · Instrumento: oscura, umbral dibujado, regla citada textual.\n\nQuedan congeladas como estaban el 9 de septiembre: en dólares y con el examen suelto, antes de que ADR-010 trajera el paquete del año. No se refrescan a propósito.\n\nDe C vale la pena robar una cosa: la tira de rendimiento del modelo. Es material para el reto de Tether y en Señalética todavía no tiene sitio."
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-1"
+  }
+}

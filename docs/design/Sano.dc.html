@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; font-family: Archivo, system-ui, sans-serif; }
+    a { color: #C42B18; } a:hover { color: #94200F; }
+  </style>
+</helmet>
+
+<div style="width: 390px; height: 874px; background: #FFFFFF; color: #101010; display: flex; flex-direction: column; overflow: hidden;">
+
+  <div style="height: 52px; flex-shrink: 0;"></div>
+
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 20px 14px 20px;">
+    <span style="font-family: 'Archivo Black', sans-serif; font-size: 14px; letter-spacing: 0.02em; text-transform: uppercase;">Ina Igar</span>
+    <span style="font-size: 12px; font-weight: 600; color: #6B6B6B;">65 mediciones</span>
+  </div>
+
+  <div style="background: #0B7A4B; padding: 26px 20px 28px 20px; display: flex; flex-direction: column; gap: 16px;">
+    <svg viewBox="0 0 24 24" width="58" height="58" fill="#FFFFFF">
+      <path d="M12 1.6a10.4 10.4 0 1 0 0 20.8 10.4 10.4 0 0 0 0-20.8Zm0 2.2a8.2 8.2 0 1 1 0 16.4 8.2 8.2 0 0 1 0-16.4Z"></path>
+      <path d="m10.6 14.3-2.6-2.6-1.6 1.6 4.2 4.2 7-7-1.6-1.6Z"></path>
+    </svg>
+    <div style="display: flex; flex-direction: column; gap: 7px;">
+      <span style="font-family: 'Archivo Black', sans-serif; font-size: 40px; line-height: 0.95; letter-spacing: -0.02em; color: #FFFFFF; text-transform: uppercase;">Todo<br>en orden</span>
+      <span style="font-size: 16px; font-weight: 600; line-height: 1.35; color: #FFFFFF;">Ninguna de tus mediciones se salió de rango. No hay nada que hacer hoy.</span>
+    </div>
+  </div>
+
+  <div style="display: flex; align-items: baseline; justify-content: space-between; padding: 18px 20px 10px 20px;">
+    <span style="font-family: 'Archivo Black', sans-serif; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;">Lo que revisé</span>
+    <span style="font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em; color: #6B6B6B; text-transform: uppercase;">14 reglas</span>
+  </div>
+
+  <div style="display: flex; flex-direction: column; flex-grow: 1; border-top: 3px solid #101010;">
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px 12px 20px; border-bottom: 1px solid #E2E2E2; border-right: 1px solid #E2E2E2;">
+        <span style="font-size: 13.5px; font-weight: 600;">Glucosa</span>
+        <span style="font-size: 13px; font-weight: 700; color: #0B7A4B;">91</span>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 20px 12px 14px; border-bottom: 1px solid #E2E2E2;">
+        <span style="font-size: 13.5px; font-weight: 600;">Presión</span>
+        <span style="font-size: 13px; font-weight: 700; color: #0B7A4B;">115/72</span>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px 12px 20px; border-bottom: 1px solid #E2E2E2; border-right: 1px solid #E2E2E2;">
+        <span style="font-size: 13.5px; font-weight: 600;">Pulso</span>
+        <span style="font-size: 13px; font-weight: 700; color: #0B7A4B;">71</span>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 20px 12px 14px; border-bottom: 1px solid #E2E2E2;">
+        <span style="font-size: 13.5px; font-weight: 600;">Oxígeno</span>
+        <span style="font-size: 13px; font-weight: 700; color: #0B7A4B;">96%</span>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px 12px 20px; border-bottom: 1px solid #E2E2E2; border-right: 1px solid #E2E2E2;">
+        <span style="font-size: 13.5px; font-weight: 600;">Temperatura</span>
+        <span style="font-size: 13px; font-weight: 700; color: #0B7A4B;">36.8</span>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 20px 12px 14px; border-bottom: 1px solid #E2E2E2;">
+        <span style="font-size: 13.5px; font-weight: 600;">Respiración</span>
+        <span style="font-size: 13px; font-weight: 700; color: #0B7A4B;">14</span>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px 12px 20px; border-bottom: 1px solid #E2E2E2; border-right: 1px solid #E2E2E2;">
+        <span style="font-size: 13.5px; font-weight: 600;">Peso</span>
+        <span style="font-size: 13px; font-weight: 700; color: #0B7A4B;">estable</span>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 20px 12px 14px; border-bottom: 1px solid #E2E2E2;">
+        <span style="font-size: 13.5px; font-weight: 600;">Masa corporal</span>
+        <span style="font-size: 13px; font-weight: 700; color: #0B7A4B;">22.3</span>
+      </div>
+    </div>
+
+    <div style="padding: 16px 20px;">
+      <span style="font-size: 13.5px; line-height: 1.45; color: #6B6B6B;">Te aviso solo cuando algo se salga de rango. Si aparece algo raro entre revisiones, no esperes a que yo lo diga.</span>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px; padding: 16px 20px 20px 20px;">
+    <button style="height: 64px; background: #FFFFFF; border: 3px solid #101010; color: #101010; font-family: 'Archivo Black', sans-serif; font-size: 16px; cursor: pointer;">Ver mis mediciones</button>
+    <span style="font-size: 11px; line-height: 1.5; color: #6B6B6B;">Estar en rango no descarta una enfermedad. Si te sientes mal, ve al centro de salud.</span>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

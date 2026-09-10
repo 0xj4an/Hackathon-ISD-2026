@@ -1,0 +1,272 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+  <style>
+    body { margin: 0; font-family: Archivo, system-ui, sans-serif; }
+    a { color: #8A5B06; } a:hover { color: #6B4605; }
+    .m { width: 196px; height: 252px; background: #FFFFFF; border: 1px solid #D5D2CB; box-sizing: border-box; display: flex; flex-direction: column; gap: 7px; padding: 13px; }
+    .b { background: #DCDAD3; }
+    .d { background: #B4B1A8; }
+    .n { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: #6E6A5D; }
+    .t { font-size: 12.5px; font-weight: 600; color: #17150F; line-height: 1.25; }
+    .s { font-size: 11px; color: #56524A; line-height: 1.35; }
+    .cell { display: flex; flex-direction: column; gap: 9px; }
+    .cap { display: flex; flex-direction: column; gap: 2px; width: 196px; }
+  </style>
+</helmet>
+
+<div style="width: 1500px; height: 1180px; background: #F6F5F2; color: #17150F; padding: 34px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 26px; overflow: hidden;">
+
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 40px;">
+    <div style="display: flex; flex-direction: column; gap: 5px;">
+      <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #6E6A5D;">Ina Igar</span>
+      <span style="font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1;">Las 17 pantallas del flujo</span>
+      <span style="font-size: 13px; line-height: 1.4; color: #56524A; max-width: 78ch;">Estructura, no estética: esto define qué pantallas existen y qué decide cada una. La dirección visual se elige aparte, y luego se aplica a todas.</span>
+    </div>
+    <div style="display: flex; gap: 22px; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 22px; height: 4px; background: #8A5B06;"></div><span style="font-size: 11.5px; color: #56524A;">Salud</span></div>
+      <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 22px; height: 4px; background: #2C6B58;"></div><span style="font-size: 11.5px; color: #56524A;">Crédito</span></div>
+      <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 22px; height: 4px; background: #A33A22;"></div><span style="font-size: 11.5px; color: #56524A;">Envío y respuesta</span></div>
+      <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 22px; height: 4px; background: #B4B1A8;"></div><span style="font-size: 11.5px; color: #56524A;">Transversal</span></div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 30px 26px;">
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #8A5B06;"></div>
+        <div class="b" style="height: 12px; width: 54%;"></div>
+        <div class="b" style="height: 34px;"></div>
+        <div class="b" style="height: 34px;"></div>
+        <div class="b" style="height: 34px;"></div>
+        <div class="b" style="height: 34px;"></div>
+        <div class="b" style="height: 34px;"></div>
+      </div>
+      <div class="cap"><span class="n">01</span><span class="t">Casos de la demo</span><span class="s">Solo existe para el video. Se declara en pantalla.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #8A5B06;"></div>
+        <div class="b" style="height: 12px; width: 44%;"></div>
+        <div class="b" style="height: 62px;"></div>
+        <div style="display: flex; gap: 7px;"><div class="b" style="height: 40px; flex-grow: 1;"></div><div class="b" style="height: 40px; flex-grow: 1;"></div><div class="b" style="height: 40px; flex-grow: 1;"></div></div>
+        <div class="b" style="height: 10px; width: 78%;"></div>
+        <div class="b" style="height: 10px; width: 60%;"></div>
+      </div>
+      <div class="cap"><span class="n">02</span><span class="t">Tu historial</span><span class="s">Las 9 variables y cuándo se midió cada una.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #8A5B06;"></div>
+        <div style="height: 52px; background: #8A5B06;"></div>
+        <div class="d" style="height: 16px; width: 70%;"></div>
+        <div class="b" style="height: 40px;"></div>
+        <div class="b" style="height: 11px;"></div>
+        <div class="b" style="height: 11px; width: 82%;"></div>
+        <div style="height: 30px; background: #17150F;"></div>
+      </div>
+      <div class="cap"><span class="n">03</span><span class="t">La señal principal</span><span class="s">Qué se observó, la ruta, el costo, qué vigilar.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #8A5B06;"></div>
+        <div class="b" style="height: 12px; width: 50%;"></div>
+        <div style="display: flex; gap: 8px; align-items: center;"><div style="width: 4px; height: 30px; background: #A33A22;"></div><div class="b" style="height: 30px; flex-grow: 1;"></div></div>
+        <div style="display: flex; gap: 8px; align-items: center;"><div style="width: 4px; height: 30px; background: #8A5B06;"></div><div class="b" style="height: 30px; flex-grow: 1;"></div></div>
+        <div style="display: flex; gap: 8px; align-items: center;"><div style="width: 4px; height: 30px; background: #8A5B06;"></div><div class="b" style="height: 30px; flex-grow: 1;"></div></div>
+        <div style="display: flex; gap: 8px; align-items: center;"><div style="width: 4px; height: 30px; background: #2C6B58;"></div><div class="b" style="height: 30px; flex-grow: 1;"></div></div>
+      </div>
+      <div class="cap"><span class="n">04</span><span class="t">Las demás señales</span><span class="s">Ordenadas por urgencia, no por variable.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #8A5B06;"></div>
+        <div class="b" style="height: 12px; width: 60%;"></div>
+        <div class="b" style="height: 66px;"></div>
+        <div class="d" style="height: 11px; width: 88%;"></div>
+        <div class="b" style="height: 11px;"></div>
+        <div class="b" style="height: 11px;"></div>
+        <div class="b" style="height: 11px; width: 66%;"></div>
+      </div>
+      <div class="cap"><span class="n">05</span><span class="t">De dónde sale</span><span class="s">La curva, el umbral, y la guía citada textual.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #2C6B58;"></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; gap: 9px;">
+          <div style="height: 42px; background: #D9E5DE;"></div>
+          <div class="b" style="height: 11px; width: 84%;"></div>
+          <div class="b" style="height: 11px; width: 62%;"></div>
+        </div>
+        <div class="b" style="height: 28px;"></div>
+      </div>
+      <div class="cap"><span class="n">06</span><span class="t">Sin hallazgos</span><span class="s">Que no diga nada vale tanto como la alerta.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #2C6B58;"></div>
+        <div class="d" style="height: 16px; width: 76%;"></div>
+        <div class="b" style="height: 11px;"></div>
+        <div class="b" style="height: 11px; width: 70%;"></div>
+        <div style="flex-grow: 1;"></div>
+        <div style="height: 32px; background: #17150F;"></div>
+        <div class="b" style="height: 32px;"></div>
+      </div>
+      <div class="cap"><span class="n">07</span><span class="t">Lo que cuesta el año</span><span class="s">El paquete del año completo. La bisagra entre las dos mitades.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #2C6B58;"></div>
+        <div class="b" style="height: 12px; width: 62%;"></div>
+        <div style="display: flex; gap: 8px; align-items: center;"><div class="d" style="width: 26px; height: 26px;"></div><div class="b" style="height: 26px; flex-grow: 1;"></div></div>
+        <div style="display: flex; gap: 8px; align-items: center;"><div class="d" style="width: 26px; height: 26px;"></div><div class="b" style="height: 26px; flex-grow: 1;"></div></div>
+        <div style="display: flex; gap: 8px; align-items: center;"><div class="d" style="width: 26px; height: 26px;"></div><div class="b" style="height: 26px; flex-grow: 1;"></div></div>
+        <div style="flex-grow: 1;"></div>
+        <div style="height: 30px; background: #17150F;"></div>
+      </div>
+      <div class="cap"><span class="n">08</span><span class="t">Qué hace falta</span><span class="s">Cédula, comprobante de ingresos y extracto, opcional.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m" style="background: #2A2823; border-color: #2A2823;">
+        <div style="height: 4px; background: #2C6B58;"></div>
+        <div style="flex-grow: 1; border: 2px dashed #6E6A60; display: flex; align-items: center; justify-content: center;">
+          <div style="width: 74%; height: 56px; background: #4A473F;"></div>
+        </div>
+        <div style="height: 30px; background: #F1EEE6;"></div>
+      </div>
+      <div class="cap"><span class="n">09</span><span class="t">La cámara</span><span class="s">Guía de encuadre. Nada se sube a ningún lado.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #2C6B58;"></div>
+        <div class="d" style="height: 14px; width: 66%;"></div>
+        <div style="display: flex; gap: 7px; align-items: center;"><div style="width: 14px; height: 14px; background: #2C6B58;"></div><div class="b" style="height: 11px; flex-grow: 1;"></div></div>
+        <div style="display: flex; gap: 7px; align-items: center;"><div style="width: 14px; height: 14px; background: #2C6B58;"></div><div class="b" style="height: 11px; flex-grow: 1;"></div></div>
+        <div style="display: flex; gap: 7px; align-items: center;"><div style="width: 14px; height: 14px; background: #8A5B06;"></div><div class="b" style="height: 11px; flex-grow: 1;"></div></div>
+        <div style="display: flex; gap: 7px; align-items: center;"><div style="width: 14px; height: 14px; background: #DCDAD3;"></div><div class="b" style="height: 11px; flex-grow: 1;"></div></div>
+        <div style="flex-grow: 1;"></div>
+        <div class="b" style="height: 6px;"></div>
+      </div>
+      <div class="cap"><span class="n">10</span><span class="t">Leyendo aquí dentro</span><span class="s">OCR, extracción, validación, borrado. Con su tiempo real.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #2C6B58;"></div>
+        <div style="height: 44px; background: #D9E5DE;"></div>
+        <div class="b" style="height: 22px;"></div>
+        <div class="b" style="height: 22px;"></div>
+        <div class="b" style="height: 22px;"></div>
+        <div class="b" style="height: 22px;"></div>
+        <div style="flex-grow: 1;"></div>
+        <div style="height: 28px; background: #17150F;"></div>
+      </div>
+      <div class="cap"><span class="n">11</span><span class="t">Lo que se leyó</span><span class="s">Campos, confianza, y las fotos ya borradas. Editable.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #2C6B58;"></div>
+        <div class="d" style="height: 34px; width: 56%;"></div>
+        <div class="b" style="height: 8px;"></div>
+        <div style="display: flex; gap: 7px;"><div class="b" style="height: 30px; flex-grow: 1;"></div><div class="d" style="height: 30px; flex-grow: 1;"></div><div class="b" style="height: 30px; flex-grow: 1;"></div></div>
+        <div class="b" style="height: 11px; width: 80%;"></div>
+        <div style="flex-grow: 1;"></div>
+        <div style="height: 28px; background: #17150F;"></div>
+      </div>
+      <div class="cap"><span class="n">12</span><span class="t">Cuánto y a qué plazo</span><span class="s">Con la cuota estimada visible antes de pedir.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #2C6B58;"></div>
+        <div class="b" style="height: 11px; width: 70%;"></div>
+        <div style="flex-grow: 1; border: 1px solid #DCDAD3; display: flex; align-items: flex-end; padding: 12px;">
+          <svg viewBox="0 0 150 40" style="width: 100%; height: 40px;"><path d="M6 30c14-26 22 14 34-6s16 10 30-8 22 12 34 2" fill="none" stroke="#B4B1A8" stroke-width="2.4" stroke-linecap="round"></path></svg>
+        </div>
+        <div style="height: 28px; background: #17150F;"></div>
+      </div>
+      <div class="cap"><span class="n">13</span><span class="t">Firma</span><span class="s">Un trazo. Se declara que no es firma electrónica legal.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #A33A22;"></div>
+        <div style="height: 46px; background: #17150F;"></div>
+        <div class="d" style="height: 14px; width: 60%;"></div>
+        <div class="b" style="height: 11px;"></div>
+        <div class="b" style="height: 11px; width: 74%;"></div>
+        <div style="flex-grow: 1;"></div>
+        <div class="b" style="height: 26px;"></div>
+      </div>
+      <div class="cap"><span class="n">14</span><span class="t">En cola, sin señal</span><span class="s">Lo dice claro y no pide reintentar a mano.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #A33A22;"></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
+          <div style="width: 46px; height: 46px; border: 2px solid #8A5B06; border-radius: 50%;"></div>
+          <div class="b" style="height: 11px; width: 80%;"></div>
+          <div class="b" style="height: 11px; width: 58%;"></div>
+        </div>
+      </div>
+      <div class="cap"><span class="n">15</span><span class="t">Sale por el nodo</span><span class="s">Hyperswarm descubrió la laptop del corresponsal.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #A33A22;"></div>
+        <div style="height: 50px; background: #D9E5DE;"></div>
+        <div class="d" style="height: 26px; width: 62%;"></div>
+        <div style="display: flex; gap: 7px;"><div class="b" style="height: 34px; flex-grow: 1;"></div><div class="b" style="height: 34px; flex-grow: 1;"></div><div class="b" style="height: 34px; flex-grow: 1;"></div></div>
+        <div style="flex-grow: 1;"></div>
+        <div style="height: 28px; background: #17150F;"></div>
+      </div>
+      <div class="cap"><span class="n">16</span><span class="t">Respuesta del banco</span><span class="s">Monto, plazo, tasa y cuota. Y que el modelo es de juguete.</span></div>
+    </div>
+
+    <div class="cell">
+      <div class="m">
+        <div style="height: 4px; background: #B4B1A8;"></div>
+        <div class="b" style="height: 12px; width: 48%;"></div>
+        <div style="display: flex; gap: 7px; align-items: center;"><div style="width: 14px; height: 14px; background: #2C6B58;"></div><div class="b" style="height: 24px; flex-grow: 1;"></div></div>
+        <div style="display: flex; gap: 7px; align-items: center;"><div style="width: 14px; height: 14px; background: #DCDAD3;"></div><div class="b" style="height: 24px; flex-grow: 1;"></div></div>
+        <div style="display: flex; gap: 7px; align-items: center;"><div style="width: 14px; height: 14px; background: #DCDAD3;"></div><div class="b" style="height: 24px; flex-grow: 1;"></div></div>
+        <div style="flex-grow: 1;"></div>
+        <div class="b" style="height: 22px;"></div>
+      </div>
+      <div class="cap"><span class="n">17</span><span class="t">Modo del teléfono</span><span class="s">Completo, ligero o delegando al nodo. Y el log de rendimiento.</span></div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 9px; justify-content: flex-start;">
+      <div style="width: 196px; background: #EDEBE5; border: 1px solid #D5D2CB; box-sizing: border-box; padding: 14px; display: flex; flex-direction: column; gap: 9px;">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: #56524A;">CÓMO LEERLO</span>
+        <span style="font-size: 11.5px; line-height: 1.45; color: #56524A;">Barras grises son contenido; el bloque negro es la acción principal, una por pantalla. La franja de arriba dice a qué mitad pertenece.</span>
+        <span style="font-size: 11.5px; line-height: 1.45; color: #56524A;">Las pantallas 01, 06 y 17 son las que sostienen la crítica: la demo se declara, el sano no dispara nada, y el teléfono barato tiene salida.</span>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; font-family: Archivo, system-ui, sans-serif; }
+    a { color: #C42B18; } a:hover { color: #94200F; }
+  </style>
+</helmet>
+
+<div style="width: 760px; height: 940px; background: #FFFFFF; color: #101010; padding: 26px 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px; overflow: hidden;">
+
+  <div style="display: flex; flex-direction: column; gap: 6px;">
+    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6B6B;">Sistema de Ina Igar</span>
+    <span style="font-family: 'Archivo Black', sans-serif; font-size: 36px; line-height: 1; letter-spacing: -0.02em; text-transform: uppercase;">Señalética</span>
+    <span style="font-size: 13.5px; line-height: 1.4; color: #4A4A4A; max-width: 68ch;">No es una interfaz, es un letrero. Bloques de color a sangre, una palabra por pantalla, pictogramas sólidos, un solo botón. Se lee al sol, de lejos, y a tamaño diminuto en el video.</span>
+  </div>
+
+  <div style="height: 3px; background: #101010; flex-shrink: 0;"></div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px;">
+
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+
+      <div style="display: flex; flex-direction: column; gap: 9px;">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6B6B;">Color</span>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;">
+          <div style="display: flex; flex-direction: column; gap: 5px;"><div style="height: 48px; background: #C42B18;"></div><span style="font-size: 10px; font-weight: 600; color: #4A4A4A;">#C42B18<br>anda ya</span></div>
+          <div style="display: flex; flex-direction: column; gap: 5px;"><div style="height: 48px; background: #A85F00;"></div><span style="font-size: 10px; font-weight: 600; color: #4A4A4A;">#A85F00<br>anda pronto</span></div>
+          <div style="display: flex; flex-direction: column; gap: 5px;"><div style="height: 48px; background: #0B7A4B;"></div><span style="font-size: 10px; font-weight: 600; color: #4A4A4A;">#0B7A4B<br>sin prisa, y todo ok</span></div>
+          <div style="display: flex; flex-direction: column; gap: 5px;"><div style="height: 48px; background: #101010;"></div><span style="font-size: 10px; font-weight: 600; color: #4A4A4A;">#101010<br>tinta, total y estado</span></div>
+          <div style="display: flex; flex-direction: column; gap: 5px;"><div style="height: 48px; background: #FFFFFF; border: 1px solid #E2E2E2;"></div><span style="font-size: 10px; font-weight: 600; color: #4A4A4A;">#FFFFFF<br>fondo</span></div>
+          <div style="display: flex; flex-direction: column; gap: 5px;"><div style="height: 48px; background: #E2E2E2;"></div><span style="font-size: 10px; font-weight: 600; color: #4A4A4A;">#E2E2E2<br>separador</span></div>
+        </div>
+        <span style="font-size: 11.5px; line-height: 1.4; color: #6B6B6B;">Un solo color de señal por pantalla: manda el más urgente y los demás esperan su turno. El negro no es una señal, es el cierre: el total y el estado del envío.</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6B6B;">Tipografía</span>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-family: 'Archivo Black', sans-serif; font-size: 38px; line-height: 0.95; letter-spacing: -0.03em; text-transform: uppercase;">Anda pronto</span>
+          <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: #6B6B6B; text-transform: uppercase;">Archivo Black 34 a 62 px · el veredicto y las cifras grandes</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 16px; font-weight: 600; line-height: 1.3;">Laboratorio, luego centro de salud. B/. 6 a 15.</span>
+          <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: #6B6B6B; text-transform: uppercase;">Archivo 600 · 16 px · modo señal, nunca por debajo de 13</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 13px; font-weight: 600; line-height: 1.25;">Hemoglobina glicosilada, 4 al año</span>
+          <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: #6B6B6B; text-transform: uppercase;">Archivo 600 · 13 px · modo denso, el piso absoluto</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #6B6B6B;">Dónde · Quién · Cuesta</span>
+          <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: #6B6B6B; text-transform: uppercase;">Archivo 700 · 12 px · etiquetas de campo</span>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 9px;">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6B6B;">Pictogramas · sólidos, 22 a 62 px</span>
+        <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px;">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="#101010"><path d="M12 2.4 23 21H1Zm0 4.6L4.5 19.2h15Z"></path><path d="M11 9.6h2v5.2h-2Zm0 6.4h2v2h-2Z"></path></svg>
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="#101010"><path d="M9.1 2h5.8v1.9h-1.1v13a1.8 1.8 0 0 1-3.6 0v-13H9.1Z"></path><rect x="10.2" y="11.4" width="3.6" height="1.6" fill="#FFFFFF"></rect></svg>
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="#101010"><path d="M12 2.6 2.6 9.2V22h18.8V9.2ZM4.6 20V10.2L12 5l7.4 5.2V20h-3.9v-5.6H8.5V20Z"></path><path d="M11 10.6h2v2.2h2.2v2H13V17h-2v-2.2H8.8v-2H11Z"></path></svg>
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="#101010"><path d="M12 3 2.4 10.2V21.6h7.4v-6h4.4v6h7.4V10.2Z"></path></svg>
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="#101010"><path d="M8.6 4.2h6.8l1.2 2.4h4.8v14H2.6v-14h4.8Zm3.4 4.4a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 2.2a2.8 2.8 0 1 1 0 5.6 2.8 2.8 0 0 1 0-5.6Z"></path></svg>
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="#101010"><path d="M1.6 4.4v15.2h20.8V4.4Zm2 2h16.8v11.2H3.6Z"></path><circle cx="8.2" cy="10.4" r="2.2"></circle><path d="M4.9 16c.5-1.7 1.8-2.5 3.3-2.5s2.8.8 3.3 2.5Zm9.1-6h5.2v1.7H14Zm0 3.4h5.2v1.7H14Z"></path></svg>
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="#101010"><path d="M2.4 2.4 21.6 21.6l-1.4 1.4L1 3.8Z"></path><path d="M12 17a1.4 1.4 0 1 1 0 2.8 1.4 1.4 0 0 1 0-2.8Z"></path><path d="M4.1 9.5A13.6 13.6 0 0 1 8.6 7l1.8 1.8a10 10 0 0 0-4.5 2.4Zm11-2.4a13.6 13.6 0 0 1 4.8 2.4l-1.8 1.8a11 11 0 0 0-4-2.1Z"></path></svg>
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="#101010"><path d="M4.4 9.4h15.2v8.2H4.4Z"></path><path d="M1.8 19h20.4v1.9H1.8Z"></path><path d="M8 6.2 6.6 4.8a7.6 7.6 0 0 1 10.8 0L16 6.2a5.6 5.6 0 0 0-8 0Z"></path></svg>
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="#101010"><path d="m12 3.2 9.6 5.8v1.6H2.4V9Z"></path><path d="M4.6 12h2.2v6.4H4.6Zm4.3 0h2.2v6.4H8.9Zm4.3 0h2.2v6.4h-2.2Zm4.3 0h2.2v6.4h-2.2Z"></path><path d="M2.4 19.6h19.2v1.9H2.4Z"></path></svg>
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="#101010"><path d="M3.4 15.4c3.4-6.8 5.2 3.4 7.7-1.7 2.5-5.1 3.4 1.7 7.7-3.4l1.6 1.4c-4.8 5.8-6.4-.6-8.2 3-1.8 3.6-4.4 2.6-6.6-.4l-.6 1.9Z"></path><path d="M3.4 19.6h17.2v1.9H3.4Z"></path></svg>
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="#101010"><path d="m12 2.4 8 3.2v6.6c0 4.7-3.2 8.4-8 9.8-4.8-1.4-8-5.1-8-9.8V5.6Z"></path><path d="m8.6 12 2.4 2.4 4.6-4.6 1.5 1.5-6.1 6.1-3.9-3.9Z" fill="#FFFFFF"></path></svg>
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="#101010"><path d="M9.2 2.6h5.6v1.9h5.4v2H3.8v-2h5.4Z"></path><path d="M5.4 8.4h13.2L17.4 21.4H6.6Zm3.7 2.4v8h1.9v-8Zm3.9 0v8h1.9v-8Z"></path></svg>
+        </div>
+        <span style="font-size: 11.5px; line-height: 1.4; color: #6B6B6B;">Alerta, laboratorio, centro de salud, casa, cámara, cédula, sin señal, nodo del pueblo, banco, firma, privacidad, borrado.</span>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6B6B;">Modo señal · una sola cosa por pantalla</span>
+
+        <div style="background: #A85F00; padding: 12px 14px; display: flex; align-items: center; gap: 12px;">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="#FFFFFF" style="flex-shrink: 0;"><path d="M9.1 2h5.8v1.9h-1.1v13a1.8 1.8 0 0 1-3.6 0v-13H9.1Z"></path></svg>
+          <span style="font-family: 'Archivo Black', sans-serif; font-size: 22px; color: #FFFFFF; text-transform: uppercase; line-height: 1;">Bloque de veredicto</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid #E2E2E2;">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="#101010" style="flex-shrink: 0;"><circle cx="12" cy="7" r="3.6"></circle><path d="M4.4 21c0-4.2 3.4-7.6 7.6-7.6s7.6 3.4 7.6 7.6Z"></path></svg>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #6B6B6B;">Fila de ruta</span>
+            <span style="font-size: 16px; font-weight: 600;">Medicina general</span>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 9px;">
+          <button style="flex-grow: 1; height: 52px; border: 0; background: #101010; color: #FFFFFF; font-family: 'Archivo Black', sans-serif; font-size: 14px; cursor: pointer;">Principal</button>
+          <button style="flex-grow: 1; height: 46px; align-self: center; background: #FFFFFF; border: 3px solid #101010; color: #101010; font-family: 'Archivo Black', sans-serif; font-size: 14px; cursor: pointer;">Secundaria</button>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6B6B;">Modo denso · cuando hay lista</span>
+
+        <div style="background: #A85F00; padding: 8px 13px; display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+          <span style="font-family: 'Archivo Black', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #FFFFFF;">El veredicto se vuelve barra</span>
+          <span style="font-size: 11.5px; font-weight: 700; color: #FFFFFF;">12 meses</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; border-top: 3px solid #101010;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #E2E2E2;">
+            <span style="font-size: 13px; font-weight: 600;">Fila de lista</span>
+            <span style="font-family: 'Archivo Black', sans-serif; font-size: 14px;">8 a 25</span>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0;">
+            <div style="display: flex; align-items: center; gap: 7px;">
+              <div style="width: 7px; height: 7px; background: #A85F00; flex-shrink: 0;"></div>
+              <span style="font-size: 13px; font-weight: 600;">Fila con precio estimado</span>
+            </div>
+            <span style="font-family: 'Archivo Black', sans-serif; font-size: 14px;">60 a 120</span>
+          </div>
+        </div>
+
+        <div style="background: #101010; padding: 11px 13px; display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #B0B0B0;">El total toma el relevo</span>
+          <span style="font-family: 'Archivo Black', sans-serif; font-size: 26px; line-height: 1; letter-spacing: -0.03em; color: #FFFFFF;">B/. 641 a 920</span>
+        </div>
+
+        <span style="font-size: 11.5px; line-height: 1.45; color: #6B6B6B;">La regla del modo denso: la pantalla sigue teniendo <b style="color: #101010;">un solo elemento dominante</b>. Si la lista se come el veredicto, el total lo recupera abajo. El cuerpo baja a 13 px y ahí se queda.</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 9px;">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6B6B;">Franjas</span>
+        <div style="background: #C42B18; padding: 11px 13px; display: flex; align-items: center; gap: 11px;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="#FFFFFF" style="flex-shrink: 0;"><path d="M12 2.4 23 21H1Zm0 4.6L4.5 19.2h15Z"></path><path d="M11 9.6h2v5.2h-2Zm0 6.4h2v2h-2Z"></path></svg>
+          <span style="font-family: 'Archivo Black', sans-serif; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: #FFFFFF;">Vigilancia</span>
+        </div>
+        <div style="background: #101010; padding: 11px 13px; display: flex; align-items: center; gap: 11px;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="#FFFFFF" style="flex-shrink: 0;"><path d="M2.4 2.4 21.6 21.6l-1.4 1.4L1 3.8Z"></path><path d="M12 17a1.4 1.4 0 1 1 0 2.8 1.4 1.4 0 0 1 0-2.8Z"></path></svg>
+          <span style="font-family: 'Archivo Black', sans-serif; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: #FFFFFF;">Estado del envío</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
