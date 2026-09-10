@@ -13,16 +13,18 @@ Las condiciones de "listo" son los criterios C1 a C13 del final.
 
 ## Bloque 0 · Desbloqueo
 
-Nada más avanza hasta que esto pase.
+**Cerrado el 9 sep en iPhone 17 Pro Max** (iOS 26.6.1), no en el Xiaomi 14T Pro.
+El 14T (HyperOS 3 / Android 16) aborta en `libbare-kit.so` al `worklet.start`
+tras `2b/4` (APK 1.0.2). Se aparca Android. La demo y C1 viven en el iPhone.
 
-- [ ] `[A]` El 14T Pro aparece en `adb devices`. Opciones de desarrollador, depuración USB **y la opción de instalar por USB**, que en Xiaomi suele faltar y puede pedir cuenta Mi
-- [ ] `[A]` `adb shell df -h /data` muestra >= 5 GB libres
-- [ ] `[A]` `cd mobile && npx expo run:android --device` (o APK EAS **1.0.2+**) pasa de `2b/4` sin abort de `libbare-kit`. Luego carga MedPsy y suelta el primer token. La primera vez baja 2.1 GB, no es un cuelgue (`ADR-007`: no bloquear onboarding; ahora el smoke sí espera)
-- [ ] `[A]` Repetir con `device: "cpu"` y anotar los dos TTFT
-- [ ] `[A]` `npm install` en `nodo/` y `core/`; `npm run banco` y `npm run corregimiento` se descubren por Hyperswarm
+- [x] `[A]` **Hecho (iPhone).** Dispositivo físico emparejado; Modo desarrollador y certificado de `Apple Development` confiados. El 14T / `adb` queda fuera
+- [x] `[A]` **Hecho.** Los 2.1 GB de MedPsy caben y están en caché QVAC del iPhone (la descarga retomó 20% → 100%)
+- [x] `[A]` **Hecho en iOS, no en Android.** `npx expo run:ios --device --configuration Release`: Bare arranca, `loadModel` CPU, primer token. `load_ms` 93722, **TTFT 2915 ms**, 56 tokens. Texto del modelo (glucosa 132). Android 1.0.2 sigue abortando; no más EAS a ciegas
+- [ ] `[A]` TTFT **GPU** en el iPhone (Metal). Solo se midió `cpu`. C2 incompleto
+- [x] `[A]` **HTTP del nodo OK; Hyperswarm entre dos procesos del Mac no conecta** (NAT/`firewalled`, sin mDNS). La demo de crédito va por HTTP LAN, no por P2P. Ver `baseline.md`
 
-**Salida:** captura del teléfono con "modelo cargado" y texto en español, más los dos TTFT.
-**Cierra:** D1, D2, D3.
+**Salida:** captura del iPhone con modelo cargado, texto generado y TTFT CPU.
+**Cierra:** D1 sí (iPhone). D2 parcial (solo CPU). D3 irrelevante (ya no es HyperOS).
 
 ---
 
@@ -38,8 +40,8 @@ Nada más avanza hasta que esto pase.
 
 ### Implementación
 
-- [~] `[A]` **Código listo, sin verificar.** `mobile/src/PantallaAlerta.tsx` existe y las seis pantallas están escritas. Nadie lo ha visto correr en un teléfono: eso lo cierra el bloque 0
-- [~] `[A]` **Escrito, nunca ejecutado.** `mobile/src/perf/logger.ts` existe y `perf/perf.jsonl` tiene cero líneas, porque no ha corrido una sola inferencia. Original: `perf/logger.ts` **desde ya**. Si no se hace ahora no se hace nunca, y es entregable de Tether Psy. Las métricas salen de `stats` de `await result.final`, no de la API de logging. Volcar `stats` entero sin filtrar y medir TTFT a mano con `Date.now()`
+- [~] `[A]` **Código listo, sin verificar en producto.** `PantallaAlerta.tsx` existe; el bloque 0 corrió MedPsy en el iPhone vía smoke, no en esta pantalla. La alerta sigue mostrando solo reglas
+- [~] `[A]` **Logger escrito; C1 midió TTFT en el smoke.** `mobile/src/perf/logger.ts` existe. Falta volcar `stats` a `perf/perf.jsonl` desde el flujo de producto. Métricas de `await result.final`, TTFT a mano con `Date.now()`
 - [x] `[A]` **Hecho.** Las dos vías viven en `mobile/src/core/reglas.ts` y `marcadores.ts`, 14 señales sobre 9 variables (`ADR-008`). `eval/run.mjs` evalúa ambas y pasa
 - [x] `[A]` **Hecho.** `data/generar-usuarios.mjs` produce el formato normalizado y `PantallaUsuarios.tsx` lo consume
 
@@ -108,8 +110,8 @@ Nada más avanza hasta que esto pase.
 
 | | Criterio | Cómo se comprueba |
 | --- | --- | --- |
-| [ ] C1 | MedPsy carga en el 14T Pro y produce texto en español | Captura con "modelo cargado" y TTFT |
-| [ ] C2 | TTFT medido con `gpu` y `cpu`, se usa el mejor | Dos líneas en `perf.jsonl` con `device_cfg` distinto |
+| [x] C1 | MedPsy carga en el **iPhone 17 Pro Max** y produce texto | Captura 9 sep: `load_ms` 93722, TTFT 2915 ms CPU, 56 tokens. El 14T Pro aborta Bare; no es el aparato de demo |
+| [ ] C2 | TTFT medido con `gpu` y `cpu`, se usa el mejor | Solo `cpu` en el iPhone. Falta Metal/`gpu` |
 | [x] C3 | La vía A dispara con el historial del usuario con hallazgo | **Verificado**, `eval/run.mjs` exit 0 |
 | [x] C3b | La vía B clasifica bien los marcadores: alto, bajo y normal | **Verificado**, los 7 marcadores en los tres estados |
 | [x] C3c | **El usuario sano no dispara ninguna alerta** | **Verificado**, cero señales |
@@ -133,10 +135,10 @@ C12 y C13 son los dos que descalifican. Los demás cuestan puntos.
 
 Se cierran con evidencia, no con opinión.
 
-- [ ] D1 ¿MedPsy carga en el 14T Pro? Con 12 GB debería
-- [ ] D2 ¿`gpu` o `cpu`? El 14T Pro lleva Mali, no Adreno, así que OpenCL no aplica
-- [ ] D3 ¿Instalar por USB en HyperOS pide cuenta Mi?
-- [ ] D4 Si D1 falla, ¿bajar cuantización o delegar? Q4_0 primero. **Q4_K_M nunca**, rompe el LoRA
+- [x] D1 ¿MedPsy carga on-device? **Sí, iPhone 17 Pro Max, CPU, Q8_0.** El 14T Pro (HyperOS 3) aborta en `libbare-kit` al arrancar el worklet
+- [ ] D2 ¿`gpu` o `cpu`? Solo CPU medido (TTFT 2915 ms). GPU/Metal en el iPhone pendiente. OpenCL/Mali del 14T ya no aplica
+- [x] D3 ¿Instalar por USB en HyperOS pide cuenta Mi? **Aparcado.** Ya no usamos el Xiaomi. iOS: Modo desarrollador + confiar certificado
+- [x] D4 Si D1 falla en el 14T… **D1 falló ahí; no bajamos cuantización.** Pasamos de aparato. Q8_0 corre en el iPhone. **Q4_K_M nunca**, rompe el LoRA
 - [ ] D6 ¿Existe constante Q4_0 de MedPsy en el catálogo? De eso depende el modo ligero
 - [ ] D8 ¿0.19 rompe el pipeline de Expo? Smoke test en 0.18.2 primero, mover, repetir
 - [ ] D9 ¿Sobrevive la distribución P2P de modelos en 0.19? No bloquea

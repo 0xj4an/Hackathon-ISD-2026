@@ -35,12 +35,11 @@ rompa `ADR-002`. No prometemos descarga con la app en segundo plano.
    existe y MedPsy no está, se muestra la alerta por reglas y el texto de
    MedPsy queda pendiente.
 3. `loadModel` se llama una vez, al primer uso de inferencia, no al splash.
-4. En el evento: caché caliente en el 14T Pro **antes** de grabar.
+4. En el evento: caché caliente en el **iPhone 17 Pro Max** antes de grabar.
 
-Esto **no se implementa ahora**. El bloqueo actual es Android: Bare aborta en
-`loadModel` / `worklet.start` (`libbare-kit.so` / `js_callback_s::on_call`)
-aunque `2b/4` (worker JS) esté bien. Hasta que eso viva, una barra de descarga
-no sirve en el Xiaomi.
+Android sigue abortando Bare en el 14T (`libbare-kit` / `js_callback_s::on_call`)
+aunque `2b/4` esté bien. No se invierte más EAS ahí hasta tener `bare:E` en
+logcat. La barra de descarga de este ADR aplica al iPhone.
 
 ## Alternativas consideradas
 

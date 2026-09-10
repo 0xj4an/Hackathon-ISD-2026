@@ -3,7 +3,7 @@
 > Decentralized AI Hackathon · ISD Summit 2026 · Panamá. Equipo: 0xj4an y Artur.
 > Retos: General · Tether QVAC Psy · Caja de Ahorros.
 
-Una app Android que, **sin internet**, detecta una señal de riesgo de salud, explica en español qué examen conviene y permite solicitar un crédito de salud fotografiando los documentos. Las fotos nunca salen del teléfono: se leen con OCR en el dispositivo, se extraen los campos a JSON, se borran, y la solicitud espera en cola hasta que hay red o un nodo P2P cerca.
+App Expo para zonas rurales de Panamá, **sin internet**: detecta una señal de riesgo de salud, explica qué examen conviene y permite solicitar un crédito fotografiando documentos. Las fotos nunca salen del teléfono. **La demo se graba en un iPhone 17 Pro Max**; el usuario del brief es rural con Android. El Xiaomi 14T Pro se descartó porque Bare aborta al arrancar.
 
 Toda la inferencia corre en el dispositivo con [`@qvac/sdk`](https://docs.qvac.tether.io) **0.18.2**. Ningún servicio remoto participa en la IA.
 
@@ -14,17 +14,18 @@ Toda la inferencia corre en el dispositivo con [`@qvac/sdk`](https://docs.qvac.t
 | OCR de documentos | `OCR_LATIN` | - | - |
 | Extracción a JSON | (por definir: MedPsy o `QWEN3_1_7B_INST_Q4`) | | |
 
-Hardware de referencia: Xiaomi 14T Pro, MediaTek Dimensity 9300+, 12 GB LPDDR5X, HyperOS (Android 14). Log de rendimiento: [`perf/`](perf/).
+Hardware de **demo**: iPhone 17 Pro Max, iOS 26.6.1, MedPsy Q8_0 en CPU (TTFT 2915 ms, 9 sep 2026). El Xiaomi 14T Pro (HyperOS 3 / Android 16) aborta en `libbare-kit.so` al arrancar Bare; no es el aparato de la grabación. El usuario del brief sigue siendo rural con Android de gama media (`ADR-006`). Log: [`perf/`](perf/).
 
 ## Cómo correrlo
 
-Requisitos: Node >= 22.17, un Android físico con depuración USB (los emuladores
-no sirven, el SDK necesita el runtime nativo) y Android SDK con `adb` en el
-`PATH`. `npx qvac doctor` valida el entorno.
+Requisitos: Node >= 22.17, un **iPhone físico** (la demo) o Android físico. Los
+emuladores no sirven. En Android, Bare aborta hoy en HyperOS 3; no depender de
+eso para el video. `npx qvac doctor` valida el entorno.
 
 ```bash
-# app
-cd mobile && npm install && npx expo prebuild && npx expo run:android --device
+# app (demo: iPhone físico)
+cd mobile && npm install && npx expo run:ios --device --configuration Release
+# Android: npx expo run:android --device  — Bare aborta en el 14T; no es el camino de la demo
 
 # nodo del corregimiento y banco mock, en dos terminales
 cd nodo && npm install

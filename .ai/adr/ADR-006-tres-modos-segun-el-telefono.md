@@ -1,10 +1,11 @@
 # ADR-006: Tres modos de ejecución según el teléfono que toque
 
 - Estado: aceptada
-- Contexto: la demo corre en un Xiaomi 14T Pro (Dimensity 9300+, **12 GB LPDDR5X**).
-  El usuario objetivo del proyecto, según `docs/BRIEF.md` y
-  `01-idea-validation.md`, es "una persona en zona rural de Panamá con Android
-  de **gama media**". No son el mismo aparato, y los docs de QVAC son explícitos:
+- Contexto: la demo corre en un **iPhone 17 Pro Max** (MedPsy Q8_0, CPU, TTFT
+  2915 ms). Se intentó el Xiaomi 14T Pro (Dimensity 9300+, 12 GB, HyperOS 3) y
+  Bare aborta al `worklet.start`. El usuario objetivo del brief sigue siendo
+  "una persona en zona rural de Panamá con Android de **gama media**". No son
+  el mismo aparato, y los docs de QVAC son explícitos:
   *"Below 4 GB, most LLMs will fail to load"*.
 
   `ADR-002` fijó MedPsy 1.7B **Q8_0**, que pesa 2.1 GB. Esa decisión se validó
@@ -19,7 +20,7 @@ La app decide su modo en arranque con `getSystemResources()`, que ya existe en
 
 | Modo | Cuándo | Qué corre en el teléfono |
 | --- | --- | --- |
-| **Completo** | RAM holgada (el 14T Pro y similares) | MedPsy Q8_0 (2.1 GB) más el adaptador. Autónomo total |
+| **Completo** | RAM holgada (el iPhone 17 Pro Max y similares) | MedPsy Q8_0 (2.1 GB) más el adaptador. Autónomo total |
 | **Ligero** | RAM ajustada | MedPsy **Q4_0** (~1.1 GB) más el adaptador. Autónomo total |
 | **Delegado** | RAM insuficiente | Solo OCR en el teléfono. El LLM corre en el nodo del corregimiento, por P2P |
 
@@ -61,7 +62,7 @@ delegado viaja **texto**, nunca imágenes, y sigue cumpliendo el reglamento
 
 ## Reabrir si
 
-El bloque 0 muestra que ni el 14T Pro con 12 GB carga Q8_0 con holgura, en cuyo
-caso el modo completo desaparece y Q4_0 pasa a ser el único local. O si no
-existe constante Q4_0 entrenable, en cuyo caso los modos son completo y
-delegado, sin escalón intermedio.
+El bloque 0 muestra que el iPhone 17 Pro Max no carga Q8_0 con holgura (load
+~94 s en CPU), en cuyo caso el modo completo desaparece y Q4_0 pasa a ser el
+único local. O si no existe constante Q4_0 entrenable, en cuyo caso los modos
+son completo y delegado, sin escalón intermedio.

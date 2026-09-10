@@ -29,7 +29,8 @@ cola y viaja al banco cuando hay red o cuando aparece el nodo del corregimiento.
 
 Éxito medible al cierre:
 
-- El flujo completo corre de punta a punta en el Xiaomi 14T Pro, grabado.
+- El flujo completo corre de punta a punta en el **iPhone 17 Pro Max**, grabado.
+  El Xiaomi 14T Pro se abandonó: Bare aborta al arrancar el worklet.
 - `perf/perf.jsonl` con métricas reales de cada inferencia.
 - `eval/` con una tabla base contra LoRA sobre el mismo set.
 - README que declara modelos, cuantización, hardware y base preexistente.
@@ -66,7 +67,8 @@ Decidido, no se discute de nuevo:
 - **Voz** (Whisper, TTS). Ninguna de las dos suma a los retos elegidos.
 - **Datos reales de cualquier persona o entidad.** Solo sintéticos.
 - **Autenticación, cuentas de usuario, backend en la nube.**
-- **iOS.** Un solo dispositivo objetivo.
+- **Android como único dispositivo de demo.** El 14T Pro abortó Bare. La demo
+  es el iPhone 17 Pro Max. El usuario del brief sigue siendo rural con Android.
 
 ## Flujo principal
 
@@ -200,7 +202,7 @@ fingir que está.
 
 | # | Criterio | Cómo se verificará |
 | --- | --- | --- |
-| C1 | MedPsy carga en el 14T Pro y produce texto en español | Captura con "modelo cargado" y TTFT en ms |
+| C1 | MedPsy carga en el **iPhone 17 Pro Max** y produce texto | Captura: TTFT 2915 ms CPU, load 93.7 s. El 14T aborta Bare |
 | C2 | TTFT medido con `gpu` y con `cpu`, y se usa el mejor | Dos líneas en `perf.jsonl` con `device_cfg` distinto |
 | C3 | Las reglas de tendencia (vía A) disparan con el historial del usuario con hallazgo | `eval/run.mjs` recorre el historial y las cuenta |
 | C3b | Las reglas de rango (vía B) clasifican bien los 8 marcadores, alto, bajo y normal | `eval/run.mjs` contra los casos de `mobile/src/core/marcadores.ts` |
@@ -282,9 +284,9 @@ Se resuelven con evidencia, no con opinión, antes de construir sobre ellas:
 
 | # | Pregunta | Cómo se cierra |
 | --- | --- | --- |
-| D1 | ¿MedPsy carga en el 14T Pro? | Correr el smoke test. Con 12 GB debería |
-| D2 | ¿`gpu` o `cpu`? | Medir TTFT con ambos. El 14T Pro lleva Mali, no Adreno, así que la ruta OpenCL no aplica |
-| D3 | ¿Instalar por USB en HyperOS pide cuenta Mi? | Con el teléfono en la mano |
+| D1 | ¿MedPsy carga on-device? | **Cerrado:** sí en iPhone 17 Pro Max CPU Q8_0. El 14T Pro aborta `libbare-kit` |
+| D2 | ¿`gpu` o `cpu`? | Solo CPU medido (TTFT 2915 ms). Falta Metal en el iPhone |
+| D3 | ¿USB / HyperOS / cuenta Mi? | **Cerrado:** ya no usamos el Xiaomi |
 | D4 | Si D1 falla, ¿bajar cuantización o delegar? | Q4_0 primero (entrenable, ~1.1 GB), delegar después. **Q4_K_M nunca**: rompe el LoRA (`ADR-006`) |
 | D6 | ¿Existe constante **Q4_0** de MedPsy 1.7B en el catálogo? | `modelRegistrySearch({ quantization })`. De esto depende el modo ligero de `ADR-006` |
 | D8 | ¿0.19 rompe el pipeline de Expo? | Smoke test en 0.18.2 primero, mover a 0.19, repetir (`ADR-001`) |
