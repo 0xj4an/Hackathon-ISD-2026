@@ -6,7 +6,7 @@ Nombre: **Ina Igar** ("Camino de la medicina" en gunagaya). Equipo: 0xj4an y Art
 Una app para personas en zonas rurales de Panamá con señal intermitente, que detecta en el teléfono una señal de riesgo de salud, muestra en español qué examen conviene y cuánto cuesta (MedPsy redacta el mensaje en inglés, `ADR-009`), y permite solicitar un crédito de salud fotografiando los documentos **sin que ninguna imagen salga del dispositivo**: la solicitud queda en cola y viaja al banco con wifi (directo) o, sin internet, por el nodo del pueblo.
 
 ## Retos a los que aplica
-- **General** (podio 6,000): conectividad intermitente, datos sensibles, trabajo en campo. Transporte de demo: HTTP (wifi al banco o LAN al nodo); Hyperswarm P2P no conectó en las pruebas y no se promete.
+- **General** (podio 6,000): conectividad intermitente, datos sensibles, trabajo en campo. Transporte: HTTP (ver [`ESTADO.md`](ESTADO.md) § Honestidad).
 - **Tether · QVAC Psy** (1,500): MedPsy redacta la alerta y `OCR_LATIN` lee documentos; ambos con función central. Hardware de demo: iPhone (Android gama media es el usuario del brief; el Xiaomi de prueba aborta Bare). Licencia MIT, log de rendimiento, nombres honestos de modelo.
 - **Caja de Ahorros** (1,500): inclusión financiera con conectividad intermitente; documentos y trámites leídos en el dispositivo; la ejecución local como ventaja (el asesor nunca ve la cédula ni el extracto).
 
@@ -46,7 +46,7 @@ Modelos: MedPsy 1.7B Q8_0, `OCR_LATIN`, LoRA `lab-v3` (examen). SDK **0.18.2**
 ([`ADR-013`](../.ai/adr/ADR-013-quedarnos-en-sdk-0.18.2.md)).
 
 ## Reglas duras
-- Inferencia: MedPsy en el teléfono primero. Si no puede (modo `nodo-offline` o fallo), POST de texto al nodo local. Nunca imágenes. Ningún proveedor de IA remoto. El banco solo recibe JSON de crédito, nunca fotos ni el motivo de salud. QVAC `delegate` no es el camino de la demo.
+- Inferencia: MedPsy en el teléfono primero; si no puede, POST de texto al nodo. Nunca imágenes ni proveedores de IA remotos. Banco: solo JSON de crédito. Transporte: [`ESTADO.md`](ESTADO.md) § Honestidad.
 - `README` declara la base preexistente: la plantilla AI Engineering Kit.
 - Log de rendimiento (`perf/perf.jsonl`): cada inferencia real registra modelo, cuantización, hardware, tokens, TTFT, tok/s.
 - Disclaimers de salud visibles. Validación de entradas antes del modelo. Sin VIH en el demo público.
@@ -65,6 +65,6 @@ Detalle abierto: [`CHECKLIST.md`](CHECKLIST.md). Foto: [`ESTADO.md`](ESTADO.md).
 2. Flujo en código (hecho). Corrida iPhone completa: [`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md).
 3. Eval verde; falta `perf.jsonl` del teléfono.
 4. LoRA `lab-v3` **en la app**; falta verlo en iPhone.
-5. Transporte honesto: HTTP, no Hyperswarm/`delegate`.
+5. Transporte: HTTP — [`ESTADO.md`](ESTADO.md) § Honestidad.
 6. Video ([`VIDEO.md`](VIDEO.md)).
 7. Colchón (Metal/GPU, etc.) solo si sobra tiempo.

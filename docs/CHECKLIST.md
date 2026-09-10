@@ -5,18 +5,12 @@
 Ordenado por lo que decide el resultado, no por horario. El detalle de cada
 punto está en [`02-stack-y-plan.md`](../.ai/runs/mvp-hackathon/02-stack-y-plan.md).
 
-Auditado contra el código el **10 sep 2026 (tarde)** (`main` ~`b5d69d6`).
 Foto viva: [`ESTADO.md`](ESTADO.md). Índice: [`README.md`](README.md).
-Evals de dominio en verde. Teléfono → pueblo → banco **medido** (90 / 812 / 920).
+Evals en verde. Camino pueblo medido: [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
 
 ## Dónde estamos
 
-Dominio y flujo móvil en código cerrados. Pueblo LAN sin IP fija. Banco Railway
-con persistencia (`STATE_DIR`). Admin con `recibida`/`canal`. Evidencia iPhone
-del camino pueblo: [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
-
-Abierto para el cierre: **video**, OCR limpio, `perf.jsonl`, ensayos en avión.
-Detalle en [`ESTADO.md`](ESTADO.md).
+Ver [`ESTADO.md`](ESTADO.md). Abierto: video, OCR limpio, `perf.jsonl`, ensayos avión.
 
 ---
 
@@ -71,10 +65,10 @@ Entrada ya no elige Historial|Examen como vías paralelas.
 - [x] Persistencia y cola. `expo-sqlite` en `colaSqlite.ts`; una pendiente a la
   vez. Si falla el envío, se guarda y al reabrir la app se vuelve a `PantallaCuota`.
   Falta verificar en el iPhone (C8/C9)
-- [x] Envío al pueblo desde iPhone (LAN): medido 10 sep (POST `192.168.0.17`,
-  montos 90 / 812 / 920 → aprobada). Descubrimiento sin IP fija.
+- [x] Envío al pueblo desde iPhone (LAN): **medido** — ver
+  [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md) / [`PRUEBA-NODO.md`](PRUEBA-NODO.md)
 - [~] Envío directo al banco (Railway) en modo `local-wifi` desde iPhone:
-  código listo; preferir anotar corrida explícita en `PRUEBA-TELEFONO.md`
+  código listo; anotar corrida en `PRUEBA-TELEFONO.md`
 - [x] Firma con trazo + disclaimer legal (`PantallaFirma`) y desembolso
   simulado (`PantallaDesembolso`) tras aprobación. Falta verlo en el iPhone
   en la misma corrida de demo grabada
@@ -83,21 +77,18 @@ Material listo: `data/documentos/` tiene ocho ficticios (nítido y difícil de
 cédula, ingresos, extracto y examen) más `esperado.json`. Cada corrida en el
 iPhone se anota en [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
 
-### 1.3 P2P no conecta — cerrado para la demo
+### 1.3 P2P no es la demo
 
-Hyperswarm entre dos procesos del Mac no conecta (NAT, `firewalled`, sin mDNS).
-La demo de crédito va por HTTP (banco o pueblo). Inferencia: MedPsy en el teléfono;
-si no puede, HTTP de texto al pueblo. QVAC `delegate` no es el plan.
+Cerrado: HTTP (banco o pueblo). Detalle y cómo *no* decirlo en cámara:
+[`ESTADO.md`](ESTADO.md) § Honestidad, [`PRUEBA-NODO.md`](PRUEBA-NODO.md),
+[`VIDEO.md`](VIDEO.md).
 
-- [x] Decisión: el guion y el README **no prometen** Hyperswarm P2P ni `delegate`
-- [x] El video no promete QVAC `delegate`. El respaldo de MedPsy es HTTP al pueblo
-
+- [x] Guion/README no prometen Hyperswarm ni QVAC `delegate`
 ---
 
 ## 2. La demo tiene que correr entera
 
-- [x] Wi-Fi / LAN al pueblo: la solicitud sale, el banco responde (medido
-  10 sep vía nodo)
+- [x] Wi-Fi / LAN al pueblo: medido — [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md)
 - [ ] Wi-Fi al banco directo (`local-wifi`): anotar corrida en teléfono
 - [ ] **Ensayarla tres veces seguidas** con el iPhone en la mano. Lo que falla,
   falla aquí y no grabando

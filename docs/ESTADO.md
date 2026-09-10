@@ -20,7 +20,7 @@ si no carga, solo texto a `/inferir`.
 | Banco remoto (Railway) | Vivo + persistente | `https://banco-production-3755.up.railway.app` · código usa `STATE_DIR` (Volume `/data` en Railway) |
 | Admin del banco | Hecho | Landing: `recibida` + `canal` (`directo` / `pueblo`) |
 | Pueblo LAN `:8788` | Vivo en laptop | `npm run corregimiento` · `/salud` `servicio: inaigar-pueblo` · Bonjour (nodo publica; app no consume) |
-| Teléfono → pueblo → banco | **Medido 10 sep** | `192.168.0.17` POST 90 / 812 / 920 → **aprobada** |
+| Teléfono → pueblo → banco | **Medido 10 sep** | Evidencia: [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md), [`PRUEBA-NODO.md`](PRUEBA-NODO.md) |
 | Descubrimiento del pueblo | Hecho | Sweep HTTP LAN / Metro (`nodoUrl.ts`); sin IP fija |
 | Cola offline SQLite | Hecho en código | `cola.ts` / `colaSqlite.ts` |
 | Firma + desembolso simulado | Hecho | `PantallaFirma`, `PantallaDesembolso` |
@@ -75,8 +75,10 @@ cd mobile && npx expo start
 
 ## Honestidad
 
-- Hyperswarm / QVAC `delegate`: **no** son el camino de la demo (P2P off salvo `ENABLE_P2P=1`).
-- Firma = trazo; desembolso = simulado; datos 100% sintéticos.
+Demo = HTTP (banco o pueblo). **No** Hyperswarm ni QVAC `delegate`
+(P2P solo con `ENABLE_P2P=1`; ver [`PRUEBA-NODO.md`](PRUEBA-NODO.md)).
+Firma = trazo; desembolso = simulado; datos sintéticos.
+Frases a evitar en cámara: [`VIDEO.md`](VIDEO.md).
 
 ## Contraste docs ↔ código (10 sep)
 

@@ -15,7 +15,7 @@ El emulador no cuenta. La demo es un **iPhone 17 Pro Max**.
 | [`eval/resultados.md`](../eval/resultados.md) | Reglas, scorecard, contrato del banco. Sin teléfono | Sí, lo genera `node eval/run.mjs` |
 | [`perf/perf.jsonl`](../perf/README.md) | Una línea por inferencia real (`stats` del SDK) | No: está en `.gitignore`. Se exporta del teléfono para Tether Psy |
 | **Este archivo** | El flujo en el iPhone: qué se tocó, qué salió, qué se rompió | Sí |
-| [`docs/PRUEBA-NODO.md`](PRUEBA-NODO.md) | HTTP y Hyperswarm laptop ↔ teléfono | Sí |
+| [`docs/PRUEBA-NODO.md`](PRUEBA-NODO.md) | HTTP banco/pueblo (LAN) | Sí |
 | Fotos de cédulas reales, pantallazos con PII | Nada. Ni sintéticas si se ve una cara real | Nunca |
 
 Qué probar en el iPhone con el Release de ahora (avión, correo, fotos, qué

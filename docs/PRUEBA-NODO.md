@@ -13,39 +13,24 @@ Sin internet (local-offline / nodo-offline):
   teléfono --LAN :8788--> pueblo --HTTP--> el mismo banco
 ```
 
-No confundir con el **examen de laboratorio** (opción tras el resultado del
-historial) ni con la **inferencia**: MedPsy en el teléfono; si no carga, POST de
-texto a `:8788/inferir`. Eso no es el envío del crédito. QVAC `delegate`
-no es el plan: no atraviesa NAT.
+No confundir con el **examen de laboratorio** ni con la **inferencia**
+(MedPsy local; si falla, POST texto a `/inferir`). Demo de crédito = HTTP.
+P2P / Hyperswarm: § más abajo (off salvo `ENABLE_P2P=1`).
 
-El objetivo de la escena sin señal es el envío al pueblo: el teléfono le habla a la
-laptop **sin internet y sin nube**. HTTP en la LAN está medido. Hyperswarm entre
-dos procesos del mismo Mac **no ha conectado nunca**.
+URLs de producción: [`ESTADO.md`](ESTADO.md).
 
 ---
 
-## Al banco: el teléfono habla con Railway
-
-Con wifi o datos, `enviarSolicitud` hace POST a `urlBanco()` (Railway). El pueblo
-no entra. Comprobarlo sin el teléfono:
+## Al banco: Railway (directo)
 
 ```
-POST https://banco-production-3755.up.railway.app/solicitud
--> aprobada, 12 meses, 17.4% anual, cuota 84.08
-   (caso demo: asalariado, ingreso 520, deudas 40, monto 920, sin extracto)
+POST <banco>/solicitud
+-> caso demo típico: aprobada (asalariado, ingreso 520, monto 920, …)
 ```
 
-Si hay extracto, el grado baja la tasa (alrededor de 10.6%).
-
-En el iPhone el camino **directo a Railway** (modo `local-wifi`) todavía
-conviene anotarlo en [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md). El camino
-**vía pueblo** desde el iPhone **sí está medido** el 10 sep (abajo).
-
-El banco en Railway persiste con `STATE_DIR` (en prod se montó Volume en `/data`;
-el env no está en el repo — el código lee `process.env.STATE_DIR`). Cada
-solicitud guarda `{id}.meta.json` con `recibida` (ISO) y `canal`
-(`directo` | `pueblo`, vía header `x-via`).
-Admin: ver URLs en [`ESTADO.md`](ESTADO.md).
+URL: [`ESTADO.md`](ESTADO.md). Persistencia: `STATE_DIR` / meta `recibida`+`canal`.
+Camino **directo** en iPhone (`local-wifi`): anotar en [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
+Camino **pueblo**: medido abajo.
 
 ---
 
@@ -119,13 +104,8 @@ documentan cómo desplegarlo**. No es un plan.
 
 ## Cómo se cuenta en el video
 
-- Banco: **"con wifi, el teléfono habla directo con el banco"**.
-- Pueblo: **"sin internet, los aparatos se hablan en la red local y el pueblo
-  se lo lleva al banco"**.
-- Decirle **"Hyperswarm P2P"** a un POST HTTP no lo sería.
-- Tampoco **"delegate"** si el respaldo fue `POST /inferir`.
-
-Lo que se afirme en el video tiene que ser lo que corrió en el video.
+Misma regla que [`VIDEO.md`](VIDEO.md): decir HTTP (banco o pueblo), no
+“Hyperswarm P2P” ni “delegate” si no corrió eso.
 
 ---
 
