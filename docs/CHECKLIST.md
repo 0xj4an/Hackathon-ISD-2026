@@ -32,8 +32,9 @@ reglas y nunca llama al modelo es un motor de reglas con un smoke test al lado.
 
 ### 1.2 La rama de documentos es una cáscara
 
-La foto se toma y no se lee. `PantallaExamen.tsx` lo dice en un comentario:
-*"Cuando `ocr()` exista"*.
+La foto se toma y no se lee. `PantallaDocumentos.tsx` lo dice en su pie:
+*"el documento está tomado, no leído"*. La rama del examen tiene el mismo hueco
+y lo dice en un comentario de `PantallaExamen.tsx`: *"Cuando `ocr()` exista"*.
 
 Lo que ya no pasa es que el flujo muera ahí: `PantallaDatos.tsx` (la pantalla 11
 del mapa, "lo que se leyó, **editable**") recoge los campos a mano y
@@ -103,7 +104,7 @@ No es núcleo. `RESULTADOS.md` lo dice: capa de las últimas horas.
 - [x] Paquete por condición a un año en vez de un monto suelto ([`ADR-010`](../.ai/adr/ADR-010-el-paquete-y-cuando-ofrecer-credito.md))
 - [x] 15 lienzos en `docs/design/` y dirección visual decidida ([`ADR-012`](../.ai/adr/ADR-012-senaletica-y-el-modo-denso.md))
 - [x] `data/documentos/`: seis imágenes sintéticas (nítida y difícil de cada documento) más `esperado.json`
-- [~] Los tres documentos y sus campos están decididos. Falta **qué pasa si falta uno**, y cómo se capturan `deudas_mensuales_usd` y `personas_a_cargo`
+- [~] Los tres documentos y sus campos están decididos, y `PantallaDatos.tsx` ya captura `deudas_mensuales_usd` y `personas_a_cargo`. Falta **qué pasa si falta uno**
 
 ### Implementación
 
@@ -112,6 +113,7 @@ No es núcleo. `RESULTADOS.md` lo dice: capa de las últimas horas.
 - [x] `eval/credito/contrato.test.mjs` llama al `decidir()` real del nodo y valida contra `RespuestaBancoSchema` en los tres caminos
 - [x] El nodo importa el motor de crédito en vez de tener su propia política
 - [x] Nueve pantallas escritas y navegación en `App.tsx`
+- [x] La cuota se calcula **en el teléfono y sin señal**: `PantallaDatos.tsx` recoge los campos y `PantallaCuota.tsx` corre `preCalificar()` del mismo motor que usa el banco, rotulado como estimado
 - [x] `data/generar-usuarios.mjs` produce el formato normalizado y `PantallaUsuarios.tsx` lo consume
 - [x] `core/` unificado en `mobile/src/core/`, sin duplicado en la raíz
 
