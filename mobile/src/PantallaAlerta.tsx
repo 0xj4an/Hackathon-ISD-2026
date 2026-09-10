@@ -91,6 +91,7 @@ export default function PantallaAlerta({
     <Alerta
       peor={peor}
       demas={demas}
+      mediciones={usuario.mediciones.length}
       onSalir={onVolver}
       onVerRuta={() => setPaso("ruta")}
     />
@@ -108,8 +109,8 @@ export default function PantallaAlerta({
  * Lo que sí espera al siguiente paso es qué hacer con cada uno, que es una
  * pregunta distinta.
  */
-function Alerta({ peor, demas, onSalir, onVerRuta }: {
-  peor: Senal; demas: Senal[]; onSalir: () => void; onVerRuta: () => void;
+function Alerta({ peor, demas, mediciones, onSalir, onVerRuta }: {
+  peor: Senal; demas: Senal[]; mediciones: number; onSalir: () => void; onVerRuta: () => void;
 }) {
   return (
     <Pantalla>
@@ -133,9 +134,19 @@ function Alerta({ peor, demas, onSalir, onVerRuta }: {
         <Franja color={COLOR.inmediata} titulo="Ve ya si aparece" texto={peor.ruta.vigilar} />
       ) : null}
 
+      {/*
+        El rotulo tiene que decir tres cosas o no dice ninguna: que son, de donde
+        salieron y que se va a hacer con ellas. "Y esto tambien" no decia nada, y
+        se noto en que hubo que preguntarlo.
+      */}
       {demas.length > 0 ? (
         <>
-          <Etiqueta>Y esto también</Etiqueta>
+          <Etiqueta>
+            {demas.length === 1 ? "También encontré esto" : `También encontré estas ${demas.length}`}
+          </Etiqueta>
+          <Text style={s.deDonde}>
+            En las mismas {mediciones} mediciones. Qué hacer con cada una, en el siguiente paso.
+          </Text>
           <View style={s.resumenes}>
             {demas.map(x => <Resumen key={x.codigo} senal={x} />)}
           </View>
@@ -317,6 +328,11 @@ function Resumen({ senal, conRuta }: { senal: Senal; conRuta?: boolean }) {
 }
 
 const s = StyleSheet.create({
+  deDonde: {
+    fontSize: 13.5, lineHeight: 18, color: COLOR.gris,
+    paddingHorizontal: ESPACIO.borde, marginTop: -4, marginBottom: 12,
+  },
+
   arriba: { paddingHorizontal: ESPACIO.borde, paddingTop: 16, paddingBottom: 14 },
   titular: { ...DISPLAY, fontSize: 28, lineHeight: 31, letterSpacing: -1, color: COLOR.tinta },
 
