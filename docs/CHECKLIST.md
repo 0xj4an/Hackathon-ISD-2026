@@ -7,13 +7,19 @@ punto está en [`02-stack-y-plan.md`](../.ai/runs/mvp-hackathon/02-stack-y-plan.
 
 ## Dónde estamos
 
-El motor de dominio está terminado y medido: 14 señales con fuente, seis casos
-clínicos, modelo de crédito con scorecard entrenado, y `eval/run.mjs` pasa en
-verde sin tocar un teléfono. MedPsy carga y genera texto en el iPhone.
+El dominio está terminado y medido: 14 señales con fuente, seis casos clínicos,
+modelo de crédito con scorecard entrenado, `eval/run.mjs` y el contrato del
+crédito pasan en verde sin tocar un teléfono. Catorce pantallas, guion de video
+escrito, documentos sintéticos listos con su ground truth.
 
-Lo que falta es unir las dos mitades. **La alerta de salud sigue saliendo de
-las reglas: ninguna pantalla de producto llama a `completion()` para redactarla.**
-Los documentos sí invocan el modelo: `leerDocumento.ts` corre OCR y MedPsy.
+Lo que falta no es código, es **evidencia en el aparato**. La única corrida
+registrada en un iPhone con la rama de documentos terminó en `invalid input`:
+el OCR rechazó la foto. Hay un arreglo escrito (JPEG compatible, base64 en vez
+de `Uint8Array`) que **nadie ha visto funcionar todavía**. Ver
+[`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
+
+Mientras eso no se repita en el teléfono, seis criterios siguen sin poder
+cerrarse y el video no se puede grabar.
 
 ---
 
@@ -23,8 +29,9 @@ Tres cosas, en este orden.
 
 ### 1.1 El modelo tiene que entrar al producto
 
-Technical pesa 35% y mide **uso genuino de QVAC**. Una app que detecta con
-reglas y nunca llama al modelo es un motor de reglas con un smoke test al lado.
+Technical pesa 35% y mide **uso genuino de QVAC**. La rama de documentos ya
+lo usa de verdad (OCR + MedPsy en `leerDocumento.ts`). La de salud no: detecta
+con reglas y muestra el resultado sin pasarlo por el modelo.
 
 - [ ] `PantallaAlerta` invoca `completion()` con `SYSTEM_ALERTA` y valida con `AlertaSchema`. Hoy muestra solo la salida de las reglas
 - [ ] El modelo se carga una vez al arrancar, no por pantalla. `ADR-007` dice que la descarga no bloquea el onboarding
@@ -75,7 +82,7 @@ La demo de crédito va por HTTP en la LAN. La regla del hackathon se cumple igua
 
 ## 3. Entregables
 
-- [ ] Guion en `docs/VIDEO.md`
+- [x] Guion en `docs/VIDEO.md`, 223 líneas, minuto a minuto y con las cifras verificadas
 - [ ] Video <= 5 min, español, enlace sin login. Es lo primero que mira el jurado del reto General
 - [ ] `perf/perf.jsonl` con una línea por inferencia real (ver 1.1)
 - [x] README: modelo, cuantización, hardware, base preexistente y fila de extracción a JSON
@@ -85,7 +92,8 @@ La demo de crédito va por HTTP en la LAN. La regla del hackathon se cumple igua
 
 ## 4. Si sobra tiempo: el LoRA
 
-No es núcleo. `RESULTADOS.md` lo dice: capa de las últimas horas.
+No es núcleo, es capa de las últimas horas. `RESULTADOS.md` se retiró en
+`248476d` por no ser reproducible; los números de esta corrida van en uno nuevo.
 
 - [ ] Entrenar con `caffeinate -i`, o el Mac se duerme como en el spike
 - [ ] Cargar el adaptador y volver a correr la evaluación

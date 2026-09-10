@@ -62,7 +62,7 @@ Los significados salen del diccionario escolar *Gayamar sabga* (gunagaya-españo
 
 ## Base preexistente (declaración obligatoria)
 
-- Plantilla [`ArturVargas/AI_Engineering_Kit`](https://github.com/ArturVargas/AI_Engineering_Kit) (ago 2026), de la que se generó el repo: `standards/`, `templates/`, `docs/superpowers/`, la estructura de `.ai/` y `docs/ai-engineering-kit.md` (su README).
+- Plantilla [`ArturVargas/AI_Engineering_Kit`](https://github.com/ArturVargas/AI_Engineering_Kit) (ago 2026), de la que se generó el repo: `standards/`, `templates/`, los cuatro archivos de agosto de `docs/superpowers/`, la estructura de `.ai/` y `docs/ai-engineering-kit.md` (su README). Lo de septiembre en `docs/superpowers/` es nuestro.
 
 ## Contexto compartido del equipo
 - `docs/CHECKLIST.md`: **el plan de trabajo que se sigue**, por bloques y con criterios de aceptación.
