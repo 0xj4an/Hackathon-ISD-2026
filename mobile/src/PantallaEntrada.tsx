@@ -76,19 +76,20 @@ export default function PantallaEntrada({
         </Text>
       </View>
 
-      <Etiqueta>Correos de la demo</Etiqueta>
+      <Etiqueta>Casos de la demo</Etiqueta>
       <View style={s.lista}>
-        {USUARIOS.map(u => {
+        {USUARIOS.map((u, i) => {
+          const etiqueta = `Caso ${i + 1}`;
           const puesto = correo.trim().toLowerCase() === u.correo;
           return (
             <Pressable
               key={u.id}
               onPress={() => escribir(u.correo)}
               accessibilityRole="button"
-              accessibilityLabel={`Usar el correo ${u.correo}`}
+              accessibilityLabel={`${etiqueta}: llenar el correo de la demo`}
               style={({ pressed }) => [s.correo, puesto && s.correoPuesto, pressed && s.correoPress]}
             >
-              <Text style={s.correoTexto}>{u.correo}</Text>
+              <Text style={s.correoTexto}>{etiqueta}</Text>
             </Pressable>
           );
         })}
