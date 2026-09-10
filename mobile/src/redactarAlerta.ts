@@ -1,0 +1,60 @@
+/**
+ * Pasa la señal ya decidida por MedPsy y valida el JSON.
+ *
+ * Si el modelo falla, no se inventa nada: la pantalla sigue mostrando las
+ * reglas (`ADR-005`, `ADR-007`).
+ */
+import { pedirMensaje, type AlertaParse } from "./core/alerta";
+import type { Medicion, Senal } from "./core/reglas";
+import { completarMedPsy, soltarMedPsy } from "./medpsy";
+import { recordError } from "./perf/logger";
+
+function motivoDe(err: unknown): string {
+  const raw = err instanceof Error ? err.message : String(err);
+  const t = raw.toLowerCase();
+  if (t.includes("download") || t.includes("bajando") || t.includes("asset")) {
+    return "No se pudo bajar o abrir MedPsy en este teléfono.";
+  }
+  if (t.includes("loadmodel") || t.includes("load model") || t.includes("cargando")) {
+    return "MedPsy no cargó en memoria.";
+  }
+  if (t.includes("worker") || t.includes("bare")) {
+    return "El motor de QVAC no arrancó.";
+  }
+  if (t.includes("oom") || t.includes("memory") || t.includes("alloc")) {
+    return "El teléfono se quedó sin memoria al correr MedPsy.";
+  }
+  return raw.trim() || "No pude redactar.";
+}
+
+export async function redactarAlerta(
+  senal: Senal,
+  mediciones: Medicion[],
+  onProgreso?: (detalle: string) => void,
+): Promise<AlertaParse> {
+  try {
+    return await pedirMensaje(
+      ({ system, user, temp }) => completarMedPsy({
+        system,
+        user,
+        temp,
+        task: "alerta",
+        predict: 220,
+        onProgreso: p => onProgreso?.(p.detalle),
+      }),
+      senal,
+      mediciones,
+    );
+  } catch (err) {
+    recordError("alerta", err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    const msg = err instanceof Error ? err.message : String(err);
+    return {
+      ok: false,
+      motivo: motivoDe(err),
+      tecnico: stack ?? msg ?? "sin detalle",
+    };
+  } finally {
+    await soltarMedPsy();
+  }
+}

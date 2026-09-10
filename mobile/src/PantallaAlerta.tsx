@@ -2,9 +2,8 @@
  * La vía A en tres pasos: qué te pasa, qué conviene hacer, y cuánto cuesta.
  *
  * Las señales las deciden las reglas de `core/reglas.ts`, no el modelo
- * (`ADR-005`). Esta pantalla muestra el resultado de esas reglas tal cual, con
- * su fuente citada. El modelo entra después, para redactar el mensaje en
- * español sencillo, y no puede cambiar ni el umbral ni la ruta.
+ * (`ADR-005`). Esta pantalla muestra esas reglas de inmediato. MedPsy entra
+ * después, solo para redactar `mensaje`. Si falla, se queda lo de las reglas.
  *
  * Por qué tres pasos y no uno. La primera versión ponía el hallazgo, las cuatro
  * señales completas, la ruta y las diez líneas del paquete en la misma pantalla.
@@ -20,10 +19,11 @@
  * Los tres pasos viven en este archivo y no en `App.tsx` a propósito: son un
  * solo asunto, la vía A, y el enrutado de arriba no tiene por qué enterarse.
  */
-import { useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import type { Usuario } from "./usuarios";
 import { detectarSenales, type Senal } from "./core/reglas";
+import { redactarAlerta } from "./redactarAlerta";
 import { armarPaquete, mensajeCredito, type Paquete } from "./core/paquete";
 import { fraseLecturas, fraseMeses, resumenHistorial } from "./historial";
 import {
@@ -43,6 +43,7 @@ const balboas = (min: number, max: number) =>
   min === max ? `B/. ${min}` : `B/. ${min} a ${max}`;
 
 type Paso = "alerta" | "ruta" | "costo";
+type FalloRedaccion = { motivo: string; tecnico: string };
 
 export default function PantallaAlerta({
   usuario, onVolver, onPedirCredito, onSubirExamen,
@@ -52,17 +53,39 @@ export default function PantallaAlerta({
   onPedirCredito?: (costoMin: number, costoMax: number) => void;
   onSubirExamen?: () => void;
 }) {
+  const senales = useMemo(
+    () => detectarSenales(usuario.mediciones)
+      .sort((a, b) => ORDEN[a.urgencia] - ORDEN[b.urgencia]),
+    [usuario.mediciones],
+  );
+  const peor = senales[0];
   const [paso, setPaso] = useState<Paso>("alerta");
+  const [mensaje, setMensaje] = useState<string | null>(null);
+  const [fallo, setFallo] = useState<FalloRedaccion | null>(null);
+  const [intento, setIntento] = useState(0);
+  const [redactando, setRedactando] = useState(senales.length > 0);
 
-  const senales = detectarSenales(usuario.mediciones)
-    .sort((a, b) => ORDEN[a.urgencia] - ORDEN[b.urgencia]);
+  useEffect(() => {
+    if (!peor) return;
+    let vivo = true;
+    setRedactando(true);
+    setMensaje(null);
+    setFallo(null);
+    void redactarAlerta(peor, usuario.mediciones).then(r => {
+      if (!vivo) return;
+      if (r.ok) setMensaje(r.alerta.mensaje);
+      else setFallo({ motivo: r.motivo, tecnico: r.tecnico });
+      setRedactando(false);
+    });
+    return () => { vivo = false; };
+  }, [peor, usuario.mediciones, intento]);
+
   const paquete = armarPaquete(senales);
 
   if (senales.length === 0) {
     return <Sano usuario={usuario} onVolver={onVolver} onSubirExamen={onSubirExamen} />;
   }
 
-  const peor = senales[0];
   const demas = senales.slice(1);
   const resumen = resumenHistorial(usuario.mediciones);
 
@@ -95,8 +118,12 @@ export default function PantallaAlerta({
       demas={demas}
       lecturas={resumen.mediciones}
       periodo={fraseMeses(resumen)}
+      mensaje={mensaje}
+      fallo={fallo}
+      redactando={redactando}
       onSalir={onVolver}
       onVerRuta={() => setPaso("ruta")}
+      onReintentar={() => setIntento(n => n + 1)}
     />
   );
 }
@@ -112,10 +139,13 @@ export default function PantallaAlerta({
  * Lo que sí espera al siguiente paso es qué hacer con cada uno, que es una
  * pregunta distinta.
  */
-function Alerta({ peor, demas, lecturas, periodo, onSalir, onVerRuta }: {
+function Alerta({ peor, demas, lecturas, periodo, mensaje, fallo, redactando, onSalir, onVerRuta, onReintentar }: {
   peor: Senal; demas: Senal[]; lecturas: number; periodo: string;
-  onSalir: () => void; onVerRuta: () => void;
+  mensaje: string | null; fallo: FalloRedaccion | null; redactando: boolean;
+  onSalir: () => void; onVerRuta: () => void; onReintentar: () => void;
 }) {
+  const [detalleAbierto, setDetalleAbierto] = useState(false);
+
   return (
     <Pantalla>
       <Encabezado meta="Salir" onVolver={onSalir} />
@@ -124,11 +154,37 @@ function Alerta({ peor, demas, lecturas, periodo, onSalir, onVerRuta }: {
         color={COLOR_URGENCIA[peor.urgencia]}
         antetitulo={VERBO_URGENCIA[peor.urgencia]}
         palabra={peor.titulo}
+        detalle={mensaje ?? (redactando ? "El modelo está explicando esto en el teléfono, sin red." : undefined)}
         mayusculas={false}
         simbolo={peor.urgencia === "Rutinaria" ? "listo" : "alerta"}
       />
 
       <Cifra valor={peor.medida.valor} unidad={peor.medida.unidad} nota={peor.medida.referencia} />
+
+      {fallo && !redactando ? (
+        <View style={s.falloCaja}>
+          <Franja
+            color={COLOR.tinta}
+            titulo="La explicación falló"
+            texto={`El hallazgo sí vale: lo decidieron las reglas. ${fallo.motivo}`}
+          />
+          <Pressable
+            onPress={() => setDetalleAbierto(v => !v)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: detalleAbierto }}
+            style={s.falloToggle}
+          >
+            <Text style={s.falloToggleTexto}>
+              {detalleAbierto ? "Ocultar detalle técnico" : "Ver detalle técnico"}
+            </Text>
+            <Text style={s.falloChevron}>{detalleAbierto ? "▴" : "▾"}</Text>
+          </Pressable>
+          {detalleAbierto ? (
+            <Text selectable style={s.falloTecnico}>{fallo.tecnico}</Text>
+          ) : null}
+          <Boton texto="Reintentar la explicación" tono="borde" onPress={onReintentar} />
+        </View>
+      ) : null}
 
       {peor.ruta.ahora ? (
         <Franja color={COLOR_URGENCIA[peor.urgencia]} titulo="Hazlo ahora" texto={peor.ruta.ahora} />
@@ -160,6 +216,8 @@ function Alerta({ peor, demas, lecturas, periodo, onSalir, onVerRuta }: {
       <Boton texto="Ver qué conviene hacer" onPress={onVerRuta} />
 
       <Pie>{peor.fuente}</Pie>
+      {mensaje ? <Pie>Redactado en el teléfono por MedPsy. El umbral lo deciden las reglas.</Pie> : null}
+      {fallo && !mensaje ? <Pie>Sin explicación del modelo. Lo que ves sale solo de las reglas.</Pie> : null}
       <Pie>{DISCLAIMER}</Pie>
     </Pantalla>
   );
@@ -337,6 +395,28 @@ const s = StyleSheet.create({
   deDonde: {
     fontSize: 13.5, lineHeight: 18, color: COLOR.gris,
     paddingHorizontal: ESPACIO.borde, marginTop: -4, marginBottom: 12,
+  },
+
+  falloCaja: { marginBottom: 4 },
+  falloToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: ESPACIO.borde,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLOR.separador,
+  },
+  falloToggleTexto: { ...TIPO.etiqueta, color: COLOR.gris, fontSize: 11 },
+  falloChevron: { fontSize: 14, color: COLOR.gris },
+  falloTecnico: {
+    fontFamily: "Courier",
+    fontSize: 11,
+    lineHeight: 15,
+    color: COLOR.tinta,
+    backgroundColor: COLOR.hundido,
+    paddingHorizontal: ESPACIO.borde,
+    paddingVertical: 12,
   },
 
   arriba: { paddingHorizontal: ESPACIO.borde, paddingTop: 16, paddingBottom: 14 },

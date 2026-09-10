@@ -17,10 +17,9 @@ import {
   SYSTEM_EXTRACCION_INGRESOS,
 } from "./core/prompts";
 import { parsearExtraccion, type ClaveDocumento, type ExtraccionFallo, type ExtraccionOk } from "./core/extraccion";
+import { asegurarMedPsy, bajar, completarMedPsy, sdk, soltarMedPsy } from "./medpsy";
 import { getAppLogger, recordError, recordInference } from "./perf/logger";
 
-const CTX = 2048;
-const MEDPSY = "HEALTHCARE_1_7B_MEDICAL_Q8_0";
 const OCR_NOMBRE = "OCR_LATIN";
 /** Lado largo máximo antes del detector. Un 17 Pro Max dispara 4000 px; CRAFT no cabe. */
 const MAX_LADO = 1280;
@@ -50,57 +49,17 @@ export type LecturaDocumento = (ExtraccionOk | ExtraccionFallo) & {
 
 export type EntradaDocumento = { clave: ClaveDocumento; uri: string };
 
-type Qvac = typeof import("@qvac/sdk");
-
-let qvac: Qvac | null = null;
 let ocrId: string | null = null;
-let llmId: string | null = null;
-let llmLoadMs: number | null = null;
 let ocupado = false;
-
-async function sdk(): Promise<Qvac> {
-  if (qvac) return qvac;
-  qvac = await import("@qvac/sdk");
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require("@qvac/sdk/worker.mobile.bundle");
-  } catch (err) {
-    recordError("worker.bundle", err);
-    throw err;
-  }
-  return qvac;
-}
-
-/**
- * Lo que `downloadAsset` acepta como origen, derivado del propio SDK en vez de
- * escrito a mano: si el paquete cambia la firma, esto deja de compilar en vez
- * de fallar en el telefono. Antes era `unknown` y el typecheck lo rechazaba al
- * pasarlo, porque las constantes del registro (OCR_LATIN y compania) son
- * objetos, no cadenas.
- */
-type OrigenAsset = Parameters<NonNullable<Qvac["downloadAsset"]>>[0]["assetSrc"];
-
-async function bajar(asset: OrigenAsset, onProgreso?: (p: ProgresoLectura) => void) {
-  const s = await sdk();
-  if (typeof s.downloadAsset !== "function") return;
-  let last = -1;
-  await s.downloadAsset({
-    assetSrc: asset,
-    onProgress: (p: { percentage?: number }) => {
-      const r = Math.floor(p?.percentage ?? 0);
-      if (r === last) return;
-      last = r;
-      onProgreso?.({ paso: "descarga", pct: r, detalle: `Bajando el lector ${r}%` });
-    },
-  });
-}
 
 async function asegurarOcr(onProgreso?: (p: ProgresoLectura) => void): Promise<string> {
   if (ocrId) return ocrId;
   const s = await sdk();
   const { OCR_LATIN } = await import("@qvac/sdk/models");
   onProgreso?.({ paso: "descarga", detalle: "Preparando el lector de texto" });
-  await bajar(OCR_LATIN, onProgreso);
+  await bajar(OCR_LATIN, p => {
+    onProgreso?.({ paso: "descarga", pct: p.pct, detalle: `Bajando el lector ${p.pct ?? 0}%` });
+  });
   onProgreso?.({ paso: "ocr", detalle: "Cargando el lector de texto" });
   ocrId = await s.loadModel({
     modelSrc: OCR_LATIN,
@@ -117,34 +76,11 @@ async function asegurarOcr(onProgreso?: (p: ProgresoLectura) => void): Promise<s
   return ocrId;
 }
 
-async function asegurarLlm(onProgreso?: (p: ProgresoLectura) => void): Promise<string> {
-  if (llmId) return llmId;
+async function soltarOcr(): Promise<void> {
+  const id = ocrId;
+  ocrId = null;
+  if (!id) return;
   const s = await sdk();
-  const { HEALTHCARE_1_7B_MEDICAL_Q8_0 } = await import("@qvac/sdk/models");
-  onProgreso?.({ paso: "descarga", detalle: "Preparando MedPsy" });
-  const t0 = Date.now();
-  await bajar(HEALTHCARE_1_7B_MEDICAL_Q8_0, (p) => {
-    onProgreso?.({ ...p, detalle: `Bajando MedPsy ${p.pct ?? 0}%` });
-  });
-  onProgreso?.({ paso: "extraccion", detalle: "Cargando MedPsy" });
-  llmId = await s.loadModel({
-    modelSrc: HEALTHCARE_1_7B_MEDICAL_Q8_0,
-    modelType: "llm",
-    modelConfig: { ctx_size: CTX, device: "cpu", reasoning_budget: 0 },
-  });
-  llmLoadMs = Date.now() - t0;
-  return llmId;
-}
-
-async function soltar(cual: "ocr" | "llm"): Promise<void> {
-  const s = qvac;
-  const id = cual === "ocr" ? ocrId : llmId;
-  if (cual === "ocr") ocrId = null;
-  else {
-    llmId = null;
-    llmLoadMs = null;
-  }
-  if (!s || !id) return;
   try {
     await s.unloadModel({ modelId: id, clearStorage: false });
   } catch (err) {
@@ -292,39 +228,15 @@ function uint8ToBase64(bytes: Uint8Array): string {
 }
 
 async function extraerConLlm(clave: ClaveDocumento, textoOcr: string, confianzaOcr?: number) {
-  const s = await sdk();
-  if (!llmId) throw new Error("MedPsy no cargado");
-  const t1 = Date.now();
-  let first: number | null = null;
-  let text = "";
   const confianza =
     typeof confianzaOcr === "number" ? `\nOCR confidence (mean): ${confianzaOcr.toFixed(2)}` : "";
-  const r = s.completion({
-    modelId: llmId,
-    stream: true,
-    generationParams: { temp: 0.1, predict: 220 },
-    history: [
-      { role: "system", content: SYSTEM[clave] },
-      { role: "user", content: `${textoOcr}${confianza}` },
-    ],
-  });
-  for await (const tok of r.tokenStream) {
-    if (first === null) first = Date.now() - t1;
-    text += tok;
-  }
-  const f = await r.final;
-  await recordInference({
+  return completarMedPsy({
+    system: SYSTEM[clave],
+    user: `${textoOcr}${confianza}`,
     task: "extraccion",
-    model: MEDPSY,
-    quant: "Q8_0",
-    lora: null,
-    ctx_size: CTX,
-    device_cfg: "cpu",
-    ttft_ms: first,
-    load_ms: llmLoadMs,
-    stats: f?.stats ?? {},
+    temp: 0.1,
+    predict: 220,
   });
-  return text;
 }
 
 function borrarCopia(uri: string): boolean {
@@ -385,6 +297,7 @@ export async function leerDocumentos(
       trabajos.push({ clave: e.clave, original: e.uri, chica });
     }
 
+    await soltarMedPsy();
     await asegurarOcr(aviso);
     for (const t of trabajos) {
       onProgreso?.(t.clave, { paso: "ocr", detalle: `Leyendo ${NOMBRE[t.clave]}` });
@@ -413,11 +326,11 @@ export async function leerDocumentos(
       }
     }
 
-    await soltar("ocr");
+    await soltarOcr();
 
     const conTexto = trabajos.filter(t => t.ocr && !t.error);
     if (conTexto.length > 0) {
-      await asegurarLlm(aviso);
+      await asegurarMedPsy(p => aviso({ paso: "extraccion", pct: p.pct, detalle: p.detalle }));
       for (const t of conTexto) {
         const ocr = t.ocr;
         if (!ocr) continue;
@@ -434,7 +347,7 @@ export async function leerDocumentos(
           t.error = mensajeLectura(err);
         }
       }
-      await soltar("llm");
+      await soltarMedPsy();
     }
 
     for (const t of trabajos) {
@@ -467,6 +380,6 @@ export async function leerDocumento(
 
 /** Libera RAM al salir de la pantalla. Los pesos siguen en caché. */
 export async function soltarLectores(): Promise<void> {
-  await soltar("ocr");
-  await soltar("llm");
+  await soltarOcr();
+  await soltarMedPsy();
 }

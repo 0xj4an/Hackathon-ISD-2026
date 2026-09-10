@@ -1,0 +1,133 @@
+/**
+ * Un solo MedPsy en RAM. Lo usan la alerta y la extracción de documentos.
+ *
+ * OCR vive aparte: detector y LLM a la vez se quedan sin grafo. Quien necesite
+ * el lector de texto suelta MedPsy antes, y al revés.
+ */
+import { getAppLogger, recordError, recordInference, type InferenceTask } from "./perf/logger";
+
+const CTX = 2048;
+const MEDPSY = "HEALTHCARE_1_7B_MEDICAL_Q8_0";
+
+type Qvac = typeof import("@qvac/sdk");
+type OrigenAsset = Parameters<NonNullable<Qvac["downloadAsset"]>>[0]["assetSrc"];
+
+export type ProgresoMedPsy = { pct?: number; detalle: string };
+
+let qvac: Qvac | null = null;
+let llmId: string | null = null;
+let llmLoadMs: number | null = null;
+let inflight = 0;
+
+export async function sdk(): Promise<Qvac> {
+  if (qvac) return qvac;
+  qvac = await import("@qvac/sdk");
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require("@qvac/sdk/worker.mobile.bundle");
+  } catch (err) {
+    recordError("worker.bundle", err);
+    throw err;
+  }
+  return qvac;
+}
+
+export async function bajar(
+  asset: OrigenAsset,
+  onProgreso?: (p: ProgresoMedPsy) => void,
+) {
+  const s = await sdk();
+  if (typeof s.downloadAsset !== "function") return;
+  let last = -1;
+  await s.downloadAsset({
+    assetSrc: asset,
+    onProgress: (p: { percentage?: number }) => {
+      const r = Math.floor(p?.percentage ?? 0);
+      if (r === last) return;
+      last = r;
+      onProgreso?.({ pct: r, detalle: `Bajando ${r}%` });
+    },
+  });
+}
+
+export async function asegurarMedPsy(
+  onProgreso?: (p: ProgresoMedPsy) => void,
+): Promise<string> {
+  if (llmId) return llmId;
+  const s = await sdk();
+  const { HEALTHCARE_1_7B_MEDICAL_Q8_0 } = await import("@qvac/sdk/models");
+  onProgreso?.({ detalle: "Preparando MedPsy" });
+  const t0 = Date.now();
+  await bajar(HEALTHCARE_1_7B_MEDICAL_Q8_0, (p) => {
+    onProgreso?.({ ...p, detalle: `Bajando MedPsy ${p.pct ?? 0}%` });
+  });
+  onProgreso?.({ detalle: "Cargando MedPsy" });
+  llmId = await s.loadModel({
+    modelSrc: HEALTHCARE_1_7B_MEDICAL_Q8_0,
+    modelType: "llm",
+    modelConfig: { ctx_size: CTX, device: "cpu", reasoning_budget: 0 },
+  });
+  llmLoadMs = Date.now() - t0;
+  return llmId;
+}
+
+export async function soltarMedPsy(): Promise<void> {
+  if (inflight > 0) return;
+  const s = qvac;
+  const id = llmId;
+  llmId = null;
+  llmLoadMs = null;
+  if (!s || !id) return;
+  try {
+    await s.unloadModel({ modelId: id, clearStorage: false });
+  } catch (err) {
+    recordError("unloadModel", err);
+  }
+}
+
+export async function completarMedPsy(opts: {
+  system: string;
+  user: string;
+  task: InferenceTask;
+  temp?: number;
+  predict?: number;
+  onProgreso?: (p: ProgresoMedPsy) => void;
+}): Promise<string> {
+  inflight++;
+  try {
+    const s = await sdk();
+    const modelId = await asegurarMedPsy(opts.onProgreso);
+    const t1 = Date.now();
+    let first: number | null = null;
+    let text = "";
+    const r = s.completion({
+      modelId,
+      stream: true,
+      generationParams: { temp: opts.temp ?? 0.1, predict: opts.predict ?? 220 },
+      history: [
+        { role: "system", content: opts.system },
+        { role: "user", content: opts.user },
+      ],
+    });
+    for await (const tok of r.tokenStream) {
+      if (first === null) first = Date.now() - t1;
+      text += tok;
+    }
+    const f = await r.final;
+    await recordInference({
+      task: opts.task,
+      model: MEDPSY,
+      quant: "Q8_0",
+      lora: null,
+      ctx_size: CTX,
+      device_cfg: "cpu",
+      ttft_ms: first,
+      load_ms: llmLoadMs,
+      stats: f?.stats ?? {},
+    });
+    getAppLogger().info(`${opts.task} ${text.length} chars`);
+    return text;
+  } finally {
+    inflight--;
+  }
+}
