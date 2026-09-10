@@ -11,7 +11,7 @@ import * as DocumentPicker from "expo-document-picker";
 import { Pantalla, Encabezado, BarraVeredicto, Franja, Etiqueta, Pie, Boton } from "./ui/componentes";
 import Pictograma from "./ui/Pictograma";
 import { COLOR, TIPO, ESPACIO, DISPLAY, TOQUE } from "./ui/tokens";
-import { leerDocumento, soltarLectores, type ProgresoLectura } from "./leerDocumento";
+import { leerDocumento, mensajeLectura, soltarLectores, type ProgresoLectura } from "./leerDocumento";
 import type { ClaveDocumento } from "./core/extraccion";
 import type { Problema } from "./core/validaciones";
 import { CedulaSchema, IngresosSchema, ExtractoSchema } from "./core/schemas";
@@ -61,6 +61,14 @@ const SIN_CAMARA = "Sin permiso de cámara no podemos leer el documento. Actíva
 const FALLO_CAMARA = "No se pudo abrir la cámara. Intenta otra vez.";
 const FALLO_ARCHIVO = "No se pudo abrir el archivo. Prueba con una foto JPG o PNG.";
 const NO_IMAGEN = "Por ahora solo fotos (JPG o PNG). Si es un PDF, sácale una foto.";
+
+/** JPEG compatible: el OCR de QVAC no abre HEIC, que es lo que iOS entrega por defecto. */
+const CAPTURA: ImagePicker.ImagePickerOptions = {
+  mediaTypes: ["images"],
+  quality: 0.55,
+  exif: false,
+  preferredAssetRepresentationMode: ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
+};
 
 function semilla(lectura?: LecturaCredito): Record<ClaveDocumento, EstadoDoc> {
   if (!lectura) {
@@ -128,8 +136,7 @@ export default function PantallaDocumentos({
       }
     } catch (err) {
       recordError("PantallaDocumentos", err);
-      const mensaje = err instanceof Error ? err.message : "No se pudo leer el documento.";
-      setEstado(clave, { fase: "error", mensaje });
+      setEstado(clave, { fase: "error", mensaje: mensajeLectura(err) });
     }
   };
 
@@ -139,7 +146,7 @@ export default function PantallaDocumentos({
     try {
       const permiso = await ImagePicker.requestCameraPermissionsAsync();
       if (!permiso.granted) return setError(SIN_CAMARA);
-      const foto = await ImagePicker.launchCameraAsync({ quality: 0.7 });
+      const foto = await ImagePicker.launchCameraAsync(CAPTURA);
       if (foto.canceled || !foto.assets[0]?.uri) return;
       await procesar(clave, foto.assets[0].uri);
     } catch {
@@ -171,7 +178,7 @@ export default function PantallaDocumentos({
           setError("Sin permiso para leer tus archivos o la galería. Actívalo y vuelve a intentar.");
           return;
         }
-        const galeria = await ImagePicker.launchImageLibraryAsync({ quality: 0.7 });
+        const galeria = await ImagePicker.launchImageLibraryAsync(CAPTURA);
         if (galeria.canceled || !galeria.assets[0]?.uri) return;
         await procesar(clave, galeria.assets[0].uri);
       } catch {
@@ -256,7 +263,7 @@ export default function PantallaDocumentos({
       )}
 
       <Pie>
-        Primero se leen. Después se ve lo que quedó, sin las fotos.
+        Si un dato no cuadra, toma otra foto. Las imágenes no salen de este teléfono.
       </Pie>
     </Pantalla>
   );
@@ -283,22 +290,40 @@ function FilaDocumento({
       <View style={s.textos}>
         <View style={s.cabecera}>
           <Text style={s.nombre}>{doc.nombre}</Text>
-          {doc.obligatorio ? null : <Text style={s.opcional}>Opcional</Text>}
+          {listo && typeof estado.datos.confianza === "number" ? (
+            <Text style={s.pct}>{Math.round(estado.datos.confianza * 100)}%</Text>
+          ) : doc.obligatorio ? null : (
+            <Text style={s.opcional}>Opcional</Text>
+          )}
         </View>
-        <Text style={s.ayuda}>
-          {estado.fase === "leyendo"
-            ? `${estado.detalle}${estado.pct != null ? ` · ${estado.pct}%` : ""}`
-            : doc.ayuda}
-        </Text>
+        {estado.fase === "leyendo" ? (
+          <Text style={s.ayuda}>
+            {estado.detalle}{estado.pct != null ? ` · ${estado.pct}%` : ""}
+          </Text>
+        ) : listo || error ? null : (
+          <Text style={s.ayuda}>{doc.ayuda}</Text>
+        )}
 
         {listo ? (
-          <Text style={s.ayuda}>
-            {estado.borrada ? "Leído y copia borrada." : "Leído. No se pudo borrar la copia."}
-          </Text>
+          <ResumenDatos
+            clave={doc.clave}
+            datos={estado.datos}
+            problemas={estado.problemas}
+            nota={estado.borrada ? "Copia borrada." : "Leído. No se pudo borrar la copia."}
+          />
         ) : null}
 
         {error ? (
-          <Text style={s.problema}>{estado.mensaje}</Text>
+          <>
+            <Text style={s.problema}>{estado.mensaje}</Text>
+            {estado.crudo && typeof estado.crudo === "object" && !Array.isArray(estado.crudo) ? (
+              <ResumenDatos
+                clave={doc.clave}
+                datos={estado.crudo as Record<string, unknown>}
+                nota="Lo que se alcanzó a leer"
+              />
+            ) : null}
+          </>
         ) : null}
 
         {estado.fase !== "leyendo" ? (
@@ -336,6 +361,91 @@ function FilaDocumento({
   );
 }
 
+const TIPO_INGRESO: Record<string, string> = {
+  asalariado: "Asalariado",
+  independiente: "Independiente",
+  jubilado: "Jubilado",
+  otro: "Otro",
+};
+
+const MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+
+function textoDe(v: unknown): string | undefined {
+  if (typeof v === "number" && Number.isFinite(v)) return String(v);
+  if (typeof v !== "string") return undefined;
+  const t = v.trim();
+  return t || undefined;
+}
+
+function dineroDe(v: unknown): string | undefined {
+  const n = typeof v === "number" ? v : typeof v === "string" ? Number(v) : NaN;
+  return Number.isFinite(n) ? `B/. ${n.toFixed(2)}` : undefined;
+}
+
+function fechaDe(v: unknown): string | undefined {
+  const t = textoDe(v);
+  if (!t) return undefined;
+  const m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return t;
+  const mes = MES[Number(m[2]) - 1];
+  return mes ? `${Number(m[3])} ${mes} ${m[1]}` : t;
+}
+
+function camposDe(clave: ClaveDocumento, datos: Record<string, unknown>): { k: string; v: string }[] {
+  const out: { k: string; v: string }[] = [];
+  const add = (k: string, v: string | undefined) => { if (v) out.push({ k, v }); };
+
+  if (clave === "cedula") {
+    add("Nombre", textoDe(datos.nombre));
+    add("Cédula", textoDe(datos.numero));
+    add("Nacimiento", fechaDe(datos.fecha_nacimiento));
+    add("Vence", fechaDe(datos.fecha_expiracion));
+  }
+  if (clave === "ingresos") {
+    add("Actividad", textoDe(datos.empleador_o_actividad));
+    add("Ingreso al mes", dineroDe(datos.ingreso_mensual_usd));
+    const tipo = textoDe(datos.tipo);
+    add("Tipo", tipo ? (TIPO_INGRESO[tipo] ?? tipo) : undefined);
+    const meses = typeof datos.antiguedad_meses === "number" ? datos.antiguedad_meses : undefined;
+    if (meses != null) {
+      add("Antigüedad", meses >= 12 ? `${Math.floor(meses / 12)} años` : `${meses} ${meses === 1 ? "mes" : "meses"}`);
+    }
+  }
+  if (clave === "extracto") {
+    add("Banco", textoDe(datos.banco));
+    add("Saldo promedio", dineroDe(datos.saldo_promedio_usd));
+    const n = typeof datos.meses_cubiertos === "number" ? datos.meses_cubiertos : undefined;
+    if (n != null) add("Periodo", n === 1 ? "1 mes" : `${n} meses`);
+  }
+  return out;
+}
+
+function ResumenDatos({
+  clave, datos, problemas, nota,
+}: {
+  clave: ClaveDocumento;
+  datos: Record<string, unknown>;
+  problemas?: Problema[];
+  nota?: string;
+}) {
+  const campos = camposDe(clave, datos);
+  if (campos.length === 0 && !nota && !problemas?.length) return null;
+  return (
+    <View style={s.resumen}>
+      {campos.map(c => (
+        <View key={c.k} style={s.dato}>
+          <Text style={s.datoK}>{c.k}</Text>
+          <Text style={s.datoV}>{c.v}</Text>
+        </View>
+      ))}
+      {problemas?.map(p => (
+        <Text key={`${p.campo}:${p.mensaje}`} style={s.aviso}>{p.mensaje}</Text>
+      ))}
+      {nota ? <Text style={s.ayuda}>{nota}</Text> : null}
+    </View>
+  );
+}
+
 const s = StyleSheet.create({
   arriba: { paddingHorizontal: ESPACIO.borde, paddingTop: 18, paddingBottom: 16, gap: 10 },
   titular: { ...DISPLAY, fontSize: 34, lineHeight: 35, letterSpacing: -1.2, color: COLOR.tinta },
@@ -351,8 +461,14 @@ const s = StyleSheet.create({
   cabecera: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
   nombre: { fontSize: 17, fontWeight: "700", color: COLOR.tinta, flex: 1 },
   opcional: { ...TIPO.etiqueta, fontSize: 11, color: COLOR.gris },
+  pct: { ...TIPO.denso, fontWeight: "700", color: COLOR.rutinaria },
   ayuda: { fontSize: 13.5, lineHeight: 18, color: COLOR.gris },
   problema: { ...TIPO.denso, color: COLOR.inmediata },
+  aviso: { ...TIPO.denso, color: COLOR.prioritaria },
+  resumen: { gap: 8, marginTop: 6, paddingTop: 8, borderTopWidth: 1, borderTopColor: COLOR.separador },
+  dato: { gap: 1 },
+  datoK: { ...TIPO.etiqueta, fontSize: 11, color: COLOR.gris },
+  datoV: { fontSize: 16, fontWeight: "700", color: COLOR.tinta },
 
   acciones: { flexDirection: "row", gap: 8, marginTop: 10 },
   accion: {

@@ -83,6 +83,7 @@ async function asegurarOcr(onProgreso?: (p: ProgresoLectura) => void): Promise<s
     modelConfig: {
       langList: ["en"],
       magRatio: 1.5,
+      canvasSize: 2560,
       defaultRotationAngles: [90, 180, 270],
       contrastRetry: false,
       lowConfidenceThreshold: 0.5,
@@ -125,6 +126,35 @@ function rutaLocal(uri: string): string {
   return uri.startsWith("file://") ? decodeURIComponent(uri.slice("file://".length)) : uri;
 }
 
+/** El cliente de `ocr()` solo manda base64 si `image` no es string y tiene `toString('base64')`. Uint8Array no. */
+function imagenBase64(b64: string): { toString: (enc?: string) => string } {
+  const limpio = b64.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, "");
+  return { toString: (enc?: string) => (enc === "base64" || enc == null ? limpio : limpio) };
+}
+
+function esJpegOPng(b64: string): boolean {
+  const t = b64.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, "").replace(/\s/g, "");
+  return t.startsWith("/9j/") || t.startsWith("iVBORw0KGgo");
+}
+
+export function mensajeLectura(err: unknown): string {
+  const raw = err instanceof Error ? err.message : String(err);
+  const t = raw.toLowerCase();
+  if (
+    t.includes("invalid input")
+    || t.includes("invalid image")
+    || t.includes("invalid_image")
+    || t.includes("expected string")
+    || t.includes("unrecognized")
+  ) {
+    return "El lector no pudo abrir esa foto. Tómala otra vez, de frente y con luz.";
+  }
+  if (t.includes("not found") || t.includes("not accessible")) {
+    return "No se pudo abrir el archivo. Prueba tomándola otra vez con la cámara.";
+  }
+  return raw || "No se pudo leer el documento.";
+}
+
 async function copiaTrabajo(uri: string): Promise<string> {
   try {
     const dest = new File(Paths.cache, `inaigar-doc-${Date.now()}.jpg`);
@@ -140,8 +170,16 @@ async function ocrImagen(uri: string): Promise<{ texto: string; confianza?: numb
   if (!ocrId) throw new Error("OCR no cargado");
   if (typeof s.ocr !== "function") throw new Error("Este SDK no expone ocr()");
 
-  const correr = async (image: string | Uint8Array) => {
-    const r = s.ocr({ modelId: ocrId as string, image: image as unknown as string });
+  const file = new File(uri);
+  const b64 = typeof file.base64 === "function"
+    ? await file.base64()
+    : uint8ToBase64(await bytesDe(uri));
+  if (!esJpegOPng(b64)) {
+    throw new Error("Esa foto quedó en un formato que el lector no abre (HEIC). Tómala otra vez con la cámara de la app.");
+  }
+
+  const correr = async (image: unknown) => {
+    const r = s.ocr({ modelId: ocrId as string, image: image as string });
     const bloques = await r.blocks;
     const stats = await r.stats;
     return { bloques, stats };
@@ -150,20 +188,35 @@ async function ocrImagen(uri: string): Promise<{ texto: string; confianza?: numb
   let bloques: { text: string; confidence?: number }[];
   let stats: unknown;
   try {
-    const r = await correr(rutaLocal(uri));
+    // El worker Bare no siempre ve el cache de ImagePicker. Base64 no depende de la ruta.
+    const r = await correr(imagenBase64(b64));
     bloques = r.bloques;
     stats = r.stats;
   } catch (err) {
-    recordError("ocr.path", err);
-    const r = await correr(await bytesDe(uri));
-    bloques = r.bloques;
-    stats = r.stats;
+    recordError("ocr.base64", err);
+    try {
+      const r = await correr(rutaLocal(uri));
+      bloques = r.bloques;
+      stats = r.stats;
+    } catch (err2) {
+      recordError("ocr.path", err2);
+      throw new Error(mensajeLectura(err2 instanceof Error ? err2 : err));
+    }
   }
 
   const texto = bloques.map(b => b.text.trim()).filter(Boolean).join("\n");
   const confs = bloques.map(b => b.confidence).filter((c): c is number => typeof c === "number");
   const confianza = confs.length ? confs.reduce((a, b) => a + b, 0) / confs.length : undefined;
   return { texto, confianza, stats };
+}
+
+function uint8ToBase64(bytes: Uint8Array): string {
+  const CHUNK = 0x8000;
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    bin += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(bin);
 }
 
 async function extraerConLlm(clave: ClaveDocumento, textoOcr: string, confianzaOcr?: number) {
