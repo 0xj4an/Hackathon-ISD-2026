@@ -10,15 +10,31 @@ Your only job is "mensaje": explain in plain English what was observed and what 
 Never invent a price, exam, specialist or source. If it is not in the input, it does not exist.`;
 
 export const SYSTEM_EXTRACCION_CEDULA = `You receive noisy OCR text from a Panama national ID card.
-Extract: numero (formats like 8-123-4567, PE-12-345, E-8-12345), full name, fecha_nacimiento (YYYY-MM-DD), fecha_expiracion (YYYY-MM-DD if present), confianza (0 to 1 for readability).
-Reply ONLY with valid JSON using those keys. Use null if a field is missing. No extra text.`;
+Reply ONLY with a JSON object with these exact keys:
+- numero: Panama ID (8-123-4567, PE-12-345, E-8-12345)
+- nombre: given names AND surnames in ONE string (join NOMBRE + APELLIDOS)
+- fecha_nacimiento: YYYY-MM-DD (convert 14-MAR-1979 or 14/03/1979)
+- fecha_expiracion: YYYY-MM-DD if present, else null
+- confianza: 0 to 1 for readability
+Use null if a field is missing. No extra text.`;
 
 export const SYSTEM_EXTRACCION_INGRESOS = `You receive OCR text from a Panama income document (employment letter, payslip, or self-employment statement).
-Extract: empleador_o_actividad, ingreso_mensual_usd (number), tipo ("asalariado"|"independiente"|"jubilado"|"otro"), fecha_documento (YYYY-MM-DD if present), confianza (0 to 1).
-Reply ONLY with valid JSON using those keys. No extra text.`;
+Reply ONLY with a JSON object with these exact keys:
+- empleador_o_actividad: employer or activity
+- ingreso_mensual_usd: monthly income as a number (B/. 520.00 means 520)
+- tipo: "asalariado" | "independiente" | "jubilado" | "otro"
+- fecha_documento: YYYY-MM-DD if present (convert "28 de agosto de 2026"), else null
+- antiguedad_meses: months at the job if stated, else null
+- confianza: 0 to 1
+No extra text.`;
 
-export const SYSTEM_EXTRACCION_EXTRACTO = `You receive OCR text from a bank statement. Extract: banco, saldo_promedio_usd (number), meses_cubiertos (integer), confianza (0 to 1).
-Reply ONLY with valid JSON using those keys. No extra text.`;
+export const SYSTEM_EXTRACCION_EXTRACTO = `You receive OCR text from a bank statement.
+Reply ONLY with a JSON object with these exact keys:
+- banco: bank name
+- saldo_promedio_usd: average balance as a number
+- meses_cubiertos: integer 1 to 12
+- confianza: 0 to 1
+No extra text.`;
 
 /**
  * Lab report. The model only transcribes what the paper says: the rules in

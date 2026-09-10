@@ -263,7 +263,7 @@ export async function leerDocumento(
       await asegurarLlm(onProgreso);
       onProgreso?.({ paso: "extraccion", detalle: "Sacando los datos" });
       const bruto = await extraerConLlm(clave, textoOcr, ocr.confianza);
-      const parsed = parsearExtraccion(clave, bruto);
+      const parsed = parsearExtraccion(clave, bruto, textoOcr);
       return { ...parsed, textoOcr, borrada };
     } finally {
       borrarCopia(trabajo);
