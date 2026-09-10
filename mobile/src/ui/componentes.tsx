@@ -234,11 +234,11 @@ const s = StyleSheet.create({
   meta: { fontSize: 12, fontWeight: "600", color: COLOR.gris },
 
   veredicto: { paddingHorizontal: ESPACIO.borde, paddingTop: 24, paddingBottom: 26, gap: 14 },
-  veredictoTextos: { gap: 7 },
+  veredictoTextos: { gap: 7, minWidth: 0 },
   veredictoAnte: { ...TIPO.etiqueta, color: COLOR.sobreColor, opacity: 0.85 },
-  veredictoPalabra: { ...TIPO.veredicto, color: COLOR.sobreColor },
+  veredictoPalabra: { ...TIPO.veredicto, color: COLOR.sobreColor, flexShrink: 1 },
   versales: { textTransform: "uppercase" },
-  frase: { fontSize: 34, lineHeight: 36, letterSpacing: -0.8 },
+  frase: { fontSize: 34, lineHeight: 40, letterSpacing: -0.8 },
   veredictoDetalle: { ...TIPO.cuerpo, color: COLOR.sobreColor, marginTop: -6 },
 
   barra: {
@@ -253,8 +253,8 @@ const s = StyleSheet.create({
     paddingHorizontal: ESPACIO.borde, paddingTop: 20, paddingBottom: 18,
     borderBottomWidth: 3, borderBottomColor: COLOR.tinta,
   },
-  cifra: { ...TIPO.cifra, color: COLOR.tinta },
-  cifraTextos: { flex: 1, gap: 3 },
+  cifra: { ...TIPO.cifra, color: COLOR.tinta, flexShrink: 0 },
+  cifraTextos: { flex: 1, gap: 3, minWidth: 0 },
   cifraUnidad: { fontSize: 15, fontWeight: "700", color: COLOR.tinta },
   cifraNota: { fontSize: 14, lineHeight: 18, color: COLOR.gris },
 
@@ -294,7 +294,7 @@ const s = StyleSheet.create({
     flexDirection: "row", alignItems: "flex-start", gap: 13,
     paddingHorizontal: ESPACIO.borde, paddingVertical: 14,
   },
-  franjaTextos: { flex: 1, gap: 2 },
+  franjaTextos: { flex: 1, gap: 2, minWidth: 0 },
   franjaTitulo: { ...TIPO.barra, fontSize: 13, letterSpacing: 0.6, color: COLOR.sobreColor },
   franjaTexto: { fontSize: 13.5, lineHeight: 18, color: COLOR.sobreColor },
   franjaTextoApagado: { color: COLOR.sobreTinta },

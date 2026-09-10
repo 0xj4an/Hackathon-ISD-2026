@@ -68,10 +68,10 @@ export const DISPLAY = {
 /** Escala tipográfica. El piso es 13: por debajo no baja ni en modo denso. */
 export const TIPO = {
   /** El veredicto. Una o dos palabras, nunca más. */
-  veredicto: { ...DISPLAY, fontSize: 38, lineHeight: 38, letterSpacing: -1 },
+  veredicto: { ...DISPLAY, fontSize: 38, lineHeight: 42, letterSpacing: -1 },
   /** Cifra grande: el valor medido, el total, el monto aprobado. */
-  cifra: { ...DISPLAY, fontSize: 54, lineHeight: 46, letterSpacing: -2 },
-  cifraMedia: { ...DISPLAY, fontSize: 30, lineHeight: 32, letterSpacing: -1 },
+  cifra: { ...DISPLAY, fontSize: 54, lineHeight: 58, letterSpacing: -2 },
+  cifraMedia: { ...DISPLAY, fontSize: 30, lineHeight: 34, letterSpacing: -1 },
   /** Título de pantalla en modo denso. */
   titulo: { ...DISPLAY, fontSize: 23, lineHeight: 25 },
   /** El wordmark y las barras. */
