@@ -38,6 +38,7 @@ cola y viaja al banco cuando hay red o cuando aparece el nodo del corregimiento.
 
 | # | Capacidad | Detalle |
 | --- | --- | --- |
+| A0 | Onboarding sin esperar 2.1 GB | Perfil, mediciones y reglas usables mientras `downloadAsset` corre. `loadModel` solo al explicar. Ver `ADR-007` |
 | A1a | Detección por **historial** | Export de Google Health / Apple Health -> reglas de tendencia -> `Senal` |
 | A1b | Detección por **laboratorio** | Un resultado de examen -> reglas de rango de referencia -> `Senal` |
 | A1c | Explicación de la señal | `Senal` (venga de donde venga) -> MedPsy la redacta -> `AlertaSchema` |

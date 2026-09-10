@@ -15,7 +15,7 @@ Nada más avanza hasta que esto pase.
 
 - [ ] `[A]` El 14T Pro aparece en `adb devices`. Opciones de desarrollador, depuración USB **y la opción de instalar por USB**, que en Xiaomi suele faltar y puede pedir cuenta Mi
 - [ ] `[A]` `adb shell df -h /data` muestra >= 5 GB libres
-- [ ] `[A]` `cd mobile && npx expo run:android --device` carga MedPsy y suelta el primer token. La primera vez baja 2.1 GB, no es un cuelgue
+- [ ] `[A]` `cd mobile && npx expo run:android --device` (o APK EAS **1.0.2+**) pasa de `2b/4` sin abort de `libbare-kit`. Luego carga MedPsy y suelta el primer token. La primera vez baja 2.1 GB, no es un cuelgue (`ADR-007`: no bloquear onboarding; ahora el smoke sí espera)
 - [ ] `[A]` Repetir con `device: "cpu"` y anotar los dos TTFT
 - [ ] `[A]` `npm install` en `nodo/` y `core/`; `npm run banco` y `npm run corregimiento` se descubren por Hyperswarm
 

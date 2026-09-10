@@ -1,7 +1,7 @@
 # Architecture Decision Records
 
 Cada ADR conserva una decisión difícil de revertir, las alternativas y la
-condición que justificaría reabrirla. Estas seis son las decisiones del MVP que
+condición que justificaría reabrirla. Estas nueve son las decisiones del MVP que
 **no se vuelven a discutir**. Si alguien quiere reabrir una, la sección
 "Reabrir si" dice bajo qué condición, y esa condición es evidencia, no opinión.
 
@@ -13,7 +13,9 @@ condición que justificaría reabrirla. Estas seis son las decisiones del MVP qu
 | [ADR-004](ADR-004-core-dentro-de-mobile.md) | `core/` dentro de `mobile/src/`, sin monorepo |
 | [ADR-005](ADR-005-las-reglas-deciden-el-modelo-explica.md) | Las reglas deciden, el modelo explica |
 | [ADR-006](ADR-006-tres-modos-segun-el-telefono.md) | Tres modos según la RAM del teléfono |
+| [ADR-007](ADR-007-descarga-medpsy-no-bloquea-onboarding.md) | La descarga de MedPsy no bloquea el onboarding |
 | [ADR-008](ADR-008-que-variables-vigilamos.md) | Qué variables vigilamos y con qué umbrales |
+| [ADR-009](ADR-009-medpsy-infiere-en-ingles.md) | MedPsy infiere en inglés |
 
 Las decisiones que siguen **abiertas** no están aquí: viven en la tabla
 "Decisiones abiertas" de `../runs/mvp-hackathon/03-specification.md` y se
