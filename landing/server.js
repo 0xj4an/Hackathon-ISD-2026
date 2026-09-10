@@ -5,8 +5,13 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const DIR = import.meta.dirname;
-const PAGINA = readFileSync(resolve(DIR, "index.html"));
 const ADMIN = readFileSync(resolve(DIR, "admin.html"));
+const ESTATICO = {
+  "/favicon.png": ["favicon.png", "image/png"],
+  "/icon.png": ["icon.png", "image/png"],
+  "/og.png": ["og.png", "image/png"],
+  "/splash.png": ["splash.png", "image/png"],
+};
 const PUERTO = Number(process.env.PORT || 3000);
 const BANCO_URL = (process.env.BANCO_URL || "http://127.0.0.1:8787").replace(/\/$/, "");
 const CORREO = (process.env.BANCO_CORREO || "banco@gmail.com").toLowerCase();
@@ -173,12 +178,21 @@ createServer(async (req, res) => {
     }
   }
 
+  if (req.method === "GET" && ESTATICO[url]) {
+    const [archivo, tipo] = ESTATICO[url];
+    res.writeHead(200, {
+      "content-type": tipo,
+      "cache-control": "public, max-age=86400",
+    });
+    return res.end(readFileSync(resolve(DIR, archivo)));
+  }
+
   if (req.method === "GET" && (url === "/" || url === "/index.html")) {
     res.writeHead(200, {
       "content-type": "text/html; charset=utf-8",
-      "cache-control": "public, max-age=300",
+      "cache-control": "no-store",
     });
-    return res.end(PAGINA);
+    return res.end(readFileSync(resolve(DIR, "index.html")));
   }
 
   res.writeHead(404, { "content-type": "text/plain" });

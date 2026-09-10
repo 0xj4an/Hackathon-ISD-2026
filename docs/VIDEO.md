@@ -36,7 +36,8 @@ El reglamento pide cosas concretas, y cada una necesita su plano:
 
 ### 0:00 a 0:30 · El problema
 
-**Se ve:** una mano sosteniendo el teléfono. Nada de la app todavía.
+**Se ve:** intro cinemática de 22 s ([`intro.html`](intro.html)), muda.
+Luego corte al teléfono en la mano. Nada de la app todavía en ese plano.
 
 **Se dice:**
 

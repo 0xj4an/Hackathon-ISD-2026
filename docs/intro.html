@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ina Igar · Intro</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@500;600;700&display=swap">
+<style>
+  :root{
+    --negro:#000;
+    --tinta:#101010;
+    --crema:#F4F0E6;
+    --apagado:#8A8A8A;
+    --dur: 22s;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--negro);color:var(--crema);
+    font-family:Archivo,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+  .hud{
+    position:fixed;z-index:20;left:0;right:0;bottom:0;
+    display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;
+    padding:16px 22px;background:linear-gradient(transparent, rgba(0,0,0,.72));
+    font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:#B0B0B0;
+  }
+  body.grabando .hud{display:none}
+  .hud b{color:var(--crema);font-weight:700}
+  .hud kbd{
+    display:inline-block;border:1px solid #3A3A3A;padding:2px 7px;
+    font-family:inherit;letter-spacing:.12em;color:var(--crema);
+  }
+  .acciones{display:flex;gap:8px;margin-left:auto}
+  .acciones button{
+    border:1px solid #3A3A3A;padding:9px 14px;letter-spacing:.12em;
+    text-transform:uppercase;font-size:11px;font-weight:700;
+  }
+  .acciones button.pri{background:var(--crema);color:var(--negro);border-color:var(--crema)}
+
+  .escenario{
+    position:absolute;inset:0;margin:auto;
+    width:min(100vw, calc(100vh * 16 / 9));
+    height:min(100vh, calc(100vw * 9 / 16));
+    overflow:hidden;background:var(--negro);
+  }
+
+  .plano{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;
+  }
+  .plano img{display:block;max-width:100%;max-height:100%}
+
+  .huellas img{
+    width:min(46vh, 42vw);height:auto;opacity:.55;
+    filter:contrast(1.05);
+  }
+  .nombre{
+    margin:0;text-align:center;font-family:"Archivo Black",Archivo,sans-serif;
+    font-weight:400;font-size:clamp(4.2rem, 12vw, 8.4rem);line-height:.88;
+    letter-spacing:-.04em;
+  }
+  .nombre span{display:block}
+  .frase{
+    margin:0;text-align:center;max-width:16ch;
+    font-family:"Archivo Black",Archivo,sans-serif;font-weight:400;
+    font-size:clamp(1.6rem, 4.2vw, 3.1rem);line-height:1.08;letter-spacing:-.03em;
+  }
+  .sub{
+    position:absolute;bottom:9%;left:0;right:0;text-align:center;
+    font-size:clamp(.78rem, 1.4vw, 1rem);font-weight:700;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--apagado);
+  }
+  .lockup img{width:100%;height:100%;object-fit:cover}
+
+  .director{
+    display:none;position:absolute;z-index:12;top:18px;left:18px;right:18px;
+    font-size:12px;font-weight:600;letter-spacing:.04em;color:#7A7A7A;
+    font-variant-numeric:tabular-nums;
+  }
+  body.dir .director{display:block}
+  .director .tc{color:var(--crema);font-family:"Archivo Black",Archivo,sans-serif;letter-spacing:.08em}
+  .director .vo{margin-top:6px;max-width:62ch;line-height:1.45;color:#9A9A9A}
+
+  body.play .huellas{
+    animation: fadeZoom var(--dur) cubic-bezier(.22,.8,.28,1) both;
+  }
+  body.play .marca{
+    animation: fadeUp 5.2s cubic-bezier(.22,.8,.28,1) .9s both,
+               fadeOut 1.1s ease 7.6s forwards;
+  }
+  body.play .camino{
+    animation: fadeUp 4.4s cubic-bezier(.22,.8,.28,1) 7.4s both,
+               fadeOut 1s ease 12.2s forwards;
+  }
+  body.play .promesa{
+    animation: fadeUp 4.6s cubic-bezier(.22,.8,.28,1) 11.6s both,
+               fadeOut 1s ease 16.6s forwards;
+  }
+  body.play .lockup{
+    animation: fadeHold 6.2s cubic-bezier(.22,.8,.28,1) 16s both;
+  }
+
+  @keyframes fadeZoom{
+    0%{opacity:0;transform:scale(1.08)}
+    8%{opacity:1;transform:scale(1.04)}
+    22%{opacity:.9;transform:scale(1)}
+    28%{opacity:0;transform:scale(.98)}
+    100%{opacity:0}
+  }
+  @keyframes fadeUp{
+    0%{opacity:0;transform:translateY(18px) scale(1.02)}
+    18%{opacity:1;transform:translateY(0) scale(1)}
+    100%{opacity:1;transform:translateY(0) scale(1)}
+  }
+  @keyframes fadeOut{
+    to{opacity:0}
+  }
+  @keyframes fadeHold{
+    0%{opacity:0;transform:scale(1.03)}
+    18%{opacity:1;transform:scale(1)}
+    78%{opacity:1}
+    100%{opacity:0}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    body.play .plano{animation:none !important}
+    body.play .lockup{opacity:1}
+  }
+</style>
+</head>
+<body>
+<div class="escenario" id="escenario">
+  <div class="director" id="director">
+    <div><span class="tc" id="tc">00:00</span> · intro 22s · luego corte al teléfono</div>
+    <p class="vo" id="vo">—</p>
+  </div>
+
+  <div class="plano huellas">
+    <img src="design/marca/ina-igar-icon-tinta.png" alt="">
+  </div>
+
+  <div class="plano marca">
+    <h1 class="nombre"><span>INA</span><span>IGAR</span></h1>
+  </div>
+
+  <div class="plano camino">
+    <p class="frase">camino de la medicina</p>
+    <p class="sub">gunagaya</p>
+  </div>
+
+  <div class="plano promesa">
+    <p class="frase">Salud y crédito donde no llega la señal</p>
+  </div>
+
+  <div class="plano lockup">
+    <img src="design/marca/ina-igar-demo-16x9.png" alt="">
+  </div>
+</div>
+
+<div class="hud">
+  <span><b>Intro · 22 s</b> · 16:9 · muda, la voz se alinea después</span>
+  <span><kbd>espacio</kbd> play · <kbd>R</kbd> repetir · <kbd>F</kbd> pantalla · <kbd>D</kbd> voz</span>
+  <div class="acciones">
+    <button type="button" id="dirBtn">Voz</button>
+    <button type="button" id="playBtn" class="pri">Grabar</button>
+  </div>
+</div>
+
+<script>
+  const DUR = 22000;
+  const VOZ = [
+    [0, "En Panamá, 4 de cada 10 adultos viven con presión alta y no todos lo saben."],
+    [8, "En el interior, hacerse un examen es bajar al pueblo, pagar de una vez, y volver. Mucha gente no baja."],
+    [16, "Ina Igar significa camino de la medicina. Responde esas dos preguntas sin internet, dentro del teléfono."],
+    [22, "Corte al teléfono."],
+  ];
+
+  const escenario = document.getElementById("escenario");
+  const tc = document.getElementById("tc");
+  const vo = document.getElementById("vo");
+  let t0 = 0;
+  let timer = 0;
+  let clock = 0;
+
+  function linea(ms) {
+    let text = VOZ[0][1];
+    for (const [s, t] of VOZ) if (ms >= s * 1000) text = t;
+    return text;
+  }
+
+  function tick() {
+    const ms = Math.min(performance.now() - t0, DUR);
+    const s = Math.floor(ms / 1000);
+    const cs = Math.floor((ms % 1000) / 10);
+    tc.textContent = "00:" + String(s).padStart(2, "0") + "." + String(cs).padStart(2, "0");
+    vo.textContent = linea(ms);
+    if (ms < DUR) clock = requestAnimationFrame(tick);
+  }
+
+  function parar() {
+    document.body.classList.remove("play", "grabando");
+    cancelAnimationFrame(clock);
+    clearTimeout(timer);
+  }
+
+  async function grabar() {
+    parar();
+    document.body.classList.add("grabando");
+    try { await escenario.requestFullscreen(); } catch {}
+    await new Promise((r) => setTimeout(r, 900));
+    t0 = performance.now();
+    document.body.classList.add("play");
+    tick();
+    timer = setTimeout(() => {
+      document.body.classList.remove("play");
+      tc.textContent = "00:22.00";
+      vo.textContent = "Corte al teléfono.";
+    }, DUR);
+  }
+
+  function reproducir() {
+    parar();
+    t0 = performance.now();
+    document.body.classList.add("play");
+    tick();
+    timer = setTimeout(() => document.body.classList.remove("play"), DUR);
+  }
+
+  document.getElementById("playBtn").onclick = grabar;
+  document.getElementById("dirBtn").onclick = () => document.body.classList.toggle("dir");
+
+  addEventListener("keydown", (e) => {
+    if (e.code === "Space") { e.preventDefault(); reproducir(); }
+    if (e.key === "r" || e.key === "R") reproducir();
+    if (e.key === "g" || e.key === "G") grabar();
+    if (e.key === "d" || e.key === "D") document.body.classList.toggle("dir");
+    if (e.key === "f" || e.key === "F") escenario.requestFullscreen().catch(() => {});
+    if (e.key === "Escape") parar();
+  });
+
+  addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) document.body.classList.remove("grabando");
+  });
+</script>
+</body>
+</html>

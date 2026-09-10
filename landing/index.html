@@ -8,6 +8,9 @@
 <meta property="og:title" content="Ina Igar">
 <meta property="og:description" content="Salud y crédito donde no llega la señal. La inteligencia vive en el bolsillo, no en la nube.">
 <meta property="og:type" content="website">
+<meta property="og:image" content="/og.png">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/icon.png">
 <title>Ina Igar</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&display=swap">
@@ -51,8 +54,12 @@ header{padding:36px 0 0}
   text-transform:uppercase;color:var(--tinta);text-decoration:none;border:3px solid var(--tinta);
   padding:9px 13px;white-space:nowrap}
 .btn-admin:hover{background:var(--tinta);color:#fff}
-.marca{margin-top:34px}
-.gunagaya{margin-top:12px;font-size:.9rem;font-weight:700;letter-spacing:.14em;
+.marca{margin-top:34px;position:relative}
+.marca img{display:block;width:100%;height:auto;background:#000}
+.marca span{
+  position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);
+}
+.gunagaya{margin-top:16px;font-size:.9rem;font-weight:700;letter-spacing:.14em;
   text-transform:uppercase;color:var(--gris)}
 .bloque{background:var(--pronto);color:#fff;margin-top:38px;padding:40px 34px}
 .bloque .lede{font-family:"Archivo Black",Archivo,sans-serif;letter-spacing:-.03em;
@@ -156,7 +163,10 @@ footer a{color:#fff}
     <span class="tag">Decentralized AI Hackathon · ISD Summit 2026</span>
     <a class="btn-admin" href="/admin">Admin del banco</a>
   </div>
-  <h1 class="marca">Ina Igar</h1>
+  <h1 class="marca">
+    <img src="/og.png" alt="" width="1280" height="720">
+    <span>Ina Igar</span>
+  </h1>
   <p class="gunagaya">"camino de la medicina" · gunagaya</p>
 
   <div class="bloque">
