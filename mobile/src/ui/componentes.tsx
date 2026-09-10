@@ -9,7 +9,7 @@
  * - **Modo denso**: `BarraVeredicto` en lugar del bloque, `FilaLista` de 13 px,
  *   y `BandaTotal` abajo tomando el relevo como elemento dominante.
  */
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   SafeAreaView, ScrollView, View, Text, Pressable, StyleSheet,
 } from "react-native";
@@ -213,6 +213,34 @@ export const Pie = ({ children }: { children: ReactNode }) => (
   <Text style={s.pie}>{children}</Text>
 );
 
+/** Collapse con el log técnico: se selecciona o se manda por la hoja de share. */
+export function DetalleTecnico({ texto, onEnviar }: { texto: string; onEnviar?: () => void }) {
+  const [abierto, setAbierto] = useState(false);
+  if (!texto.trim()) return null;
+  return (
+    <View>
+      <Pressable
+        onPress={() => setAbierto(v => !v)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: abierto }}
+        accessibilityLabel={abierto ? "Ocultar detalle técnico" : "Ver detalle técnico"}
+        style={s.falloToggle}
+      >
+        <Text style={s.falloToggleTexto}>
+          {abierto ? "Ocultar detalle técnico" : "Ver detalle técnico"}
+        </Text>
+        <Text style={s.falloChevron}>{abierto ? "▴" : "▾"}</Text>
+      </Pressable>
+      {abierto ? (
+        <>
+          <Text selectable style={s.falloTecnico}>{texto}</Text>
+          {onEnviar ? <Boton texto="Enviar detalle" tono="borde" onPress={onEnviar} /> : null}
+        </>
+      ) : null}
+    </View>
+  );
+}
+
 /** La leyenda del punto ámbar. Va debajo de cualquier lista con estimaciones. */
 export const LeyendaEstimado = () => (
   <View style={s.leyenda}>
@@ -316,5 +344,27 @@ const s = StyleSheet.create({
   pie: {
     ...TIPO.pie, color: COLOR.gris,
     paddingHorizontal: ESPACIO.borde, marginTop: 12,
+  },
+
+  falloToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    minHeight: TOQUE,
+    paddingHorizontal: ESPACIO.borde,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLOR.separador,
+  },
+  falloToggleTexto: { ...TIPO.etiqueta, color: COLOR.gris, fontSize: 11 },
+  falloChevron: { fontSize: 14, color: COLOR.gris },
+  falloTecnico: {
+    fontFamily: "Courier",
+    fontSize: 11,
+    lineHeight: 15,
+    color: COLOR.tinta,
+    backgroundColor: COLOR.hundido,
+    paddingHorizontal: ESPACIO.borde,
+    paddingVertical: 12,
   },
 });

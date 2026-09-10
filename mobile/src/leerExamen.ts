@@ -4,7 +4,7 @@
  * El modelo solo transcribe. Rangos y urgencia salen de `marcadores.ts`.
  */
 import { SYSTEM_EXTRACCION_LABORATORIO } from "./core/prompts";
-import { parsearLaboratorio } from "./core/laboratorio";
+import { formatearDiagnosticoExamen, parsearLaboratorio } from "./core/laboratorio";
 import { buscarMarcador, clasificar, type LecturaLab, type Sexo } from "./core/marcadores";
 import { completarMedPsy, soltarMedPsy } from "./medpsy";
 import { saltarMedPsyLocal } from "./modo";
@@ -19,9 +19,20 @@ import { getAppLogger, recordError } from "./perf/logger";
 
 export type ResultadoExamen =
   | { ok: true; lecturas: LecturaLab[]; textoOcr: string; lora: string | null }
-  | { ok: false; error: string; textoOcr?: string };
+  | { ok: false; error: string; textoOcr?: string; diagnostico?: string };
 
 const ORDEN = { Inmediata: 0, Prioritaria: 1, Rutinaria: 2 } as const;
+
+function fallo(error: string, ocr: string, modelo: string): ResultadoExamen {
+  const diagnostico = formatearDiagnosticoExamen({
+    motivo: error,
+    lora: saltarMedPsyLocal() ? null : LORA_LAB_VERSION,
+    ocr,
+    modelo,
+  });
+  getAppLogger().warn(`examen fallo\n${diagnostico}`);
+  return { ok: false, error, textoOcr: ocr, diagnostico };
+}
 
 export async function leerExamenFoto(
   uri: string,
@@ -34,7 +45,7 @@ export async function leerExamenFoto(
     const ocr = await leerOcrDeUri(uri, aviso);
     textoOcr = ocr.texto;
     if (!textoOcr.trim()) {
-      return { ok: false, error: "No se leyó texto. Más luz o más de frente.", textoOcr };
+      return fallo("No se leyó texto. Más luz o más de frente.", textoOcr, "");
     }
     await soltarLectores();
 
@@ -61,10 +72,8 @@ export async function leerExamenFoto(
           : `MedPsy + LoRA · ${p.detalle}`,
       }),
     });
-    const parsed = parsearLaboratorio(bruto);
-    if (!parsed.ok) {
-      return { ok: false, error: parsed.error, textoOcr };
-    }
+    const parsed = parsearLaboratorio(bruto, textoOcr);
+    if (!parsed.ok) return fallo(parsed.error, textoOcr, bruto);
 
     const lecturas: LecturaLab[] = [];
     for (const l of parsed.datos.lecturas) {
@@ -73,11 +82,7 @@ export async function leerExamenFoto(
       lecturas.push(clasificar(m, l.valor, sexo));
     }
     if (lecturas.length === 0) {
-      return {
-        ok: false,
-        error: "Leí el papel, pero no reconocí ningún marcador del catálogo.",
-        textoOcr,
-      };
+      return fallo("Leí el papel, pero no reconocí ningún marcador del catálogo.", textoOcr, bruto);
     }
 
     getAppLogger().info(`examen ${lecturas.length} marcadores lora=${saltarMedPsyLocal() ? "nodo" : LORA_LAB_VERSION}`);
@@ -89,7 +94,11 @@ export async function leerExamenFoto(
     };
   } catch (err) {
     recordError("examen.foto", err);
-    return { ok: false, error: mensajeLectura(err), textoOcr };
+    return fallo(
+      mensajeLectura(err),
+      textoOcr,
+      err instanceof Error ? (err.stack ?? err.message) : String(err),
+    );
   } finally {
     await soltarLectores();
     await soltarMedPsy(true);

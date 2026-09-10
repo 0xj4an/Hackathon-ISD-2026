@@ -3,7 +3,7 @@
  * Si hay hallazgos fuera de rango, se puede pedir crédito.
  */
 import { useState } from "react";
-import { View, Text, TextInput, StyleSheet } from "react-native";
+import { View, Text, TextInput, StyleSheet, Share } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import type { Usuario } from "./usuarios";
@@ -14,7 +14,7 @@ import { LORA_LAB_VERSION } from "./lora";
 import { fichaModo, saltarMedPsyLocal } from "./modo";
 import { recordError } from "./perf/logger";
 import {
-  Pantalla, Encabezado, BarraVeredicto, Veredicto, Franja, Boton, Etiqueta, Pie,
+  Pantalla, Encabezado, BarraVeredicto, Veredicto, Franja, Boton, Etiqueta, Pie, DetalleTecnico,
 } from "./ui/componentes";
 import { COLOR, COLOR_URGENCIA, VERBO_URGENCIA, TIPO, ESPACIO, DISPLAY, TOQUE } from "./ui/tokens";
 
@@ -48,6 +48,21 @@ export default function PantallaExamen({
   const [progreso, setProgreso] = useState("");
   const [conLora, setConLora] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [diagnostico, setDiagnostico] = useState("");
+
+  const fallar = (mensaje: string, detalle = "") => {
+    setError(mensaje);
+    setDiagnostico(detalle);
+  };
+
+  const enviarDetalle = () => {
+    if (!diagnostico) return;
+    void Share.share({ message: diagnostico, title: "Error examen Ina Igar" }).catch(err => {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (/dismiss|cancel/i.test(msg)) return;
+      recordError("examen.share", err);
+    });
+  };
 
   const leerUri = async (uri: string) => {
     setLeyendo(true);
@@ -56,7 +71,7 @@ export default function PantallaExamen({
       const r = await leerExamenFoto(uri, usuario.sexo, p => {
         setProgreso(p.detalle + (p.pct != null ? ` · ${p.pct}%` : ""));
       });
-      if (!r.ok) setError(r.error);
+      if (!r.ok) fallar(r.error, r.diagnostico ?? "");
       else {
         setConLora(r.lora);
         setLecturas(r.lecturas);
@@ -69,23 +84,23 @@ export default function PantallaExamen({
 
   const tomarFoto = async () => {
     if (leyendo) return;
-    setError("");
+    fallar("");
     try {
       const permiso = await ImagePicker.requestCameraPermissionsAsync();
-      if (!permiso.granted) return setError(SIN_PERMISO);
+      if (!permiso.granted) return fallar(SIN_PERMISO);
       const foto = await ImagePicker.launchCameraAsync(CAPTURA);
       if (foto.canceled || !foto.assets[0]?.uri) return;
       await leerUri(foto.assets[0].uri);
     } catch {
       setLeyendo(false);
       setProgreso("");
-      setError(FALLO_CAMARA);
+      fallar(FALLO_CAMARA);
     }
   };
 
   const subirArchivo = async () => {
     if (leyendo) return;
-    setError("");
+    fallar("");
     try {
       const pick = await DocumentPicker.getDocumentAsync({
         type: ["image/jpeg", "image/png", "image/heic", "image/heif", "image/webp"],
@@ -95,7 +110,7 @@ export default function PantallaExamen({
       const asset = pick.assets[0];
       const mime = (asset.mimeType ?? "").toLowerCase();
       if (mime && !mime.startsWith("image/")) {
-        setError(NO_IMAGEN);
+        fallar(NO_IMAGEN);
         return;
       }
       await leerUri(asset.uri);
@@ -104,7 +119,7 @@ export default function PantallaExamen({
       try {
         const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (!permiso.granted) {
-          setError("Sin permiso para leer tus archivos o la galería. Actívalo y vuelve a intentar.");
+          fallar("Sin permiso para leer tus archivos o la galería. Actívalo y vuelve a intentar.");
           return;
         }
         const galeria = await ImagePicker.launchImageLibraryAsync(CAPTURA);
@@ -113,7 +128,7 @@ export default function PantallaExamen({
       } catch {
         setLeyendo(false);
         setProgreso("");
-        setError(FALLO_ARCHIVO);
+        fallar(FALLO_ARCHIVO);
       }
     }
   };
@@ -127,8 +142,8 @@ export default function PantallaExamen({
       if (!Number.isFinite(valor)) continue;
       salida.push(clasificar(m, valor, usuario.sexo));
     }
-    if (salida.length === 0) return setError(NADA);
-    setError("");
+    if (salida.length === 0) return fallar(NADA);
+    fallar("");
     setConLora(null);
     setLecturas(salida.sort((a, b) => ORDEN[a.urgencia] - ORDEN[b.urgencia]));
   };
@@ -203,7 +218,7 @@ export default function PantallaExamen({
         <Boton
           texto="Leer otro examen"
           tono="borde"
-          onPress={() => { setLecturas(null); setConLora(null); }}
+          onPress={() => { setLecturas(null); setConLora(null); fallar(""); }}
         />
 
         <Pie>
@@ -231,6 +246,7 @@ export default function PantallaExamen({
       </View>
 
       {error ? <Franja color={COLOR.inmediata} titulo="No se pudo" texto={error} /> : null}
+      {diagnostico ? <DetalleTecnico texto={diagnostico} onEnviar={enviarDetalle} /> : null}
       {leyendo ? (
         <Franja
           color={COLOR.prioritaria}
@@ -263,7 +279,7 @@ export default function PantallaExamen({
               value={valores[m.codigo] ?? ""}
               onChangeText={texto => {
                 setValores(previos => ({ ...previos, [m.codigo]: texto }));
-                if (error) setError("");
+                if (error) fallar("");
               }}
               placeholder="--"
               placeholderTextColor="#9A9A9A"

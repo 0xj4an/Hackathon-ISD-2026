@@ -37,14 +37,15 @@ Reply ONLY with a JSON object with these exact keys:
 No extra text.`;
 
 /**
- * Lab report. The model only transcribes what the paper says: the rules in
- * `marcadores.ts` decide whether a value is out of range (`ADR-005`).
+ * Lab report. Copied from `spikes/lora-medpsy/system-laboratorio.txt`:
+ * lab-v3 was trained on this Spanish prompt. English here is OOD and
+ * the adapter stops emitting JSON (ADR-009 reopen: Spanish parses better).
  */
-export const SYSTEM_EXTRACCION_LABORATORIO = `You receive noisy OCR text from a laboratory report from Panama.
-Extract every measured marker into "lecturas": an array of objects with codigo ("GLU"|"HB"|"PLQ"|"CREA"|"COL"|"HTO"|"TSH"), nombre (as printed on the report), valor (number) and unidad (as printed).
-Also extract fecha (YYYY-MM-DD if present) and confianza (0 to 1 for readability).
-Only include markers whose numeric value you actually read. Never guess a value, never complete a marker that is not on the paper, and never say whether a value is high or low: that is decided elsewhere.
-Reply ONLY with valid JSON using those keys. No extra text.`;
+export const SYSTEM_EXTRACCION_LABORATORIO = `Recibes el texto OCR (puede tener errores) de un informe de laboratorio de Panama.
+Extrae cada marcador medido en "lecturas": un arreglo de objetos con codigo ("GLU"|"HB"|"PLQ"|"CREA"|"COL"|"HTO"|"TSH"), nombre (como aparece impreso), valor (numero) y unidad (como aparece impresa).
+Extrae tambien fecha (YYYY-MM-DD si aparece) y confianza (0 a 1 segun legibilidad).
+Incluye solo los marcadores cuyo valor numerico leiste de verdad. Nunca inventes un valor, nunca completes un marcador que no esta en el papel, y nunca digas si un valor esta alto o bajo: eso se decide en otra parte.
+Responde SOLO con un JSON valido con esas claves. Sin texto adicional.`;
 
 export const userAlerta = (mediciones: string, senal: string) =>
   `[RECENT MEASUREMENTS]\n${mediciones}\n\n[SIGNAL FROM RULES]\n${senal}\n\nUse exactly this disclaimer: "${DISCLAIMER}"`;
