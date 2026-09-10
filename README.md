@@ -51,12 +51,11 @@ que se clasifica están en [`core/marcadores.ts`](core/marcadores.ts).
 
 - Plantilla [`ArturVargas/AI_Engineering_Kit`](https://github.com/ArturVargas/AI_Engineering_Kit) (ago 2026), de la que se generó el repo: `standards/`, `templates/`, `docs/superpowers/`, la estructura de `.ai/` y `docs/ai-engineering-kit.md` (su README).
 
-
 ## Contexto compartido del equipo
 - `docs/CHECKLIST.md`: **el plan de trabajo que se sigue**, por bloques y con criterios de aceptación.
 - `docs/BRIEF.md`: qué construimos, flujo y arquitectura.
 - `.ai/`: contexto estable (reglas del hackathon, los 5 retos, referencia del SDK QVAC, línea base) y decisiones.
-- `spikes/`: experimentos de validación. Vacío por ahora: el spike de LoRA se rehace desde cero dentro de la ventana, con sus scripts en el repo para que el jurado pueda repetirlo.
+- `spikes/`: experimentos de validación con sus scripts, para que el jurado pueda repetirlos. `spikes/README.md` explica cómo.
 - `docs/Reglas_Decentralized_AI_Hackathon.pdf`: reglamento oficial.
 
 ## Licencia

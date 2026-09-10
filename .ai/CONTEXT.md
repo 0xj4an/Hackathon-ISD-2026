@@ -13,7 +13,12 @@
 
 1. Toda inferencia corre en el dispositivo o delegada por P2P con QVAC. Ninguna llamada a OpenAI, Anthropic, Google, etc. en ningún flujo, ni para features menores. Descalifica.
 2. Nube permitida solo para lo no-IA (UI, backend, auth, sync opcional) y la app debe seguir siendo útil sin ella.
-3. Declarar en el README toda base preexistente (plantillas, librerías, boilerplate, este kit). Omitirla descalifica.
+3. Declarar en el README toda base preexistente. Omitirla descalifica. **Hoy esa
+   declaración es una sola línea, la plantilla AI Engineering Kit, y se queda
+   así.** Preexistente es lo que existía antes de que arrancara el cronómetro.
+   El andamiaje de `create-expo-app`, el tutorial de Expo, las librerías de los
+   `package.json` y las notas de `.ai/references/` no lo son y no se vuelven a
+   añadir. No expandir esa sección sin acordarlo con el equipo.
 4. Entregables: repo accesible al jurado + video ≤ 5 min en español, enlace sin login.
 5. Si se opta al reto Tether Psy: licencia open source permisiva, log de rendimiento estructurado (carga, prompts, tokens, TTFT, throughput), nombres honestos de modelo/cuantización/hardware, disclaimers médicos.
 6. Sin credenciales, tokens, PII ni datos reales de clientes en el repo ni en estos artefactos.
