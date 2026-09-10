@@ -81,6 +81,27 @@ Criterios que mueve: C6, C10, …
 
 ## Corridas
 
+### 2026-09-10 (tarde) · iPhone · pueblo LAN → Railway · ~`b5d69d6`
+
+Build: Metro / Release en mano (descubrimiento LAN activo).
+Quién: Juan (+ Artur en paralelo de docs)
+Documento: atajo demo / flujo crédito (no OCR en esta corrida)
+Caso: envío al pueblo
+
+| Paso | Resultado | Qué se vio |
+| --- | --- | --- |
+| Entrada / Buscar WiFi | ok | App halló `:8788` sin IP hardcodeada (`servicio: inaigar-pueblo`) |
+| Salud / alerta / docs | no el foco | Se llegó a cuota / envío |
+| Cuota → envío | **ok** | Cliente `192.168.0.17` → laptop pueblo → Railway |
+| Banco | **aprobada** | Montos **90**, **812**, **920** (logs del nodo) |
+| Admin | ok | `recibida` + canal `pueblo` |
+| Firma / desembolso | no se tocó / no anotado | Pendiente en corrida de video |
+
+Error literal: ninguno en el POST.
+
+Criterios: mueve evidencia de C8 parcial (camino B vivo). C6 OCR sigue abierta.
+Ver [`PRUEBA-NODO.md`](PRUEBA-NODO.md) § Medido 10 sep.
+
 ### 2026-09-10 ~02:40 · iPhone 17 Pro Max · `b27afc0` + cambios locales
 
 Build: el Release/Metro que tenía Artur en la mano. En el working tree, sin
@@ -126,9 +147,10 @@ iOS 26.6.1. Release `expo run:ios --device --configuration Release`.
 
 ---
 
-## Lo que todavía no se puede afirmar (auditoría 10 sep)
+## Lo que todavía no se puede afirmar (auditoría 10 sep tarde)
 
-Código por delante de la evidencia en el aparato. Ver [`CHECKLIST.md`](CHECKLIST.md).
+Código por delante de la evidencia en el aparato. Ver [`CHECKLIST.md`](CHECKLIST.md)
+y [`ESTADO.md`](ESTADO.md).
 
 - Que la foto de la cédula ya lee después del arreglo JPEG/base64.
 - Que ingresos y extracto leen por cámara. El arreglo es el mismo camino; no se
@@ -137,7 +159,9 @@ Código por delante de la evidencia en el aparato. Ver [`CHECKLIST.md`](CHECKLIS
   no se listó el contenedor.
 - Cola SQLite durable: código en `cola.ts` / `colaSqlite.ts`. Falta ver en el
   iPhone que sobrevive un kill y que al volver la red sale sola.
-- HTTP banco/pueblo **desde el iPhone** (sí medido desde laptop en
-  [`PRUEBA-NODO.md`](PRUEBA-NODO.md)).
+- HTTP **directo** al banco Railway desde el iPhone (modo `local-wifi`). El
+  camino **pueblo** sí está medido (corrida de arriba).
 - Alerta redactada por MedPsy **vista en el iPhone** (código: `redactarAlerta`).
 - `perf.jsonl` exportado de una corrida de producto (logger ya cableado).
+- Build EAS/Release con `expo-network` nativo si el binario viejo falla con
+  `Cannot find native module 'ExpoNetwork'` (Metro / prebuild reciente OK).

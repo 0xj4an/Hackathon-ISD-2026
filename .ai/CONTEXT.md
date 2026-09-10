@@ -45,5 +45,6 @@ Artefactos de la iniciativa en curso, en orden de lectura:
 3. `runs/mvp-hackathon/02-stack-y-plan.md`: plan por bloques (histórico).
 4. `adr/`: las **13** decisiones (001–013; 001 reemplazada por 013).
 
-`docs/BRIEF.md` y `docs/CHECKLIST.md` resumen el estado del equipo; ante una
-discrepancia con código, manda el código y el ADR vigente.
+`docs/ESTADO.md` es la **foto viva** (qué está medido, URLs, qué falta).
+`docs/BRIEF.md` y `docs/CHECKLIST.md` detallan producto e ítems; ante
+discrepancia con código, mandan el código, el ADR vigente y `ESTADO.md`.

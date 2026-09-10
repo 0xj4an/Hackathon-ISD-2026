@@ -16,23 +16,23 @@ Una app para personas en zonas rurales de Panamá con señal intermitente, que d
 3. **Documentos en el dispositivo (crédito).** Foto de cédula, ingresos y extracto. OCR (`OCR_LATIN`) → MedPsy base → JSON → **las fotos se borran**.
 4. **Examen de laboratorio.** Opción tras el resultado: foto del papel → OCR → **MedPsy + LoRA `lab-v3`** → `clasificar()` contra el catálogo. El adaptador solo corre aquí; cédula/ingresos/alerta siguen en MedPsy base.
 5. **Cola offline.** La solicitud va a SQLite (`cola.ts`) si no hay salida. Al reabrir, se retoma en cuota.
-6. **Envío.** Mismo JSON, nunca fotos. Con wifi (modo `local-wifi`): al banco remoto. Sin internet (`local-offline` / `nodo-offline`): LAN al nodo del pueblo.
-7. **Respuesta del banco.** Railway corre el mismo motor que `preCalificar()` en el teléfono. Cartera sintética, declarada.
+6. **Envío.** Mismo JSON, nunca fotos. Con wifi (modo `local-wifi`): al banco remoto. Sin internet (`local-offline` / `nodo-offline`): LAN al nodo del pueblo. La app **descubre el pueblo en la WiFi** (sin IP hardcodeada).
+7. **Respuesta del banco.** Railway corre el mismo motor que `preCalificar()` en el teléfono. Cartera sintética, declarada. Persistencia en Volume. Admin muestra hora y canal de llegada.
 8. **Firma y cierre.** Trazo en pantalla (no es firma electrónica legal; se declara) → desembolso **simulado** → Listo.
 
 ## Arquitectura
 ```
 mobile/   Expo + @qvac/sdk 0.18.2 · UI, cámara, OCR, MedPsy, LoRA lab-v3, cola SQLite, HTTP A/B
-          core: schemas, prompts, reglas, crédito, laboratorio
-nodo/     "nodo del pueblo" (LAN :8788) + banco remoto (Railway)
-landing/  Sitio del proyecto + admin mock del banco
+          descubrimiento LAN del pueblo (nodoUrl.ts) · core: schemas, prompts, reglas, crédito
+nodo/     "nodo del pueblo" (LAN :8788, Bonjour, /inferir) + banco remoto (Railway + Volume)
+landing/  Sitio del proyecto + admin (timestamp + canal por solicitud)
 data/     9 usuarios sintéticos, documentos de ejemplo (nunca datos reales)
 eval/     reglas + paquetes + crédito + alerta + laboratorio
 perf/     log estructurado (carga, prompt, tokens, TTFT, throughput, lora)
-docs/     brief, checklist, guion, DEMO-OBJETIVO-1, pruebas, decisiones
+docs/     ESTADO, brief, checklist, guion, pruebas, decisiones
 spikes/   LoRA MedPsy (RESULTADOS.md); el adaptador de corrida 3 vive en mobile/assets/models/
 ```
-Modelos (nombres honestos): MedPsy 1.7B Q8_0 (`HEALTHCARE_1_7B_MEDICAL_Q8_0`) para alerta y extracción de documentos; `OCR_LATIN` para texto; LoRA `lab-v3` (33 MB) solo en examen de lab. SDK **0.18.2** ([`ADR-013`](../.ai/adr/ADR-013-quedarnos-en-sdk-0.18.2.md)).
+Estado vivo: [`ESTADO.md`](ESTADO.md). Modelos (nombres honestos): MedPsy 1.7B Q8_0 (`HEALTHCARE_1_7B_MEDICAL_Q8_0`) para alerta y extracción de documentos; `OCR_LATIN` para texto; LoRA `lab-v3` (33 MB) solo en examen de lab. SDK **0.18.2** ([`ADR-013`](../.ai/adr/ADR-013-quedarnos-en-sdk-0.18.2.md)).
 
 ## Reglas duras
 - Inferencia: MedPsy en el teléfono primero. Si no puede (modo `nodo-offline` o fallo), POST de texto al nodo local. Nunca imágenes. Ningún proveedor de IA remoto. El banco solo recibe JSON de crédito, nunca fotos ni el motivo de salud. QVAC `delegate` no es el camino de la demo.

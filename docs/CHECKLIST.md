@@ -5,33 +5,26 @@
 Ordenado por lo que decide el resultado, no por horario. El detalle de cada
 punto está en [`02-stack-y-plan.md`](../.ai/runs/mvp-hackathon/02-stack-y-plan.md).
 
-Auditado contra el código el **10 sep 2026** (HEAD de trabajo). Los evals de
-dominio pasan; lo que falta es **evidencia en el iPhone** y cola durable.
+Auditado contra el código el **10 sep 2026 (tarde)** (`main` ~`b5d69d6`).
+Resumen ejecutivo: [`ESTADO.md`](ESTADO.md). Los evals de dominio pasan.
+Teléfono → pueblo → banco **medido** (montos 90, 812, 920 aprobados).
 
 ## Dónde estamos
 
 El dominio está terminado y medido: 14 señales con fuente, **nueve** casos
 clínicos, modelo de crédito con scorecard entrenado, `eval/run.mjs` y el
-contrato del crédito en verde sin tocar un teléfono. Trece pantallas en
-`mobile/src/` (once cableadas en `App.tsx`; `PantallaDatos` y `PantallaUsuarios`
-siguen en el repo fuera del camino de la demo). Guion de video escrito;
-documentos sintéticos listos con su ground truth.
+contrato del crédito en verde. Flujo móvil cableado hasta firma y desembolso
+simulado. Banco en Railway con **Volume** (solicitudes sobreviven redeploy).
+Admin muestra `recibida` + `canal`. El pueblo se **descubre en la LAN** sin IP
+fija (`nodoUrl.ts`).
 
-En código, la rama de salud ya pide a MedPsy la redacción (`redactarAlerta` →
-`SYSTEM_ALERTA` + `AlertaSchema`), la de documentos lee con OCR + MedPsy
-(`leerDocumento.ts`), el envío HTTP banco/pueblo existe, la cola SQLite guarda
-la solicitud pendiente (`cola.ts`), y `perf/logger` escribe desde esos flujos.
-El examen lee foto con OCR + **MedPsy + LoRA `lab-v3`**
-(`leerExamen.ts`, asset en `mobile/assets/models/`). Spike medido en
-`spikes/lora-medpsy/RESULTADOS.md` (lab JSON 5% → 68%).
+**Medido en iPhone (10 sep):** POST al pueblo desde `192.168.0.17` → banco
+aprueba. Ver [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md) y
+[`PRUEBA-NODO.md`](PRUEBA-NODO.md).
 
-Lo que falta no es “inventar el producto”, es **cerrar en el aparato**. Qué
-tocar en el iPhone, en avión, está en [`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md).
-El resultado de cada corrida se anota en [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
-La única corrida registrada de documentos en iPhone terminó en `invalid input`:
-el OCR rechazó la foto. Hay un arreglo escrito (JPEG compatible, base64) que
-**nadie ha visto funcionar todavía**. Sin esa corrida no se graba el video, y
-C6–C10 siguen abiertos en la práctica.
+Lo que falta para el cierre es sobre todo **video**, OCR limpio documentado,
+`perf.jsonl` exportado y ensayos repetidos en avión. Detalle en
+[`ESTADO.md`](ESTADO.md).
 
 ---
 
@@ -62,8 +55,8 @@ aparato.
 la copia (`leerDocumento.ts`). MedPsy es local primero; si no carga, el texto
 va al pueblo. Sigue `PantallaLeido`, la cuota con `preCalificar()` y el envío: al banco remoto si hay wifi (`local-wifi`), al nodo del pueblo si
 no. Tras aprobación: `PantallaFirma` (trazo) → `PantallaDesembolso` (simulado).
-HTTP medido desde laptop ([`PRUEBA-NODO.md`](PRUEBA-NODO.md)); desde el
-iPhone, no.
+HTTP al pueblo medido desde iPhone ([`PRUEBA-NODO.md`](PRUEBA-NODO.md));
+directo a Railway en teléfono, pendiente de anotar.
 
 `PantallaDatos.tsx` (editable, deudas y personas a cargo) sigue en el repo; el
 camino de la demo no pasa por ella (`lectura.ts` manda deudas/personas en 0).
@@ -86,16 +79,17 @@ Entrada ya no elige Historial|Examen como vías paralelas.
 - [x] Persistencia y cola. `expo-sqlite` en `colaSqlite.ts`; una pendiente a la
   vez. Si falla el envío, se guarda y al reabrir la app se vuelve a `PantallaCuota`.
   Falta verificar en el iPhone (C8/C9)
-- [~] Envío: al banco (Railway) si modo `local-wifi`; al pueblo si offline.
-  Código en `envio.ts`; medido sin teléfono; falta el iPhone
+- [x] Envío al pueblo desde iPhone (LAN): medido 10 sep (POST `192.168.0.17`,
+  montos 90 / 812 / 920 → aprobada). Descubrimiento sin IP fija.
+- [~] Envío directo al banco (Railway) en modo `local-wifi` desde iPhone:
+  código listo; preferir anotar corrida explícita en `PRUEBA-TELEFONO.md`
 - [x] Firma con trazo + disclaimer legal (`PantallaFirma`) y desembolso
   simulado (`PantallaDesembolso`) tras aprobación. Falta verlo en el iPhone
-  en la misma corrida de demo
+  en la misma corrida de demo grabada
 
 Material listo: `data/documentos/` tiene ocho ficticios (nítido y difícil de
-cédula, ingresos, extracto y examen) más `esperado.json`.
-más `esperado.json`. Cada corrida en el iPhone se anota en
-[`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
+cédula, ingresos, extracto y examen) más `esperado.json`. Cada corrida en el
+iPhone se anota en [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
 
 ### 1.3 P2P no conecta — cerrado para la demo
 
@@ -110,9 +104,9 @@ si no puede, HTTP de texto al pueblo. QVAC `delegate` no es el plan.
 
 ## 2. La demo tiene que correr entera
 
-- [~] Wi-Fi apagado: la solicitud queda en cola y la app lo dice (código:
-  SQLite + UI; falta ensayo en iPhone)
-- [ ] Wi-Fi encendido: la solicitud sale, el banco responde, la respuesta vuelve
+- [x] Wi-Fi / LAN al pueblo: la solicitud sale, el banco responde (medido
+  10 sep vía nodo)
+- [ ] Wi-Fi al banco directo (`local-wifi`): anotar corrida en teléfono
 - [ ] **Ensayarla tres veces seguidas** con el iPhone en la mano. Lo que falla,
   falla aquí y no grabando
 - [~] Disclaimers de salud visibles **en pantalla**: fuertes en Alerta y Examen;
@@ -173,7 +167,8 @@ JSON válido **5% → 68%**. Adaptador en la app como
 - [x] `data/generar-usuarios.mjs` produce el formato normalizado; casos embebidos en `mobile/src/datos/`
 - [x] `core/` unificado en `mobile/src/core/`, sin duplicado en la raíz
 - [x] Sentry cableado (init compartido, breadcrumbs, hooks EAS)
-- [x] Landing + admin del banco (`landing/`)
+- [x] Landing + admin del banco (`landing/`): lista con `recibida` + `canal`
+  (`directo` / `pueblo`). Banco Railway con Volume `/data`
 
 ### Bloque 0, cerrado en iPhone
 

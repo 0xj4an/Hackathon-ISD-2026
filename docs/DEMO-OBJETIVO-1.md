@@ -1,7 +1,9 @@
 # Ensayo en el iPhone: objetivo 1 (avión)
 
+Estado vivo del proyecto: [`ESTADO.md`](ESTADO.md).
+
 Qué tocar en el **iPhone 17 Pro Max** con el Release de `main` ahora
-(el SHA de `git rev-parse --short HEAD` al instalar; hoy ~`93d0ca3` o posterior).
+(el SHA de `git rev-parse --short HEAD` al instalar; hoy ~`b5d69d6` o posterior).
 
 Esto no es el guion del jurado ([`VIDEO.md`](VIDEO.md)). Es la corrida que
 tiene que salir **antes** de grabar. Lo que no se vea aquí no se dice en el

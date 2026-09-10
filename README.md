@@ -23,16 +23,24 @@ Requisitos: Node >= 22.17, un **iPhone físico** (la demo) o Android físico. Lo
 emuladores no sirven. En Android, Bare aborta hoy en HyperOS 3; no depender de
 eso para el video. `npx qvac doctor` valida el entorno.
 
+Estado actual (qué está medido, qué falta, URLs de Railway):
+[`docs/ESTADO.md`](docs/ESTADO.md).
+
 ```bash
 # app (demo: iPhone físico)
-cd mobile && npm install && npx expo run:ios --device --configuration Release
-# Android: npx expo run:android --device  - Bare aborta en el 14T; no es el camino de la demo
+cd mobile && npm install && npx expo start
+# Release / dispositivo: npx expo run:ios --device --configuration Release
 
-# camino: nodo del pueblo (apunta al banco en Railway)
+# nodo del pueblo (misma WiFi que el teléfono; la app lo descubre sola)
 cd nodo && npm install && npm run corregimiento
-# el banco remoto ya está en https://banco-production-3755.up.railway.app
-# opcional, banco local: npm run banco
+# Banco remoto: https://banco-production-3755.up.railway.app
+# Admin: https://isd-hackathon-landing-production.up.railway.app/admin
 ```
+
+La app **no usa IP fija** del pueblo: barre la LAN (y la IP de Metro si Expo
+va en LAN) buscando `:8788/salud` con `servicio: inaigar-pueblo`. En Entrada →
+*Solo para demostración* → **Buscar WiFi**. Cambiar de red no pide reeditar
+código: laptop y teléfono en la misma WiFi, nodo corriendo.
 
 La primera ejecución descarga MedPsy 1.7B Q8_0 (2.1 GB) al caché de QVAC.
 Hacerlo con wifi antes de la demo, no delante del jurado.
@@ -79,6 +87,7 @@ Los significados salen del diccionario escolar *Gayamar sabga* (gunagaya-españo
 - Plantilla [`ArturVargas/AI_Engineering_Kit`](https://github.com/ArturVargas/AI_Engineering_Kit) (ago 2026), de la que se generó el repo: `standards/`, `templates/`, los cuatro archivos de agosto de `docs/superpowers/`, la estructura de `.ai/` y `docs/ai-engineering-kit.md` (su README). Lo de septiembre en `docs/superpowers/` es nuestro.
 
 ## Contexto compartido del equipo
+- `docs/ESTADO.md`: **foto del estado** (qué está medido, URLs, qué falta).
 - `docs/CHECKLIST.md`: **el plan de trabajo que se sigue**, por bloques y con criterios de aceptación.
 - `docs/PRUEBA-TELEFONO.md`: lo que se vio en el iPhone físico, incluidas las fallas.
 - `docs/PRUEBA-NODO.md`: envío al banco (Railway) y al pueblo (LAN), medido, no recordado.

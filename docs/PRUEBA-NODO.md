@@ -37,15 +37,21 @@ POST https://banco-production-3755.up.railway.app/solicitud
 
 Si hay extracto, el grado baja la tasa (alrededor de 10.6%).
 
-En el iPhone esto **aún no está verificado**. El código ya intenta A (8 s) y si
-no hay respuesta final, cae a B.
+En el iPhone el camino **directo a Railway** (modo `local-wifi`) todavía
+conviene anotarlo en [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md). El camino
+**vía pueblo** desde el iPhone **sí está medido** el 10 sep (abajo).
+
+El banco en Railway usa **Volume** en `/data` (`STATE_DIR=/data`): las
+solicitudes sobreviven redeploy. Cada una guarda `{id}.meta.json` con
+`recibida` (ISO) y `canal` (`directo` | `pueblo`, vía header `x-via`).
+Admin: https://isd-hackathon-landing-production.up.railway.app/admin
 
 ---
 
 ## Al pueblo: HTTP en la LAN, medido
 
-Probado el 9 de septiembre y **vuelto a probar el 10**. Hoy el pueblo no decide:
-recibe y reenvía. Arranque:
+Probado el 9 de septiembre y **vuelto a probar el 10** (laptop y **iPhone**).
+Hoy el pueblo no decide: recibe y reenvía. Arranque:
 
 ```bash
 cd nodo && npm run corregimiento
@@ -138,9 +144,25 @@ antes de escribir. Un POST con esos campos extra responde 400.
 
 ---
 
+## Medido 10 sep · iPhone → pueblo → Railway
+
+Misma WiFi. Nodo `corregimiento` en laptop. App descubrió `:8788` (sin IP
+fija). Cliente visto en logs: `192.168.0.17`.
+
+| Monto | Decisión | Notas |
+| --- | --- | --- |
+| 90 | aprobada | POST `/solicitud` vía pueblo |
+| 812 | aprobada | idem |
+| 920 | aprobada | caso demo asalariado |
+
+Admin del banco muestra `recibida` + canal `pueblo`. Detalle de UI en
+[`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
+
+---
+
 ## Pendiente de verificar
 
-- [ ] Envío al banco en el iPhone: wifi encendido, POST a Railway, decisión en pantalla.
-- [ ] Envío al pueblo en el iPhone: wifi apagado / solo LAN, POST al pueblo `:8788`.
+- [ ] Envío **directo** al banco en el iPhone (modo `local-wifi`, sin pueblo).
+- [x] Envío al pueblo en el iPhone: LAN, POST `:8788` → Railway (10 sep).
 - [ ] Inferencia: MedPsy local; si el teléfono no puede, POST `/inferir` (texto).
 - [ ] Cola en SQLite (`colaSqlite.ts`). Cierra `C8` y `C9` en el aparato.
