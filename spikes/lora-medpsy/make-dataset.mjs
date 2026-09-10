@@ -25,18 +25,35 @@ const int = (lo, hi) => lo + Math.floor(rnd() * (hi - lo + 1));
 // Se leen de core/marcadores.ts por regex en vez de importar, para no arrastrar
 // un paso de compilacion de TypeScript dentro del spike.
 const SRC = readFileSync(resolve(DIR, "../../core/marcadores.ts"), "utf8");
-const MARCADORES = [...SRC.matchAll(
-  /\{\s*codigo:\s*"([^"]+)",\s*nombre:\s*"([^"]+)",\s*unidad:\s*"([^"]+)",\s*min:\s*([\d.]+),\s*max:\s*([\d.]+),\s*hallazgoAlto:\s*"([^"]+)",\s*hallazgoBajo:\s*"([^"]+)",\s*pasoAlto:\s*"([^"]+)",\s*pasoBajo:\s*"([^"]+)"/g
-)].map((m) => ({
-  codigo: m[1], nombre: m[2], unidad: m[3],
-  min: Number(m[4]), max: Number(m[5]),
-  hallazgoAlto: m[6], hallazgoBajo: m[7], pasoAlto: m[8], pasoBajo: m[9],
-}));
+
+// Se extrae campo por campo dentro de cada objeto `{ codigo: ... }`, en vez de
+// exigir un orden fijo. Asi el generador no se rompe (ni se salta un marcador
+// en silencio) cuando la tabla gana campos nuevos como `porSexo` o `fuente`.
+const bloques = SRC.slice(SRC.indexOf("MARCADORES: Marcador[]"))
+  .split(/\{\s*codigo:/).slice(1);
+
+const campo = (b, k) => b.match(new RegExp(`${k}:\\s*"([^"]+)"`))?.[1];
+const num = (b, k) => {
+  const v = b.match(new RegExp(`(?:^|[,{\\s])${k}:\\s*(-?[\\d.]+)`))?.[1];
+  return v === undefined ? undefined : Number(v);
+};
+
+const MARCADORES = bloques.map((b) => ({
+  codigo: b.match(/^\s*"([^"]+)"/)?.[1],
+  nombre: campo(b, "nombre"),
+  unidad: campo(b, "unidad"),
+  min: num(b, "min"),
+  max: num(b, "max"),
+  hallazgoAlto: campo(b, "hallazgoAlto"),
+  hallazgoBajo: campo(b, "hallazgoBajo"),
+  pasoAlto: campo(b, "pasoAlto"),
+  pasoBajo: campo(b, "pasoBajo"),
+})).filter((m) => m.codigo && m.nombre && m.min !== undefined && m.max !== undefined);
 
 if (MARCADORES.length === 0) throw new Error("no pude leer core/marcadores.ts");
 
-// CD4 fuera del dataset: su siguiente paso menciona VIH y el brief lo prohibe
-// en la demo publica. Ver 03-specification.md.
+// CD4 ya no esta en la tabla (su siguiente paso mencionaba VIH y el brief lo
+// prohibe). El filtro se queda como red de seguridad por si alguien lo repone.
 const USABLES = MARCADORES.filter((m) => m.codigo !== "CD4");
 
 // ------------------------------------------------------------------ CEDULAS
