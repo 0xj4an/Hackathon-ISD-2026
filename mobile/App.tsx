@@ -19,6 +19,7 @@
 // Expo o el SDK, en vez de nuestro código.
 import { useState } from "react";
 import PantallaEntrada from "./src/PantallaEntrada";
+import PantallaSalud from "./src/PantallaSalud";
 import PantallaRevision from "./src/PantallaRevision";
 import PantallaAlerta from "./src/PantallaAlerta";
 import PantallaCredito from "./src/PantallaCredito";
@@ -36,6 +37,7 @@ type PasoCredito = "captura" | "leido" | "cuota" | "banco";
 
 export default function App() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [conectado, setConectado] = useState(false);
   const [revisado, setRevisado] = useState(false);
   const [credito, setCredito] = useState<Credito | null>(null);
   const [enExamen, setEnExamen] = useState(false);
@@ -54,6 +56,7 @@ export default function App() {
 
   const salir = () => {
     setUsuario(null);
+    setConectado(false);
     setRevisado(false);
     setCredito(null);
     setEnExamen(false);
@@ -65,12 +68,26 @@ export default function App() {
   // require() y no import: expo-sharing no puede tumbar el arranque.
   if (enRegistro) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const PantallaRegistro = require("./src/PantallaRegistro").default;
+    const PantallaRegistro: typeof import("./src/PantallaRegistro").default =
+      require("./src/PantallaRegistro").default;
     return <PantallaRegistro onVolver={() => setEnRegistro(false)} />;
   }
 
   if (!usuario) {
     return <PantallaEntrada onEntrar={setUsuario} onRegistro={() => setEnRegistro(true)} />;
+  }
+
+  // De donde salen las mediciones. Es simulacion declarada, no conexion real:
+  // sin este paso la app salta del correo a un hallazgo y nadie entiende de
+  // donde salieron los numeros.
+  if (!conectado) {
+    return (
+      <PantallaSalud
+        usuario={usuario}
+        onListo={() => setConectado(true)}
+        onVolver={salir}
+      />
+    );
   }
 
   if (!revisado) {
@@ -150,7 +167,8 @@ export default function App() {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const PantallaDocumentos = require("./src/PantallaDocumentos").default;
+  const PantallaDocumentos: typeof import("./src/PantallaDocumentos").default =
+    require("./src/PantallaDocumentos").default;
   return (
     <PantallaDocumentos
       monto={monto}
