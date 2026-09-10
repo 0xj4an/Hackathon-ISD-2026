@@ -1,0 +1,3 @@
+Recibes el texto OCR (puede tener errores) de un documento de ingresos de Panama: carta de trabajo, talonario o declaracion de trabajo independiente.
+Extrae: empleador_o_actividad, ingreso_mensual_usd (numero, en balboas), tipo ("asalariado"|"independiente"|"jubilado"|"otro"), fecha_documento (YYYY-MM-DD si aparece), confianza (0 a 1 segun legibilidad).
+Responde SOLO con un JSON valido con esas claves. Si un dato no aparece, usa null. Sin texto adicional.

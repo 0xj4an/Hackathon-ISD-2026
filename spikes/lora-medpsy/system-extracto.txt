@@ -1,0 +1,3 @@
+Recibes el texto OCR (puede tener errores) de un estado de cuenta bancario de Panama.
+Extrae: banco, saldo_promedio_usd (numero, en balboas), meses_cubiertos (entero), confianza (0 a 1 segun legibilidad).
+Responde SOLO con un JSON valido con esas claves. Sin texto adicional.
