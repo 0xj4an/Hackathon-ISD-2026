@@ -1,19 +1,11 @@
 /**
- * Pantalla de entrada: se elige con qué usuario entrar.
+ * Pantalla de entrada alternativa: se elige con qué usuario entrar.
  *
- * En producción no existiría: la app leería el historial de quien la usa. Está
- * aquí porque la demo tiene que poder mostrar varios cuadros clínicos en cinco
- * minutos de vídeo, y se declara como tal en pantalla.
+ * En producción no existiría. No adelanta hallazgos: eso sale después de leer
+ * el historial, igual que en el flujo real (entrada → salud → alerta).
  */
 import { SafeAreaView, ScrollView, Text, View, Pressable, StyleSheet } from "react-native";
 import { USUARIOS, type Usuario } from "./usuarios";
-import { detectarSenales } from "./core/reglas";
-
-const COLOR_URGENCIA = {
-  Inmediata: "#A2402F",
-  Prioritaria: "#B77812",
-  Rutinaria: "#0E6E6C",
-} as const;
 
 export default function PantallaUsuarios({ onElegir }: { onElegir: (u: Usuario) => void }) {
   return (
@@ -21,55 +13,34 @@ export default function PantallaUsuarios({ onElegir }: { onElegir: (u: Usuario) 
       <ScrollView contentContainerStyle={s.cuerpo}>
         <Text style={s.marca}>Ina Igar</Text>
         <Text style={s.sub}>camino de la medicina</Text>
-        <Text style={s.titulo}>Elige un caso</Text>
+        <Text style={s.titulo}>Elige un historial</Text>
 
         <View style={s.aviso}>
           <Text style={s.avisoTexto}>
-            Pantalla de demostración. Cada caso es un historial sintético completo: ninguno
-            corresponde a una persona real. En uso normal la app leería tu propio historial y
-            esta pantalla no existiría.
+            Pantalla de demostración. Cada opción es un historial sintético de ~un año: ninguno
+            corresponde a una persona real. Primero se lee; después, si algo está fuera de rango,
+            aparece la alerta.
           </Text>
         </View>
 
-        {USUARIOS.map(u => {
-          const senales = detectarSenales(u.mediciones);
-          const peor = senales.find(x => x.urgencia === "Inmediata")
-            ?? senales.find(x => x.urgencia === "Prioritaria")
-            ?? senales[0];
-          return (
-            <Pressable
-              key={u.id}
-              onPress={() => onElegir(u)}
-              accessibilityRole="button"
-              accessibilityLabel={`Ver el caso ${u.nombre}. ${u.descripcion}`}
-              style={({ pressed }) => [s.tarjeta, pressed && s.tarjetaPress]}
-            >
-              <View style={s.fila}>
-                <View style={s.inicial}><Text style={s.inicialTexto}>{u.nombre[0]}</Text></View>
-                <View style={s.textos}>
-                  <Text style={s.nombre}>{u.nombre}</Text>
-                  <Text style={s.meta}>{u.sexo === "mujer" ? "Mujer" : "Hombre"}, {u.edad} años</Text>
-                  <Text style={s.caso}>{u.descripcion}</Text>
-                </View>
-                <View style={s.estado}>
-                  {senales.length === 0 ? (
-                    <Text style={[s.pill, { color: COLOR_URGENCIA.Rutinaria }]}>Sin señales</Text>
-                  ) : (
-                    <>
-                      <Text style={[s.pill, { color: COLOR_URGENCIA[peor!.urgencia] }]}>
-                        {peor!.urgencia}
-                      </Text>
-                      <Text style={s.cuenta}>
-                        {senales.length} {senales.length === 1 ? "señal" : "señales"}
-                      </Text>
-                    </>
-                  )}
-                </View>
+        {USUARIOS.map(u => (
+          <Pressable
+            key={u.id}
+            onPress={() => onElegir(u)}
+            accessibilityRole="button"
+            accessibilityLabel={`Entrar con ${u.correo}`}
+            style={({ pressed }) => [s.tarjeta, pressed && s.tarjetaPress]}
+          >
+            <View style={s.fila}>
+              <View style={s.inicial}><Text style={s.inicialTexto}>{u.correo[0].toUpperCase()}</Text></View>
+              <View style={s.textos}>
+                <Text style={s.nombre}>{u.correo}</Text>
+                <Text style={s.meta}>{u.sexo === "mujer" ? "Mujer" : "Hombre"}, {u.edad} años</Text>
               </View>
-              <Text style={s.contexto}>{u.contexto}</Text>
-            </Pressable>
-          );
-        })}
+            </View>
+            <Text style={s.contexto}>{u.contexto}</Text>
+          </Pressable>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
@@ -100,10 +71,6 @@ const s = StyleSheet.create({
   textos: { flex: 1 },
   nombre: { fontSize: 16, fontWeight: "600", color: "#0F1512" },
   meta: { fontSize: 12, color: "#818C87", marginTop: 1 },
-  caso: { fontSize: 13.5, color: "#4E5A55", marginTop: 5 },
-  estado: { alignItems: "flex-end" },
-  pill: { fontSize: 12, fontWeight: "700" },
-  cuenta: { fontSize: 11, color: "#818C87", marginTop: 2 },
   contexto: {
     fontSize: 12.5, color: "#818C87", marginTop: 12, paddingTop: 10,
     borderTopWidth: 1, borderTopColor: "#EAEEEB", lineHeight: 18,
