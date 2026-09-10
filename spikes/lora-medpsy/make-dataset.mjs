@@ -308,20 +308,55 @@ for (let i = 0; i < 80; i++) {
   }));
 }
 
-// Barajado determinista, para que train y eval mezclen las dos tareas.
-for (let i = filas.length - 1; i > 0; i--) {
-  const j = Math.floor(rnd() * (i + 1));
-  [filas[i], filas[j]] = [filas[j], filas[i]];
+// Barajado determinista dentro de cada tarea.
+const barajar = (a) => {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/**
+ * El corte es estratificado: 20% de CADA tarea va a evaluacion.
+ *
+ * Con un corte plano el barajado dejo 3 casos de ingresos y 2 de extracto, y
+ * ahi un solo acierto mueve el resultado 33 o 50 puntos. La tabla antes/despues
+ * es el entregable: tiene que medir, no oscilar.
+ */
+// El generador puede repetir un ejemplo por azar, y un duplicado que cae a los
+// dos lados del corte le regala al modelo un caso que ya memorizo. Fuera antes
+// de repartir.
+const unicas = [...new Set(filas)];
+const duplicados = filas.length - unicas.length;
+
+const porTarea = {};
+for (const f of unicas) {
+  const t = JSON.parse(f).messages[0].content;
+  const k = t.includes("cedula de identidad") ? "cedula"
+          : t.includes("documento de ingresos") ? "ingresos"
+          : t.includes("estado de cuenta") ? "extracto" : "triaje";
+  (porTarea[k] ??= []).push(f);
 }
 
-const CORTE = 270;
-writeFileSync(resolve(DIR, "train.jsonl"), filas.slice(0, CORTE).join("\n") + "\n");
-writeFileSync(resolve(DIR, "eval.jsonl"), filas.slice(CORTE).join("\n") + "\n");
+const train = [], evalu = [];
+for (const k of Object.keys(porTarea).sort()) {
+  const g = barajar(porTarea[k]);
+  const nEval = Math.max(8, Math.round(g.length * 0.2));
+  evalu.push(...g.slice(0, nEval));
+  train.push(...g.slice(nEval));
+}
+barajar(train); barajar(evalu);
+
+writeFileSync(resolve(DIR, "train.jsonl"), train.join("\n") + "\n");
+writeFileSync(resolve(DIR, "eval.jsonl"), evalu.join("\n") + "\n");
+const filasTrain = train, filasEval = evalu;
 writeFileSync(resolve(DIR, "system-extraccion.txt"), SYSTEM_EXTRACCION);
 writeFileSync(resolve(DIR, "system-triaje.txt"), SYSTEM_TRIAJE);
 writeFileSync(resolve(DIR, "system-ingresos.txt"), SYSTEM_INGRESOS);
 writeFileSync(resolve(DIR, "system-extracto.txt"), SYSTEM_EXTRACTO);
 
 console.log(`marcadores usados: ${USABLES.length} de ${MARCADORES.length} (CD4 excluido por el brief)`);
-console.log(`train ${CORTE} / eval ${filas.length - CORTE} ejemplos`);
+console.log(`train ${filasTrain.length} / eval ${filasEval.length} ejemplos (corte estratificado, 20% de cada tarea)`);
+console.log(`duplicados eliminados: ${duplicados}`);
 console.log(`mezcla: 110 cedula + 55 ingresos + 55 extracto + 80 triaje`);
