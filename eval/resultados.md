@@ -71,6 +71,57 @@ detecta algo y no sabe decir cuanto cuesta atenderlo.
 
 - senales sin paquete: 0, OK (de 14)
 
+## 5. Modelo de credito
+
+El scorecard esta entrenado sobre **cartera sintetica** de 3000 solicitantes con semilla 20260910. No hay ni un dato real de ningun cliente.
+
+Holdout: AUC 0.7233, KS 0.3795, mora de la cartera 13.27%.
+
+### Monotonia de los puntos
+
+| Variable | IV | Puntos por bin | |
+| --- | --- | --- | --- |
+| tipo | 0.245 | 101, 116, 84, 59 | categorica |
+| antiguedad | 0.030 | 85, 85, 95 | OK |
+| deuda_ing | 0.241 | 112, 109, 91, 75 | OK |
+| monto_ing | 0.074 | 99, 99, 91, 82 | OK |
+| meses_extracto | 0.309 | 84, 93, 95, 109 | OK |
+| saldo_ing | 0.304 | 84, 101, 105 | OK |
+
+La edad no puntua: OK. Solo define elegibilidad.
+
+### Los montos de la demo
+
+Ingreso de B/. 520, asalariado, una deuda de B/. 40 al mes, sin dependientes.
+
+| Monto | Decision | Grado | Plazo | Tasa | Cuota | |
+| --- | --- | --- | --- | --- | --- | --- |
+| 920 | aprobada | C | 12 | 17.4% | 84.08 | OK |
+| 812 | aprobada | C | 12 | 17.49% | 74.25 | OK |
+| 530 | aprobada | C | 6 | 16.63% | 92.67 | OK |
+| 170 | aprobada | B | 6 | 19.92% | 30 | OK |
+| 120 | aprobada | B | 6 | 22.96% | 21.36 | OK |
+| 28 | aprobada | B | 6 | 24% | 5 | OK |
+
+### Invariantes
+
+| Invariante | |
+| --- | --- |
+| la cuota nunca pasa la capacidad | OK |
+| el monto nunca pasa 3 veces el ingreso | OK |
+| la tasa esta entre el piso y el techo | OK |
+| toda decision trae version de politica | OK |
+| el rechazo dice cuanto puede pagar | OK |
+| el rechazo trae factores accionables | OK |
+| la precalificacion se declara estimada | OK |
+| precalificacion y decision coinciden en el monto | OK |
+
+### El precio contra la perdida
+
+Expuesto B/. 2580. Perdida simulada B/. 116.87 (4.53%). Prima de riesgo cobrada B/. 212.99. Provision B/. 155.83.
+
+El precio cubre la perdida: OK.
+
 ## Resultado
 
 **Todo pasa.** Los casos producen exactamente sus senales declaradas, los marcadores clasifican en los tres estados, ninguna senal sale sin ruta ni sin fuente, y todo paquete sale con su costo y su fuente.

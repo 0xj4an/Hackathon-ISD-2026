@@ -25,14 +25,21 @@ const TMP = mkdtempSync(resolve(tmpdir(), "eval-inaigar-"));
 execFileSync(resolve(RAIZ, "mobile/node_modules/.bin/tsc"), [
   "--outDir", TMP, "--target", "es2022", "--module", "esnext",
   "--moduleResolution", "bundler", "--skipLibCheck",
+  // Dentro de `credito/` los imports llevan extension `.ts` porque los lee
+  // Node sin build. Este flag los reescribe a `.js` al emitir.
+  "--rewriteRelativeImportExtensions",
   resolve(RAIZ, "mobile/src/core/reglas.ts"),
   resolve(RAIZ, "mobile/src/core/marcadores.ts"),
   resolve(RAIZ, "mobile/src/core/paquete.ts"),
+  resolve(RAIZ, "mobile/src/core/credito/motor.ts"),
 ], { stdio: "pipe" });
 
 const { detectarSenales } = await import(resolve(TMP, "reglas.js"));
 const { MARCADORES, clasificar } = await import(resolve(TMP, "marcadores.js"));
 const { armarPaquete } = await import(resolve(TMP, "paquete.js"));
+const { decidir, preCalificar } = await import(resolve(TMP, "credito/motor.js"));
+const { MODELO } = await import(resolve(TMP, "credito/modelo.js"));
+const { simular } = await import(resolve(RAIZ, "nodo/cartera.mjs"));
 
 const lineas = [];
 const di = (s = "") => { console.log(s); lineas.push(s); };
@@ -188,6 +195,104 @@ const CODIGOS = [
 const sinPaquete = CODIGOS.filter(c => armarPaquete([{ codigo: c, urgencia: "Rutinaria" }]) === null);
 if (sinPaquete.length) fallos++;
 di(`- senales sin paquete: ${sinPaquete.length}${sinPaquete.length ? " (" + sinPaquete.join(", ") + ") FALLA" : ", OK"} (de ${CODIGOS.length})`);
+di();
+
+// ---------------------------------------------------------------- 5) credito
+di("## 5. Modelo de credito");
+di();
+di("El scorecard esta entrenado sobre **cartera sintetica** de " + MODELO.n +
+   " solicitantes con semilla " + MODELO.semilla + ". No hay ni un dato real de ningun cliente.");
+di();
+di(`Holdout: AUC ${MODELO.metricas.auc}, KS ${MODELO.metricas.ks}, mora de la cartera ${(MODELO.metricas.mora_cartera * 100).toFixed(2)}%.`);
+di();
+
+di("### Monotonia de los puntos");
+di();
+di("| Variable | IV | Puntos por bin | |");
+di("| --- | --- | --- | --- |");
+for (const v of MODELO.variables) {
+  const pts = MODELO.puntos[v];
+  const esCategorica = MODELO.bins[v].clase === "categorica";
+  const sube = pts.every((p, i) => i === 0 || p >= pts[i - 1]);
+  const baja = pts.every((p, i) => i === 0 || p <= pts[i - 1]);
+  const ok = esCategorica || sube || baja;
+  if (!ok) fallos++;
+  di(`| ${v} | ${MODELO.iv[v].toFixed(3)} | ${pts.join(", ")} | ${ok ? (esCategorica ? "categorica" : "OK") : "**FALLA**"} |`);
+}
+di();
+
+const puntuaEdad = MODELO.variables.includes("edad");
+if (puntuaEdad) fallos++;
+di(`La edad no puntua: ${puntuaEdad ? "**FALLA**" : "OK"}. Solo define elegibilidad.`);
+di();
+
+di("### Los montos de la demo");
+di();
+di("Ingreso de B/. 520, asalariado, una deuda de B/. 40 al mes, sin dependientes.");
+di();
+di("| Monto | Decision | Grado | Plazo | Tasa | Cuota | |");
+di("| --- | --- | --- | --- | --- | --- | --- |");
+
+const HOY_EVAL = new Date("2026-09-10T12:00:00.000Z");
+const solBase = (monto) => ({
+  id: "0b7f1a2c-3d4e-4f50-8a1b-2c3d4e5f6071",
+  monto_solicitado_usd: monto,
+  cedula: { numero: "8-123-4567", nombre: "Demo", fecha_nacimiento: "1990-05-04",
+            fecha_expiracion: "2030-01-01", confianza: 0.9 },
+  ingresos: { empleador_o_actividad: "Finca", ingreso_mensual_usd: 520,
+              tipo: "asalariado", antiguedad_meses: 36, confianza: 0.9 },
+  deudas_mensuales_usd: 40, personas_a_cargo: 0,
+});
+
+const MONTOS = [920, 812, 530, 170, 120, 28];
+const aprobados = [];
+for (const monto of MONTOS) {
+  const r = decidir(solBase(monto), {}, HOY_EVAL);
+  const ok = r.decision === "aprobada";
+  if (!ok) fallos++;
+  if (ok) aprobados.push({ monto: r.monto_aprobado_usd, pd: r.pd_pct / 100 });
+  di(`| ${monto} | ${r.decision} | ${r.grado ?? "-"} | ${r.plazo_meses ?? "-"} | ${r.tasa_anual_pct ?? "-"}% | ${r.cuota_mensual_usd ?? "-"} | ${ok ? "OK" : "**FALLA**"} |`);
+}
+di();
+
+di("### Invariantes");
+di();
+const invariantes = [];
+for (const monto of MONTOS) {
+  const r = decidir(solBase(monto), {}, HOY_EVAL);
+  if (r.decision !== "aprobada") continue;
+  invariantes.push(["la cuota nunca pasa la capacidad", r.cuota_mensual_usd <= 138.84]);
+  invariantes.push(["el monto nunca pasa 3 veces el ingreso", r.monto_aprobado_usd <= 1560]);
+  invariantes.push(["la tasa esta entre el piso y el techo", r.tasa_anual_pct >= 9.5 && r.tasa_anual_pct <= 24]);
+  invariantes.push(["toda decision trae version de politica", Boolean(r.politica_version)]);
+}
+const rechazo = decidir({ ...solBase(920), ingresos: { ...solBase(920).ingresos, ingreso_mensual_usd: 260 }, personas_a_cargo: 3 }, {}, HOY_EVAL);
+invariantes.push(["el rechazo dice cuanto puede pagar", /B\/\./.test(rechazo.motivo)]);
+invariantes.push(["el rechazo trae factores accionables", rechazo.factores.every(f => f.que_cambiaria.length > 0)]);
+const pre = preCalificar(solBase(920), HOY_EVAL);
+invariantes.push(["la precalificacion se declara estimada", pre.estimado === true]);
+invariantes.push(["precalificacion y decision coinciden en el monto", pre.monto === decidir(solBase(920), {}, HOY_EVAL).monto_aprobado_usd]);
+
+const agrupadas = new Map();
+for (const [nombre, ok] of invariantes) agrupadas.set(nombre, (agrupadas.get(nombre) ?? true) && ok);
+di("| Invariante | |");
+di("| --- | --- |");
+for (const [nombre, ok] of agrupadas) {
+  if (!ok) fallos++;
+  di(`| ${nombre} | ${ok ? "OK" : "**FALLA**"} |`);
+}
+di();
+
+di("### El precio contra la perdida");
+di();
+const sim = simular(aprobados);
+const cobrado = aprobados.reduce((a, c) => a + c.monto * c.pd * 0.75, 0);
+const cubre = cobrado >= sim.perdida_esperada;
+if (!cubre) fallos++;
+di(`Expuesto B/. ${sim.expuesto}. Perdida simulada B/. ${sim.perdida_esperada} (${sim.perdida_pct}%). ` +
+   `Prima de riesgo cobrada B/. ${Math.round(cobrado * 100) / 100}. Provision B/. ${sim.provision}.`);
+di();
+di(`El precio cubre la perdida: ${cubre ? "OK" : "**FALLA**"}.`);
 di();
 
 di("## Resultado");
