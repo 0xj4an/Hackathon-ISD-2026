@@ -50,18 +50,28 @@ export function Encabezado({ meta, onVolver }: { meta?: string; onVolver?: () =>
  * Es lo primero que se ve y lo único que hace falta leer si no hay tiempo.
  */
 export function Veredicto({
-  color, palabra, detalle, simbolo, children,
+  color, antetitulo, palabra, detalle, simbolo, mayusculas = true, children,
 }: {
   color: string;
+  /** La urgencia dicha en corto, encima del hallazgo: "anda pronto". */
+  antetitulo?: string;
   palabra: string;
   detalle?: string;
   simbolo?: Simbolo;
+  /**
+   * Las mayúsculas son para una o dos palabras. Un hallazgo es una frase
+   * ("Tu azúcar está alta") y en versales a 38 px se vuelve un grito ilegible.
+   */
+  mayusculas?: boolean;
   children?: ReactNode;
 }) {
   return (
     <View style={[s.veredicto, { backgroundColor: color }]}>
       {simbolo ? <Pictograma simbolo={simbolo} tamano={54} color={COLOR.sobreColor} fondo={color} /> : null}
-      <Text style={s.veredictoPalabra}>{palabra}</Text>
+      <View style={s.veredictoTextos}>
+        {antetitulo ? <Text style={s.veredictoAnte}>{antetitulo}</Text> : null}
+        <Text style={[s.veredictoPalabra, mayusculas ? s.versales : s.frase]}>{palabra}</Text>
+      </View>
       {detalle ? <Text style={s.veredictoDetalle}>{detalle}</Text> : null}
       {children}
     </View>
@@ -213,7 +223,11 @@ const s = StyleSheet.create({
   meta: { fontSize: 12, fontWeight: "600", color: COLOR.gris },
 
   veredicto: { paddingHorizontal: ESPACIO.borde, paddingTop: 24, paddingBottom: 26, gap: 14 },
-  veredictoPalabra: { ...TIPO.veredicto, color: COLOR.sobreColor, textTransform: "uppercase" },
+  veredictoTextos: { gap: 7 },
+  veredictoAnte: { ...TIPO.etiqueta, color: COLOR.sobreColor, opacity: 0.85 },
+  veredictoPalabra: { ...TIPO.veredicto, color: COLOR.sobreColor },
+  versales: { textTransform: "uppercase" },
+  frase: { fontSize: 34, lineHeight: 36, letterSpacing: -0.8 },
   veredictoDetalle: { ...TIPO.cuerpo, color: COLOR.sobreColor, marginTop: -6 },
 
   barra: {

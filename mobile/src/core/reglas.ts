@@ -55,6 +55,14 @@ export type Ruta = {
 
 export type Senal = {
   codigo: string;
+  /**
+   * El hallazgo dicho como se lo dirías a la persona, en segunda persona y en
+   * tres o cuatro palabras. `descripcion` es preciso y clínico, y sirve para
+   * auditar; esto es lo que se lee primero en pantalla. Los dos hacen falta.
+   */
+  titulo: string;
+  /** La cifra que disparó la regla, separada para poder enseñarla grande. */
+  medida: { valor: string; unidad: string; referencia: string };
   descripcion: string;
   /** Qué hacer. Reemplaza al texto libre que había antes. */
   ruta: Ruta;
@@ -110,6 +118,8 @@ export function detectarSenales(m: Medicion[]): Senal[] {
     const grave = gluBaja < 54;
     out.push({
       codigo: grave ? "GLU_MUY_BAJA" : "GLU_BAJA",
+      titulo: grave ? "Tu azúcar está muy baja" : "Tu azúcar está baja",
+      medida: { valor: gluBaja.toFixed(0), unidad: "mg/dL", referencia: "Lo normal es 70 o más" },
       descripcion: `glucosa en ${gluBaja.toFixed(0)} mg/dL (por debajo de ${grave ? 54 : 70})`,
       ruta: grave
         ? { tipo: "emergencia", ahora: "Tomar azúcar de absorción rápida ahora mismo", donde: `${CENTRO}, ahora`, especialista: URGENCIAS, vigilar: "Confusión, temblor, sudor frío o desmayo" }
@@ -128,6 +138,8 @@ export function detectarSenales(m: Medicion[]): Senal[] {
     if (prom >= 126) {
       out.push({
         codigo: "GLU_ALTA",
+        titulo: "Tu azúcar está alta",
+        medida: { valor: prom.toFixed(0), unidad: "mg/dL en ayunas", referencia: "Lo normal es menos de 100" },
         descripcion: `glucosa en ayunas promedio ${prom.toFixed(0)} mg/dL en las últimas 3 tomas (referencia menor a 100)`,
         ruta: { tipo: "examen_y_consulta", examen: "Glucosa en ayunas en laboratorio para confirmar", donde: `${LAB}, luego ${CENTRO.toLowerCase()}`, especialista: `${GENERAL}, puede derivar a endocrinología`, vigilar: "Sed intensa, orinar mucho, bajar de peso sin querer" },
         costo: PRECIO_GLUCOSA,
@@ -137,6 +149,8 @@ export function detectarSenales(m: Medicion[]): Senal[] {
     } else if (prom >= 100) {
       out.push({
         codigo: "GLU_LIMITE",
+        titulo: "Tu azúcar está en el límite",
+        medida: { valor: prom.toFixed(0), unidad: "mg/dL en ayunas", referencia: "Lo normal es menos de 100" },
         descripcion: `glucosa en ayunas promedio ${prom.toFixed(0)} mg/dL (referencia menor a 100)`,
         ruta: { tipo: "examen", examen: "Glucosa en ayunas en laboratorio", donde: LAB, especialista: GENERAL },
         costo: PRECIO_GLUCOSA,
@@ -158,8 +172,16 @@ export function detectarSenales(m: Medicion[]): Senal[] {
     const cifras = sistAlta && diastAlta ? `${promedio(sist).toFixed(0)}/${promedio(diast).toFixed(0)}`
       : sistAlta ? `${promedio(sist).toFixed(0)} de sistólica`
       : `${promedio(diast).toFixed(0)} de diastólica`;
+    // La cifra y su unidad van sueltas: la pantalla la enseña grande y no
+    // puede partir una frase. "la alta" y "la baja" es como se dice.
+    const cifra = sistAlta && diastAlta ? `${promedio(sist).toFixed(0)}/${promedio(diast).toFixed(0)}`
+      : sistAlta ? promedio(sist).toFixed(0) : promedio(diast).toFixed(0);
+    const unidadPresion = sistAlta && diastAlta ? "mmHg"
+      : sistAlta ? "mmHg, la alta" : "mmHg, la baja";
     out.push({
       codigo: "PRES_ALTA",
+      titulo: "Tu presión está alta",
+      medida: { valor: cifra, unidad: unidadPresion, referencia: "Lo normal es menos de 140/90" },
       descripcion: `presión ${cual} alta en 3 tomas: ${cifras} mmHg (referencia menor a 140/90)`,
       ruta: { tipo: "consulta", examen: "Toma de presión en días distintos para confirmar", donde: CENTRO, especialista: `${GENERAL}, puede derivar a cardiología`, vigilar: "Dolor de cabeza fuerte, visión borrosa o dolor en el pecho" },
       costo: PRECIO_CONSULTA,
@@ -173,6 +195,8 @@ export function detectarSenales(m: Medicion[]): Senal[] {
   if (pulso.length >= 5 && pulso.every(v => v > 100)) {
     out.push({
       codigo: "TAQUI",
+      titulo: "Tu pulso está acelerado",
+      medida: { valor: promedio(pulso).toFixed(0), unidad: "por minuto en reposo", referencia: "Lo normal es entre 60 y 100" },
       descripcion: "pulso en reposo por encima de 100 durante 5 días",
       ruta: { tipo: "examen_y_consulta", examen: "Electrocardiograma", donde: CENTRO, especialista: `${GENERAL}, puede derivar a cardiología`, vigilar: "Dolor en el pecho, desmayo o falta de aire" },
       costo: PRECIO_ECG,
@@ -187,6 +211,8 @@ export function detectarSenales(m: Medicion[]): Senal[] {
   if (satCritica !== undefined) {
     out.push({
       codigo: "SAT_CRITICA",
+      titulo: "Tu oxígeno está muy bajo",
+      medida: { valor: satCritica.toFixed(0), unidad: "% de oxígeno", referencia: "Lo normal es 95 o más" },
       descripcion: `saturación de oxígeno en ${satCritica.toFixed(0)}% (por debajo de 90%)`,
       ruta: { tipo: "emergencia", donde: `${CENTRO}, ahora`, especialista: URGENCIAS, vigilar: "Falta de aire en reposo o labios azulados" },
       urgencia: "Inmediata",
@@ -197,6 +223,8 @@ export function detectarSenales(m: Medicion[]): Senal[] {
     if (sat3.length >= 3 && sat3.every(v => v < 95)) {
       out.push({
         codigo: "SAT_BAJA",
+        titulo: "Tu oxígeno está bajo",
+        medida: { valor: promedio(sat3).toFixed(0), unidad: "% de oxígeno", referencia: "Lo normal es 95 o más" },
         descripcion: `saturación de oxígeno por debajo de 95% en 3 mediciones (promedio ${promedio(sat3).toFixed(0)}%)`,
         ruta: { tipo: "consulta", examen: "Medición con oxímetro en el centro de salud", donde: CENTRO, especialista: `${GENERAL}, puede derivar a neumología`, vigilar: "Falta de aire en reposo o labios azulados" },
         costo: PRECIO_CONSULTA,
@@ -213,6 +241,8 @@ export function detectarSenales(m: Medicion[]): Senal[] {
   if (fiebre !== undefined) {
     out.push({
       codigo: "FIEBRE",
+      titulo: "Tienes fiebre",
+      medida: { valor: fiebre.toFixed(1), unidad: "grados", referencia: "Hay fiebre desde 38" },
       descripcion: `temperatura de ${fiebre.toFixed(1)} grados (fiebre a partir de 38)`,
       ruta: { tipo: "consulta", ahora: "Hidratarse y reposo", donde: CENTRO, especialista: GENERAL, vigilar: "Dolor abdominal intenso, vómito persistente, sangrado de encías o nariz. Con cualquiera de estos, acudir de inmediato" },
       costo: PRECIO_CONSULTA,
@@ -228,6 +258,8 @@ export function detectarSenales(m: Medicion[]): Senal[] {
   if (respAlta !== undefined) {
     out.push({
       codigo: "RESP_MUY_ALTA",
+      titulo: "Respiras muy rápido",
+      medida: { valor: respAlta.toFixed(0), unidad: "respiraciones por minuto", referencia: "Lo normal es entre 12 y 20" },
       descripcion: `frecuencia respiratoria de ${respAlta.toFixed(0)} por minuto (normal 12 a 20)`,
       ruta: { tipo: "emergencia", donde: `${CENTRO}, ahora`, especialista: URGENCIAS, vigilar: "Falta de aire o dolor en el pecho" },
       urgencia: "Inmediata",
@@ -236,6 +268,8 @@ export function detectarSenales(m: Medicion[]): Senal[] {
   } else if (respUlt.length >= 3 && respUlt.every(v => v > 20)) {
     out.push({
       codigo: "RESP_ALTA",
+      titulo: "Respiras rápido",
+      medida: { valor: promedio(respUlt).toFixed(0), unidad: "respiraciones por minuto", referencia: "Lo normal es entre 12 y 20" },
       descripcion: `frecuencia respiratoria por encima de 20 por minuto en 3 mediciones (promedio ${promedio(respUlt).toFixed(0)})`,
       ruta: { tipo: "consulta", donde: CENTRO, especialista: GENERAL, vigilar: "Falta de aire o dolor en el pecho" },
       costo: PRECIO_CONSULTA,
@@ -253,6 +287,8 @@ export function detectarSenales(m: Medicion[]): Senal[] {
     if (imc >= 30) {
       out.push({
         codigo: "IMC_OBESIDAD",
+        titulo: "Tu peso está muy alto para tu estatura",
+        medida: { valor: imc.toFixed(1), unidad: "de masa corporal", referencia: "Lo normal es menos de 25" },
         descripcion: `índice de masa corporal de ${imc.toFixed(1)} (obesidad a partir de 30)`,
         ruta: { tipo: "examen_y_consulta", examen: "Glucosa en ayunas y perfil lipídico", donde: `${LAB}, luego ${CENTRO.toLowerCase()}`, especialista: `${GENERAL}, puede derivar a nutrición` },
         costo: PRECIO_GLUCOSA,
@@ -262,6 +298,8 @@ export function detectarSenales(m: Medicion[]): Senal[] {
     } else if (imc >= 25) {
       out.push({
         codigo: "IMC_SOBREPESO",
+        titulo: "Tu peso está alto para tu estatura",
+        medida: { valor: imc.toFixed(1), unidad: "de masa corporal", referencia: "Lo normal es menos de 25" },
         descripcion: `índice de masa corporal de ${imc.toFixed(1)} (sobrepeso a partir de 25)`,
         ruta: { tipo: "consulta", donde: CENTRO, especialista: `${GENERAL} o nutrición` },
         costo: PRECIO_CONSULTA,
@@ -279,6 +317,8 @@ export function detectarSenales(m: Medicion[]): Senal[] {
     if (Number.isFinite(dias) && dias >= 60 && dias <= 400 && caida > 0.05) {
       out.push({
         codigo: "PESO_BAJA",
+        titulo: "Estás bajando de peso",
+        medida: { valor: `${(caida * 100).toFixed(0)}%`, unidad: "de tu peso", referencia: `De ${primero.valor.toFixed(1)} a ${ultimo.valor.toFixed(1)} kg` },
         descripcion: `pérdida de ${(caida * 100).toFixed(0)}% del peso en ${Math.round(dias)} días, de ${primero.valor.toFixed(1)} a ${ultimo.valor.toFixed(1)} kg`,
         ruta: { tipo: "consulta", donde: CENTRO, especialista: GENERAL, vigilar: "Si la pérdida no fue intencional, amerita estudio" },
         costo: PRECIO_CONSULTA,
