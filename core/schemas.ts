@@ -3,7 +3,16 @@ import { z } from "zod";
 /** 1) Alerta de salud (salida de MedPsy). Orientativa, nunca diagnóstico. */
 export const AlertaSchema = z.object({
   senal: z.string().describe("Qué se observa en las mediciones, en lenguaje simple"),
-  examen_sugerido: z.string(),
+  /**
+   * La ruta: qué hacer. Viene de `Senal.ruta` y se copia tal cual, el modelo no
+   * la inventa. Es lo único que de verdad le importa a la persona.
+   */
+  ruta_tipo: z.enum(["emergencia", "autocuidado", "consulta", "examen", "examen_y_consulta"]),
+  ruta_ahora: z.string().optional().describe("Qué hacer en este momento, antes de moverse"),
+  ruta_examen: z.string().optional().describe("Qué examen, si la ruta lo incluye"),
+  ruta_donde: z.string().describe("Casa, centro de salud o laboratorio"),
+  ruta_especialista: z.string().describe("A quién le corresponde"),
+  ruta_vigilar: z.string().optional().describe("Síntomas que obligan a ir de inmediato aunque la ruta diga otra cosa"),
   /** Rango, no un número exacto: los precios de laboratorio varían por sede. Ausente si no hay precio con fuente. */
   costo_min_usd: z.number().min(0).max(2000).optional(),
   costo_max_usd: z.number().min(0).max(2000).optional(),

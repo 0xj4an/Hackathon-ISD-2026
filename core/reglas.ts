@@ -23,16 +23,54 @@ export type Medicion = { ts: string; tipo: TipoMedicion; valor: number };
 /** Precio orientativo de un examen. Sin fuente no se pone número. */
 export type CostoEstimado = { min_usd: number; max_usd: number; fuente: string };
 
+/**
+ * Qué tiene que hacer la persona. Es lo único que de verdad le importa: no el
+ * número, sino si sale ahora, se hace un examen, o lo menciona en su próxima
+ * consulta.
+ */
+export type TipoRuta =
+  | "emergencia"          // salir hacia un centro de salud ahora
+  | "autocuidado"         // algo que hace la persona en el momento
+  | "consulta"            // que la vea alguien
+  | "examen"              // hacerse un examen
+  | "examen_y_consulta";  // examen primero, después que se lo lean
+
+export type Ruta = {
+  tipo: TipoRuta;
+  /** Qué hacer en este momento, antes de moverse. Ausente si no aplica. */
+  ahora?: string;
+  /** Qué examen, si la ruta lo incluye. */
+  examen?: string;
+  /** Dónde se resuelve: casa, centro de salud, laboratorio. */
+  donde: string;
+  /**
+   * A quién le corresponde. En Panamá la puerta de entrada es medicina general
+   * en el centro de salud; el especialista es a dónde suele derivar, no a dónde
+   * ir directo. Decidir la derivación es acto médico, no nuestro.
+   */
+  especialista: string;
+  /** Síntomas que obligan a ir de inmediato aunque la ruta diga otra cosa. */
+  vigilar?: string;
+};
+
 export type Senal = {
   codigo: string;
   descripcion: string;
-  examen: string;
+  /** Qué hacer. Reemplaza al texto libre que había antes. */
+  ruta: Ruta;
   /** Ausente cuando no hay un precio publicado que citar. */
   costo?: CostoEstimado;
   urgencia: "Rutinaria" | "Prioritaria" | "Inmediata";
   /** De dónde sale el umbral que disparó esta señal. */
   fuente: string;
 };
+
+// Destinos y responsables, para no repetirlos en cada señal.
+const CENTRO = "Centro de salud";
+const LAB = "Laboratorio";
+const CASA = "En casa";
+const GENERAL = "Medicina general";
+const URGENCIAS = "Urgencias";
 
 // Precios de laboratorio en Panamá. Rangos publicados, no precios de un
 // laboratorio concreto: varían por sede, promoción y paquete.
@@ -63,9 +101,9 @@ export function detectarSenales(m: Medicion[]): Senal[] {
     out.push({
       codigo: grave ? "GLU_MUY_BAJA" : "GLU_BAJA",
       descripcion: `glucosa en ${gluBaja.toFixed(0)} mg/dL (por debajo de ${grave ? 54 : 70})`,
-      examen: grave
-        ? "Tomar azúcar de absorción rápida ahora y acudir a un centro de salud"
-        : "Tomar azúcar de absorción rápida y consultar si se repite",
+      ruta: grave
+        ? { tipo: "emergencia", ahora: "Tomar azúcar de absorción rápida ahora mismo", donde: `${CENTRO}, ahora`, especialista: URGENCIAS, vigilar: "Confusión, temblor, sudor frío o desmayo" }
+        : { tipo: "autocuidado", ahora: "Tomar azúcar de absorción rápida", donde: `${CASA}. Consulta si se repite`, especialista: GENERAL, vigilar: "Si vuelve a bajar o aparece confusión" },
       urgencia: grave ? "Inmediata" : "Prioritaria",
       fuente: grave
         ? "ADA: por debajo de 54 mg/dL es hipoglucemia clínicamente significativa, requiere acción inmediata"
@@ -81,7 +119,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
       out.push({
         codigo: "GLU_ALTA",
         descripcion: `glucosa en ayunas promedio ${prom.toFixed(0)} mg/dL en las últimas 3 tomas (referencia menor a 100)`,
-        examen: "Glucosa en ayunas en laboratorio para confirmar. El médico puede añadir hemoglobina glicosilada (HbA1c)",
+        ruta: { tipo: "examen_y_consulta", examen: "Glucosa en ayunas en laboratorio para confirmar", donde: `${LAB}, luego ${CENTRO.toLowerCase()}`, especialista: `${GENERAL}, puede derivar a endocrinología`, vigilar: "Sed intensa, orinar mucho, bajar de peso sin querer" },
         costo: PRECIO_GLUCOSA,
         urgencia: "Prioritaria",
         fuente: "ADA, Standards of Care: 126 mg/dL o más en ayunas es criterio diagnóstico de diabetes",
@@ -90,7 +128,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
       out.push({
         codigo: "GLU_LIMITE",
         descripcion: `glucosa en ayunas promedio ${prom.toFixed(0)} mg/dL (referencia menor a 100)`,
-        examen: "Glucosa en ayunas en laboratorio",
+        ruta: { tipo: "examen", examen: "Glucosa en ayunas en laboratorio", donde: LAB, especialista: GENERAL },
         costo: PRECIO_GLUCOSA,
         urgencia: "Rutinaria",
         fuente: "ADA, Standards of Care: 100 a 125 mg/dL en ayunas es glucosa alterada en ayunas",
@@ -113,7 +151,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
     out.push({
       codigo: "PRES_ALTA",
       descripcion: `presión ${cual} alta en 3 tomas: ${cifras} mmHg (referencia menor a 140/90)`,
-      examen: "Toma de presión en un centro de salud, en días distintos, para confirmar",
+      ruta: { tipo: "consulta", examen: "Toma de presión en días distintos para confirmar", donde: CENTRO, especialista: `${GENERAL}, puede derivar a cardiología`, vigilar: "Dolor de cabeza fuerte, visión borrosa o dolor en el pecho" },
       urgencia: "Prioritaria",
       fuente: "OMS: hipertensión es 140/90 mmHg o más, medida en dos días diferentes",
     });
@@ -125,7 +163,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
     out.push({
       codigo: "TAQUI",
       descripcion: "pulso en reposo por encima de 100 durante 5 días",
-      examen: "Electrocardiograma y consulta general",
+      ruta: { tipo: "examen_y_consulta", examen: "Electrocardiograma", donde: CENTRO, especialista: `${GENERAL}, puede derivar a cardiología`, vigilar: "Dolor en el pecho, desmayo o falta de aire" },
       costo: PRECIO_ECG,
       urgencia: "Prioritaria",
       fuente: "Rango normal de pulso en reposo en adultos: 60 a 100 lpm. Por encima de 100 es taquicardia",
@@ -139,7 +177,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
     out.push({
       codigo: "SAT_CRITICA",
       descripcion: `saturación de oxígeno en ${satCritica.toFixed(0)}% (por debajo de 90%)`,
-      examen: "Acudir a un centro de salud ahora",
+      ruta: { tipo: "emergencia", donde: `${CENTRO}, ahora`, especialista: URGENCIAS, vigilar: "Falta de aire en reposo o labios azulados" },
       urgencia: "Inmediata",
       fuente: "Por debajo de 90% de saturación se considera que requiere atención médica inmediata",
     });
@@ -149,7 +187,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
       out.push({
         codigo: "SAT_BAJA",
         descripcion: `saturación de oxígeno por debajo de 95% en 3 mediciones (promedio ${promedio(sat3).toFixed(0)}%)`,
-        examen: "Consulta general y medición con oxímetro en el centro de salud",
+        ruta: { tipo: "consulta", examen: "Medición con oxímetro en el centro de salud", donde: CENTRO, especialista: `${GENERAL}, puede derivar a neumología`, vigilar: "Falta de aire en reposo o labios azulados" },
         urgencia: "Prioritaria",
         fuente: "Saturación normal en adultos: 95 a 100%. Por debajo de 95% se considera anormal",
       });
@@ -164,7 +202,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
     out.push({
       codigo: "FIEBRE",
       descripcion: `temperatura de ${fiebre.toFixed(1)} grados (fiebre a partir de 38)`,
-      examen: "Consulta general. Si aparece dolor abdominal intenso, vómito persistente o sangrado, acudir de inmediato",
+      ruta: { tipo: "consulta", ahora: "Hidratarse y reposo", donde: CENTRO, especialista: GENERAL, vigilar: "Dolor abdominal intenso, vómito persistente, sangrado de encías o nariz. Con cualquiera de estos, acudir de inmediato" },
       urgencia: "Prioritaria",
       fuente: "38 grados o más se considera fiebre. Los signos de alarma citados son los de la OMS para dengue grave",
     });
@@ -178,7 +216,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
     out.push({
       codigo: "RESP_MUY_ALTA",
       descripcion: `frecuencia respiratoria de ${respAlta.toFixed(0)} por minuto (normal 12 a 20)`,
-      examen: "Acudir a un centro de salud ahora",
+      ruta: { tipo: "emergencia", donde: `${CENTRO}, ahora`, especialista: URGENCIAS, vigilar: "Falta de aire o dolor en el pecho" },
       urgencia: "Inmediata",
       fuente: "Por encima de 25 respiraciones por minuto en adultos se considera señal de alarma",
     });
@@ -186,7 +224,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
     out.push({
       codigo: "RESP_ALTA",
       descripcion: `frecuencia respiratoria por encima de 20 por minuto en 3 mediciones (promedio ${promedio(respUlt).toFixed(0)})`,
-      examen: "Consulta general",
+      ruta: { tipo: "consulta", donde: CENTRO, especialista: GENERAL, vigilar: "Falta de aire o dolor en el pecho" },
       urgencia: "Prioritaria",
       fuente: "Taquipnea en adultos es más de 20 respiraciones por minuto. Normal: 12 a 20",
     });
@@ -202,7 +240,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
       out.push({
         codigo: "IMC_OBESIDAD",
         descripcion: `índice de masa corporal de ${imc.toFixed(1)} (obesidad a partir de 30)`,
-        examen: "Consulta general, glucosa en ayunas y perfil lipídico",
+        ruta: { tipo: "examen_y_consulta", examen: "Glucosa en ayunas y perfil lipídico", donde: `${LAB}, luego ${CENTRO.toLowerCase()}`, especialista: `${GENERAL}, puede derivar a nutrición` },
         costo: PRECIO_GLUCOSA,
         urgencia: "Rutinaria",
         fuente: "OMS: en adultos, IMC de 30 o más es obesidad. El IMC es un indicador aproximado de grasa corporal",
@@ -211,7 +249,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
       out.push({
         codigo: "IMC_SOBREPESO",
         descripcion: `índice de masa corporal de ${imc.toFixed(1)} (sobrepeso a partir de 25)`,
-        examen: "Consulta general",
+        ruta: { tipo: "consulta", donde: CENTRO, especialista: `${GENERAL} o nutrición` },
         urgencia: "Rutinaria",
         fuente: "OMS: en adultos, IMC de 25 o más es sobrepeso. El IMC es un indicador aproximado de grasa corporal",
       });
@@ -227,7 +265,7 @@ export function detectarSenales(m: Medicion[]): Senal[] {
       out.push({
         codigo: "PESO_BAJA",
         descripcion: `pérdida de ${(caida * 100).toFixed(0)}% del peso en ${Math.round(dias)} días, de ${primero.valor.toFixed(1)} a ${ultimo.valor.toFixed(1)} kg`,
-        examen: "Consulta general. Si no fue intencional, amerita estudio",
+        ruta: { tipo: "consulta", donde: CENTRO, especialista: GENERAL, vigilar: "Si la pérdida no fue intencional, amerita estudio" },
         urgencia: "Prioritaria",
         fuente: "Perder más del 5% del peso corporal en 6 a 12 meses sin proponérselo amerita evaluación médica",
       });
