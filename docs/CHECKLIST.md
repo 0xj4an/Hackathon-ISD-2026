@@ -19,9 +19,11 @@ documentos sintéticos listos con su ground truth.
 
 En código, la rama de salud ya pide a MedPsy la redacción (`redactarAlerta` →
 `SYSTEM_ALERTA` + `AlertaSchema`), la de documentos lee con OCR + MedPsy
-(`leerDocumento.ts`), el envío HTTP camino A/B existe, y `perf/logger` escribe
-desde esos flujos. El LoRA del spike se midió otra vez (tres corridas en
-`spikes/lora-medpsy/RESULTADOS.md`).
+(`leerDocumento.ts`), el envío HTTP camino A/B existe, la cola SQLite guarda
+la solicitud pendiente (`cola.ts`), y `perf/logger` escribe desde esos flujos.
+La vía B de examen lee foto con OCR + **MedPsy + LoRA `lab-v3`**
+(`leerExamen.ts`, asset en `mobile/assets/models/`). Spike medido en
+`spikes/lora-medpsy/RESULTADOS.md` (lab JSON 5% → 68%).
 
 Lo que falta no es “inventar el producto”, es **cerrar en el aparato**. Qué
 tocar en el iPhone, en avión, está en [`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md).
@@ -66,17 +68,19 @@ iPhone, no.
 `PantallaDatos.tsx` (editable, deudas y personas a cargo) sigue en el repo; el
 camino de la demo no pasa por ella.
 
-La rama del examen **no** tiene OCR todavía: `PantallaExamen.tsx` sigue con el
-comentario *"Cuando `ocr()` exista"* y entrada manual + `clasificar()`.
+La rama del examen (vía B) ya tiene foto → OCR → MedPsy+LoRA → `clasificar()`
+(`PantallaExamen` / `leerExamen.ts`). Entrada manual sigue de respaldo.
 
 - [~] `ocr()` sobre la foto, extracción a JSON con `SYSTEM_EXTRACCION_*`,
   validación con `CedulaSchema` e `IngresosSchema`. Código listo; falta
   verificar en el iPhone
+- [~] Examen vía B con LoRA `lab-v3`. Código + asset en la app; falta rebuild
+  nativo y corrida en el iPhone
 - [~] **Borrar la foto** después de extraer. El código lo hace; falta verificar
   en el iPhone (C6)
-- [ ] Persistencia y cola. `expo-sqlite` está en dependencias y en el plugin de
-  Expo, pero **no se importa** en `mobile/src`. `pendiente` hoy es estado en
-  memoria + UI en `PantallaCuota` (se pierde al matar la app)
+- [x] Persistencia y cola. `expo-sqlite` en `colaSqlite.ts`; una pendiente a la
+  vez. Si falla el envío, se guarda y al reabrir la app se vuelve a `PantallaCuota`.
+  Falta verificar en el iPhone (C8/C9)
 - [~] Envío: camino A al banco (Railway) si hay wifi; camino B al pueblo si no.
   Código en `envio.ts`; medido sin teléfono; falta el iPhone
 
@@ -100,8 +104,8 @@ si no puede, HTTP de texto al pueblo. QVAC `delegate` no es el plan (NAT).
 
 ## 2. La demo tiene que correr entera
 
-- [ ] Wi-Fi apagado: la solicitud queda en cola y la app lo dice (hoy: en
-  memoria; sin SQLite no sobrevive un kill)
+- [~] Wi-Fi apagado: la solicitud queda en cola y la app lo dice (código:
+  SQLite + UI; falta ensayo en iPhone)
 - [ ] Wi-Fi encendido: la solicitud sale, el banco responde, la respuesta vuelve
 - [ ] **Ensayarla tres veces seguidas** con el iPhone en la mano. Lo que falla,
   falla aquí y no grabando
@@ -124,17 +128,16 @@ si no puede, HTTP de texto al pueblo. QVAC `delegate` no es el plan (NAT).
 
 ---
 
-## 4. LoRA (spike medido; no en producto)
+## 4. LoRA (en producto para vía B; falta iPhone)
 
-`RESULTADOS.md` se retiró en `248476d` por no ser reproducible; **volvió** con
-tres corridas documentadas en `spikes/lora-medpsy/RESULTADOS.md` (corrida 3:
-laboratorio JSON válido 5% → 68%). El adaptador **no** está cargado en la app.
+Tres corridas en `spikes/lora-medpsy/RESULTADOS.md`. Corrida 3: laboratorio
+JSON válido **5% → 68%**. Adaptador en la app como
+`mobile/assets/models/lora-lab-v3.gguf` (solo foto de examen; no cédula/ingresos/alerta).
 
-- [x] Entrenar con evidencia (corridas 1–3; `caffeinate` + lecciones del sueño)
-- [x] Tabla base contra LoRA en el spike (cierra la evidencia de C11 a nivel
-  spike; no a nivel producto)
-- [ ] Cargar el adaptador en la app y re-medir en el iPhone — solo si sobra
-  tiempo y lab OCR entra al flujo de Examen
+- [x] Entrenar con evidencia (corridas 1–3)
+- [x] Tabla base contra LoRA en el spike (C11 a nivel spike)
+- [x] Cargar el adaptador en la app (`lora.ts` / `leerExamen.ts` / UI MedPsy+LoRA)
+- [ ] Re-medir / ver franja LoRA en el iPhone (rebuild nativo + foto de lab)
 
 ---
 
@@ -193,10 +196,10 @@ queda aparcado.
 | [~] C5 | La alerta valida contra `AlertaSchema` | Código listo (`redactarAlerta`). Falta verlo en el iPhone |
 | [~] C6 | La foto se borra tras extraer | Código en `leerDocumento.ts`. Falta verificar en el iPhone |
 | [~] C7 | Ninguna imagen ni dato clínico sale del teléfono | Schema del banco rechaza motivo/foto (`eval` + PRUEBA-NODO). Falta E2E en iPhone |
-| [ ] C8 | Con Wi-Fi apagado queda `pendiente` y se dice | UI parcial; sin SQLite no es cola durable |
-| [ ] C9 | Al volver la red, sale y vuelve la respuesta | Poll en memoria; falta prueba en iPhone + cola durable |
+| [~] C8 | Con Wi-Fi apagado queda `pendiente` y se dice | Código: SQLite + UI. Falta iPhone |
+| [~] C9 | Al volver la red, sale y vuelve la respuesta | Poll + cola durable. Falta iPhone |
 | [ ] C10 | `perf.jsonl` con una línea por inferencia | Logger cableado; falta export de corrida real |
-| [~] C11 | Tabla base contra LoRA | Spike medido (RESULTADOS.md). Adaptador no en producto |
+| [~] C11 | Tabla base contra LoRA | Spike 5%→68% + adaptador en app (vía B). Falta verlo en iPhone |
 | [x] C12 | **Cero llamadas a proveedores de IA remotos** | Verificado en `mobile/src`, `nodo`, `eval`, `data`. Repetir sobre el bundle antes de entregar |
 | [x] C13 | README declara modelo, cuantización, hardware y base | MedPsy Q8_0, OCR_LATIN, extracción = MedPsy, iPhone 17 Pro Max, Kit declarado |
 

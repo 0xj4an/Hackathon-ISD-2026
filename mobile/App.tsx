@@ -10,9 +10,10 @@
 // Vuelve a la alerta, no sigue hacia el crédito.
 //
 // Firmar intenta el banco remoto si hay wifi (camino A). Si no hay internet,
-// deja el JSON en el nodo del pueblo (camino B). Las fotos no salen.
-// La alerta y la extracción intentan MedPsy en el teléfono. Si el modelo
-// no carga, el texto va al pueblo; las fotos no.
+// deja el JSON en el nodo del pueblo (camino B). Si tampoco hay nodo, la
+// solicitud queda en SQLite (`cola`) y se reintenta al volver la red.
+// Las fotos no salen. La alerta y la extracción intentan MedPsy en el
+// teléfono; si el modelo no carga, el texto va al pueblo.
 // `PantallaDatos` sigue en el repo (deudas y personas a cargo, pantalla 11 del
 // mapa) pero el camino de la demo pasa por lo leído → cuota → banco.
 //
@@ -31,10 +32,16 @@ import PantallaBanco from "./src/PantallaBanco";
 import PantallaExamen from "./src/PantallaExamen";
 import { solicitudDeLectura, type LecturaCredito } from "./src/lectura";
 import { consultarRespuesta, enviarSolicitud } from "./src/envio";
+import {
+  borrarPendiente,
+  guardarPendiente,
+  leerPendiente,
+} from "./src/cola";
+import { iniciarColaSqlite } from "./src/colaSqlite";
 import { marcarPasoSentry, marcarUsuarioSentry } from "./src/sentry";
 import type { Respuesta } from "./src/core/credito/motor";
 import type { Solicitud } from "./src/core/schemas";
-import type { Usuario } from "./src/usuarios";
+import { buscarPorCorreo, type Usuario } from "./src/usuarios";
 
 /** Lo que cuesta el paquete, y el monto que la persona decidió pedir. */
 type Credito = { min: number; max: number; monto?: number };
@@ -54,6 +61,7 @@ export default function App() {
   const [enviando, setEnviando] = useState(false);
   const [pendiente, setPendiente] = useState(false);
   const [aviso, setAviso] = useState<string | undefined>();
+  const [colaLista, setColaLista] = useState(false);
 
   const soltarCredito = () => {
     setPaso("captura");
@@ -74,23 +82,62 @@ export default function App() {
     soltarCredito();
   };
 
+  const cerrarPendiente = async (id: string) => {
+    setPendiente(false);
+    setAviso(undefined);
+    await borrarPendiente(id);
+  };
+
   const mandar = async (sol: Solicitud) => {
     if (enviando) return;
     setEnviando(true);
     const r = await enviarSolicitud(sol);
     setEnviando(false);
     if (r.ok) {
-      setPendiente(false);
-      setAviso(undefined);
+      await cerrarPendiente(sol.id);
       setRespuesta(r.respuesta);
       setPaso("banco");
       return;
     }
-    setPendiente(true);
-    setAviso(r.pendiente
+    const detalle = r.pendiente
       ? r.detalle
-      : `${r.detalle} La solicitud queda pendiente.`);
+      : `${r.detalle} La solicitud queda pendiente.`;
+    setPendiente(true);
+    setAviso(detalle);
+    if (usuario && credito) {
+      await guardarPendiente({
+        solicitud: sol,
+        detalle,
+        usuario_correo: usuario.correo,
+        costo_min: credito.min,
+        costo_max: credito.max,
+      });
+    }
   };
+
+  useEffect(() => {
+    let vivo = true;
+    void (async () => {
+      try {
+        await iniciarColaSqlite();
+        const p = await leerPendiente();
+        if (!vivo || !p) return;
+        const u = buscarPorCorreo(p.usuario_correo);
+        if (!u) return;
+        setUsuario(u);
+        setConectado(true);
+        setRevisado(true);
+        setCredito({ min: p.costo_min, max: p.costo_max, monto: p.solicitud.monto_solicitado_usd });
+        setSolicitud(p.solicitud);
+        setPendiente(true);
+        setAviso(p.detalle);
+        setPaso("cuota");
+      } finally {
+        if (vivo) setColaLista(true);
+      }
+    })();
+    return () => { vivo = false; };
+  }, []);
 
   useEffect(() => {
     marcarUsuarioSentry(usuario?.correo);
@@ -116,8 +163,7 @@ export default function App() {
       ocupado = true;
       const vista = await consultarRespuesta(solicitud.id);
       if (vivo && vista) {
-        setPendiente(false);
-        setAviso(undefined);
+        await cerrarPendiente(solicitud.id);
         setRespuesta(vista);
         setPaso("banco");
         ocupado = false;
@@ -127,17 +173,27 @@ export default function App() {
       ocupado = false;
       if (!vivo) return;
       if (r.ok) {
-        setPendiente(false);
-        setAviso(undefined);
+        await cerrarPendiente(solicitud.id);
         setRespuesta(r.respuesta);
         setPaso("banco");
       } else if (r.pendiente) {
         setAviso(r.detalle);
+        if (usuario && credito) {
+          await guardarPendiente({
+            solicitud,
+            detalle: r.detalle,
+            usuario_correo: usuario.correo,
+            costo_min: credito.min,
+            costo_max: credito.max,
+          });
+        }
       }
     };
     const id = setInterval(tick, 4000);
     return () => { vivo = false; clearInterval(id); };
-  }, [pendiente, solicitud]);
+  }, [pendiente, solicitud, usuario, credito]);
+
+  if (!colaLista) return null;
 
   // Fuera del camino de la demo a proposito: los registros son para nosotros,
   // no para el usuario, y no aparecen en el flujo que se graba.

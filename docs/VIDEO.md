@@ -1,12 +1,18 @@
 # Guion del video
 
-**Estado: borrador.** Se ajusta cuando se ensaye con el teléfono en la mano.
+**Estado: listo para ensayar.** Ajustar solo lo que falle en el iPhone
+([`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md)). No inventar planos que no corrieron.
 
 **Límite: 5 minutos.** En español, enlace sin login. Es lo primero que mira el
 jurado del reto General, el del podio de 6,000.
 
 **Regla de oro: solo se dice lo que se ve pasar en pantalla.** Si algo no corrió
 en la grabación, no se menciona. Un jurado técnico revisa el repo después.
+
+**Camino de la grabación (prioridad):** Caso diabetes → alerta MedPsy → crédito
+con **modo avión** → documentos → cuota. **Plano corto de vía B** (foto de
+examen + franja `MedPsy + LoRA`) si el rebuild con el `.gguf` ya está en el
+iPhone; si no, se omite y el LoRA se deja en el repo / `RESULTADOS.md`.
 
 ---
 
@@ -16,12 +22,13 @@ El reglamento pide cosas concretas, y cada una necesita su plano:
 
 | Lo que piden | Cómo se ve |
 | --- | --- |
-| Un modelo Psy con función central | MedPsy lee el documento y redacta la alerta |
-| Flujo de usuario completo, no una llamada al SDK | De abrir la app a la respuesta del banco |
-| Toda la inferencia en el dispositivo | Modo avión encendido durante la lectura |
+| Un modelo Psy con función central | MedPsy redacta la alerta; MedPsy (+ LoRA en vía B) lee documentos / lab |
+| Flujo de usuario completo, no una llamada al SDK | De abrir la app a la respuesta del banco (o pendiente sin nodo) |
+| Toda la inferencia en el dispositivo | Modo avión encendido durante alerta y lectura |
 | Comunicar limitaciones (proyectos médicos) | El aviso en pantalla, leído en voz alta |
-| Registro de rendimiento estructurado | La pantalla de registros con el TTFT real |
+| Registro de rendimiento estructurado | Pantalla de registros / `perf.jsonl` con TTFT real |
 | Hardware honesto | Se nombra el iPhone y se dice que el usuario es rural con Android |
+| Calidad de dominio medible | `eval/run.mjs` en verde; LoRA lab 5%→68% si se muestra la tabla o la vía B |
 
 ---
 
@@ -45,15 +52,16 @@ El reglamento pide cosas concretas, y cada una necesita su plano:
 **Por qué así:** el jurado tiene que entender el problema antes que la
 tecnología. Treinta segundos, no más.
 
-### 0:30 a 1:15 · Detectar
+### 0:30 a 1:10 · Detectar
 
-**Se ve:** entrar con un correo. El caso de diabetes. La pantalla de revisión
-pasando por las mediciones. La alerta.
+**Se ve:** entrar con `insulina@gmail.com` (o chip Caso diabetes). Pantalla de
+salud simulada. Revisión pasando el historial. La alerta: primero las reglas,
+luego el texto de MedPsy.
 
 **Se dice:**
 
 > La app lee las mediciones que la persona ya tiene en el teléfono. Aquí hay
-> 65, de los últimos meses.
+> más de trescientas, de un año.
 >
 > Encuentra cuatro cosas. Y esto es importante: **quién decide no es el modelo,
 > son reglas con umbrales de la OMS y la Asociación Americana de Diabetes,
@@ -69,7 +77,7 @@ pasando por las mediciones. La alerta.
 **Por qué así:** el reto Tether Psy exige "comunicar limitaciones, sin
 afirmaciones clínicas no respaldadas". Esto lo cumple y además es lo correcto.
 
-### 1:15 a 2:00 · Cuánto cuesta
+### 1:10 a 1:50 · Cuánto cuesta
 
 **Se ve:** el desglose del paquete, línea por línea, hasta el total.
 
@@ -90,18 +98,18 @@ afirmaciones clínicas no respaldadas". Esto lo cumple y además es lo correcto.
 **Por qué así:** es lo que nos separa de una app de salud genérica, y le habla
 directo al jurado de Caja de Ahorros.
 
-### 2:00 a 3:00 · Leer los documentos
+### 1:50 a 2:50 · Leer los documentos (crédito)
 
-**Se ve:** **modo avión encendido, en primer plano.** Foto de la cédula. El
-texto crudo del OCR. Los campos ya en su sitio.
+**Se ve:** **modo avión encendido, en primer plano.** Foto de la cédula, de
+ingresos y del extracto. Lectura en curso. Campos en su sitio. La UI dice que
+las copias se borraron.
 
 **Se dice:**
 
 > Para pedir el crédito hacen falta tres documentos. Se fotografían aquí.
 >
 > Miren el modo avión. **No hay red.** El OCR corre en el teléfono, MedPsy saca
-> los campos en el teléfono, y **la foto se borra apenas se leyó**, antes
-> incluso de que el modelo la procese.
+> los campos en el teléfono, y **la foto se borra apenas se leyó**.
 >
 > Al banco viaja un JSON. Ni la imagen, ni el motivo de salud. El banco sabe
 > que el crédito es para salud, y nada más.
@@ -111,9 +119,10 @@ prueba de que corre local, y no se puede fingir.
 
 **Por qué así:** es el corazón del reto General, "IA donde la nube no llega".
 
-### 3:00 a 3:40 · El crédito
+### 2:50 a 3:25 · El crédito
 
-**Se ve:** elegir el monto. La solicitud sale. La respuesta del banco.
+**Se ve:** elegir el monto. Firmar. Pendiente sin nodo **o** respuesta del banco
+si en esa toma hubo wifi al final.
 
 **Se dice:**
 
@@ -121,38 +130,54 @@ prueba de que corre local, y no se puede fingir.
 > pagar el máximo o lo justo.
 >
 > La solicitud intenta el banco por wifi. Si no hay internet, queda en el nodo
-> del pueblo, esta laptop, y él se la lleva. El banco responde: aprobado,
-> 12 meses, 17.4% anual, cuota de 84 balboas al mes.
+> del pueblo, o pendiente en el teléfono. El motor ya calculó la cuota aquí:
+> 12 meses, 17.4% anual, unos 84 balboas al mes sobre 920.
 >
-> Esa cuota cabe en el 30% del ingreso, y el motor lo verifica antes de aprobar.
-> No es un modelo de juguete: tiene elegibilidad, capacidad de pago, scorecard,
-> el precio descompuesto en sus costos, y clasificación de cartera por días de
-> mora según el Acuerdo 4-2013.
+> Esa cuota cabe en el 30% del ingreso. No es un modelo de juguete: tiene
+> elegibilidad, capacidad de pago, scorecard, el precio descompuesto, y
+> clasificación de cartera por el Acuerdo 4-2013.
 
-**Si la cola sin señal llegó a funcionar**, aquí van 20 segundos más: apagar la
-red, ver que queda pendiente, encenderla, ver que sale sola.
+**Si la cola sin señal llegó a funcionar en cámara**, 15 segundos: pendiente →
+red → sale sola.
 
-### 3:40 a 4:20 · Que no es humo
+### 3:25 a 3:55 · Vía B: el papel del laboratorio (si el build trae LoRA)
 
-**Se ve:** la pantalla de registros. El `perf.jsonl` con sus líneas. Y en el
-Mac, `node eval/run.mjs` saliendo en verde.
+**Se ve:** desde la alerta o el menú, **Tu examen** → foto → franja
+**`MedPsy + LoRA · lab-v3`** → marcadores clasificados.
+
+**Se dice:**
+
+> Si la persona ya se hizo el examen, trae el papel. OCR lee el texto; un
+> adaptador LoRA entrenado solo para laboratorio saca los marcadores. **Quién
+> dice si está alto o bajo no es el modelo: es el catálogo con fuentes.**
+>
+> Medimos el hueco antes: el MedPsy base devolvía JSON válido de lab 1 de cada
+> 22 veces. Con este LoRA, 15 de 22. Por eso va en la app, y solo en esta vía:
+> cédula e ingresos siguen en el modelo base.
+
+**Si el rebuild con el `.gguf` no está en el iPhone ese día:** se corta este
+bloque y no se improvisa. La evidencia queda en
+`spikes/lora-medpsy/RESULTADOS.md` y en el repo (`lora-lab-v3.gguf`).
+
+### 3:55 a 4:30 · Que no es humo
+
+**Se ve:** la pantalla de registros (long-press en el pie de entrada). El
+`perf.jsonl` con líneas. En el Mac, `node eval/run.mjs` en verde. Opcional: tabla
+de `RESULTADOS.md` corrida 3.
 
 **Se dice:**
 
 > Todo esto está medido. MedPsy carga en este iPhone y suelta el primer token
-> en 2.9 segundos, con Q8_0 en CPU. Cada inferencia queda registrada.
+> en 2.9 segundos, con Q8_0 en CPU. Cada inferencia queda registrada, incluida
+> si llevó LoRA o no.
 >
-> Y las reglas de salud tienen su propia evaluación: 14 señales, nueve casos
-> de prueba, y **el caso sano no dispara ninguna alerta**, que vale tanto como
-> acertar las otras.
-
-**Si el LoRA salió bien**, aquí van 20 segundos con la tabla antes contra
-después. Si no salió, no se menciona.
+> Las reglas de salud tienen su propia evaluación: 14 señales, nueve casos, y
+> **el caso sano no dispara ninguna alerta**.
 
 **Por qué así:** el reto pide "calidad de dominio medible" y "evidencia
-reproducible". Esto es exactamente eso.
+reproducible".
 
-### 4:20 a 4:50 · Cierre
+### 4:30 a 5:00 · Cierre
 
 **Se ve:** la app en la mano, cerrada.
 
@@ -177,49 +202,48 @@ es un problema.
 
 ## Las cifras, y de dónde salen
 
-Verificadas contra el repo el 10 de septiembre. Si alguna cambia, se vuelve a
-verificar antes de grabar: en el video no entra un número que no se pueda
-reproducir.
+Verificadas contra el repo el **10 de septiembre de 2026**. Si alguna cambia, se
+vuelve a verificar antes de grabar.
 
 | Cifra | Verificación |
 | --- | --- |
 | 42% de hipertensión en Panamá | MINSA, en [`salud.md`](../.ai/references/salud.md) |
-| ~315 mediciones en un año | `data/usuarios/diabetes.json` |
+| 315 mediciones en un año | `data/usuarios/diabetes.json` / `mobile/src/datos/` |
 | 4 hallazgos | `GLU_ALTA`, `PRES_ALTA`, `PESO_BAJA`, `IMC_SOBREPESO` |
-| B/. 641 a 920 el año | `armarPaquete()` sobre ese caso |
+| B/. 641 a 920 el año | `armarPaquete()` / `eval/resultados.md` |
 | 730 tabletas, B/. 380, 41% | Decreto Ejecutivo 36: B/. 0.52 por tableta |
 | TTFT 2915 ms | `perf/`, iPhone 17 Pro Max, Q8_0 en CPU |
 | 12 meses, 17.4%, cuota 84.08 | `decidir()` / `eval/run.mjs`, monto 920 |
+| Lab JSON válido 5% → 68% | `spikes/lora-medpsy/RESULTADOS.md`, corrida 3 |
 | 14 señales | `mobile/src/core/reglas.ts` |
-| 58 tests de crédito en verde | `node --test eval/credito/*.test.mjs` |
+| Tests de crédito en verde | `node --test eval/credito/*.test.mjs` |
 
 ## Antes de grabar
 
-- [ ] Ensayar el flujo completo **tres veces seguidas** con el teléfono en la
-      mano. Lo que falla, falla aquí y no grabando.
+- [ ] Ensayar el flujo completo **tres veces seguidas** con el teléfono
+      ([`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md)).
 - [ ] Modelo ya descargado. Los 2.1 GB no se bajan en cámara.
-- [ ] Modo avión listo para el minuto 2, y comprobado que la app funciona así.
-- [ ] `perf.jsonl` con líneas de verdad.
-- [ ] Batería del teléfono arriba del 50%, no vaya a salir el aviso en pantalla.
+- [ ] Rebuild nativo con `lora-lab-v3.gguf` si se va a filmar vía B.
+- [ ] Modo avión listo, y comprobado que la app funciona así.
+- [ ] `perf.jsonl` con líneas de verdad (alerta, ocr, extracción).
+- [ ] Batería arriba del 50%.
 - [ ] Nadie dice "CD4" ni nombra una enfermedad como diagnóstico.
 
 ## Lo que NO se dice
 
-- **"Hyperswarm P2P"** si la demo salió por HTTP. Camino A se dice "el teléfono
-  habla con el banco, con wifi". Camino B se dice "sin internet, el pueblo se
-  lo lleva al banco". Inferencia: "el teléfono intenta el modelo; si no puede,
-  le pide el texto al nodo". Ver [`PRUEBA-NODO.md`](PRUEBA-NODO.md).
+- **"Hyperswarm P2P"** si la demo salió por HTTP. Camino A: "el teléfono habla
+  con el banco, con wifi". Camino B: "sin internet, el pueblo se lo lleva".
+  Inferencia: "el teléfono intenta el modelo; si no puede, le pide el texto al
+  nodo". Ver [`PRUEBA-NODO.md`](PRUEBA-NODO.md).
 - **"Diagnostica"**, "detecta enfermedades", "sabe qué tienes". Detecta valores
   fuera de rango y sugiere una ruta.
-- Cualquier cifra que no se vea en pantalla en ese momento.
-- El LoRA en el video, si no se carga en la app. El spike sí se midió
-  (`spikes/lora-medpsy/RESULTADOS.md`); eso no implica mencionarlo en cámara.
+- Cualquier cifra que no se vea en pantalla (o en la tabla del Mac) en ese momento.
+- El LoRA **si no salió en cámara** la franja `MedPsy + LoRA` ni la tabla del
+  spike. El adaptador está en el producto; eso no autoriza a inventar el plano.
 
 ## Lo que falta decidir
 
 - Quién narra, y si es voz en vivo o grabada aparte.
-- Si se graba la pantalla del teléfono o se filma el teléfono en la mano. Filmar
-  la mano se ve más real y el modo avión se aprecia mejor; grabar la pantalla se
-  lee mejor. Probablemente mezcla: pantalla para el detalle, mano para el modo
-  avión.
+- Mezcla: pantalla para el detalle, mano para el modo avión.
 - Dónde se sube. Tiene que abrir sin login.
+- Si en la toma de 5 min cabe vía B completa, o solo el banner + un marcador.

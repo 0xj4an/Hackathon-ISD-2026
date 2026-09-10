@@ -14,7 +14,9 @@
   },
   "dependencies": {
     "b4a": "^1.6.7",
+    "blind-relay": "^1.6.1",
     "hypercore-crypto": "^3.4.2",
+    "hyperdht": "^6.34.0",
     "hyperswarm": "^4.8.0",
     "zod": "^4.5.4"
   }

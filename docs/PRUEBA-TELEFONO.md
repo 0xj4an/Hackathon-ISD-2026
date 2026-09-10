@@ -135,7 +135,8 @@ Código por delante de la evidencia en el aparato. Ver [`CHECKLIST.md`](CHECKLIS
   vio en el aparato.
 - Que la copia se borra del disco (C6): el código lo hace, la UI lo puede decir,
   no se listó el contenedor.
-- Cola SQLite durable (`expo-sqlite` no se usa en `mobile/src`).
+- Cola SQLite durable: código en `cola.ts` / `colaSqlite.ts`. Falta ver en el
+  iPhone que sobrevive un kill y que al volver la red sale sola.
 - HTTP camino A/B **desde el iPhone** (sí medido desde laptop en
   [`PRUEBA-NODO.md`](PRUEBA-NODO.md)).
 - Alerta redactada por MedPsy **vista en el iPhone** (código: `redactarAlerta`).

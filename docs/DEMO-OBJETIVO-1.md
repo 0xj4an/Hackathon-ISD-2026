@@ -1,7 +1,7 @@
 # Ensayo en el iPhone: objetivo 1 (avión)
 
 Qué tocar en el **iPhone 17 Pro Max** con el Release de `main` ahora
-(`3787570` o el SHA de `git rev-parse --short HEAD` al instalar).
+(el SHA de `git rev-parse --short HEAD` al instalar; hoy ~`93d0ca3` o posterior).
 
 Esto no es el guion del jurado ([`VIDEO.md`](VIDEO.md)). Es la corrida que
 tiene que salir **antes** de grabar. Lo que no se vea aquí no se dice en el

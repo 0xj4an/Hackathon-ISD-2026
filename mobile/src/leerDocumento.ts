@@ -6,8 +6,8 @@
  * grafo (`ggml_galloc_alloc_graph`) en la segunda página. Aquí el OCR corre
  * solo, se suelta, y MedPsy entra después.
  *
- * No hay SQLite aquí. Lo que queda es el JSON validado, en memoria, hasta que
- * confirmemos si hace falta persistirlo para la cola.
+ * No hay SQLite aquí. La cola durable de la solicitud de crédito está en
+ * `cola.ts` (SQLite). Aquí solo queda el JSON validado en memoria del flujo.
  */
 import { Image } from "react-native";
 import { File, Paths } from "expo-file-system";
