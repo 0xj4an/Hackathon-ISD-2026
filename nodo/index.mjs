@@ -341,7 +341,7 @@ createServer(async (req, res) => {
 
   res.statusCode = 404;
   res.end();
-}).listen(PORT, "0.0.0.0", () => log(`HTTP en :${PORT} p2p=${SKIP_P2P ? "off" : "on"}`));
+}).listen(PORT, "0.0.0.0", () => log(`HTTP en :${PORT} p2p=${SKIP_P2P ? "off" : "on"} state=${STATE}`));
 
 if (ROL === "corregimiento") setInterval(() => { void reenviarPendientes(); }, 4000);
 
