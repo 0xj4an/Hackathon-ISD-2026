@@ -124,6 +124,19 @@ export function recordError(where: string, err: unknown) {
     stack,
   });
   emitUi(`ERROR ${where}: ${message}`);
+  // Observabilidad remota: sin adjuntar fotos ni blobs.
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Sentry } = require("../sentry") as typeof import("../sentry");
+    Sentry.withScope(scope => {
+      scope.setTag("where", where);
+      scope.setLevel("error");
+      if (err instanceof Error) Sentry.captureException(err);
+      else Sentry.captureMessage(`${where}: ${message}`);
+    });
+  } catch {
+    // Sentry aún no cargó o falló el require — el log local basta.
+  }
 }
 
 export async function recordInference(
