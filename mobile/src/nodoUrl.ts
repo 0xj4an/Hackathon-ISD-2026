@@ -2,10 +2,11 @@
  * URL del nodo del pueblo (:8788). Sin IPs hardcodeadas.
  *
  * Orden: override manual → hallazgo LAN → IP de Metro → EXPO_PUBLIC_NODO_URL.
- * El barrido LAN usa la IP de Metro (misma red). expo-network es opcional:
- * si el build nativo no lo trae, la app igual arranca.
+ * En la misma WiFi, la app sonda el /24 buscando /salud del corregimiento.
  */
 import Constants from "expo-constants";
+import * as Network from "expo-network";
+import { NetworkStateType } from "expo-network";
 import {
   deleteAsync,
   documentDirectory,
@@ -143,22 +144,8 @@ function ordenarHosts(pref: string, propios: string[]): string[] {
   return outs;
 }
 
-/** IP del teléfono solo si el nativo trae expo-network (build nuevo). */
-async function ipDelTelefono(): Promise<string | null> {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const Network = require("expo-network") as typeof import("expo-network");
-    if (typeof Network.getIpAddressAsync !== "function") return null;
-    const ip = await Network.getIpAddressAsync();
-    return prefijoLan(ip) ? ip : null;
-  } catch {
-    return null;
-  }
-}
-
 /**
- * Busca el pueblo en la misma WiFi.
- * Prefiere el /24 de Metro (laptop); si hay expo-network, también el del teléfono.
+ * Busca el pueblo en la misma WiFi: Metro primero, luego el /24 del teléfono.
  */
 export async function descubrirPuebloLan(): Promise<{ url: string; detalle: string } | null> {
   if (barrido) return barrido;
@@ -167,19 +154,39 @@ export async function descubrirPuebloLan(): Promise<{ url: string; detalle: stri
     const metro = hostDelMetro();
     if (metro && esIpLan(metro)) candidatos.push(`http://${metro}:${PUERTO}`);
 
-    const prefMetro = metro ? prefijoLan(metro) : null;
-    const ipPhone = await ipDelTelefono();
-    const prefPhone = ipPhone ? prefijoLan(ipPhone) : null;
-    const pref = prefMetro || prefPhone;
-
-    if (pref) {
-      const propios = [
-        ...(metro && metro.startsWith(`${pref}.`) ? [metro] : []),
-        ...(ipPhone && ipPhone.startsWith(`${pref}.`) ? [ipPhone] : []),
-      ];
-      for (const h of ordenarHosts(pref, propios)) {
-        const url = `http://${h}:${PUERTO}`;
-        if (!candidatos.includes(url)) candidatos.push(url);
+    try {
+      const estado = await Network.getNetworkStateAsync();
+      const enLan =
+        estado.type === NetworkStateType.WIFI
+        || estado.type === NetworkStateType.VPN
+        || estado.type === NetworkStateType.UNKNOWN;
+      if (enLan) {
+        const ip = await Network.getIpAddressAsync();
+        const pref = prefijoLan(ip) || (metro ? prefijoLan(metro) : null);
+        if (pref) {
+          const propios = [
+            ...(metro && metro.startsWith(`${pref}.`) ? [metro] : []),
+            ...(ip && ip.startsWith(`${pref}.`) ? [ip] : []),
+          ];
+          for (const h of ordenarHosts(pref, propios)) {
+            const url = `http://${h}:${PUERTO}`;
+            if (!candidatos.includes(url)) candidatos.push(url);
+          }
+        }
+      } else if (metro && prefijoLan(metro)) {
+        const pref = prefijoLan(metro)!;
+        for (const h of ordenarHosts(pref, [metro])) {
+          const url = `http://${h}:${PUERTO}`;
+          if (!candidatos.includes(url)) candidatos.push(url);
+        }
+      }
+    } catch {
+      if (metro && prefijoLan(metro)) {
+        const pref = prefijoLan(metro)!;
+        for (const h of ordenarHosts(pref, [metro])) {
+          const url = `http://${h}:${PUERTO}`;
+          if (!candidatos.includes(url)) candidatos.push(url);
+        }
       }
     }
 
