@@ -122,7 +122,7 @@ prueba de que corre local, y no se puede fingir.
 >
 > La solicitud intenta el banco por wifi. Si no hay internet, queda en el nodo
 > del pueblo, esta laptop, y él se la lleva. El banco responde: aprobado,
-> 12 meses, 11.1% anual, cuota de 81 balboas al mes.
+> 12 meses, 17.4% anual, cuota de 84 balboas al mes.
 >
 > Esa cuota cabe en el 30% del ingreso, y el motor lo verifica antes de aprobar.
 > No es un modelo de juguete: tiene elegibilidad, capacidad de pago, scorecard,
@@ -142,7 +142,7 @@ Mac, `node eval/run.mjs` saliendo en verde.
 > Todo esto está medido. MedPsy carga en este iPhone y suelta el primer token
 > en 2.9 segundos, con Q8_0 en CPU. Cada inferencia queda registrada.
 >
-> Y las reglas de salud tienen su propia evaluación: 14 señales, los seis casos
+> Y las reglas de salud tienen su propia evaluación: 14 señales, nueve casos
 > de prueba, y **el caso sano no dispara ninguna alerta**, que vale tanto como
 > acertar las otras.
 
@@ -189,9 +189,9 @@ reproducir.
 | B/. 641 a 920 el año | `armarPaquete()` sobre ese caso |
 | 730 tabletas, B/. 380, 41% | Decreto Ejecutivo 36: B/. 0.52 por tableta |
 | TTFT 2915 ms | `perf/`, iPhone 17 Pro Max, Q8_0 en CPU |
-| 12 meses, 11.1%, cuota 81.35 | `decidir()` de `nodo/credito.mjs`, corrido |
+| 12 meses, 17.4%, cuota 84.08 | `decidir()` / `eval/run.mjs`, monto 920 |
 | 14 señales | `mobile/src/core/reglas.ts` |
-| 52 tests de crédito en verde | `node --test eval/credito/*.test.mjs` |
+| 58 tests de crédito en verde | `node --test eval/credito/*.test.mjs` |
 
 ## Antes de grabar
 
@@ -212,7 +212,8 @@ reproducir.
 - **"Diagnostica"**, "detecta enfermedades", "sabe qué tienes". Detecta valores
   fuera de rango y sugiere una ruta.
 - Cualquier cifra que no se vea en pantalla en ese momento.
-- El LoRA, si no llegó a medirse.
+- El LoRA en el video, si no se carga en la app. El spike sí se midió
+  (`spikes/lora-medpsy/RESULTADOS.md`); eso no implica mencionarlo en cámara.
 
 ## Lo que falta decidir
 

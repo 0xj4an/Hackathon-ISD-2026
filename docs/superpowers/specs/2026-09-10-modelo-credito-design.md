@@ -335,7 +335,7 @@ Sección 5 nueva en `eval/run.mjs`, determinista, sin teléfono, semilla fija:
 
 - **Scorecard:** AUC y KS sobre holdout, y monotonía de cada banda WOE.
 - **Política:** los montos que la app puede pedir salen con cuota dentro de
-  capacidad, y los seis casos de la demo producen una decisión válida.
+  capacidad, y los nueve casos de la demo producen una decisión válida.
 - **Invariantes:** nunca cuota mayor que `cuota_max`; nunca monto mayor que
   `monto_max`; tasa siempre dentro de piso y techo; toda respuesta valida contra
   `RespuestaBancoSchema`; todo rechazo trae al menos un factor.

@@ -1,4 +1,5 @@
-import { completion, LLAMA_3_2_1B_INST_Q4_0, loadModel, close } from "@qvac/sdk";
+process.env.QVAC_CONFIG_PATH = new URL("./qvac.relays.config.json", import.meta.url).pathname;
+const { completion, LLAMA_3_2_1B_INST_Q4_0, loadModel, close } = await import("@qvac/sdk");
 
 const providerPublicKey = process.argv[2];
 if (!providerPublicKey) {

@@ -59,7 +59,7 @@ Caso clínico: diabetes.json | sano.json | …
 | Paso | Resultado | Qué se vio |
 | --- | --- | --- |
 | Entrada / revisión | ok / fallo / no se tocó | |
-| Alerta (reglas, no MedPsy) | | |
+| Alerta (reglas + MedPsy redacta) | | |
 | Monto del crédito | | |
 | Cédula → JSON | | nombre / número / fechas vs esperado |
 | Ingresos → JSON | | empleador / B/. / tipo |
@@ -123,11 +123,17 @@ iOS 26.6.1. Release `expo run:ios --device --configuration Release`.
 
 ---
 
-## Lo que esta noche todavía no se puede afirmar
+## Lo que todavía no se puede afirmar (auditoría 10 sep)
+
+Código por delante de la evidencia en el aparato. Ver [`CHECKLIST.md`](CHECKLIST.md).
 
 - Que la foto de la cédula ya lee después del arreglo JPEG/base64.
 - Que ingresos y extracto leen por cámara. El arreglo es el mismo camino; no se
   vio en el aparato.
 - Que la copia se borra del disco (C6): el código lo hace, la UI lo puede decir,
   no se listó el contenedor.
-- Cola SQLite, HTTP al nodo desde la app, alerta redactada por MedPsy.
+- Cola SQLite durable (`expo-sqlite` no se usa en `mobile/src`).
+- HTTP camino A/B **desde el iPhone** (sí medido desde laptop en
+  [`PRUEBA-NODO.md`](PRUEBA-NODO.md)).
+- Alerta redactada por MedPsy **vista en el iPhone** (código: `redactarAlerta`).
+- `perf.jsonl` exportado de una corrida de producto (logger ya cableado).

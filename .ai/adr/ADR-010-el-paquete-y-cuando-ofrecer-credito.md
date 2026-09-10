@@ -61,22 +61,24 @@ senal va primero ("come azucar ya"), el paquete debajo, y su nota abre con
 **Las 14 senales tienen paquete.** Si faltara uno, habria un caso donde la app
 detecta algo y no sabe decir cuanto cuesta atenderlo. `eval/run.mjs` lo verifica.
 
-Resultado sobre los 6 casos: **5 de 6 ofrecen credito**. El unico que no es el
-caso sano, que no tiene nada que atender.
+Resultado sobre los 9 casos (`eval/run.mjs`): **8 de 9 ofrecen credito**. El
+unico que no es el caso sano, que no tiene nada que atender.
 
-| Caso | Total | Credito | Plazo y cuota con ingreso de B/. 520 |
+| Caso | Total | Credito | Demo (ingreso B/. 520, deuda 40) |
 | --- | --- | --- | --- |
-| Diabetes sin diagnosticar | B/. 641 a 920 | si | 12 meses, B/. 57 a 82 |
-| Hipertension no controlada | B/. 617 a 812 | si | 12 meses, B/. 55 a 72 |
-| Hipoglucemia | B/. 235 a 530 | si | 6 a 12 meses, B/. 41 a 47 |
-| Prediabetes | B/. 72 a 170 | si | 6 meses, B/. 12 a 29 |
-| Cuadro respiratorio agudo | B/. 48 a 120 | si | 6 meses, B/. 8 a 21 |
+| Diabetes sin diagnosticar | B/. 641 a 920 | si | 12 m, 17.4%, cuota 84.08 |
+| Hipertension no controlada | B/. 617 a 812 | si | 12 m, 17.49%, cuota 74.25 |
+| Hipoglucemia | B/. 235 a 530 | si | 6 m, 16.63%, cuota 92.67 |
+| Prediabetes | B/. 72 a 170 | si | 6 m, 19.92%, cuota 30 |
+| Cuadro respiratorio agudo | B/. 48 a 120 | si | 6 m, 22.96%, cuota 21.36 |
+| Azucar baja (leve) | B/. 39 a 90 | si | (paquete menor) |
+| Respiracion muy rapida | B/. 71 a 205 | si | (paquete) |
+| Oxigeno critico | B/. 113 a 310 | si | (paquete) |
 | Sin hallazgos | sin paquete | no | nada que atender |
 
-El nodo aprueba estos montos sin recortarlos: con ingreso de B/. 520 al mes,
-diabetes por 920 sale aprobada a 12 meses con cuota de B/. 81.96, muy debajo
-del techo del 30% del ingreso. Recien con ingreso de B/. 250 empieza a
-ajustar (aprueba 828 de los 920).
+El nodo aprueba el monto 920 sin recortarlo: con ingreso de B/. 520 al mes,
+diabetes por 920 sale aprobada a 12 meses con cuota de B/. 84.08, debajo del
+techo del 30% del ingreso. Ver `eval/resultados.md`.
 
 ## Los precios
 
