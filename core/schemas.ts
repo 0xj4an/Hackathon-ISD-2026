@@ -7,8 +7,15 @@ export const AlertaSchema = z.object({
   /** Rango, no un número exacto: los precios de laboratorio varían por sede. Ausente si no hay precio con fuente. */
   costo_min_usd: z.number().min(0).max(2000).optional(),
   costo_max_usd: z.number().min(0).max(2000).optional(),
+  costo_nota: z.string().optional().describe("Aviso de que el precio es un rango aproximado y varía por laboratorio"),
   urgencia: z.enum(["Rutinaria", "Prioritaria", "Inmediata"]),
   mensaje: z.string().describe("Texto en español para la persona, máx 3 frases"),
+  /**
+   * De dónde sale el umbral que disparó la alerta. Viene de `Senal.fuente` y se
+   * copia tal cual: el modelo no la redacta. Va en pantalla para que la app
+   * cite en vez de afirmar, que es lo que exige el reto Tether Psy (`ADR-008`).
+   */
+  fuente: z.string(),
   disclaimer: z.string(),
 });
 export type Alerta = z.infer<typeof AlertaSchema>;

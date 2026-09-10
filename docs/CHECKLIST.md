@@ -28,10 +28,10 @@ Nada más avanza hasta que esto pase.
 
 ### Dominio
 
-- [ ] `[J]` Revisar los cuatro umbrales de `core/reglas.ts` contra una fuente citable, y dejar la cita: glucosa >= 126 y >= 100 sobre 3 tomas, pulso > 100 durante 5 días, sistólica >= 140 en 3 tomas
-- [ ] `[J]` Revisar examen y costo de cada señal en `core/reglas.ts`. Los de hoy (25, 8, 40, 15 USD) son inventados y salen en pantalla: sostenerlos o etiquetarlos como estimados
+- [x] `[J]` **Hecho.** Umbrales revisados y citados, y la cobertura pasó de 4 señales a 14. Ver [`ADR-008`](../.ai/adr/ADR-008-que-variables-vigilamos.md) y [`salud.md`](../.ai/references/salud.md). Cada señal lleva su `fuente` en el código
+- [x] `[J]` **Hecho.** Los costos inventados salieron. Ahora son rangos publicados con fuente (glucosa 6 a 15 USD, ECG 20 a 45), y donde no hay precio citable el campo va ausente y la pantalla no muestra número
 - [ ] `[J]` Añadir el especialista al tipo `Senal`. Hoy no existe, y es la mitad de lo que hace útil la alerta
-- [ ] `[J]` Quitar `linfocitos CD4` de `core/marcadores.ts`: su siguiente paso menciona VIH y el brief lo prohíbe
+- [x] `[J]` **Hecho.** CD4 fuera de la tabla, con filtro de respaldo en el generador del spike
 - [ ] `[J]` `data/`: historial de dos usuarios ficticios, uno sano y uno con hallazgo. **El sano no debe disparar nada**, esa es media demo
 
 ### Implementación
@@ -111,7 +111,7 @@ Nada más avanza hasta que esto pase.
 | [ ] C3 | La vía A dispara con el historial del usuario con hallazgo | `eval/run.mjs` las cuenta |
 | [ ] C3b | La vía B clasifica bien los marcadores: alto, bajo y normal | `eval/run.mjs` contra `core/marcadores.ts` |
 | [ ] C3c | **El usuario sano no dispara ninguna alerta** | `eval/run.mjs` sobre su historial: cero señales |
-| [ ] C3d | `linfocitos CD4` no aparece en pantalla ni en el video | Grep en la app y revisión del guion |
+| [x] C3d | `linfocitos CD4` no aparece en pantalla ni en el video | **Fuera de `core/marcadores.ts`.** Falta revisar el guion cuando exista |
 | [ ] C4 | Toda salida del modelo pasa por `limpiarJson()` | Grep: cero `JSON.parse` sin `limpiarJson` |
 | [ ] C5 | La alerta valida contra `AlertaSchema` | `.parse()` sin excepción en 20 corridas |
 | [ ] C6 | La foto se borra tras extraer | Listar el directorio: cero imágenes |

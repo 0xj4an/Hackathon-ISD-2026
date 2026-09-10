@@ -11,7 +11,7 @@ Una app para personas en zonas rurales de Panamá con señal intermitente, que d
 - **Caja de Ahorros** (1,500): inclusión financiera con conectividad intermitente; documentos y trámites leídos en el dispositivo; la ejecución local como ventaja (el asesor nunca ve la cédula ni el extracto).
 
 ## Flujo de usuario (el que se graba)
-1. **Alerta local.** Un dataset sintético de mediciones (glucómetro, pulso, peso) dispara una regla; MedPsy 1.7B redacta en español: qué se observa, qué examen conviene, costo aproximado, disclaimer. Sin diagnóstico.
+1. **Alerta local.** Un dataset sintético de mediciones (glucosa, presión, pulso, saturación, frecuencia respiratoria, temperatura, peso y estatura) dispara una de las 14 reglas de `ADR-008`; MedPsy 1.7B redacta en español: qué se observa, qué examen conviene, costo aproximado, disclaimer. Sin diagnóstico.
 2. **Decisión.** "¿Necesitas ayuda para pagarlo?" → entra el flujo de crédito de salud. El banco **no** recibe el motivo de salud.
 3. **Documentos en el dispositivo.** Foto de cédula, comprobante de ingresos (carta laboral o similar) y extracto. OCR (`OCR_LATIN`, plan B VisionPsy-Nano) → LLM extrae campos a JSON con schema → validaciones en código (rangos, consistencia, EXIF) → **las fotos se borran**, queda el JSON firmado localmente.
 4. **Cola offline.** La solicitud se guarda en SQLite con estado `pendiente`. Se muestra "sin señal, se enviará cuando haya conexión".

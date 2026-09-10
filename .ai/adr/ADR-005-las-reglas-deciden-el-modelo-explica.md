@@ -39,9 +39,10 @@ JSON extraído en código, nunca confiando en la salida del LLM.
 
 ## Consecuencias
 
-- Las señales que la app detecta están limitadas a las 4 reglas escritas
-  (`GLU_ALTA`, `GLU_LIMITE`, `TAQUI`, `PRES_ALTA`). Cobertura estrecha, y es
-  correcto que lo sea.
+- Las señales que la app detecta están limitadas a las reglas escritas: hoy
+  **14 sobre 9 variables**, enumeradas con su umbral y su fuente en
+  [`ADR-008`](ADR-008-que-variables-vigilamos.md). Cobertura acotada, y es
+  correcto que lo sea: lo que no está en una guía publicada, no se detecta.
 - Los costos y las urgencias son valores fijos en el código, no estimaciones del
   modelo. Auditables de un vistazo.
 - Es un argumento fuerte ante el jurado, no una limitación que esconder: el

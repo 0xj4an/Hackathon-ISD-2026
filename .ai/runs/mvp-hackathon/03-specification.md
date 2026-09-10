@@ -115,7 +115,7 @@ cosas de forma distinta**.
 | Qué mira | Una **tendencia**: el valor viene mal N días seguidos | Un **valor suelto** contra su rango de referencia |
 | Necesita historia | Sí, sin serie temporal no hay señal | No, con un dato basta |
 | Ejemplo | "glucosa en ayunas sobre 126 en las últimas 3 tomas" | "hemoglobina 9.1 g/dL, rango 12 a 16, anemia" |
-| Estado hoy | `core/reglas.ts`, 4 reglas escritas | **`core/marcadores.ts`**, con los 8 marcadores, sus rangos y el clasificador |
+| Estado hoy | `core/reglas.ts`, **14 señales** sobre 9 variables, cada una con su fuente (`ADR-008`) | **`core/marcadores.ts`**, con los 8 marcadores, sus rangos y el clasificador |
 
 **Las dos desembocan en el mismo tipo `Senal`** (`codigo`, `descripcion`,
 `examen`, `costo_usd`, `urgencia`) y de ahí en adelante el flujo es uno solo:

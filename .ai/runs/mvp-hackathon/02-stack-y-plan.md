@@ -228,7 +228,7 @@ o el backend de GPU.
 **`0xj4an` (dominio):**
 
 - Revisar los umbrales de la via A, que hoy estan en `core/reglas.ts` puestos a
-  ojo: glucosa >= 126 y >= 100 sobre 3 tomas, pulso > 100 durante 5 dias,
+  ojo: hecho, ver `ADR-008`. Las reglas pasaron de 4 a 14 senales,
   sistolica >= 140 en 3 tomas. Confirmar cada uno contra una fuente citable.
 - Revisar el examen y el costo de cada senal, tambien en `core/reglas.ts`. Los
   costos de hoy (25, 8, 40, 15 USD) son inventados y la app se los muestra al
