@@ -1,8 +1,8 @@
 # Estado del proyecto · 10 sep 2026 (tarde)
 
-Auditoría contra código en `main` (`b5d69d6` y siguientes) y corridas del
-iPhone el mismo día. Ante duda: manda el código y este archivo; el
-[`CHECKLIST.md`](CHECKLIST.md) detalla ítems abiertos.
+Auditoría contra código en `main` (`b5d69d6` / docs `6615ed6`+) y corridas del
+iPhone el mismo día. Ante duda: **código** y este archivo.
+Ítems abiertos: [`CHECKLIST.md`](CHECKLIST.md). Índice docs: [`README.md`](README.md).
 
 ## Una frase
 
@@ -16,12 +16,12 @@ si no carga, solo texto a `/inferir`.
 | Pieza | Estado | Evidencia |
 |---|---|---|
 | Dominio (señales, scorecard, eval) | Hecho | `eval/run.mjs`, `eval/resultados.md` |
-| Flujo móvil completo en código | Hecho | `App.tsx`: entrada → salud → alerta → docs → cuota → banco → firma → desembolso |
-| Banco remoto (Railway) | Vivo + persistente | `https://banco-production-3755.up.railway.app` · Volume `/data` · `STATE_DIR=/data` |
-| Admin del banco | Hecho | Landing: timestamp + canal (`directo` / `pueblo`) por solicitud |
-| Pueblo LAN `:8788` | Vivo en laptop | `npm run corregimiento` · Bonjour `_inaigar-pueblo._tcp` · `/salud` con `servicio: inaigar-pueblo` |
-| Teléfono → pueblo → banco | **Medido 10 sep** | Logs: `192.168.0.17` POST monto 90, 812, 920 → **aprobada** |
-| Descubrimiento de IP del pueblo | Hecho | App barre la LAN / Metro; no hay IP hardcodeada. Demo: **Buscar WiFi** |
+| Flujo móvil en código | Hecho | `App.tsx`: entrada → salud → revisión → alerta → docs → cuota → banco → firma → desembolso |
+| Banco remoto (Railway) | Vivo + persistente | `https://banco-production-3755.up.railway.app` · código usa `STATE_DIR` (Volume `/data` en Railway) |
+| Admin del banco | Hecho | Landing: `recibida` + `canal` (`directo` / `pueblo`) |
+| Pueblo LAN `:8788` | Vivo en laptop | `npm run corregimiento` · `/salud` `servicio: inaigar-pueblo` · Bonjour (nodo publica; app no consume) |
+| Teléfono → pueblo → banco | **Medido 10 sep** | `192.168.0.17` POST 90 / 812 / 920 → **aprobada** |
+| Descubrimiento del pueblo | Hecho | Sweep HTTP LAN / Metro (`nodoUrl.ts`); sin IP fija |
 | Cola offline SQLite | Hecho en código | `cola.ts` / `colaSqlite.ts` |
 | Firma + desembolso simulado | Hecho | `PantallaFirma`, `PantallaDesembolso` |
 | Sentry | Hecho | Fallos de envío y pantallas |
@@ -31,62 +31,67 @@ si no carga, solo texto a `/inferir`.
 ```
 local-wifi:
   teléfono ──HTTPS──► banco Railway
+  (si no hay respuesta final → pueblo → pendiente)
 
 local-offline / nodo-offline:
-  teléfono ──LAN :8788──► pueblo (laptop) ──HTTP──► banco Railway
+  teléfono ──LAN :8788──► pueblo ──HTTP──► banco Railway
                  ▲
-                 │  la app busca sola :8788/salud (servicio inaigar-pueblo)
+                 │  app: sweep :8788/salud (no Bonjour)
 ```
 
-El banco **no** usa LLM: scorecard determinista (`decidir()`). Guarda
-`{id}.json`, `{id}.respuesta.json` y `{id}.meta.json` (`recibida`, `canal`).
+El banco **no** usa LLM: scorecard (`decidir()` en `mobile/src/core/credito/`).
+Guarda `{id}.json`, `{id}.respuesta.json`, `{id}.meta.json`.
 
 ## Cómo arrancar la demo (día a día)
 
 ```bash
-# 1) Pueblo en la laptop (misma WiFi que el teléfono)
 cd nodo && npm install && npm run corregimiento
-
-# 2) App en el iPhone
-cd mobile && npx expo start          # o el build Release instalado
-# Misma WiFi. En Entrada → Solo para demostración → Buscar WiFi / Probar.
+cd mobile && npx expo start
+# Misma WiFi. Entrada → Solo para demostración → Buscar WiFi.
 ```
 
-Banco en producción (no hace falta levantarlo local):
-
-- API: https://banco-production-3755.up.railway.app  
+- API banco: https://banco-production-3755.up.railway.app  
 - Admin: https://isd-hackathon-landing-production.up.railway.app/admin  
   (login `banco@gmail.com`)
 
 ## Qué falta para el cierre
 
-1. **Video ≤ 5 min** ([`VIDEO.md`](VIDEO.md)) — ensayo completo grabado.
-2. **OCR / documentos en iPhone** — hubo `invalid input` temprano; hay atajo
-   demo en documentos; falta corrida limpia documentada.
-3. **`perf/perf.jsonl` exportado** del iPhone (Tether Psy).
-4. **EAS iOS** con `expo-network` en el binario nativo si el Release viejo
-   no lo trae (el error `Cannot find native module 'ExpoNetwork'`). Metro /
-   builds que ya cargan el módulo funcionan; el barrido LAN también usa la
-   IP de Metro aunque el nativo falle al pedir la IP del teléfono.
-5. Ensayo **tres veces seguidas** en avión / sin wifi (cola → reintento).
+1. **Video ≤ 5 min** ([`VIDEO.md`](VIDEO.md)).
+2. **OCR / documentos en iPhone** (corrida limpia en [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md)).
+3. **`perf/perf.jsonl` exportado** del iPhone.
+4. Build nativo con `expo-network` si el Release viejo falla (`ExpoNetwork`).
+5. Ensayo **tres veces** en avión / cola ([`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md)).
 
 ## Archivos clave
 
 | Ruta | Rol |
 |---|---|
-| `mobile/App.tsx` | Navegación del camino demo |
-| `mobile/src/envio.ts` | Banco → pueblo |
-| `mobile/src/nodoUrl.ts` | URL del pueblo + descubrimiento LAN |
-| `mobile/src/lectura.ts` / `PantallaDocumentos.tsx` | Docs + atajo demo |
+| `mobile/App.tsx` | Navegación demo |
+| `mobile/src/envio.ts` / `nodoUrl.ts` | Banco, pueblo, discovery |
 | `nodo/index.mjs` | Pueblo / banco HTTP |
 | `landing/admin.html` | Back office |
-| `docs/PRUEBA-NODO.md` | Cómo medir A/B |
-| `docs/PRUEBA-TELEFONO.md` | Corridas en aparato |
-| `docs/CHECKLIST.md` | Ítems abiertos/cerrados |
+| `docs/PRUEBA-*` | Evidencia |
+| `docs/CHECKLIST.md` | Ítems |
 
 ## Honestidad
 
-- Hyperswarm P2P **no** conecta; no se promete.
-- QVAC `delegate` **no** es el plan de demo.
-- Firma = trazo; desembolso = simulado.
-- Datos 100% sintéticos.
+- Hyperswarm / QVAC `delegate`: **no** son el camino de la demo (P2P off salvo `ENABLE_P2P=1`).
+- Firma = trazo; desembolso = simulado; datos 100% sintéticos.
+
+## Contraste docs ↔ código (10 sep)
+
+| Afirmación | Veredicto | Nota |
+|---|---|---|
+| URLs banco / admin | true | `bancoUrl.ts`, `nodo/package.json`, `landing/server.js` |
+| Sweep LAN sin IP fija | true | `nodoUrl.ts` |
+| Bonjour descubre en la app | **parcial** | Nodo publica; app solo HTTP |
+| Modos `local-wifi` / … | true | `modo.ts` |
+| Offline = “sin Railway” | **falso** (corregido) | Teléfono no llama Railway; pueblo sí reenvía |
+| Hyperswarm en `corregimiento` | **falso** (corregido) | Hace falta `ENABLE_P2P=1` |
+| `SolicitudSchema.strict()` | true | `schemas.ts` + eval |
+| Política en `nodo/credito.mjs` | **stale** (corregido en baseline) | Motor en `mobile/src/core/credito/` |
+| Volume `STATE_DIR=/data` | **parcial** | Código sí; env Railway no está en git |
+| Flujo BRIEF = App | **parcial** (corregido) | Incluye Salud + Revisión |
+| 13 pantallas | **stale** (corregido) | 15 `Pantalla*.tsx` |
+| LoRA en app | true en código | Medición iPhone abierta |
+| SDK 0.18.2 | true | `mobile/package.json` |

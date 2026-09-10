@@ -1,5 +1,9 @@
 # Modelo de análisis de crédito · plan de implementación
 
+> **HISTÓRICO (plan ejecutado).** No es ops. Verdad viva: [`ADR-011`](../../../.ai/adr/ADR-011-el-modelo-de-credito.md),
+> `mobile/src/core/credito/`, [`eval/resultados.md`](../../../eval/resultados.md),
+> spec en `../specs/2026-09-10-modelo-credito-design.md`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Reemplazar el modelo de crédito de juguete de `nodo/credito.mjs` por un motor que mida capacidad de pago real, estime probabilidad de incumplimiento con un scorecard entrenado, descomponga la tasa en sus costos, despeje el plazo de la cuota y clasifique la cartera según el Acuerdo 4-2013.

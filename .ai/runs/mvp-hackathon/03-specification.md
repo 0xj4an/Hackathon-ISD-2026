@@ -1,6 +1,12 @@
 # Especificación · MVP hackathon
 
-> **Histórico.** Ante conflicto mandan BRIEF, CHECKLIST, ADRs vigentes (006/007/009/011/013) y el código. Modos reales: `local-wifi` / `local-offline` / `nodo-offline`. SDK 0.18.2. Demo = HTTP.
+> **HISTÓRICO (no ops).** Spec inicial (Android-céntrica en partes). Ante conflicto
+> mandan código, [`docs/ESTADO.md`](../../../docs/ESTADO.md),
+> [`docs/BRIEF.md`](../../../docs/BRIEF.md), [`docs/CHECKLIST.md`](../../../docs/CHECKLIST.md)
+> y ADRs vigentes (006/007/009/011/013). Modos: `local-wifi` / `local-offline` /
+> `nodo-offline`. SDK 0.18.2. Demo = HTTP. **Decisiones abiertas vivas:** solo en
+> [`docs/CHECKLIST.md`](../../../docs/CHECKLIST.md) § Decisiones abiertas; la tabla
+> al final de este archivo es un snapshot y puede estar desfasada.
 
 Referencias: `01-idea-validation.md` (decisión de idea), `02-stack-y-plan.md`
 (stack, plan por bloques, LoRA), `docs/BRIEF.md`, `references/retos.md`.
@@ -280,7 +286,10 @@ hay que repetirlo antes de entregar.
 2. Nodo banco y nodo corregimiento corriendo en la laptop, misma LAN.
 3. Ensayar el flujo entero 3 veces seguidas antes de grabar.
 
-## Decisiones abiertas
+## Decisiones abiertas (snapshot histórico)
+
+> **No actualizar aquí.** Lista viva: [`docs/CHECKLIST.md`](../../../docs/CHECKLIST.md).
+> Se resolvían con evidencia, no con opinión:
 
 Se resuelven con evidencia, no con opinión, antes de construir sobre ellas:
 

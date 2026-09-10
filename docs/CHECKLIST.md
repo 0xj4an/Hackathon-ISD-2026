@@ -6,25 +6,17 @@ Ordenado por lo que decide el resultado, no por horario. El detalle de cada
 punto está en [`02-stack-y-plan.md`](../.ai/runs/mvp-hackathon/02-stack-y-plan.md).
 
 Auditado contra el código el **10 sep 2026 (tarde)** (`main` ~`b5d69d6`).
-Resumen ejecutivo: [`ESTADO.md`](ESTADO.md). Los evals de dominio pasan.
-Teléfono → pueblo → banco **medido** (montos 90, 812, 920 aprobados).
+Foto viva: [`ESTADO.md`](ESTADO.md). Índice: [`README.md`](README.md).
+Evals de dominio en verde. Teléfono → pueblo → banco **medido** (90 / 812 / 920).
 
 ## Dónde estamos
 
-El dominio está terminado y medido: 14 señales con fuente, **nueve** casos
-clínicos, modelo de crédito con scorecard entrenado, `eval/run.mjs` y el
-contrato del crédito en verde. Flujo móvil cableado hasta firma y desembolso
-simulado. Banco en Railway con **Volume** (solicitudes sobreviven redeploy).
-Admin muestra `recibida` + `canal`. El pueblo se **descubre en la LAN** sin IP
-fija (`nodoUrl.ts`).
+Dominio y flujo móvil en código cerrados. Pueblo LAN sin IP fija. Banco Railway
+con persistencia (`STATE_DIR`). Admin con `recibida`/`canal`. Evidencia iPhone
+del camino pueblo: [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
 
-**Medido en iPhone (10 sep):** POST al pueblo desde `192.168.0.17` → banco
-aprueba. Ver [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md) y
-[`PRUEBA-NODO.md`](PRUEBA-NODO.md).
-
-Lo que falta para el cierre es sobre todo **video**, OCR limpio documentado,
-`perf.jsonl` exportado y ensayos repetidos en avión. Detalle en
-[`ESTADO.md`](ESTADO.md).
+Abierto para el cierre: **video**, OCR limpio, `perf.jsonl`, ensayos en avión.
+Detalle en [`ESTADO.md`](ESTADO.md).
 
 ---
 
@@ -162,7 +154,9 @@ JSON válido **5% → 68%**. Adaptador en la app como
 - [x] `eval/run.mjs` cubre historial, laboratorio e integridad de rutas. Determinista, sin teléfono, exit 1 si algo falla
 - [x] `eval/credito/*.test.mjs` (58 tests) llama al motor real y valida contrato/schemas; `eval/salud/alerta.test.mjs` y `eval/nodo/inferir.test.mjs` en verde
 - [x] El nodo importa el motor de crédito en vez de tener su propia política
-- [x] Trece `Pantalla*.tsx`; navegación en `App.tsx` (Entrada → … → Banco; Examen y Registro laterales)
+- [x] Quince `Pantalla*.tsx` en `mobile/src/`; camino demo en `App.tsx`
+  (Entrada → Salud → Revisión → Alerta → … → Firma → Desembolso). Fuera del
+  camino: p. ej. `PantallaUsuarios`, `PantallaDatos`, `PantallaRegistro`
 - [x] La cuota se calcula **en el teléfono y sin señal**: `PantallaLeido` muestra lo extraído, `PantallaCuota` corre `preCalificar()` y `PantallaBanco` muestra `decidir()`; si aprueba, firma y desembolso simulado
 - [x] `data/generar-usuarios.mjs` produce el formato normalizado; casos embebidos en `mobile/src/datos/`
 - [x] `core/` unificado en `mobile/src/core/`, sin duplicado en la raíz
@@ -211,10 +205,12 @@ ahora es **1.2 en el iPhone** (OCR + envío E2E) y la cola durable (C8/C9).
 
 ## Decisiones abiertas
 
+Lista viva (no usar el snapshot de `03-specification.md`).
+
 - [x] D1 ¿MedPsy carga on-device? **Sí**, iPhone 17 Pro Max, CPU, Q8_0
 - [x] D3 ¿HyperOS pide cuenta Mi? **Aparcado**, ya no usamos el Xiaomi
 - [ ] D2 ¿`gpu` o `cpu`? Solo CPU medido. Falta Metal en el iPhone
 - [ ] D5 ¿`finetune()` corre en el dispositivo? Solo si todo lo demás está entregable
 - [ ] D7 ¿Un adaptador entrenado sobre Q8_0 carga sobre Q4_0?
-- [x] D11 ¿Se recupera el transporte P2P, o el video no lo promete? **No se
-  recupera.** Demo = HTTP. Guion/README no prometen Hyperswarm ni `delegate`.
+- [x] D10 ¿`delegate` atraviesa NAT? **No es plan de demo.** Bonus solo si se mide a propósito.
+- [x] D11 ¿Se recupera el transporte P2P? **No.** Demo = HTTP. No prometer Hyperswarm ni `delegate`.

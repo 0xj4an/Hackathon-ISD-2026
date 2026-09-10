@@ -147,21 +147,10 @@ iOS 26.6.1. Release `expo run:ios --device --configuration Release`.
 
 ---
 
-## Lo que todavía no se puede afirmar (auditoría 10 sep tarde)
+## Lo que todavía no se puede afirmar
 
-Código por delante de la evidencia en el aparato. Ver [`CHECKLIST.md`](CHECKLIST.md)
-y [`ESTADO.md`](ESTADO.md).
-
-- Que la foto de la cédula ya lee después del arreglo JPEG/base64.
-- Que ingresos y extracto leen por cámara. El arreglo es el mismo camino; no se
-  vio en el aparato.
-- Que la copia se borra del disco (C6): el código lo hace, la UI lo puede decir,
-  no se listó el contenedor.
-- Cola SQLite durable: código en `cola.ts` / `colaSqlite.ts`. Falta ver en el
-  iPhone que sobrevive un kill y que al volver la red sale sola.
-- HTTP **directo** al banco Railway desde el iPhone (modo `local-wifi`). El
-  camino **pueblo** sí está medido (corrida de arriba).
-- Alerta redactada por MedPsy **vista en el iPhone** (código: `redactarAlerta`).
-- `perf.jsonl` exportado de una corrida de producto (logger ya cableado).
-- Build EAS/Release con `expo-network` nativo si el binario viejo falla con
-  `Cannot find native module 'ExpoNetwork'` (Metro / prebuild reciente OK).
+Lista viva de cierre: [`ESTADO.md`](ESTADO.md) y [`CHECKLIST.md`](CHECKLIST.md).
+Aquí solo lo que **este log** aún no demostró en el aparato: OCR limpio tras
+JPEG/base64; borrado de foto en disco; cola SQLite post-kill; HTTP **directo**
+Railway (`local-wifi`); alerta MedPsy vista; `perf.jsonl` exportado; Release
+con módulo nativo `ExpoNetwork` si el binario viejo falla.

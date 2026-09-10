@@ -41,10 +41,11 @@ En el iPhone el camino **directo a Railway** (modo `local-wifi`) todavía
 conviene anotarlo en [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md). El camino
 **vía pueblo** desde el iPhone **sí está medido** el 10 sep (abajo).
 
-El banco en Railway usa **Volume** en `/data` (`STATE_DIR=/data`): las
-solicitudes sobreviven redeploy. Cada una guarda `{id}.meta.json` con
-`recibida` (ISO) y `canal` (`directo` | `pueblo`, vía header `x-via`).
-Admin: https://isd-hackathon-landing-production.up.railway.app/admin
+El banco en Railway persiste con `STATE_DIR` (en prod se montó Volume en `/data`;
+el env no está en el repo — el código lee `process.env.STATE_DIR`). Cada
+solicitud guarda `{id}.meta.json` con `recibida` (ISO) y `canal`
+(`directo` | `pueblo`, vía header `x-via`).
+Admin: ver URLs en [`ESTADO.md`](ESTADO.md).
 
 ---
 
@@ -61,12 +62,12 @@ ipconfig getifaddr en0        # solo para saber la IP; la app la toma sola de Me
 
 Teléfono y laptop **en el mismo wifi**. Arranca el pueblo (`npm run corregimiento`).
 La app **busca sola** en la LAN un `:8788/salud` con `servicio: inaigar-pueblo`
-(también prueba la IP de Metro si Expo va en LAN). Cambiar de WiFi no pide rebuild
-ni pegar IP: solo que ambos estén en la misma red y el nodo corriendo.
+(también prueba la IP de Metro si Expo va en LAN). El nodo además **publica**
+Bonjour `_inaigar-pueblo._tcp`; la app **aún no lo consume** (solo HTTP).
+Cambiar de WiFi no pide rebuild ni pegar IP: misma red y nodo corriendo.
 
 En Entrada → *Solo para demostración* → **Pueblo** puedes **Buscar WiFi** o
-pegar una IP a mano (override). El nodo además se anuncia por Bonjour
-`_inaigar-pueblo._tcp`.
+pegar una IP a mano (override).
 
 Desde el navegador del teléfono: `http://<IP>:8788/respuesta/loquesea` debe
 responder `{"decision":"pendiente"}`. Si no carga, el problema es la red.
@@ -82,31 +83,34 @@ en la demo el banco es Railway.
 
 ## Hyperswarm entre dos procesos del mismo Mac: NO conecta
 
-(Documentado abajo.) Railway pone `SKIP_P2P=1` y ni lo intenta. En laptop,
-`npm run corregimiento` **sí** intenta Hyperswarm salvo que pongas
-`SKIP_P2P=1` — el teléfono no usa ese camino; la demo es HTTP.
+P2P está **apagado por defecto**. Solo arranca si pones `ENABLE_P2P=1`
+(`nodo/index.mjs`). `npm run corregimiento` **no** intenta Hyperswarm.
+Railway / `RAILWAY_ENVIRONMENT` / Dockerfile también dejan P2P off.
+El teléfono no usa ese camino; la demo es HTTP.
 
-Cero conexiones tras dos minutos, con el código de `nodo/` y también con una
-prueba mínima de dos peers y un topic aislado.
+Cuando se forzó P2P en pruebas tempranas: cero conexiones tras dos minutos,
+con el código de `nodo/` y también con una prueba mínima de dos peers.
 
 **La causa, medida:** `hyperdht` arranca y llega a la red (61 nodos conocidos),
 pero reporta **`firewalled: true`**. El nodo está detrás de NAT y no acepta
 entrantes. Dos peers detrás del mismo NAT necesitan *hairpinning*, y muchos
 routers no lo hacen. El firewall de macOS estaba apagado.
 
-**Síntoma adicional, visto el 10 de septiembre:** al arrancar, la línea
-`esperando peers` **no aparece en los primeros 2 segundos**. Esa línea iba
-después de `await swarm.join(...).flushed()`, así que el `flushed()` se queda
-esperando. El HTTP ya está escuchando. En Railway el banco arranca con
-`SKIP_P2P=1` y ni lo intenta.
+**Síntoma adicional, visto el 10 de septiembre:** al arrancar con P2P forzado,
+la línea `esperando peers` **no aparece en los primeros 2 segundos** (el
+`flushed()` del join se queda esperando). El HTTP ya está escuchando.
 
-Esto **no es el camino de la demo**. HTTP (A a Railway, B por LAN) es el que vale.
+Esto **no es el camino de la demo**. HTTP (banco Railway o pueblo LAN) es el que vale.
 
 ### Si alguien insiste en probar Hyperswarm
 
-Laptop: `cd nodo && npm run banco` (local, sin SKIP_P2P). Esperar 3 minutos.
-¿Salió `peer conectado`? Si no, parar. `hyperswarm` 4.17.1 no trae descubrimiento
-en LAN: dos aparatos en el mismo wifi igual salen por la DHT pública.
+```bash
+cd nodo && ENABLE_P2P=1 npm run banco
+```
+
+Esperar 3 minutos. ¿Salió `peer conectado`? Si no, parar. `hyperswarm` 4.17.1
+no trae descubrimiento en LAN: dos aparatos en el mismo wifi igual salen por
+la DHT pública.
 
 Queda `swarmRelays` con relay propio. Los docs de QVAC lo mencionan y **no
 documentan cómo desplegarlo**. No es un plan.

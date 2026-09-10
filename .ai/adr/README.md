@@ -21,6 +21,7 @@ condición que justificaría reabrirla. Estas son las decisiones del MVP que
 | [ADR-012](ADR-012-senaletica-y-el-modo-denso.md) | La dirección visual es Señalética, con un modo denso |
 | [ADR-013](ADR-013-quedarnos-en-sdk-0.18.2.md) | Quedarnos en `@qvac/sdk` 0.18.2 (reemplaza a ADR-001) |
 
-Las decisiones que siguen **abiertas** no están aquí: viven en la tabla
-"Decisiones abiertas" de `../runs/mvp-hackathon/03-specification.md` y se
-cierran con una medición, no con una discusión.
+Las decisiones que siguen **abiertas** no están aquí: viven en
+[`docs/CHECKLIST.md`](../../docs/CHECKLIST.md) § Decisiones abiertas, y se
+cierran con una medición, no con una discusión. El snapshot en
+`../runs/mvp-hackathon/03-specification.md` es histórico.

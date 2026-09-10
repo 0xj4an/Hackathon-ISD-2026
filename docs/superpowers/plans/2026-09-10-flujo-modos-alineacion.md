@@ -1,5 +1,9 @@
 # Flujo, modos y alineación · plan de implementación
 
+> **HISTÓRICO (plan ejecutado).** No es ops. Verdad viva: código +
+> [`docs/ESTADO.md`](../../ESTADO.md), [`ADR-006`](../../../.ai/adr/ADR-006-tres-modos-segun-el-telefono.md),
+> spec en `../specs/2026-09-10-flujo-modos-alineacion-design.md`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Alinear app, vocabulario y docs al tronco real (historial siempre → resultado → crédito y/o examen; crédito también tras lab) y a los tres modos `local-wifi` / `local-offline` / `nodo-offline`, sin prometer P2P ni QVAC `delegate`.

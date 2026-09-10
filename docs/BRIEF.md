@@ -11,28 +11,39 @@ Una app para personas en zonas rurales de Panamá con señal intermitente, que d
 - **Caja de Ahorros** (1,500): inclusión financiera con conectividad intermitente; documentos y trámites leídos en el dispositivo; la ejecución local como ventaja (el asesor nunca ve la cédula ni el extracto).
 
 ## Flujo de usuario (el que se graba)
-1. **Alerta local.** Un dataset sintético de mediciones dispara una de las 14 reglas de `ADR-008`; MedPsy 1.7B **solo redacta** el mensaje (prompts en inglés, `ADR-009`); la UI y el disclaimer van en español. Sin diagnóstico.
-2. **Resultado.** El historial siempre se lee (alerta o en orden). Desde ahí se puede pedir crédito si hay paquete, y/o subir un examen de laboratorio. Si el examen sale fuera de rango, también se puede pedir crédito. El banco **nunca** recibe el motivo de salud.
-3. **Documentos en el dispositivo (crédito).** Foto de cédula, ingresos y extracto. OCR (`OCR_LATIN`) → MedPsy base → JSON → **las fotos se borran**.
-4. **Examen de laboratorio.** Opción tras el resultado: foto del papel → OCR → **MedPsy + LoRA `lab-v3`** → `clasificar()` contra el catálogo. El adaptador solo corre aquí; cédula/ingresos/alerta siguen en MedPsy base.
-5. **Cola offline.** La solicitud va a SQLite (`cola.ts`) si no hay salida. Al reabrir, se retoma en cuota.
-6. **Envío.** Mismo JSON, nunca fotos. Con wifi (modo `local-wifi`): al banco remoto. Sin internet (`local-offline` / `nodo-offline`): LAN al nodo del pueblo. La app **descubre el pueblo en la WiFi** (sin IP hardcodeada).
-7. **Respuesta del banco.** Railway corre el mismo motor que `preCalificar()` en el teléfono. Cartera sintética, declarada. Persistencia en Volume. Admin muestra hora y canal de llegada.
-8. **Firma y cierre.** Trazo en pantalla (no es firma electrónica legal; se declara) → desembolso **simulado** → Listo.
+
+Camino en app: Entrada → **Salud** → **Revisión** → Alerta (si hay señal) → …
+(crédito y/o examen) → documentos → cuota → banco → firma → desembolso.
+
+1. **Historial y alerta.** Dataset sintético → reglas `ADR-008`; MedPsy **solo
+   redacta** (`ADR-009`). UI y disclaimer en español. Sin diagnóstico.
+2. **Resultado.** Desde ahí: crédito si hay paquete, y/o examen de lab. Si el
+   lab sale fuera de rango, también crédito. El banco **nunca** recibe el motivo
+   de salud.
+3. **Documentos.** Foto cédula / ingresos / extracto. OCR → MedPsy → JSON →
+   **fotos se borran**.
+4. **Examen de laboratorio.** Opción tras el resultado: OCR → **MedPsy + LoRA
+   `lab-v3`** → `clasificar()`. Adaptador solo aquí.
+5. **Cola offline.** SQLite si no hay salida; al reabrir se retoma en cuota.
+6. **Envío.** Mismo JSON, nunca fotos. `local-wifi`: banco Railway (luego
+   pueblo si hace falta). Offline: LAN al pueblo (que puede reenviar a Railway).
+   Discovery: sweep HTTP, sin IP fija.
+7. **Respuesta del banco.** Mismo motor que `preCalificar()` / `decidir()`.
+   Persistencia vía `STATE_DIR`. Admin: hora + canal. URLs: [`ESTADO.md`](ESTADO.md).
+8. **Firma y cierre.** Trazo (no firma electrónica legal) → desembolso
+   **simulado** → Listo.
 
 ## Arquitectura
 ```
-mobile/   Expo + @qvac/sdk 0.18.2 · UI, cámara, OCR, MedPsy, LoRA lab-v3, cola SQLite, HTTP A/B
-          descubrimiento LAN del pueblo (nodoUrl.ts) · core: schemas, prompts, reglas, crédito
-nodo/     "nodo del pueblo" (LAN :8788, Bonjour, /inferir) + banco remoto (Railway + Volume)
-landing/  Sitio del proyecto + admin (timestamp + canal por solicitud)
-data/     9 usuarios sintéticos, documentos de ejemplo (nunca datos reales)
-eval/     reglas + paquetes + crédito + alerta + laboratorio
-perf/     log estructurado (carga, prompt, tokens, TTFT, throughput, lora)
-docs/     ESTADO, brief, checklist, guion, pruebas, decisiones
-spikes/   LoRA MedPsy (RESULTADOS.md); el adaptador de corrida 3 vive en mobile/assets/models/
+mobile/   Expo + @qvac/sdk 0.18.2 · UI, cámara, OCR, MedPsy, LoRA lab-v3, cola, HTTP
+          descubrimiento LAN (nodoUrl.ts) · core: schemas, prompts, reglas, crédito
+nodo/     pueblo LAN :8788 + /inferir; banco remoto (Railway)
+landing/  sitio + admin
+data/ eval/ perf/ docs/ spikes/
 ```
-Estado vivo: [`ESTADO.md`](ESTADO.md). Modelos (nombres honestos): MedPsy 1.7B Q8_0 (`HEALTHCARE_1_7B_MEDICAL_Q8_0`) para alerta y extracción de documentos; `OCR_LATIN` para texto; LoRA `lab-v3` (33 MB) solo en examen de lab. SDK **0.18.2** ([`ADR-013`](../.ai/adr/ADR-013-quedarnos-en-sdk-0.18.2.md)).
+Detalle vivo y URLs: [`ESTADO.md`](ESTADO.md). Índice: [`README.md`](README.md).
+Modelos: MedPsy 1.7B Q8_0, `OCR_LATIN`, LoRA `lab-v3` (examen). SDK **0.18.2**
+([`ADR-013`](../.ai/adr/ADR-013-quedarnos-en-sdk-0.18.2.md)).
 
 ## Reglas duras
 - Inferencia: MedPsy en el teléfono primero. Si no puede (modo `nodo-offline` o fallo), POST de texto al nodo local. Nunca imágenes. Ningún proveedor de IA remoto. El banco solo recibe JSON de crédito, nunca fotos ni el motivo de salud. QVAC `delegate` no es el camino de la demo.
@@ -45,13 +56,15 @@ Estado vivo: [`ESTADO.md`](ESTADO.md). Modelos (nombres honestos): MedPsy 1.7B Q
 - 0xj4an: mobile (Expo + QVAC), cola, transporte, perf log, video.
 - Artur: prompts y validaciones (core), datos sintéticos, banco, eval, README y guion.
 
-## Plan por bloques, en orden
+## Plan por bloques (resumen)
 
-0. **Desbloqueo.** Expo + QVAC en iPhone: primer token medido (hecho). OCR en aparato: **aún por verificar**.
-1. **Rebanada vertical.** Core + nodo HTTP (hecho).
-2. **Flujo completo.** Alerta MedPsy, docs OCR+MedPsy, cola SQLite, envío banco/pueblo, examen+LoRA en código. **Falta corrida iPhone** ([`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md)).
-3. **Eval y perf.** Dominio en verde; falta exportar `perf.jsonl` del teléfono.
-4. **LoRA.** Spike corrida 3 (lab JSON 5%→68%) **ya en la app** (`lora-lab-v3.gguf`); falta verlo en el iPhone.
-5. **Demo y honestidad de transporte.** No prometer Hyperswarm P2P ni QVAC `delegate`; la demo es HTTP (banco o pueblo).
-6. **Video** ([`VIDEO.md`](VIDEO.md)), README, licencia y declaración de base.
-7. **Colchón.** Metal/GPU, VisionPsy, otro adaptador si hace falta.
+Detalle abierto: [`CHECKLIST.md`](CHECKLIST.md). Foto: [`ESTADO.md`](ESTADO.md).
+
+0. Desbloqueo iPhone (MedPsy medido). OCR en aparato: **por verificar**.
+1. Core + nodo HTTP (hecho).
+2. Flujo en código (hecho). Corrida iPhone completa: [`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md).
+3. Eval verde; falta `perf.jsonl` del teléfono.
+4. LoRA `lab-v3` **en la app**; falta verlo en iPhone.
+5. Transporte honesto: HTTP, no Hyperswarm/`delegate`.
+6. Video ([`VIDEO.md`](VIDEO.md)).
+7. Colchón (Metal/GPU, etc.) solo si sobra tiempo.
