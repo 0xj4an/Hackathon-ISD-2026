@@ -24,7 +24,8 @@
         "NSBonjourServices": [
           "_expo._tcp",
           "_metro._tcp",
-          "_http._tcp"
+          "_http._tcp",
+          "_inaigar-pueblo._tcp"
         ],
         "NSAppTransportSecurity": {
           "NSAllowsLocalNetworking": true,

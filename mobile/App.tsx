@@ -43,7 +43,7 @@ import type { Respuesta } from "./src/core/credito/motor";
 import type { Solicitud } from "./src/core/schemas";
 import { buscarPorCorreo, type Usuario } from "./src/usuarios";
 import { fijarModo, resetModo } from "./src/modo";
-import { cargarUrlNodo } from "./src/nodoUrl";
+import { cargarUrlNodo, descubrirPuebloLan } from "./src/nodoUrl";
 import { IrInicioContext } from "./src/ui/componentes";
 
 /** Lo que cuesta el paquete, y el monto que la persona decidió pedir. */
@@ -140,6 +140,7 @@ export default function App() {
     void (async () => {
       try {
         await cargarUrlNodo();
+        await descubrirPuebloLan().catch(() => null);
         await iniciarColaSqlite();
         const p = await leerPendiente();
         if (!vivo || !p) return;

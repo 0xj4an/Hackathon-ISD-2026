@@ -53,12 +53,14 @@ cd nodo && npm run corregimiento
 ipconfig getifaddr en0        # solo para saber la IP; la app la toma sola de Metro
 ```
 
-Teléfono y laptop **en el mismo wifi**. Arranca Expo en LAN (no tunnel): la app
-resuelve el pueblo como `http://<IP-de-Metro>:8788`. Si cambias de red, Metro
-trae la IP nueva — **no hay que reeditar `.env` ni el código**.
+Teléfono y laptop **en el mismo wifi**. Arranca el pueblo (`npm run corregimiento`).
+La app **busca sola** en la LAN un `:8788/salud` con `servicio: inaigar-pueblo`
+(también prueba la IP de Metro si Expo va en LAN). Cambiar de WiFi no pide rebuild
+ni pegar IP: solo que ambos estén en la misma red y el nodo corriendo.
 
-Si usas un build sin Metro (o tunnel), en Entrada → *Solo para demostración* →
-**Pueblo** puedes pegar la IP y Probar `/salud`. Eso se guarda en el teléfono.
+En Entrada → *Solo para demostración* → **Pueblo** puedes **Buscar WiFi** o
+pegar una IP a mano (override). El nodo además se anuncia por Bonjour
+`_inaigar-pueblo._tcp`.
 
 Desde el navegador del teléfono: `http://<IP>:8788/respuesta/loquesea` debe
 responder `{"decision":"pendiente"}`. Si no carga, el problema es la red.

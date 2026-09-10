@@ -27,6 +27,6 @@ test("sinWifiDemo salta el banco vía modo", () => {
 test("nodoUrl no hardcodea IP de demo", () => {
   const src = readFileSync(new URL("../../mobile/src/nodoUrl.ts", import.meta.url), "utf8");
   assert.doesNotMatch(src, /192\.168\.0\.\d+/);
-  assert.match(src, /hostDelMetro|hostUri/);
-  assert.match(src, /fijarUrlNodo/);
+  assert.match(src, /descubrirPuebloLan/);
+  assert.match(src, /inaigar-pueblo/);
 });

@@ -9,7 +9,7 @@
  */
 import { getAppLogger, recordError, recordInference, type InferenceTask } from "./perf/logger";
 import { LORA_LAB_VERSION, rutaLoraLab } from "./lora";
-import { urlNodo } from "./nodoUrl";
+import { asegurarUrlNodo } from "./nodoUrl";
 import { saltarMedPsyLocal } from "./modo";
 
 const CTX = 2048;
@@ -126,8 +126,8 @@ async function completarEnNodo(opts: {
   onProgreso?: (p: ProgresoMedPsy) => void;
 }): Promise<string> {
   opts.onProgreso?.({ detalle: "El teléfono no pudo. Delegando al nodo…" });
-  const nodo = urlNodo();
-  if (!nodo) throw new Error("sin URL del pueblo (Metro en LAN o override en demo)");
+  const nodo = await asegurarUrlNodo();
+  if (!nodo) throw new Error("sin pueblo en esta WiFi");
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 180_000);
   try {

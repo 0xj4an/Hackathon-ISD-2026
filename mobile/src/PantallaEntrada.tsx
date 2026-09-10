@@ -9,6 +9,7 @@ import {
   MODOS, fijarModo, usuarioDelModo, etiquetaModo, type ModoId,
 } from "./modo";
 import {
+  descubrirPuebloLan,
   etiquetaOrigen,
   fijarUrlNodo,
   limpiarUrlNodo,
@@ -79,7 +80,9 @@ export default function PantallaEntrada({
 
   const usarAuto = async () => {
     await limpiarUrlNodo();
-    setPuebloPrueba("Auto (Metro / env).");
+    setPuebloPrueba("Buscando en la WiFi…");
+    const d = await descubrirPuebloLan();
+    setPuebloPrueba(d ? `Hallado · ${d.url}` : "Auto: no hay pueblo en esta WiFi.");
     refrescarPueblo();
   };
 
@@ -149,7 +152,7 @@ export default function PantallaEntrada({
         {demoAbierta ? (
           <View style={s.demoCuerpo}>
             <Text style={s.demoAyuda}>
-              WiFi, modelo y nodo del pueblo. La IP se toma de Metro en LAN; si cambias de red, no hay que reeditar código.
+              WiFi, modelo y nodo del pueblo. En la misma red la app busca sola el nodo (:8788); no hace falta pegar IP al cambiar de WiFi.
             </Text>
 
             <Text style={s.demoEtiqueta}>Modo · el teléfono</Text>
@@ -212,7 +215,7 @@ export default function PantallaEntrada({
                   accessibilityRole="button"
                   style={({ pressed }) => [s.puebloBtn, pressed && s.press]}
                 >
-                  <Text style={s.puebloBtnTexto}>Auto</Text>
+                  <Text style={s.puebloBtnTexto}>Buscar WiFi</Text>
                 </Pressable>
                 <Pressable
                   onPress={() => { void probar(); }}

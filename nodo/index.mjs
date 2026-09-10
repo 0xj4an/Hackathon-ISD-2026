@@ -273,6 +273,8 @@ createServer(async (req, res) => {
     json(res, 200, {
       ok: true,
       rol: ROL,
+      /** La app busca esto en la LAN para hallar el pueblo sin IP fija. */
+      servicio: ROL === "corregimiento" ? "inaigar-pueblo" : undefined,
       peers: peers.size,
       inferir: ROL === "corregimiento",
       p2p: !SKIP_P2P,
@@ -341,8 +343,31 @@ createServer(async (req, res) => {
 
   res.statusCode = 404;
   res.end();
-}).listen(PORT, "0.0.0.0", () => log(`HTTP en :${PORT} p2p=${SKIP_P2P ? "off" : "on"} state=${STATE}`));
+}).listen(PORT, "0.0.0.0", () => {
+  log(`HTTP en :${PORT} p2p=${SKIP_P2P ? "off" : "on"} state=${STATE}`);
+  if (ROL === "corregimiento") anunciarBonjour();
+});
 
 if (ROL === "corregimiento") setInterval(() => { void reenviarPendientes(); }, 4000);
 
 arrancarP2P().catch((e) => log("p2p", e.message));
+
+/** mDNS: el teléfono (u otras apps) puede hallar el pueblo en la misma WiFi. */
+function anunciarBonjour() {
+  void import("bonjour-service").then(({ Bonjour }) => {
+    const bonjour = new Bonjour();
+    bonjour.publish({
+      name: "Ina Igar Pueblo",
+      type: "inaigar-pueblo",
+      protocol: "tcp",
+      port: PORT,
+      txt: { servicio: "inaigar-pueblo", path: "/salud" },
+    });
+    log(`bonjour _inaigar-pueblo._tcp :${PORT}`);
+    const apagar = () => {
+      try { bonjour.unpublishAll(() => bonjour.destroy()); } catch { /* ignore */ }
+    };
+    process.on("SIGINT", apagar);
+    process.on("SIGTERM", apagar);
+  }).catch((e) => log(`bonjour omitido: ${e.message}`));
+}

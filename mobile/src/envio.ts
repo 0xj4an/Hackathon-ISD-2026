@@ -6,7 +6,7 @@
  * Inferencia (MedPsy /inferir) es otra tubería. Nunca fotos.
  */
 import { urlBanco } from "./bancoUrl";
-import { urlNodo } from "./nodoUrl";
+import { asegurarUrlNodo, urlNodo } from "./nodoUrl";
 import { reportarEnvioSentry, Sentry } from "./sentry";
 import { modo, sinWifiDemo } from "./modo";
 import type { Respuesta } from "./core/credito/motor";
@@ -127,11 +127,11 @@ export async function enviarSolicitud(sol: Solicitud): Promise<Envio> {
     lineas.push("banco omitido (modo offline)");
   }
 
-  const nodo = urlNodo();
+  const nodo = await asegurarUrlNodo();
   if (!nodo) {
-    lineas.push("pueblo sin URL (Metro no está en LAN ni hay override)");
+    lineas.push("pueblo sin URL (no hay nodo en esta WiFi)");
     const tecnico = armarTecnico(sol.id, lineas);
-    const detalle = "Sin red y sin el nodo del pueblo (URL desconocida).";
+    const detalle = "Sin red y sin el nodo del pueblo (no aparece en esta WiFi).";
     reportarEnvioSentry({
       ok: false, envio: null, pendiente: false, detalle, tecnico, modo: modo(), nodoHost: "",
     });
@@ -168,7 +168,7 @@ export async function consultarRespuesta(id: string): Promise<Respuesta | null> 
     const a = await pedir(`${urlBanco()}/respuesta/${id}`, {}, 4000);
     if (esFinal(a.body)) return a.body;
   }
-  const nodo = urlNodo();
+  const nodo = await asegurarUrlNodo();
   if (!nodo) return null;
   const b = await pedir(`${nodo}/respuesta/${id}`, {}, 4000);
   return esFinal(b.body) ? b.body : null;
