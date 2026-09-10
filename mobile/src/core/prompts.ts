@@ -20,6 +20,16 @@ Reply ONLY with valid JSON using those keys. No extra text.`;
 export const SYSTEM_EXTRACCION_EXTRACTO = `You receive OCR text from a bank statement. Extract: banco, saldo_promedio_usd (number), meses_cubiertos (integer), confianza (0 to 1).
 Reply ONLY with valid JSON using those keys. No extra text.`;
 
+/**
+ * Lab report. The model only transcribes what the paper says: the rules in
+ * `marcadores.ts` decide whether a value is out of range (`ADR-005`).
+ */
+export const SYSTEM_EXTRACCION_LABORATORIO = `You receive noisy OCR text from a laboratory report from Panama.
+Extract every measured marker into "lecturas": an array of objects with codigo ("GLU"|"HB"|"PLQ"|"CREA"|"COL"|"HTO"|"TSH"), nombre (as printed on the report), valor (number) and unidad (as printed).
+Also extract fecha (YYYY-MM-DD if present) and confianza (0 to 1 for readability).
+Only include markers whose numeric value you actually read. Never guess a value, never complete a marker that is not on the paper, and never say whether a value is high or low: that is decided elsewhere.
+Reply ONLY with valid JSON using those keys. No extra text.`;
+
 export const userAlerta = (mediciones: string, senal: string) =>
   `[RECENT MEASUREMENTS]\n${mediciones}\n\n[SIGNAL FROM RULES]\n${senal}\n\nUse exactly this disclaimer: "${DISCLAIMER}"`;
 

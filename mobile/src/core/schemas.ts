@@ -51,6 +51,23 @@ export const ExtractoSchema = z.object({
   confianza: z.number().min(0).max(1),
 });
 
+/**
+ * Examen de laboratorio fotografiado (vía B). El modelo transcribe lo que dice
+ * el papel y nada más: quién está alto o bajo lo decide `clasificar()` de
+ * `marcadores.ts` contra su rango citado.
+ */
+export const LaboratorioSchema = z.object({
+  lecturas: z.array(z.object({
+    codigo: z.enum(["GLU", "HB", "PLQ", "CREA", "COL", "HTO", "TSH"]),
+    nombre: z.string(),
+    valor: z.number(),
+    unidad: z.string(),
+  })).min(1),
+  fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  confianza: z.number().min(0).max(1),
+});
+export type Laboratorio = z.infer<typeof LaboratorioSchema>;
+
 /** 3) Solicitud que viaja al banco. Solo JSON; sin imágenes ni motivo de salud. */
 export const SolicitudSchema = z.object({
   id: z.string().uuid(),

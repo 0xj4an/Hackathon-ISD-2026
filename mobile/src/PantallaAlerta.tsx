@@ -250,6 +250,12 @@ const s = StyleSheet.create({
 
   fuente: { ...TIPO.pie, color: COLOR.gris, marginTop: 12 },
 
+  examen: { marginTop: 26 },
+  examenTexto: {
+    fontSize: 14.5, lineHeight: 20, color: COLOR.gris,
+    paddingHorizontal: ESPACIO.borde, marginBottom: 4,
+  },
+
   paquete: { marginTop: 22 },
   paqueteTitulo: {
     ...TIPO.titulo, color: COLOR.tinta,
