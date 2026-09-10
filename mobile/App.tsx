@@ -27,6 +27,7 @@ import PantallaLeido from "./src/PantallaLeido";
 import PantallaCuota from "./src/PantallaCuota";
 import PantallaBanco from "./src/PantallaBanco";
 import PantallaExamen from "./src/PantallaExamen";
+import PantallaRegistro from "./src/PantallaRegistro";
 import { solicitudDeLectura, type LecturaCredito } from "./src/lectura";
 import { decidir, type Respuesta, type Solicitud } from "./src/core/credito/motor";
 import type { Usuario } from "./src/usuarios";
@@ -40,6 +41,7 @@ export default function App() {
   const [revisado, setRevisado] = useState(false);
   const [credito, setCredito] = useState<Credito | null>(null);
   const [enExamen, setEnExamen] = useState(false);
+  const [enRegistro, setEnRegistro] = useState(false);
   const [paso, setPaso] = useState<PasoCredito>("captura");
   const [lectura, setLectura] = useState<LecturaCredito | null>(null);
   const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
@@ -60,7 +62,13 @@ export default function App() {
     soltarCredito();
   };
 
-  if (!usuario) return <PantallaEntrada onEntrar={setUsuario} />;
+  // Fuera del camino de la demo a proposito: los registros son para nosotros,
+  // no para el usuario, y no aparecen en el flujo que se graba.
+  if (enRegistro) return <PantallaRegistro onVolver={() => setEnRegistro(false)} />;
+
+  if (!usuario) {
+    return <PantallaEntrada onEntrar={setUsuario} onRegistro={() => setEnRegistro(true)} />;
+  }
 
   if (!revisado) {
     return <PantallaRevision usuario={usuario} onListo={() => setRevisado(true)} />;

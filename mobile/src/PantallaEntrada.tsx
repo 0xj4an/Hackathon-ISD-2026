@@ -13,7 +13,13 @@ import { COLOR, TIPO, ESPACIO, DISPLAY } from "./ui/tokens";
 
 const NO_EXISTE = "No hay ningún historial con ese correo. Revisa cómo lo escribiste.";
 
-export default function PantallaEntrada({ onEntrar }: { onEntrar: (u: Usuario) => void }) {
+export default function PantallaEntrada({
+  onEntrar, onRegistro,
+}: {
+  onEntrar: (u: Usuario) => void;
+  /** Los registros medidos, para sacarlos del telefono. Entrada discreta. */
+  onRegistro?: () => void;
+}) {
   const [correo, setCorreo] = useState("");
   const [error, setError] = useState("");
 
@@ -82,7 +88,9 @@ export default function PantallaEntrada({ onEntrar }: { onEntrar: (u: Usuario) =
         ))}
       </View>
 
-      <Pie>Toda la inteligencia corre en este teléfono. Ningún servicio remoto participa.</Pie>
+      <Pressable onLongPress={onRegistro} delayLongPress={800} accessibilityRole="button">
+        <Pie>Toda la inteligencia corre en este teléfono. Ningún servicio remoto participa.</Pie>
+      </Pressable>
     </Pantalla>
   );
 }
