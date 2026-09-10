@@ -11,6 +11,7 @@
 import { urlBanco } from "./bancoUrl";
 import { urlNodo } from "./nodoUrl";
 import { Sentry } from "./sentry";
+import { sinWifiDemo } from "./escenario";
 import type { Respuesta } from "./core/credito/motor";
 import type { Solicitud } from "./core/schemas";
 
@@ -70,8 +71,10 @@ function post(sol: Solicitud) {
 
 /** Wifi al banco. Si no hay red, el pueblo lo envía. */
 export async function enviarSolicitud(sol: Solicitud): Promise<Envio> {
-  const a = await pedir(`${urlBanco()}/solicitud`, post(sol), 8000);
-  if (esFinal(a)) return { ok: true, camino: "A", respuesta: a };
+  if (!sinWifiDemo()) {
+    const a = await pedir(`${urlBanco()}/solicitud`, post(sol), 8000);
+    if (esFinal(a)) return { ok: true, camino: "A", respuesta: a };
+  }
 
   const nodo = urlNodo();
   const b = await pedir(`${nodo}/solicitud`, post(sol), 8000);
@@ -84,8 +87,10 @@ export async function enviarSolicitud(sol: Solicitud): Promise<Envio> {
 
 /** Misma prioridad: banco remoto, luego pueblo. */
 export async function consultarRespuesta(id: string): Promise<Respuesta | null> {
-  const a = await pedir(`${urlBanco()}/respuesta/${id}`, {}, 4000);
-  if (esFinal(a)) return a;
+  if (!sinWifiDemo()) {
+    const a = await pedir(`${urlBanco()}/respuesta/${id}`, {}, 4000);
+    if (esFinal(a)) return a;
+  }
   const b = await pedir(`${urlNodo()}/respuesta/${id}`, {}, 4000);
   return esFinal(b) ? b : null;
 }

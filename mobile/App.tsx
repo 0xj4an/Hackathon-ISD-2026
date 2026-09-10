@@ -42,6 +42,7 @@ import { marcarPasoSentry, marcarUsuarioSentry } from "./src/sentry";
 import type { Respuesta } from "./src/core/credito/motor";
 import type { Solicitud } from "./src/core/schemas";
 import { buscarPorCorreo, type Usuario } from "./src/usuarios";
+import { fijarEscenario, fijarViaSalud, resetEscenario } from "./src/escenario";
 
 /** Lo que cuesta el paquete, y el monto que la persona decidió pedir. */
 type Credito = { min: number; max: number; monto?: number };
@@ -53,6 +54,7 @@ export default function App() {
   const [revisado, setRevisado] = useState(false);
   const [credito, setCredito] = useState<Credito | null>(null);
   const [enExamen, setEnExamen] = useState(false);
+  const [pendienteExamen, setPendienteExamen] = useState(false);
   const [enRegistro, setEnRegistro] = useState(false);
   const [paso, setPaso] = useState<PasoCredito>("captura");
   const [lectura, setLectura] = useState<LecturaCredito | null>(null);
@@ -74,11 +76,13 @@ export default function App() {
   };
 
   const salir = () => {
+    resetEscenario();
     setUsuario(null);
     setConectado(false);
     setRevisado(false);
     setCredito(null);
     setEnExamen(false);
+    setPendienteExamen(false);
     soltarCredito();
   };
 
@@ -206,7 +210,17 @@ export default function App() {
   }
 
   if (!usuario) {
-    return <PantallaEntrada onEntrar={setUsuario} onRegistro={() => setEnRegistro(true)} />;
+    return (
+      <PantallaEntrada
+        onEntrar={(u, e, via) => {
+          fijarEscenario(e);
+          fijarViaSalud(via);
+          setPendienteExamen(via === "examen");
+          setUsuario(u);
+        }}
+        onRegistro={() => setEnRegistro(true)}
+      />
+    );
   }
 
   // De donde salen las mediciones. Es simulacion declarada, no conexion real:
@@ -223,7 +237,18 @@ export default function App() {
   }
 
   if (!revisado) {
-    return <PantallaRevision usuario={usuario} onListo={() => setRevisado(true)} />;
+    return (
+      <PantallaRevision
+        usuario={usuario}
+        onListo={() => {
+          setRevisado(true);
+          if (pendienteExamen) {
+            setEnExamen(true);
+            setPendienteExamen(false);
+          }
+        }}
+      />
+    );
   }
 
   if (enExamen) {

@@ -25,6 +25,7 @@ import { View, Text, Pressable, StyleSheet } from "react-native";
 import type { Usuario } from "./usuarios";
 import { detectarSenales, type Senal } from "./core/reglas";
 import { redactarAlerta } from "./redactarAlerta";
+import { fichaEscenario, saltarMedPsyLocal } from "./escenario";
 import { armarPaquete, mensajeCredito, type Paquete } from "./core/paquete";
 import { fraseLecturas, fraseMeses, resumenHistorial } from "./historial";
 import {
@@ -150,12 +151,17 @@ function Alerta({ peor, demas, lecturas, periodo, mensaje, fallo, redactando, on
   return (
     <Pantalla>
       <Encabezado meta="Salir" onVolver={onSalir} />
+      <Franja color={fichaEscenario().color} titulo={fichaEscenario().titulo} texto={fichaEscenario().franja} />
 
       <Veredicto
         color={COLOR_URGENCIA[peor.urgencia]}
         antetitulo={VERBO_URGENCIA[peor.urgencia]}
         palabra={peor.titulo}
-        detalle={mensaje ?? (redactando ? "El modelo está explicando esto en el teléfono, sin red." : undefined)}
+        detalle={mensaje ?? (redactando
+          ? (saltarMedPsyLocal()
+            ? "Este teléfono no carga el modelo. Pidiendo el texto al pueblo…"
+            : "El modelo está explicando esto en el teléfono.")
+          : undefined)}
         mayusculas={false}
         simbolo={peor.urgencia === "Rutinaria" ? "listo" : "alerta"}
       />
@@ -343,6 +349,7 @@ function Sano({ usuario, onVolver, onSubirExamen }: {
   return (
     <Pantalla>
       <Encabezado meta="Salir" onVolver={onVolver} />
+      <Franja color={fichaEscenario().color} titulo={fichaEscenario().titulo} texto={fichaEscenario().franja} />
       <Veredicto
         color={COLOR.rutinaria}
         palabra={"Todo\nen orden"}

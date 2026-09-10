@@ -11,6 +11,7 @@ import type { Usuario } from "./usuarios";
 import { MARCADORES, clasificar, buscarMarcador, type LecturaLab } from "./core/marcadores";
 import { leerExamenFoto } from "./leerExamen";
 import { LORA_LAB_VERSION } from "./lora";
+import { fichaEscenario, saltarMedPsyLocal } from "./escenario";
 import {
   Pantalla, Encabezado, BarraVeredicto, Veredicto, Franja, Boton, Etiqueta, Pie,
 } from "./ui/componentes";
@@ -82,6 +83,7 @@ export default function PantallaExamen({
     return (
       <Pantalla>
         <Encabezado meta="Volver" onVolver={onVolver} />
+        <Franja color={fichaEscenario().color} titulo={fichaEscenario().titulo} texto={fichaEscenario().franja} />
 
         {fuera.length === 0 ? (
           <Veredicto
@@ -147,13 +149,16 @@ export default function PantallaExamen({
   return (
     <Pantalla>
       <Encabezado meta="Volver" onVolver={onVolver} />
+      <Franja color={fichaEscenario().color} titulo={fichaEscenario().titulo} texto={fichaEscenario().franja} />
 
       <BarraVeredicto color={COLOR.prioritaria} texto="Tu examen" />
 
       <View style={s.arriba}>
         <Text style={s.titular}>¿Te hiciste{"\n"}un examen?</Text>
         <Text style={s.parrafo}>
-          Tráelo y te decimos qué dice cada número. Se lee en este teléfono, como todo lo demás.
+          {saltarMedPsyLocal()
+            ? "La foto se lee aquí. El texto (nunca la imagen) va al pueblo, sin LoRA."
+            : "Tráelo y te decimos qué dice cada número. Se lee en este teléfono."}
         </Text>
       </View>
 
@@ -161,13 +166,15 @@ export default function PantallaExamen({
       {leyendo ? (
         <Franja
           color={COLOR.prioritaria}
-          titulo={`MedPsy + LoRA · ${LORA_LAB_VERSION}`}
-          texto={progreso || "Leyendo el examen en este teléfono"}
+          titulo={saltarMedPsyLocal() ? "OCR aquí · texto al pueblo" : `MedPsy + LoRA · ${LORA_LAB_VERSION}`}
+          texto={progreso || "Leyendo el examen"}
         />
       ) : null}
 
       <Boton
-        texto={leyendo ? "Leyendo con LoRA…" : "Tomar foto del examen"}
+        texto={leyendo
+          ? (saltarMedPsyLocal() ? "Leyendo…" : "Leyendo con LoRA…")
+          : "Tomar foto del examen"}
         onPress={() => { if (!leyendo) void tomarYLeer(); }}
       />
 
@@ -204,7 +211,9 @@ export default function PantallaExamen({
 
       <Pie>
         Solo escribe los que aparezcan en tu papel. Los que dejes vacíos no se inventan.
-        La foto usa MedPsy + LoRA ({LORA_LAB_VERSION}); escribir a mano no.
+        {saltarMedPsyLocal()
+          ? "En este escenario la foto no carga LoRA: OCR aquí, texto al pueblo."
+          : `La foto usa MedPsy + LoRA (${LORA_LAB_VERSION}); escribir a mano no.`}
       </Pie>
     </Pantalla>
   );

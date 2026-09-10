@@ -10,6 +10,7 @@
 import { getAppLogger, recordError, recordInference, type InferenceTask } from "./perf/logger";
 import { LORA_LAB_VERSION, rutaLoraLab } from "./lora";
 import { urlNodo } from "./nodoUrl";
+import { saltarMedPsyLocal } from "./escenario";
 
 const CTX = 2048;
 const MEDPSY = "HEALTHCARE_1_7B_MEDICAL_Q8_0";
@@ -173,6 +174,7 @@ export async function completarMedPsy(opts: {
   try {
     inflight++;
     try {
+      if (saltarMedPsyLocal()) return await completarEnNodo(opts);
       const s = await sdk();
       const modelId = await asegurarMedPsy(opts.onProgreso, { conLora: opts.conLora });
       const t1 = Date.now();

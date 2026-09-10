@@ -7,6 +7,7 @@ import { SYSTEM_EXTRACCION_LABORATORIO } from "./core/prompts";
 import { parsearLaboratorio } from "./core/laboratorio";
 import { buscarMarcador, clasificar, type LecturaLab, type Sexo } from "./core/marcadores";
 import { completarMedPsy, soltarMedPsy } from "./medpsy";
+import { saltarMedPsyLocal } from "./escenario";
 import { LORA_LAB_VERSION } from "./lora";
 import {
   leerOcrDeUri,
@@ -39,7 +40,9 @@ export async function leerExamenFoto(
 
     aviso({
       paso: "extraccion",
-      detalle: `MedPsy + LoRA sacando marcadores (${LORA_LAB_VERSION})`,
+      detalle: saltarMedPsyLocal()
+        ? "Texto al pueblo para sacar marcadores"
+        : `MedPsy + LoRA sacando marcadores (${LORA_LAB_VERSION})`,
     });
     const bruto = await completarMedPsy({
       system: SYSTEM_EXTRACCION_LABORATORIO,
@@ -77,12 +80,12 @@ export async function leerExamenFoto(
       };
     }
 
-    getAppLogger().info(`examen ${lecturas.length} marcadores lora=${LORA_LAB_VERSION}`);
+    getAppLogger().info(`examen ${lecturas.length} marcadores lora=${saltarMedPsyLocal() ? "nodo" : LORA_LAB_VERSION}`);
     return {
       ok: true,
       lecturas: lecturas.sort((a, b) => ORDEN[a.urgencia] - ORDEN[b.urgencia]),
       textoOcr,
-      lora: LORA_LAB_VERSION,
+      lora: saltarMedPsyLocal() ? null : LORA_LAB_VERSION,
     };
   } catch (err) {
     recordError("examen.foto", err);
