@@ -125,7 +125,7 @@ export default function PantallaExamen({
     <Pantalla>
       <Encabezado meta="Volver" onVolver={onVolver} />
 
-      <BarraVeredicto color={COLOR.tinta} texto="Tu examen" />
+      <BarraVeredicto color={COLOR.prioritaria} texto="Tu examen" />
 
       <View style={s.arriba}>
         <Text style={s.titular}>¿Te hiciste{"\n"}un examen?</Text>
@@ -190,7 +190,7 @@ const s = StyleSheet.create({
   unidad: { ...TIPO.denso, color: COLOR.gris },
   campo: {
     width: 104, minHeight: TOQUE, paddingHorizontal: 12,
-    borderWidth: 3, borderColor: COLOR.separador, backgroundColor: COLOR.fondo,
+    borderWidth: 3, borderColor: COLOR.tinta, backgroundColor: COLOR.fondo,
     ...DISPLAY, fontSize: 20, color: COLOR.tinta, textAlign: "right",
   },
 

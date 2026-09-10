@@ -11,7 +11,7 @@
  */
 import { useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Pantalla, Encabezado, Boton, Etiqueta, Franja, Pie } from "./ui/componentes";
+import { Pantalla, Encabezado, BarraVeredicto, Boton, Etiqueta, Franja, Pie } from "./ui/componentes";
 import { COLOR, TIPO, ESPACIO } from "./ui/tokens";
 import { estadoRegistros, compartirRegistro, type Registro } from "./perf/exportar";
 import { SDK_VERSION } from "./perf/logger";
@@ -35,15 +35,15 @@ export default function PantallaRegistro({ onVolver }: { onVolver: () => void })
 
       <Etiqueta>Registros del aparato</Etiqueta>
       <Text style={s.parrafo}>
-        Lo que la app midio corriendo aqui dentro. Sacalo del telefono antes de
-        desinstalar: es la unica evidencia que no se puede volver a generar.
+        Lo que la app midió corriendo aquí dentro. Sácalo del teléfono antes de
+        desinstalar: es la única evidencia que no se puede volver a generar.
       </Text>
 
       {error ? <Franja color={COLOR.inmediata} titulo="No se pudo" texto={error} /> : null}
 
       {vacios ? (
         <Franja
-          titulo="Todavia no hay nada"
+          titulo="Todavía no hay nada"
           texto="Los registros se escriben cuando corre una inferencia. Lee un documento o abre una alerta y vuelve."
         />
       ) : null}
@@ -53,7 +53,7 @@ export default function PantallaRegistro({ onVolver }: { onVolver: () => void })
           <View style={s.fila}>
             <Text style={s.nombre}>{r.nombre}</Text>
             <Text style={s.cuenta}>
-              {r.existe ? `${r.lineas} ${r.lineas === 1 ? "linea" : "lineas"}` : "sin crear"}
+              {r.existe ? `${r.lineas} ${r.lineas === 1 ? "línea" : "líneas"}` : "sin crear"}
             </Text>
           </View>
           {r.existe ? <Text style={s.peso}>{(r.bytes / 1024).toFixed(1)} KB</Text> : null}

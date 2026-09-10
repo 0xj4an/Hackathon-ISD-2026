@@ -54,9 +54,9 @@ export default function PantallaCuota({
 
       <Etiqueta>Las condiciones</Etiqueta>
       <FilaRuta simbolo="moneda" etiqueta="Monto" valor={`B/. ${pre.monto}`} />
-      <FilaRuta simbolo="listo" etiqueta="Plazo" valor={`${pre.meses} meses`} />
-      <FilaRuta simbolo="persona" etiqueta="Tasa anual" valor={`${pre.tasa_anual_pct}%`} />
-      <FilaRuta simbolo="salud" etiqueta="Puedes pagar hasta" valor={`${techo} al mes`} ultima />
+      <FilaRuta simbolo="calendario" etiqueta="Plazo" valor={`${pre.meses} meses`} />
+      <FilaRuta simbolo="porcentaje" etiqueta="Tasa anual" valor={`${pre.tasa_anual_pct}%`} />
+      <FilaRuta simbolo="moneda" etiqueta="Puedes pagar hasta" valor={`${techo} al mes`} ultima />
 
       <BandaTotal etiqueta="Pagas en total" valor={`B/. ${(pre.cuota * pre.meses).toFixed(2)}`} />
 

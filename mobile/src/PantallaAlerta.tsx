@@ -57,7 +57,9 @@ export default function PantallaAlerta({
     .sort((a, b) => ORDEN[a.urgencia] - ORDEN[b.urgencia]);
   const paquete = armarPaquete(senales);
 
-  if (senales.length === 0) return <Sano usuario={usuario} onVolver={onVolver} />;
+  if (senales.length === 0) {
+    return <Sano usuario={usuario} onVolver={onVolver} onSubirExamen={onSubirExamen} />;
+  }
 
   const peor = senales[0];
   const demas = senales.slice(1);
@@ -258,7 +260,9 @@ function Costo({ paquete, onVolver, onPedirCredito }: {
 }
 
 /** Que no diga nada vale tanto como la alerta, y por eso tiene su pantalla. */
-function Sano({ usuario, onVolver }: { usuario: Usuario; onVolver: () => void }) {
+function Sano({ usuario, onVolver, onSubirExamen }: {
+  usuario: Usuario; onVolver: () => void; onSubirExamen?: () => void;
+}) {
   return (
     <Pantalla>
       <Encabezado meta="Salir" onVolver={onVolver} />
@@ -269,10 +273,16 @@ function Sano({ usuario, onVolver }: { usuario: Usuario; onVolver: () => void })
         simbolo="listo"
       />
       <Etiqueta>Lo que revisé</Etiqueta>
-      <Text style={s.sanoTexto}>
-        {usuario.mediciones.length} mediciones de los últimos meses, contra las 14 reglas de
-        referencia. Te aviso solo cuando algo se salga de rango.
-      </Text>
+      <View style={s.sanoBloque}>
+        <Text style={s.sanoTexto}>
+          {usuario.mediciones.length} mediciones de los últimos meses, contra las 14 reglas de
+          referencia. Te aviso solo cuando algo se salga de rango.
+        </Text>
+      </View>
+
+      {onSubirExamen ? (
+        <Boton texto="Tengo un examen de laboratorio" tono="borde" onPress={onSubirExamen} />
+      ) : null}
       <Pie>
         Estar en rango no descarta una enfermedad. Si te sientes mal, ve al centro de salud sin
         esperar a que esta app diga nada.
@@ -310,9 +320,11 @@ const s = StyleSheet.create({
   arriba: { paddingHorizontal: ESPACIO.borde, paddingTop: 16, paddingBottom: 14 },
   titular: { ...DISPLAY, fontSize: 28, lineHeight: 31, letterSpacing: -1, color: COLOR.tinta },
 
-  sanoTexto: {
-    fontSize: 15, lineHeight: 21, color: COLOR.gris, paddingHorizontal: ESPACIO.borde,
+  sanoBloque: {
+    borderTopWidth: 3, borderTopColor: COLOR.tinta,
+    paddingHorizontal: ESPACIO.borde, paddingTop: 14,
   },
+  sanoTexto: { fontSize: 15, lineHeight: 21, color: COLOR.gris },
 
   ruta: { borderTopWidth: 3, borderTopColor: COLOR.tinta },
 

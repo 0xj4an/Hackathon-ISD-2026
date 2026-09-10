@@ -117,11 +117,11 @@ export default function PantallaDatos({
       </View>
 
       <Etiqueta>De tu cédula</Etiqueta>
-      <Campo etiqueta="Año de nacimiento" valor={anio} onCambio={setAnio} marcador="1990" />
+      <Campo etiqueta="Año de nacimiento" valor={anio} onCambio={setAnio} marcador="ej. 1990" />
 
       <Etiqueta>De tu comprobante de ingresos</Etiqueta>
-      <Campo etiqueta="Cuánto ganas al mes" prefijo="B/." valor={ingreso} onCambio={setIngreso} marcador="520" />
-      <Campo etiqueta="Meses en esa actividad" valor={antiguedad} onCambio={setAntiguedad} marcador="36" />
+      <Campo etiqueta="Cuánto ganas al mes" prefijo="B/." valor={ingreso} onCambio={setIngreso} marcador="ej. 520" />
+      <Campo etiqueta="Meses en esa actividad" valor={antiguedad} onCambio={setAntiguedad} marcador="ej. 36" />
 
       <Etiqueta>Cómo ganas</Etiqueta>
       <View style={s.opciones}>
@@ -160,8 +160,8 @@ export default function PantallaDatos({
       {conExtracto ? (
         <>
           <Etiqueta>De tu extracto</Etiqueta>
-          <Campo etiqueta="Meses que cubre" valor={mesesExtracto} onCambio={setMesesExtracto} marcador="6" />
-          <Campo etiqueta="Saldo promedio" prefijo="B/." valor={saldo} onCambio={setSaldo} marcador="200" />
+          <Campo etiqueta="Meses que cubre" valor={mesesExtracto} onCambio={setMesesExtracto} marcador="ej. 6" />
+          <Campo etiqueta="Saldo promedio" prefijo="B/." valor={saldo} onCambio={setSaldo} marcador="ej. 200" />
         </>
       ) : null}
 
@@ -207,7 +207,7 @@ function Campo({
     <View style={s.campo}>
       <Text style={s.campoEtiqueta}>{etiqueta}</Text>
       <View style={s.entradaFila}>
-        {prefijo ? <Text style={s.prefijo}>{prefijo}</Text> : null}
+        {prefijo ? <Text style={[s.prefijo, valor ? null : s.prefijoVacio]}>{prefijo}</Text> : null}
         <TextInput
           value={valor}
           onChangeText={onCambio}
@@ -233,7 +233,8 @@ const s = StyleSheet.create({
     flexDirection: "row", alignItems: "center", gap: 6,
     borderBottomWidth: 2, borderBottomColor: COLOR.tinta,
   },
-  prefijo: { ...TIPO.cifraMedia, color: COLOR.gris },
+  prefijo: { ...TIPO.cifraMedia, color: COLOR.tinta },
+  prefijoVacio: { color: COLOR.apagado },
   entrada: { ...TIPO.cifraMedia, color: COLOR.tinta, flex: 1, minHeight: TOQUE, paddingVertical: 4 },
   ayuda: { ...TIPO.pie, color: COLOR.gris, marginTop: 4 },
   opciones: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: ESPACIO.entre },

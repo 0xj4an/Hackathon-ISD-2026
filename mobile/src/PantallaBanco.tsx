@@ -52,12 +52,12 @@ export default function PantallaBanco({
             valor={`B/. ${respuesta.cuota_mensual_usd?.toFixed(2)}`}
           />
           <FilaRuta
-            simbolo="listo"
+            simbolo="calendario"
             etiqueta="Durante"
             valor={`${respuesta.plazo_meses} meses`}
           />
           <FilaRuta
-            simbolo="persona"
+            simbolo="porcentaje"
             etiqueta="Tasa anual"
             valor={`${respuesta.tasa_anual_pct}%`}
             ultima

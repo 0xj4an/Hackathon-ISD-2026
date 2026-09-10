@@ -17,7 +17,9 @@ export type Simbolo =
   | "moneda"      // lo que cuesta
   | "listo"       // círculo con visto: todo en orden
   | "sinSenal"    // círculo tachado: no hay red
-  | "documento";  // hoja con líneas: la cédula, el comprobante
+  | "documento"   // hoja con líneas: la cédula, el comprobante
+  | "calendario"  // cuánto tiempo dura: el plazo, los meses
+  | "porcentaje"; // la tasa
 
 /**
  * `fondo` es el color que hay detrás del pictograma, y hace falta porque tres
@@ -149,6 +151,31 @@ export default function Pictograma({
             transform: [{ rotate: "45deg" }],
           }]}
         />
+      </View>
+    );
+  }
+
+  if (simbolo === "calendario") {
+    return (
+      <View style={[caja, s.centro]}>
+        <View style={{ width: 20 * u, height: 18 * u, borderWidth: 2.4 * u, borderColor: color }}>
+          <View style={{ height: 4.4 * u, backgroundColor: color }} />
+          <View style={{ flex: 1, flexDirection: "row", flexWrap: "wrap", padding: 1.8 * u, gap: 1.6 * u }}>
+            <View style={{ width: 3 * u, height: 3 * u, backgroundColor: color }} />
+            <View style={{ width: 3 * u, height: 3 * u, backgroundColor: color }} />
+            <View style={{ width: 3 * u, height: 3 * u, backgroundColor: color }} />
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  if (simbolo === "porcentaje") {
+    return (
+      <View style={[caja, s.centro]}>
+        <View style={[s.encima, { top: 3 * u, left: 4 * u, width: 6 * u, height: 6 * u, borderRadius: 3 * u, borderWidth: 2.2 * u, borderColor: color }]} />
+        <View style={{ width: 2.6 * u, height: 21 * u, backgroundColor: color, transform: [{ rotate: "28deg" }] }} />
+        <View style={[s.encima, { bottom: 3 * u, right: 4 * u, width: 6 * u, height: 6 * u, borderRadius: 3 * u, borderWidth: 2.2 * u, borderColor: color }]} />
       </View>
     );
   }

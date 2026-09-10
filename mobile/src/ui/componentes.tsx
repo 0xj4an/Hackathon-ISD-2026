@@ -78,7 +78,18 @@ export function Veredicto({
   );
 }
 
-/** El veredicto encogido, para cuando debajo viene una lista larga. */
+/**
+ * El veredicto encogido, para cuando debajo viene una lista larga.
+ *
+ * Qué color lleva la barra, que hasta ahora era costumbre y se rompía sola:
+ *
+ * - **Color de urgencia** cuando la pantalla da un veredicto de salud.
+ * - **Ámbar** cuando la pantalla te pide algo: el examen, los documentos, los
+ *   datos, el monto del crédito.
+ * - **Negro** cuando la pantalla solo reporta algo ya calculado: lo que se
+ *   leyó, tu cuota. Es el mismo negro del total y del estado del envío, y por
+ *   eso no se usa para pedir.
+ */
 export function BarraVeredicto({ color, texto, derecha }: {
   color: string; texto: string; derecha?: string;
 }) {
