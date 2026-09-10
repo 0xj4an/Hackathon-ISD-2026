@@ -82,24 +82,24 @@ export const POLITICA: Politica = {
     exposicion_x_ingreso:
       "Ley 81 de 2009 de Panama: el limite de una tarjeta no puede pasar de tres " +
       "veces el ingreso mensual demostrado. Adaptado a prestamo personal",
-    monto_min: "Politica del producto. Piso fijado en ADR-010",
-    monto_max: "Politica del producto",
-    confianza_min: "Politica. Debajo de esto la solicitud va a revision humana",
+    monto_min: "Política del producto. Piso fijado en ADR-010",
+    monto_max: "Política del producto",
+    confianza_min: "Política. Debajo de esto la solicitud va a revisión humana",
     edad_min: "Mayoria de edad",
-    edad_max: "Politica. Edad al vencimiento del credito",
+    edad_max: "Política. Edad al vencimiento del crédito",
     fondeo: "Costo de depositos en la banca panamena, 2025 a 2026",
-    lgd: "Perdida dado el incumplimiento en credito sin garantia",
+    lgd: "Pérdida dado el incumplimiento en crédito sin garantía",
     opex_solicitud: "Estimado. Originacion digital sin sucursal ni oficial en campo",
     capital_pct: "Ponderacion de capital para cartera de consumo",
-    retorno_exigido: "Politica. Retorno sobre el capital asignado",
+    retorno_exigido: "Política. Retorno sobre el capital asignado",
     margen: "Politica",
     tasa_piso:
-      "Politica. Apenas encima del promedio de prestamos personales en Panama " +
+      "Política. Apenas encima del promedio de prestamos personales en Panama " +
       "(8.92%, SBP octubre 2025), porque ese promedio es de creditos con " +
       "descuento directo de planilla y este no lo tiene",
     tasa_techo:
-      "Politica. Entre el promedio de tarjetas de credito (22.02%, SBP octubre " +
-      "2025) y el maximo observado en el mercado panameno (27.12%)",
+      "Política. Entre el promedio de tarjetas de crédito (22.02%, SBP octubre " +
+      "2025) y el máximo observado en el mercado panameño (27.12%)",
     prima_plazo: "Estimado. Recargo por plazo mayor al preferente",
   },
 };

@@ -69,7 +69,7 @@ function elegibilidad(
   }
   const edad = edadEn(sol.cedula.fecha_nacimiento, hoy);
   if (edad < v.edad_min || edad > v.edad_max) {
-    return { decision: "rechazada", motivo: `la politica cubre de ${v.edad_min} a ${v.edad_max} anos` };
+    return { decision: "rechazada", motivo: `la política cubre de ${v.edad_min} a ${v.edad_max} años` };
   }
   if (sol.monto_solicitado_usd < v.monto_min || sol.monto_solicitado_usd > v.monto_max) {
     return { decision: "rechazada", motivo: `el monto va de B/. ${v.monto_min} a B/. ${v.monto_max}` };
@@ -133,7 +133,7 @@ export function decidir(
   if (mora > 60) {
     return {
       ...base, decision: "rechazada",
-      motivo: `el comportamiento de pago en el sistema financiero muestra ${mora} dias de atraso`,
+      motivo: `el comportamiento de pago en el sistema financiero muestra ${mora} días de atraso`,
     };
   }
   const castigo = mora > 30 ? 0.05 : 0;
@@ -145,7 +145,7 @@ export function decidir(
     return {
       ...base, decision: "rechazada", factores,
       motivo: `con tus ingresos la cuota maxima es B/. ${cap.cuota_max.toFixed(2)} al mes, ` +
-              `y el monto minimo de B/. ${pol.valores.monto_min} no cabe`,
+              `y el monto mínimo de B/. ${pol.valores.monto_min} no cabe`,
     };
   }
 

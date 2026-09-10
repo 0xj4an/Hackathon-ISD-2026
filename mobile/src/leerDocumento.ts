@@ -72,7 +72,16 @@ async function sdk(): Promise<Qvac> {
   return qvac;
 }
 
-async function bajar(asset: { src: string } | string, onProgreso?: (p: ProgresoLectura) => void) {
+/**
+ * Lo que `downloadAsset` acepta como origen, derivado del propio SDK en vez de
+ * escrito a mano: si el paquete cambia la firma, esto deja de compilar en vez
+ * de fallar en el telefono. Antes era `unknown` y el typecheck lo rechazaba al
+ * pasarlo, porque las constantes del registro (OCR_LATIN y compania) son
+ * objetos, no cadenas.
+ */
+type OrigenAsset = Parameters<NonNullable<Qvac["downloadAsset"]>>[0]["assetSrc"];
+
+async function bajar(asset: OrigenAsset, onProgreso?: (p: ProgresoLectura) => void) {
   const s = await sdk();
   if (typeof s.downloadAsset !== "function") return;
   let last = -1;

@@ -57,7 +57,7 @@ export function estadoRegistros(): Registro[] {
  */
 export async function compartirRegistro(nombre: string): Promise<string | null> {
   const { file, texto } = leer(nombre);
-  if (texto === null) return `Todavia no hay ${nombre}. Corre una inferencia primero.`;
+  if (texto === null) return `Todavía no hay ${nombre}. Corre una inferencia primero.`;
   if (!texto.trim()) return `${nombre} esta vacio.`;
   if (!(await Sharing.isAvailableAsync())) return "Este aparato no puede compartir archivos.";
   try {

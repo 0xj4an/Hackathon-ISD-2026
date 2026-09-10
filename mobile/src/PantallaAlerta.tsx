@@ -136,7 +136,7 @@ function Alerta({ peor, demas, mediciones, onSalir, onVerRuta }: {
 
       {/*
         El rotulo tiene que decir tres cosas o no dice ninguna: que son, de donde
-        salieron y que se va a hacer con ellas. "Y esto tambien" no decia nada, y
+        salieron y que se va a hacer con ellas. "Y esto también" no decía nada, y
         se noto en que hubo que preguntarlo.
       */}
       {demas.length > 0 ? (
