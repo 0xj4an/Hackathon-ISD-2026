@@ -1,6 +1,13 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    // `core/credito/` se importa con la extensión `.ts` puesta, y no es un
+    // descuido: ADR-011 decide que el nodo corra el mismo código que el
+    // teléfono, y Node 22 solo lee TypeScript si el import lleva la extensión
+    // explícita (ver `nodo/credito.mjs`). Quitarlas arreglaría el typecheck y
+    // rompería el nodo. La base de Expo ya trae `noEmit`, que es la condición
+    // que este flag necesita.
+    "allowImportingTsExtensions": true
   }
 }
