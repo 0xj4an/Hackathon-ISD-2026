@@ -1,21 +1,27 @@
-// Modelo de crédito DE JUGUETE. Existe solo para demostrar el flujo; no representa ninguna política real.
-/** Piso del credito. Debe quedar por debajo del paquete mas barato de la app. */
-const MONTO_MINIMO = 25;
+// El banco decide. Este archivo ya no tiene politica: la politica vive en
+// mobile/src/core/credito/, y el nodo la importa tal cual.
+//
+// Node 22 lee TypeScript sin build, asi que no hay copia ni paso de compilacion:
+// el nodo corre EXACTAMENTE el mismo codigo que el telefono usa para
+// precalificar. Si hubiera dos copias, la del banco y la del telefono podrian
+// dar numeros distintos y nadie se enteraria hasta la demo.
+//
+// El modelo esta entrenado sobre cartera sintetica y no representa la politica
+// de ningun banco real. Se declara en pantalla y en el README.
+
+import { decidir as decidirConMotor } from "../mobile/src/core/credito/motor.ts";
+
+/**
+ * Contexto que solo el banco tiene. En un banco de verdad esto sale de APC
+ * Intelidat (Ley 24 de 2002) y de la tesoreria. Aqui se simula, y se dice.
+ */
+function contextoDelBanco(sol) {
+  // Sin consulta real de bureau: la demo no tiene red garantizada y no vamos a
+  // inventar un historial que no existe. Cero dias de mora es el supuesto
+  // declarado, no un dato.
+  return { bureau: { peor_mora_dias: 0 } };
+}
 
 export function decidir(sol) {
-  const ing = sol.ingresos?.ingreso_mensual_usd ?? 0;
-  const conf = Math.min(sol.cedula?.confianza ?? 0, sol.ingresos?.confianza ?? 0);
-  const pedido = sol.monto_solicitado_usd ?? 0;
-  const ts = new Date().toISOString();
-  if (conf < 0.5) return { solicitud_id: sol.id, decision: "revision", motivo: "documentos poco legibles; un agente revisará", ts };
-  const capacidad = ing * 0.3; // cuota máxima 30% del ingreso
-  const tasa_anual_pct = sol.extracto ? 9.5 : 12.5;
-  const plazo_meses = pedido <= 300 ? 6 : pedido <= 1000 ? 12 : 24;
-  const r = tasa_anual_pct / 100 / 12;
-  const cuota = (m) => (m * r) / (1 - Math.pow(1 + r, -plazo_meses));
-  let monto = Math.min(pedido, 5000);
-  while (monto > MONTO_MINIMO && cuota(monto) > capacidad) monto = Math.floor(monto * 0.9);
-  if (monto < MONTO_MINIMO) return { solicitud_id: sol.id, decision: "rechazada", motivo: `capacidad de pago insuficiente para el monto minimo de B/. ${MONTO_MINIMO}`, ts };
-  return { solicitud_id: sol.id, decision: "aprobada", monto_aprobado_usd: Math.round(monto), plazo_meses, tasa_anual_pct,
-    cuota_mensual_usd: Math.round(cuota(monto) * 100) / 100, motivo: monto < pedido ? "monto ajustado a capacidad de pago (30% del ingreso)" : "aprobado por capacidad de pago", ts };
+  return decidirConMotor(sol, contextoDelBanco(sol), new Date());
 }
