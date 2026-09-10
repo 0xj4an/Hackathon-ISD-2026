@@ -38,7 +38,7 @@ export default function PantallaRevision({
       titulo: "Comparando con los rangos de referencia",
       resultado: senales.length === 0
         ? "Nada fuera de rango"
-        : `${senales.length} ${senales.length === 1 ? "señal encontrada" : "señales encontradas"}`,
+        : `${senales.length} ${senales.length === 1 ? "cosa fuera de rango" : "cosas fuera de rango"}`,
     },
     {
       titulo: "Calculando lo que cuesta atenderlo",

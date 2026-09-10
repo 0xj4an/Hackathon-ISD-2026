@@ -88,7 +88,7 @@ export default function PantallaAlerta({
   return (
     <Alerta
       peor={peor}
-      otras={demas.length}
+      demas={demas}
       onSalir={onVolver}
       onVerRuta={() => setPaso("ruta")}
     />
@@ -96,14 +96,18 @@ export default function PantallaAlerta({
 }
 
 /**
- * Paso 1. Qué te pasa, y nada más.
+ * Paso 1. Qué encontré, todo, y nada más.
  *
- * Lo único que puede acompañar al hallazgo es lo que obliga a moverse ahora
- * mismo: la instrucción inmediata y los síntomas de alarma. Todo lo demás
- * espera al siguiente paso.
+ * Todos los hallazgos salen aquí: esconder tres de cuatro es ocultarle a alguien
+ * algo suyo, y encima la lista es corta. Lo que hacia ilegible la versión
+ * anterior no era el número de hallazgos, era que cada uno venía como una ficha
+ * clínica entera con ruta, costo y fuente. Un titulo y su cifra ocupan una fila.
+ *
+ * Lo que sí espera al siguiente paso es qué hacer con cada uno, que es una
+ * pregunta distinta.
  */
-function Alerta({ peor, otras, onSalir, onVerRuta }: {
-  peor: Senal; otras: number; onSalir: () => void; onVerRuta: () => void;
+function Alerta({ peor, demas, onSalir, onVerRuta }: {
+  peor: Senal; demas: Senal[]; onSalir: () => void; onVerRuta: () => void;
 }) {
   return (
     <Pantalla>
@@ -127,11 +131,13 @@ function Alerta({ peor, otras, onSalir, onVerRuta }: {
         <Franja color={COLOR.inmediata} titulo="Ve ya si aparece" texto={peor.ruta.vigilar} />
       ) : null}
 
-      {otras > 0 ? (
-        <Text style={s.otras}>
-          {otras === 1 ? "Hay una señal más" : `Hay ${otras} señales más`}. Te las cuento en el
-          siguiente paso.
-        </Text>
+      {demas.length > 0 ? (
+        <>
+          <Etiqueta>Y esto también</Etiqueta>
+          <View style={s.resumenes}>
+            {demas.map(x => <Resumen key={x.codigo} senal={x} />)}
+          </View>
+        </>
       ) : null}
 
       <Boton texto="Ver qué conviene hacer" onPress={onVerRuta} />
@@ -177,11 +183,9 @@ function Ruta({ peor, demas, hayCosto, onVolver, onVerCosto, onSubirExamen }: {
 
       {demas.length > 0 ? (
         <>
-          <Etiqueta>
-            {demas.length === 1 ? "La otra señal" : `Las otras ${demas.length} señales`}
-          </Etiqueta>
+          <Etiqueta>Qué hacer con lo demás</Etiqueta>
           <View style={s.resumenes}>
-            {demas.map(x => <Resumen key={x.codigo} senal={x} />)}
+            {demas.map(x => <Resumen key={x.codigo} senal={x} conRuta />)}
           </View>
         </>
       ) : null}
@@ -277,8 +281,13 @@ function Sano({ usuario, onVolver }: { usuario: Usuario; onVolver: () => void })
   );
 }
 
-/** Las demás señales, en el paso de la ruta: título, cifra y a dónde ir. */
-function Resumen({ senal }: { senal: Senal }) {
+/**
+ * Un hallazgo en una fila: la urgencia por color, el título y su cifra.
+ *
+ * `conRuta` añade a dónde ir. En el paso 1 sobra, porque ahí la pregunta es qué
+ * encontré; en el paso 2 es justo lo que se viene a leer.
+ */
+function Resumen({ senal, conRuta }: { senal: Senal; conRuta?: boolean }) {
   const color = COLOR_URGENCIA[senal.urgencia];
   return (
     <View style={s.resumen}>
@@ -289,18 +298,15 @@ function Resumen({ senal }: { senal: Senal }) {
         <Text style={s.resumenMedida}>
           {senal.medida.valor} {senal.medida.unidad}. {senal.medida.referencia}.
         </Text>
-        <Text style={s.resumenRuta}>{senal.ruta.examen ?? senal.ruta.donde}</Text>
+        {conRuta ? (
+          <Text style={s.resumenRuta}>{senal.ruta.examen ?? senal.ruta.donde}</Text>
+        ) : null}
       </View>
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  otras: {
-    fontSize: 14.5, lineHeight: 20, color: COLOR.gris,
-    paddingHorizontal: ESPACIO.borde, marginTop: 18,
-  },
-
   arriba: { paddingHorizontal: ESPACIO.borde, paddingTop: 16, paddingBottom: 14 },
   titular: { ...DISPLAY, fontSize: 28, lineHeight: 31, letterSpacing: -1, color: COLOR.tinta },
 
