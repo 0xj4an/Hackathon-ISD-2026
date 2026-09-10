@@ -10,7 +10,7 @@
 import { useState } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { Pantalla, Encabezado, BarraVeredicto, Franja, Etiqueta, Pie } from "./ui/componentes";
+import { BarraVeredicto, Boton, Encabezado, Etiqueta, Franja, Pantalla, Pie } from "./ui/componentes";
 import Pictograma from "./ui/Pictograma";
 import { COLOR, TIPO, ESPACIO, DISPLAY, TOQUE } from "./ui/tokens";
 
@@ -48,8 +48,18 @@ const SIN_PERMISO = "Sin permiso de cámara no podemos leer el documento. Actív
 const FALLO = "No se pudo abrir la cámara. Intenta otra vez.";
 
 export default function PantallaDocumentos({
-  monto, onVolver,
-}: { monto: number; onVolver: () => void }) {
+  monto, onListo, onVolver,
+}: {
+  monto: number;
+  /**
+   * Se llama cuando estan los obligatorios. Hoy pasa solo si se fotografio el
+   * extracto, porque de la foto no sale nada mas: la extraccion es del bloque
+   * siguiente. Cuando exista, aqui van los campos leidos y su confianza, y
+   * `PantallaDatos` los recibe ya rellenos en vez de vacios.
+   */
+  onListo: (conExtracto: boolean) => void;
+  onVolver: () => void;
+}) {
   const [tomados, setTomados] = useState<Partial<Record<Clave, boolean>>>({});
   const [error, setError] = useState("");
 
@@ -134,9 +144,17 @@ export default function PantallaDocumentos({
           : "Ya están los obligatorios."}
       </Text>
 
+      <Boton
+        texto={faltan > 0 ? "Faltan documentos" : "Continuar"}
+        onPress={() => { if (faltan === 0) onListo(!!tomados.extracto); }}
+        tono={faltan > 0 ? "borde" : "tinta"}
+        etiqueta="Continuar a confirmar tus datos"
+      />
+
       <Pie>
         La lectura en el dispositivo y el envío al banco se conectan en el siguiente bloque. Hasta
-        entonces la pantalla dice que el documento está tomado, no leído.
+        entonces la pantalla dice que el documento está tomado, no leído, y los campos se escriben
+        a mano en la pantalla siguiente.
       </Pie>
     </Pantalla>
   );

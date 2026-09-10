@@ -13,13 +13,17 @@
 // `./src/SmokeTest` y montarlo directo: aísla si el problema es el teléfono,
 // Expo o el SDK, en vez de nuestro código.
 import { useState } from "react";
+import { Alert } from "react-native";
 import PantallaEntrada from "./src/PantallaEntrada";
 import PantallaRevision from "./src/PantallaRevision";
 import PantallaAlerta from "./src/PantallaAlerta";
 import PantallaCredito from "./src/PantallaCredito";
 import PantallaDocumentos from "./src/PantallaDocumentos";
+import PantallaDatos from "./src/PantallaDatos";
+import PantallaCuota from "./src/PantallaCuota";
 import PantallaExamen from "./src/PantallaExamen";
 import type { Usuario } from "./src/usuarios";
+import type { Solicitud } from "./src/core/credito/motor";
 
 /** Lo que cuesta el paquete, y el monto que la persona decidió pedir. */
 type Credito = { min: number; max: number; monto?: number };
@@ -29,12 +33,18 @@ export default function App() {
   const [revisado, setRevisado] = useState(false);
   const [credito, setCredito] = useState<Credito | null>(null);
   const [enExamen, setEnExamen] = useState(false);
+  /** Documentos fotografiados: si hubo extracto, se preguntan sus campos. */
+  const [conExtracto, setConExtracto] = useState<boolean | null>(null);
+  /** Los campos confirmados. Con esto ya se puede calcular la cuota aqui mismo. */
+  const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
 
   const salir = () => {
     setUsuario(null);
     setRevisado(false);
     setCredito(null);
     setEnExamen(false);
+    setConExtracto(null);
+    setSolicitud(null);
   };
 
   if (!usuario) return <PantallaEntrada onEntrar={setUsuario} />;
@@ -69,10 +79,38 @@ export default function App() {
     );
   }
 
+  if (conExtracto === null) {
+    return (
+      <PantallaDocumentos
+        monto={credito.monto}
+        onListo={setConExtracto}
+        onVolver={() => setCredito({ min: credito.min, max: credito.max })}
+      />
+    );
+  }
+
+  if (!solicitud) {
+    return (
+      <PantallaDatos
+        monto={credito.monto}
+        conExtracto={conExtracto}
+        onListo={setSolicitud}
+        onVolver={() => setConExtracto(null)}
+      />
+    );
+  }
+
   return (
-    <PantallaDocumentos
-      monto={credito.monto}
-      onVolver={() => setCredito({ min: credito.min, max: credito.max })}
+    <PantallaCuota
+      solicitud={solicitud}
+      onFirmar={() =>
+        Alert.alert(
+          "Todavía no se envía",
+          "La firma, la cola y el envío al banco se conectan en el siguiente bloque. " +
+            "La cuota que ves ya la calculó este teléfono, sin señal.",
+        )
+      }
+      onVolver={() => setSolicitud(null)}
     />
   );
 }
