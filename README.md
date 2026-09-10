@@ -1,4 +1,4 @@
-# (nombre pendiente) · IA local para salud y crédito donde no llega la señal
+# Ina Igar · IA local para salud y crédito donde no llega la señal
 
 > Decentralized AI Hackathon · ISD Summit 2026 · Panamá. Equipo: 0xj4an y Artur.
 > Retos: General · Tether QVAC Psy · Caja de Ahorros.
@@ -46,6 +46,13 @@ que se clasifica están en [`core/marcadores.ts`](core/marcadores.ts).
 - El banco recibe solo campos estructurados; nunca imágenes, ni el motivo de salud.
 - El modelo de crédito del nodo "banco" es de juguete, para demostrar el flujo. La firma en pantalla no es firma electrónica legal.
 - Datos: 100% sintéticos. Ningún dato real de clientes ni de pacientes.
+
+
+## El nombre
+
+**Ina Igar** significa "camino de la medicina" en gunagaya, la lengua del pueblo Guna de Panamá. `ina` es medicina o planta medicinal; `igar` es camino, vía, y también lección o tratado: el saber y la ruta en la misma palabra. Es exactamente lo que hace la app, porque cada detección devuelve una ruta.
+
+Los significados salen del diccionario escolar *Gayamar sabga* (gunagaya-español) de Reuter Orán B. y Aiban Wagua, publicado por el Proyecto de Implementación de la Educación Bilingüe Intercultural en los Territorios Gunas de Panamá. No es una palabra nuestra: es prestada, y se cita.
 
 ## Base preexistente (declaración obligatoria)
 

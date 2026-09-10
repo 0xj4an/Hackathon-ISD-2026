@@ -1,6 +1,6 @@
 # Contexto del proyecto
 
-- Producto: proyecto para el Decentralized AI Hackathon · ISD Summit 2026 (Panamá). Nombre del equipo en Dojo: TBD-Panama. Idea final: alerta de salud local + crédito de salud con documentos leídos en el dispositivo y envío offline/P2P al banco. Ver `docs/BRIEF.md` y `runs/mvp-hackathon/01-idea-validation.md`.
+- Producto: **Ina Igar** ("camino de la medicina" en gunagaya, la lengua guna). Proyecto para el Decentralized AI Hackathon · ISD Summit 2026 (Panamá). Nombre del equipo en Dojo: TBD-Panama. Idea final: alerta de salud local + crédito de salud con documentos leídos en el dispositivo y envío offline/P2P al banco. Ver `docs/BRIEF.md` y `runs/mvp-hackathon/01-idea-validation.md`.
 - Propósito: ganar el ranking general ("Sovereign Intelligence at the Edge", podio 6,000 USDT) y encajar en uno o dos retos corporativos (1,500 USDT c/u). Un mismo proyecto puede optar a varios.
 - Usuarios principales: personas en zonas rurales de Panamá con Android de gama media y conectividad intermitente (retos General + Tether Psy + Caja de Ahorros).
 - Equipo: @0xj4an y Artur (@ArturVargas). Máximo 4.

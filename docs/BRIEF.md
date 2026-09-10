@@ -1,6 +1,6 @@
 # Brief del proyecto · Decentralized AI Hackathon · ISD Summit 2026
 
-Nombre de trabajo: **(pendiente)**. Equipo: 0xj4an y Artur.
+Nombre: **Ina Igar** ("camino de la medicina" en gunagaya). Equipo: 0xj4an y Artur.
 
 ## Una frase
 Una app para personas en zonas rurales de Panamá con señal intermitente, que detecta en el teléfono una señal de riesgo de salud, explica en español qué examen conviene y cuánto cuesta, y permite solicitar un crédito de salud fotografiando los documentos **sin que ninguna imagen salga del dispositivo**: la solicitud queda en cola y viaja al banco cuando hay red o por P2P a través del nodo del corregimiento.

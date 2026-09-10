@@ -1,0 +1,9 @@
+{
+  "name": "landing",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Landing publica del proyecto. Pagina estatica servida por Node sin dependencias.",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=22" }
+}
