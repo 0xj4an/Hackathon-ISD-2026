@@ -37,7 +37,10 @@ export async function leerExamenFoto(
     }
     await soltarLectores();
 
-    aviso({ paso: "extraccion", detalle: `Sacando marcadores (${LORA_LAB_VERSION})` });
+    aviso({
+      paso: "extraccion",
+      detalle: `MedPsy + LoRA sacando marcadores (${LORA_LAB_VERSION})`,
+    });
     const bruto = await completarMedPsy({
       system: SYSTEM_EXTRACCION_LABORATORIO,
       user: textoOcr + (typeof ocr.confianza === "number"
@@ -47,7 +50,13 @@ export async function leerExamenFoto(
       temp: 0.1,
       predict: 512,
       conLora: true,
-      onProgreso: p => aviso({ paso: "extraccion", pct: p.pct, detalle: p.detalle }),
+      onProgreso: p => aviso({
+        paso: "extraccion",
+        pct: p.pct,
+        detalle: p.detalle.includes("MedPsy") || p.detalle.includes("LoRA")
+          ? p.detalle
+          : `MedPsy + LoRA · ${p.detalle}`,
+      }),
     });
     const parsed = parsearLaboratorio(bruto);
     if (!parsed.ok) {

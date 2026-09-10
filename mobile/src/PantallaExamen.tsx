@@ -99,6 +99,14 @@ export default function PantallaExamen({
           />
         )}
 
+        {conLora ? (
+          <Franja
+            color={COLOR.tinta}
+            titulo="MedPsy + LoRA"
+            texto={`Marcadores sacados con ${conLora}. Rangos y urgencia los decide el catálogo, no el modelo.`}
+          />
+        ) : null}
+
         <View style={s.resultados}>
           {lecturas.map(l => {
             const dentro = l.hallazgo === "dentro de rango";
@@ -131,7 +139,6 @@ export default function PantallaExamen({
         <Pie>
           Los rangos salen del catálogo de marcadores, cada uno con su fuente. Esto es orientación
           automática y local, no un diagnóstico.
-          {conLora ? ` Extracción con MedPsy + ${conLora}.` : ""}
         </Pie>
       </Pantalla>
     );
@@ -154,13 +161,13 @@ export default function PantallaExamen({
       {leyendo ? (
         <Franja
           color={COLOR.prioritaria}
-          titulo="Leyendo en el teléfono"
-          texto={progreso || `MedPsy + ${LORA_LAB_VERSION}`}
+          titulo={`MedPsy + LoRA · ${LORA_LAB_VERSION}`}
+          texto={progreso || "Leyendo el examen en este teléfono"}
         />
       ) : null}
 
       <Boton
-        texto={leyendo ? "Leyendo…" : "Tomar foto del examen"}
+        texto={leyendo ? "Leyendo con LoRA…" : "Tomar foto del examen"}
         onPress={() => { if (!leyendo) void tomarYLeer(); }}
       />
 
@@ -190,11 +197,14 @@ export default function PantallaExamen({
         ))}
       </View>
 
-      <Boton texto="Ver qué dicen" onPress={leer} />
+      <Boton
+        texto="Ver qué dicen"
+        onPress={() => { if (!leyendo) leer(); }}
+      />
 
       <Pie>
         Solo escribe los que aparezcan en tu papel. Los que dejes vacíos no se inventan.
-        La foto usa el adaptador {LORA_LAB_VERSION}; reemplazable sin tocar MedPsy.
+        La foto usa MedPsy + LoRA ({LORA_LAB_VERSION}); escribir a mano no.
       </Pie>
     </Pantalla>
   );
