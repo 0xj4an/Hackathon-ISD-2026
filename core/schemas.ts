@@ -56,7 +56,9 @@ export const SolicitudSchema = z.object({
   id: z.string().uuid(),
   creada: z.string().datetime(),
   proposito: z.literal("salud"), // categoría genérica; el detalle clínico NUNCA sale del dispositivo
-  monto_solicitado_usd: z.number().min(50).max(5000),
+  /** Piso por debajo del paquete mas barato (sobrepeso, B/. 28): la app
+   * ofrece credito por cualquier monto y el nodo tiene que poder recibirlo. */
+  monto_solicitado_usd: z.number().min(25).max(5000),
   cedula: CedulaSchema,
   ingresos: IngresosSchema,
   extracto: ExtractoSchema.optional(),

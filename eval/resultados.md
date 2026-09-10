@@ -49,23 +49,28 @@ Toda senal tiene que decir que hacer, no solo que algo anda mal.
 
 Senales distintas ejercitadas por los casos: **11** (FIEBRE, GLU_ALTA, GLU_LIMITE, GLU_MUY_BAJA, IMC_OBESIDAD, IMC_SOBREPESO, PESO_BAJA, PRES_ALTA, RESP_ALTA, SAT_BAJA, TAQUI).
 
-## 4. El paquete y la puerta del credito
+## 4. El paquete de cada caso
 
-Un credito solo se ofrece cuando el costo pesa y hay tratamiento sostenido.
-Ofrecerlo por una consulta suelta, o en una urgencia, seria poner un tramite
-en el camino de alguien que tiene que ir hoy.
+El credito se ofrece SIEMPRE que haya algo que atender, sin importar el monto
+ni la urgencia. La atencion de urgencia tambien cuesta, y es justo por eso que
+la gente no va. Lo unico sin paquete es no tener ningun hallazgo.
 
 | Caso | Paquete | Total | Credito | |
 | --- | --- | --- | --- | --- |
-| Diabetes sin diagnosticar | Confirmar y empezar a tratar la diabetes | B/. 164 a 254 | si | OK |
-| Hipertension no controlada | Confirmar y controlar la presión | B/. 218 a 349 | si | OK |
-| Hipoglucemia | urgencia, va directo | - | no | OK |
-| Prediabetes | Confirmar la glucosa en el límite | B/. 14 a 40 | no | OK |
-| Cuadro respiratorio agudo | Estudiar la falta de oxígeno | B/. 48 a 120 | no | OK |
+| Diabetes sin diagnosticar | Diabetes tipo 2: confirmar y tratar un año | B/. 641 a 920 | si | OK |
+| Hipertension no controlada | Hipertensión: confirmar y controlar un año | B/. 617 a 812 | si | OK |
+| Hipoglucemia | Azúcar peligrosamente baja: urgencia y seguimiento un año | B/. 235 a 530 | si | OK |
+| Prediabetes | Prediabetes: seguimiento por un año | B/. 72 a 170 | si | OK |
+| Cuadro respiratorio agudo | Falta de oxígeno: estudio inicial | B/. 48 a 120 | si | OK |
 | Sin hallazgos | sin hallazgos | - | no | OK |
 
-Casos que ofrecen credito: **2 de 6**. Los demas no lo necesitan o no pueden esperarlo.
+Casos que ofrecen credito: **5 de 6**. El unico que no, es el caso sano: no hay nada que atender.
+
+Toda senal tiene que tener paquete. Si falta uno, hay un caso donde la app
+detecta algo y no sabe decir cuanto cuesta atenderlo.
+
+- senales sin paquete: 0, OK (de 14)
 
 ## Resultado
 
-**Todo pasa.** Los casos producen exactamente sus senales declaradas, los marcadores clasifican en los tres estados, ninguna senal sale sin ruta ni sin fuente, y el credito solo se ofrece donde el costo pesa y hay tratamiento sostenido.
+**Todo pasa.** Los casos producen exactamente sus senales declaradas, los marcadores clasifican en los tres estados, ninguna senal sale sin ruta ni sin fuente, y todo paquete sale con su costo y su fuente.

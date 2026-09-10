@@ -1,18 +1,23 @@
 /**
- * El paquete: cuánto cuesta de verdad atender lo que se detectó.
+ * El paquete: cuánto cuesta de verdad atender lo que se detectó, durante un año.
  *
- * Sin esto no se puede ofrecer crédito con seriedad. Una consulta de B/. 15 no
- * se financia: nadie pide un préstamo para eso y ofrecerlo sería ruido. El
- * crédito tiene sentido cuando el costo total pesa, y eso solo se sabe sumando
- * consulta, exámenes, equipo y el tratamiento sostenido en el tiempo.
+ * Sin esto no se puede ofrecer crédito con seriedad: no por el monto, sino
+ * porque nadie sabe por cuánto pedirlo. El número solo aparece cotizando el año
+ * completo: diagnóstico, equipo, exámenes de seguimiento, consultas de control
+ * y el medicamento de todos los días.
+ *
+ * El medicamento diario es lo que domina el total, y es justo lo que no se ve
+ * cuando uno cotiza "una consulta y un examen". Metformina dos veces al día son
+ * 730 tabletas en un año.
  *
  * Se cotiza el **límite superior** de cada rango. Para un crédito es lo
  * correcto: si el monto cubre el peor caso, la persona no queda a mitad de
  * camino. Y se cotiza lo privado, que en un centro del MINSA puede costar menos.
  *
  * Sobre los medicamentos: esto **no receta nada**. Estima lo que suele costar el
- * tratamiento habitual de una condición, para que la persona sepa a qué se
- * enfrenta. Qué tomar lo decide un médico, y la pantalla lo dice.
+ * tratamiento habitual de una condición, con la dosis de mantenimiento más
+ * común, para que la persona sepa a qué se enfrenta. Qué tomar, en qué dosis y
+ * por cuánto tiempo lo decide un médico, y la pantalla lo dice.
  */
 import type { Senal } from "./reglas";
 
@@ -31,76 +36,190 @@ export type Paquete = {
   lineas: LineaCosto[];
   total_min: number;
   total_max: number;
+  /** Horizonte que cubre el paquete. 0 en cuadros agudos, que se acaban. */
   meses: number;
-  /** false cuando es tan barato que pedir crédito no tiene sentido. */
-  vale_credito: boolean;
   nota: string;
 };
-
-/**
- * Cuándo ofrecer crédito. Dos condiciones, y las dos importan:
- *
- * 1. El paquete tiene que pesar. Por debajo de B/. 100 el trámite cuesta más
- *    que el examen y ofrecerlo sería ruido, o algo peor.
- * 2. Tiene que haber tratamiento sostenido. Un cuadro agudo se atiende hoy y se
- *    acaba; financiar una consulta que hay que hacerse ya solo pone un trámite
- *    en medio. El crédito es para lo crónico, que es donde el costo se estira
- *    en meses y de verdad se vuelve una barrera.
- */
-const MINIMO_CREDITO = 100;
 
 const AVISO_MINSA = "Precio privado. En un centro del MINSA puede costar menos o nada";
 const DECRETO = "Precio tope oficial, Decreto Ejecutivo 36 del 30 sep 2025 (MICI)";
 const RANGOS_PA = "Rangos publicados de laboratorios y clínicas en Panamá";
+const SIN_PRECIO = "Sin precio publicado que citar. Estimado por comparación";
 
-/** Meses de tratamiento que cubre el paquete de una condición crónica. */
-const MESES_CRONICO = 3;
+/** Una condición crónica se cotiza a un año: es el ciclo de control completo. */
+const ANIO = 12;
 
 const CONSULTA: LineaCosto = {
-  concepto: "Consulta de medicina general", min: 8, max: 25,
+  concepto: "Consulta de medicina general, para el diagnóstico", min: 8, max: 25,
   fuente: `${RANGOS_PA}. ${AVISO_MINSA}`,
 };
-const CONTROL: LineaCosto = {
-  concepto: "Consulta de control a los 3 meses", min: 8, max: 25,
+/** Tres controles en el año, uno cada tres meses. */
+const CONTROLES: LineaCosto = {
+  concepto: "Consultas de control, 3 en el año", min: 24, max: 75,
+  fuente: `${RANGOS_PA}. ${AVISO_MINSA}`,
+};
+const LIPIDOS: LineaCosto = {
+  concepto: "Perfil lipídico, 1 vez al año", min: 8, max: 15,
+  fuente: `${RANGOS_PA}. ${AVISO_MINSA}`,
+};
+const RENAL: LineaCosto = {
+  concepto: "Creatinina y función renal, 1 vez al año", min: 30, max: 60,
+  fuente: `${RANGOS_PA}. ${AVISO_MINSA}`,
+};
+const GLUCOSA: LineaCosto = {
+  concepto: "Glucosa en ayunas en laboratorio", min: 6, max: 15,
   fuente: `${RANGOS_PA}. ${AVISO_MINSA}`,
 };
 
-/**
- * Paquetes por condición. La clave es la señal que los dispara; si un caso
- * dispara varias, se toma el paquete más completo y no se suman dos veces la
- * consulta.
- */
-const PAQUETES: Record<string, Omit<Paquete, "total_min" | "total_max" | "vale_credito">> = {
+const NOTA_URGENCIA =
+  "Primero la atención: ve ya, no esperes a resolver la plata. Esto es lo que " +
+  "cuesta esa atención y el año de seguimiento, para que sepas a qué te enfrentas después.";
+
+const NOTA_CRONICA =
+  "Cubre el año completo: diagnóstico, equipo, seguimiento y medicamento diario. " +
+  "El tratamiento lo decide un médico; esto solo estima lo que suele costar.";
+
+const PAQUETES: Record<string, Omit<Paquete, "total_min" | "total_max">> = {
   GLU_ALTA: {
-    titulo: "Confirmar y empezar a tratar la diabetes",
-    meses: MESES_CRONICO,
-    nota: "Cubre confirmar el diagnóstico y los primeros 3 meses. El tratamiento lo decide el médico: esto solo estima lo que suele costar.",
+    titulo: "Diabetes tipo 2: confirmar y tratar un año",
+    meses: ANIO,
+    nota: NOTA_CRONICA,
     lineas: [
       CONSULTA,
-      { concepto: "Glucosa en ayunas en laboratorio", min: 6, max: 15, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
-      { concepto: "Hemoglobina glicosilada (HbA1c)", min: 15, max: 30, fuente: "Sin precio publicado que citar. Estimado por comparación con otros exámenes de sangre en Panamá", estimado: true },
-      { concepto: "Perfil lipídico", min: 8, max: 15, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
+      GLUCOSA,
+      { concepto: "Hemoglobina glicosilada (HbA1c), 4 veces en el año", min: 60, max: 120, fuente: `${SIN_PRECIO} con otros exámenes de sangre en Panamá`, estimado: true },
+      LIPIDOS,
+      RENAL,
+      { concepto: "Revisión de fondo de ojo, 1 vez al año", min: 25, max: 60, fuente: `${SIN_PRECIO} con consulta oftalmológica en Panamá`, estimado: true },
       { concepto: "Glucómetro con tiras y lancetas", min: 25, max: 50, fuente: "Kit completo con 25 tiras y 200 lancetas en Panamá" },
-      { concepto: "Metformina 850 mg, 2 al día por 3 meses (180 tabletas)", min: 94, max: 94, fuente: `${DECRETO}: B/. 0.52 por tableta` },
-      CONTROL,
+      { concepto: "Tiras reactivas para el resto del año", min: 75, max: 120, fuente: `${SIN_PRECIO}: 3 cajas de 50 tiras, midiendo 3 veces por semana`, estimado: true },
+      { concepto: "Metformina 850 mg, 2 al día por 12 meses (730 tabletas)", min: 380, max: 380, fuente: `${DECRETO}: B/. 0.52 por tableta` },
+      CONTROLES,
     ],
   },
   PRES_ALTA: {
-    titulo: "Confirmar y controlar la presión",
-    meses: MESES_CRONICO,
-    nota: "Cubre confirmar el diagnóstico y los primeros 3 meses. El tratamiento lo decide el médico: esto solo estima lo que suele costar.",
+    titulo: "Hipertensión: confirmar y controlar un año",
+    meses: ANIO,
+    nota: NOTA_CRONICA,
     lineas: [
       CONSULTA,
-      { concepto: "Electrocardiograma", min: 20, max: 45, fuente: `Clínicas en Panamá. ${AVISO_MINSA}` },
-      { concepto: "Perfil lipídico", min: 8, max: 15, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
-      { concepto: "Creatinina y perfil renal", min: 30, max: 60, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
-      { concepto: "Tensiómetro digital para la casa", min: 25, max: 60, fuente: "Sin precio publicado que citar. Estimado de equipos médicos en Panamá", estimado: true },
-      { concepto: "Enalapril 20 mg, 1 al día por 3 meses (90 tabletas)", min: 119, max: 119, fuente: `${DECRETO}: B/. 1.32 por tableta` },
-      CONTROL,
+      { concepto: "Electrocardiograma", min: 20, max: 45, fuente: `Clínicas en Panamá: trazo desde ~B/. 28, informado por cardiología ~B/. 45. ${AVISO_MINSA}` },
+      LIPIDOS,
+      RENAL,
+      { concepto: "Potasio y sodio, 2 veces en el año", min: 20, max: 50, fuente: `${SIN_PRECIO} con otros exámenes de sangre. El control se hace porque el tratamiento habitual los altera`, estimado: true },
+      { concepto: "Tensiómetro digital para la casa", min: 25, max: 60, fuente: `${SIN_PRECIO} con equipos médicos en Panamá`, estimado: true },
+      { concepto: "Enalapril 20 mg, 1 al día por 12 meses (365 tabletas)", min: 482, max: 482, fuente: `${DECRETO}: B/. 1.32 por tableta` },
+      CONTROLES,
+    ],
+  },
+  GLU_MUY_BAJA: {
+    titulo: "Azúcar peligrosamente baja: urgencia y seguimiento un año",
+    meses: ANIO,
+    nota: NOTA_URGENCIA,
+    lineas: [
+      { concepto: "Atención de urgencia, consulta y observación", min: 30, max: 90, fuente: `${SIN_PRECIO} con consulta de urgencias privada en Panamá`, estimado: true },
+      { concepto: "Dextrosa intravenosa y suministros", min: 20, max: 60, fuente: `${SIN_PRECIO} con insumos de sala de urgencias`, estimado: true },
+      GLUCOSA,
+      { concepto: "Consulta con endocrinología", min: 25, max: 60, fuente: `${SIN_PRECIO} con consulta especializada en Panamá`, estimado: true },
+      { concepto: "Hemoglobina glicosilada (HbA1c), 2 veces en el año", min: 30, max: 60, fuente: `${SIN_PRECIO} con otros exámenes de sangre en Panamá`, estimado: true },
+      { concepto: "Glucómetro con tiras y lancetas", min: 25, max: 50, fuente: "Kit completo con 25 tiras y 200 lancetas en Panamá" },
+      { concepto: "Tiras reactivas para el resto del año", min: 75, max: 120, fuente: `${SIN_PRECIO}: 3 cajas de 50 tiras, midiendo 3 veces por semana`, estimado: true },
+      CONTROLES,
+    ],
+  },
+  SAT_CRITICA: {
+    titulo: "Oxígeno crítico: urgencia y estudio",
+    meses: 0,
+    nota: NOTA_URGENCIA,
+    lineas: [
+      { concepto: "Atención de urgencia con oxígeno", min: 40, max: 120, fuente: `${SIN_PRECIO} con consulta de urgencias privada en Panamá`, estimado: true },
+      { concepto: "Radiografía de tórax", min: 25, max: 60, fuente: `${SIN_PRECIO} con imagenología en Panamá`, estimado: true },
+      { concepto: "Hemograma y gases en sangre", min: 25, max: 70, fuente: `${SIN_PRECIO} con exámenes de sangre en Panamá`, estimado: true },
+      { concepto: "Oxímetro de pulso para la casa", min: 15, max: 35, fuente: `${SIN_PRECIO} con equipos médicos en Panamá`, estimado: true },
+      { concepto: "Consulta de control", min: 8, max: 25, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
+    ],
+  },
+  RESP_MUY_ALTA: {
+    titulo: "Respiración muy acelerada: urgencia y estudio",
+    meses: 0,
+    nota: NOTA_URGENCIA,
+    lineas: [
+      { concepto: "Atención de urgencia, consulta y observación", min: 30, max: 90, fuente: `${SIN_PRECIO} con consulta de urgencias privada en Panamá`, estimado: true },
+      { concepto: "Radiografía de tórax", min: 25, max: 60, fuente: `${SIN_PRECIO} con imagenología en Panamá`, estimado: true },
+      { concepto: "Hemograma completo", min: 8, max: 30, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
+      { concepto: "Consulta de control", min: 8, max: 25, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
+    ],
+  },
+  RESP_ALTA: {
+    titulo: "Respiración acelerada: estudio inicial",
+    meses: 0,
+    nota: "Cubre el estudio inicial. Si la radiografía sale alterada, el médico decidirá qué sigue.",
+    lineas: [
+      CONSULTA,
+      { concepto: "Radiografía de tórax", min: 25, max: 60, fuente: `${SIN_PRECIO} con imagenología en Panamá`, estimado: true },
+      { concepto: "Hemograma completo", min: 8, max: 30, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
+    ],
+  },
+  PESO_BAJA: {
+    titulo: "Pérdida de peso: estudio inicial",
+    meses: 0,
+    nota: "Bajar de peso sin proponérselo tiene muchas causas. Esto cubre el estudio que las descarta.",
+    lineas: [
+      CONSULTA,
+      { concepto: "Hemograma completo", min: 8, max: 30, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
+      GLUCOSA,
+      { concepto: "TSH, función de la tiroides", min: 15, max: 35, fuente: `${SIN_PRECIO} con otros exámenes de sangre en Panamá`, estimado: true },
+      { concepto: "Consulta de control", min: 8, max: 25, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
+    ],
+  },
+  GLU_BAJA: {
+    titulo: "Azúcar baja: estudio inicial",
+    meses: 0,
+    nota: "Cubre el estudio y el equipo para medirse en casa, que es lo que dice si se repite.",
+    lineas: [
+      CONSULTA,
+      GLUCOSA,
+      { concepto: "Glucómetro con tiras y lancetas", min: 25, max: 50, fuente: "Kit completo con 25 tiras y 200 lancetas en Panamá" },
+    ],
+  },
+  GLU_LIMITE: {
+    titulo: "Prediabetes: seguimiento por un año",
+    meses: ANIO,
+    nota: "Cubre un año de seguimiento. Es el caso más barato y el más valioso: " +
+      "aquí todavía se puede evitar la diabetes, y se maneja con hábitos, no con medicamento.",
+    lineas: [
+      CONSULTA,
+      GLUCOSA,
+      { concepto: "Hemoglobina glicosilada (HbA1c), 2 veces en el año", min: 30, max: 60, fuente: `${SIN_PRECIO} con otros exámenes de sangre en Panamá`, estimado: true },
+      { concepto: "Consulta de nutrición", min: 20, max: 45, fuente: `${SIN_PRECIO} con consulta especializada en Panamá`, estimado: true },
+      { concepto: "Consulta de control a los 6 meses", min: 8, max: 25, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
+    ],
+  },
+  IMC_OBESIDAD: {
+    titulo: "Riesgo metabólico: seguimiento por un año",
+    meses: ANIO,
+    nota: "Cubre un año de seguimiento. El manejo del peso es consulta y " +
+      "acompañamiento sostenido, no medicamento.",
+    lineas: [
+      CONSULTA,
+      GLUCOSA,
+      LIPIDOS,
+      { concepto: "Consultas de nutrición, 3 en el año", min: 60, max: 135, fuente: `${SIN_PRECIO} con consulta especializada en Panamá`, estimado: true },
+      { concepto: "Consulta de control a los 6 meses", min: 8, max: 25, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
+    ],
+  },
+  SAT_BAJA: {
+    titulo: "Falta de oxígeno: estudio inicial",
+    meses: 0,
+    nota: "Es un cuadro agudo: se atiende ahora y se acaba. Si hace falta más, el médico lo indica.",
+    lineas: [
+      CONSULTA,
+      { concepto: "Oxímetro de pulso para la casa", min: 15, max: 35, fuente: `${SIN_PRECIO} con equipos médicos en Panamá`, estimado: true },
+      { concepto: "Radiografía de tórax", min: 25, max: 60, fuente: `${SIN_PRECIO} con imagenología en Panamá`, estimado: true },
     ],
   },
   TAQUI: {
-    titulo: "Estudiar el pulso acelerado",
+    titulo: "Pulso acelerado: estudio inicial",
     meses: 0,
     nota: "Cubre el estudio inicial. Si el electrocardiograma sale alterado, el médico decidirá qué sigue.",
     lineas: [
@@ -109,65 +228,36 @@ const PAQUETES: Record<string, Omit<Paquete, "total_min" | "total_max" | "vale_c
       { concepto: "TSH y hemograma", min: 20, max: 45, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
     ],
   },
-  SAT_BAJA: {
-    titulo: "Estudiar la falta de oxígeno",
-    meses: 0,
-    nota: "Cubre el estudio inicial. Si hace falta radiografía o más, el médico lo indica.",
-    lineas: [
-      CONSULTA,
-      { concepto: "Oxímetro de pulso para la casa", min: 15, max: 35, fuente: "Sin precio publicado que citar. Estimado de equipos médicos en Panamá", estimado: true },
-      { concepto: "Radiografía de tórax", min: 25, max: 60, fuente: "Sin precio publicado que citar. Estimado de imagenología en Panamá", estimado: true },
-    ],
-  },
   FIEBRE: {
-    titulo: "Atender la fiebre",
+    titulo: "Fiebre: atención puntual",
     meses: 0,
-    nota: "Cubre la consulta y lo básico. La fiebre suele resolverse sola o con tratamiento corto.",
+    nota: "Es un cuadro agudo: la fiebre suele resolverse sola o con tratamiento corto.",
     lineas: [
       CONSULTA,
       { concepto: "Hemograma completo", min: 8, max: 30, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
-      { concepto: "Medicamentos de venta libre, tratamiento corto", min: 5, max: 20, fuente: "Sin precio publicado que citar. Estimado de farmacia en Panamá", estimado: true },
-    ],
-  },
-  GLU_LIMITE: {
-    titulo: "Confirmar la glucosa en el límite",
-    meses: 0,
-    nota: "Es el caso más barato y el más común. Se confirma con un examen y se maneja con hábitos, no con medicamento.",
-    lineas: [
-      CONSULTA,
-      { concepto: "Glucosa en ayunas en laboratorio", min: 6, max: 15, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
+      { concepto: "Medicamentos de venta libre, tratamiento corto", min: 5, max: 20, fuente: `${SIN_PRECIO} con precios de farmacia en Panamá`, estimado: true },
     ],
   },
   IMC_SOBREPESO: {
-    titulo: "Revisar el peso",
+    titulo: "Sobrepeso: revisión",
     meses: 0,
     nota: "El manejo del peso es consulta y seguimiento, no medicamento.",
     lineas: [
       CONSULTA,
-      { concepto: "Consulta de nutrición", min: 20, max: 45, fuente: "Sin precio publicado que citar. Estimado de consulta especializada en Panamá", estimado: true },
-    ],
-  },
-  IMC_OBESIDAD: {
-    titulo: "Estudiar el riesgo metabólico",
-    meses: 0,
-    nota: "Cubre el estudio inicial. El manejo del peso es sobre todo consulta y seguimiento, no medicamento.",
-    lineas: [
-      CONSULTA,
-      { concepto: "Glucosa en ayunas en laboratorio", min: 6, max: 15, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
-      { concepto: "Perfil lipídico", min: 8, max: 15, fuente: `${RANGOS_PA}. ${AVISO_MINSA}` },
-      { concepto: "Consulta de nutrición", min: 20, max: 45, fuente: "Sin precio publicado que citar. Estimado de consulta especializada en Panamá", estimado: true },
+      { concepto: "Consulta de nutrición", min: 20, max: 45, fuente: `${SIN_PRECIO} con consulta especializada en Panamá`, estimado: true },
     ],
   },
 };
 
 /** Orden de prioridad: si un caso dispara varias, gana el paquete más completo. */
-const PRIORIDAD = ["GLU_ALTA", "PRES_ALTA", "SAT_BAJA", "TAQUI", "IMC_OBESIDAD", "FIEBRE", "GLU_LIMITE", "IMC_SOBREPESO"];
+const PRIORIDAD = [
+  "SAT_CRITICA", "RESP_MUY_ALTA", "GLU_MUY_BAJA",
+  "GLU_ALTA", "PRES_ALTA",
+  "SAT_BAJA", "RESP_ALTA", "TAQUI", "FIEBRE", "PESO_BAJA", "GLU_BAJA",
+  "IMC_OBESIDAD", "GLU_LIMITE", "IMC_SOBREPESO",
+];
 
 export function armarPaquete(senales: Senal[]): Paquete | null {
-  // Las emergencias no se financian: quien está en emergencia va a urgencias,
-  // no llena un formulario de crédito.
-  if (senales.some(s => s.urgencia === "Inmediata")) return null;
-
   const codigos = new Set(senales.map(s => s.codigo));
   const elegido = PRIORIDAD.find(c => codigos.has(c));
   if (!elegido) return null;
@@ -176,22 +266,18 @@ export function armarPaquete(senales: Senal[]): Paquete | null {
   const total_min = Math.round(base.lineas.reduce((a, l) => a + l.min, 0));
   const total_max = Math.round(base.lineas.reduce((a, l) => a + l.max, 0));
 
-  return {
-    ...base,
-    total_min,
-    total_max,
-    vale_credito: base.meses > 0 && total_max >= MINIMO_CREDITO,
-  };
+  return { ...base, total_min, total_max };
 }
 
-/** Qué decirle a la persona sobre el crédito, según lo que cueste. */
+/**
+ * Qué decirle a la persona sobre el crédito.
+ *
+ * Se ofrece siempre que haya algo que atender, sin importar el monto: quién
+ * puede pagar de una y quién no es decisión de la persona, no de un umbral
+ * puesto desde aquí. Lo único que la app hace es poner el número al frente.
+ */
 export function mensajeCredito(p: Paquete): string {
-  const rango = `Todo junto sale entre B/. ${p.total_min} y B/. ${p.total_max}.`;
-  if (p.vale_credito) {
-    return `${rango} Si no lo tienes ahora, puedes pedir un crédito de salud por el monto que necesites.`;
-  }
-  if (p.meses === 0 && p.total_max >= MINIMO_CREDITO) {
-    return `${rango} Esto no se financia: hay que atenderlo ahora, no cuando salga un préstamo.`;
-  }
-  return `${rango} Por ese monto no vale la pena un crédito: sale más barato pagarlo de una.`;
+  const cuanto = p.meses > 0 ? "El año completo sale" : "Todo junto sale";
+  return `${cuanto} entre B/. ${p.total_min} y B/. ${p.total_max}. ` +
+    "Si prefieres no pagarlo de una, puedes pedir un crédito de salud y pagarlo mes a mes.";
 }

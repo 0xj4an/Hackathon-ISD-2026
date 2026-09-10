@@ -96,13 +96,13 @@ function BloqueP({ paquete, onPedir }: {
         <Text style={s.totalV}>B/. {p.total_min} a {p.total_max}</Text>
       </View>
 
-      <View style={[s.credito, p.vale_credito ? s.creditoSi : s.creditoNo]}>
-        <Text style={[s.creditoTexto, !p.vale_credito && s.creditoTextoNo]}>
+      <View style={s.credito}>
+        <Text style={s.creditoTexto}>
           {mensajeCredito(p)}
         </Text>
       </View>
 
-      {p.vale_credito && onPedir ? (
+      {onPedir ? (
         <Pressable
           onPress={() => onPedir(p.total_min, p.total_max)}
           accessibilityRole="button"
@@ -252,11 +252,8 @@ const s = StyleSheet.create({
     paddingVertical: 14, alignItems: "center",
   },
   botonTexto: { color: "#FFFFFF", fontSize: 15, fontWeight: "700" },
-  credito: { marginTop: 14, padding: 12, borderRadius: 3 },
-  creditoSi: { backgroundColor: "#DCEBEA" },
-  creditoNo: { backgroundColor: "#EAEEEB" },
+  credito: { marginTop: 14, padding: 12, borderRadius: 3, backgroundColor: "#DCEBEA" },
   creditoTexto: { fontSize: 13.5, lineHeight: 20, color: "#0E6E6C", fontWeight: "600" },
-  creditoTextoNo: { color: "#4E5A55", fontWeight: "400" },
 
   disclaimer: {
     marginTop: 26, padding: 14, backgroundColor: "#EAEEEB", borderRadius: 3,

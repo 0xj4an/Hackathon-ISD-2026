@@ -139,11 +139,11 @@ di(`Senales distintas ejercitadas por los casos: **${unicas.length}** (${unicas.
 // ---------------------------------------------------------------- cierre
 di();
 // ---------------------------------------------------------------- 4) paquetes
-di("## 4. El paquete y la puerta del credito");
+di("## 4. El paquete de cada caso");
 di();
-di("Un credito solo se ofrece cuando el costo pesa y hay tratamiento sostenido.");
-di("Ofrecerlo por una consulta suelta, o en una urgencia, seria poner un tramite");
-di("en el camino de alguien que tiene que ir hoy.");
+di("El credito se ofrece SIEMPRE que haya algo que atender, sin importar el monto");
+di("ni la urgencia. La atencion de urgencia tambien cuesta, y es justo por eso que");
+di("la gente no va. Lo unico sin paquete es no tener ningun hallazgo.");
 di();
 di("| Caso | Paquete | Total | Credito | |");
 di("| --- | --- | --- | --- | --- |");
@@ -151,38 +151,49 @@ di("| --- | --- | --- | --- | --- |");
 for (const u of usuarios) {
   const senales = detectarSenales(u.mediciones);
   const p = armarPaquete(senales);
-  const urgente = senales.some(x => x.urgencia === "Inmediata");
 
   // Lo que se exige: nunca credito en urgencia, nunca por debajo del minimo,
   // nunca sin tratamiento sostenido, y toda linea con su fuente.
   let mal = null;
   if (!p) {
-    if (senales.length > 0 && !urgente) mal = "hay senales y no hay paquete";
+    if (senales.length > 0) mal = "hay senales y no hay paquete";
   } else {
-    if (urgente) mal = "paquete en una urgencia";
-    else if (p.vale_credito && p.meses === 0) mal = "credito sin tratamiento sostenido";
-    else if (p.vale_credito && p.total_max < 100) mal = "credito por debajo del minimo";
-    else if (p.total_max < p.total_min) mal = "rango invertido";
+    if (p.total_max < p.total_min) mal = "rango invertido";
+    else if (p.total_min <= 0) mal = "paquete sin costo";
     else if (p.lineas.some(l => !l.fuente)) mal = "linea sin fuente";
     else if (p.lineas.some(l => l.max < l.min)) mal = "linea con rango invertido";
   }
   if (mal) fallos++;
 
-  const desc = p ? p.titulo : (urgente ? "urgencia, va directo" : "sin hallazgos");
+  const desc = p ? p.titulo : "sin hallazgos";
   const total = p ? `B/. ${p.total_min} a ${p.total_max}` : "-";
-  const cred = p ? (p.vale_credito ? "si" : "no") : "no";
+  const cred = p ? "si" : "no";
   di(`| ${u.nombre} | ${desc} | ${total} | ${cred} | ${mal ? "FALLA: " + mal : "OK"} |`);
 }
 di();
 
-const conCredito = usuarios.filter(u => armarPaquete(detectarSenales(u.mediciones))?.vale_credito).length;
-di(`Casos que ofrecen credito: **${conCredito} de ${usuarios.length}**. Los demas no lo necesitan o no pueden esperarlo.`);
+const conCredito = usuarios.filter(u => armarPaquete(detectarSenales(u.mediciones)) !== null).length;
+di(`Casos que ofrecen credito: **${conCredito} de ${usuarios.length}**. El unico que no, es el caso sano: no hay nada que atender.`);
+di();
+
+di("Toda senal tiene que tener paquete. Si falta uno, hay un caso donde la app");
+di("detecta algo y no sabe decir cuanto cuesta atenderlo.");
+di();
+
+const CODIGOS = [
+  "GLU_MUY_BAJA", "GLU_BAJA", "GLU_ALTA", "GLU_LIMITE", "PRES_ALTA", "TAQUI",
+  "SAT_CRITICA", "SAT_BAJA", "RESP_MUY_ALTA", "RESP_ALTA", "FIEBRE",
+  "IMC_OBESIDAD", "IMC_SOBREPESO", "PESO_BAJA",
+];
+const sinPaquete = CODIGOS.filter(c => armarPaquete([{ codigo: c, urgencia: "Rutinaria" }]) === null);
+if (sinPaquete.length) fallos++;
+di(`- senales sin paquete: ${sinPaquete.length}${sinPaquete.length ? " (" + sinPaquete.join(", ") + ") FALLA" : ", OK"} (de ${CODIGOS.length})`);
 di();
 
 di("## Resultado");
 di();
 di(fallos === 0
-  ? "**Todo pasa.** Los casos producen exactamente sus senales declaradas, los marcadores clasifican en los tres estados, ninguna senal sale sin ruta ni sin fuente, y el credito solo se ofrece donde el costo pesa y hay tratamiento sostenido."
+  ? "**Todo pasa.** Los casos producen exactamente sus senales declaradas, los marcadores clasifican en los tres estados, ninguna senal sale sin ruta ni sin fuente, y todo paquete sale con su costo y su fuente."
   : `**${fallos} comprobacion(es) fallan.** Ver arriba.`);
 
 writeFileSync(resolve(import.meta.dirname, "resultados.md"), lineas.join("\n") + "\n");
