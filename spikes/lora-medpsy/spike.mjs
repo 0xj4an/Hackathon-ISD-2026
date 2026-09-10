@@ -38,7 +38,18 @@ const limpiarJson = (s) => {
 const CASOS = readFileSync(resolve(DIR, "eval.jsonl"), "utf8")
   .split("\n").filter(Boolean).map(JSON.parse);
 
-const esExtraccion = (c) => c.messages[0].content.includes("cedula de identidad");
+/**
+ * Cuatro tareas, no dos. Clasificar por "cedula de identidad" metia ingresos y
+ * extracto en el balde de triaje, y la tabla salia mintiendo sobre que midio.
+ */
+const tareaDe = (c) => {
+  const s = c.messages[0].content;
+  if (s.includes("cedula de identidad")) return "cedula";
+  if (s.includes("documento de ingresos")) return "ingresos";
+  if (s.includes("estado de cuenta")) return "extracto";
+  return "triaje";
+};
+const TAREAS = ["cedula", "ingresos", "extracto", "triaje"];
 
 /** Compara el JSON del modelo contra el esperado, campo por campo. */
 function puntuar(esperado, crudo) {
@@ -64,13 +75,11 @@ async function medir(etiqueta, modelConfigExtra) {
   });
   console.log(`\n${ts()} === MIDIENDO: ${etiqueta} ===`);
 
-  const acc = {
-    extraccion: { n: 0, validos: 0, campos: 0, total: 0 },
-    triaje:     { n: 0, validos: 0, campos: 0, total: 0 },
-  };
+  const acc = Object.fromEntries(
+    TAREAS.map((t) => [t, { n: 0, validos: 0, campos: 0, total: 0 }]));
 
   for (const caso of CASOS) {
-    const tarea = esExtraccion(caso) ? "extraccion" : "triaje";
+    const tarea = tareaDe(caso);
     const esperado = JSON.parse(caso.messages[2].content);
     const r = completion({
       modelId,
@@ -97,7 +106,8 @@ async function medir(etiqueta, modelConfigExtra) {
 // ---------------------------------------------------------------- 0) entorno
 const info = await getModelInfo({ name: "HEALTHCARE_1_7B_MEDICAL_Q8_0" });
 console.log(`${ts()} modelo: quant=${info.quantization} params=${info.params} cacheado=${info.isCached}`);
-console.log(`${ts()} casos de evaluacion: ${CASOS.length} (${CASOS.filter(esExtraccion).length} extraccion, ${CASOS.filter((c) => !esExtraccion(c)).length} triaje)`);
+console.log(`${ts()} casos de evaluacion: ${CASOS.length} (` +
+  TAREAS.map((t) => `${CASOS.filter((c) => tareaDe(c) === t).length} ${t}`).join(", ") + ")");
 
 // ---------------------------------------------------------------- 1) base
 const base = await medir("BASE (sin adaptador)", {});
@@ -154,13 +164,13 @@ const conLora = await medir(`LoRA (${adaptador.f})`, { lora: resolve(OUT, adapta
 // ---------------------------------------------------------------- 4) tabla
 const fila = (t) => {
   const b = base[t], l = conLora[t];
+  if (!b.n) return `| ${t} | sin casos | | | |`;
   return `| ${t} | ${b.pctValido}% | ${l.pctValido}% | ${b.pctCampos}% | ${l.pctCampos}% |`;
 };
 const tabla = [
   "| Tarea | JSON valido base | JSON valido LoRA | Campos base | Campos LoRA |",
   "| --- | --- | --- | --- | --- |",
-  fila("extraccion"),
-  fila("triaje"),
+  ...TAREAS.map(fila),
 ].join("\n");
 
 console.log(`\n${ts()} RESUMEN\n${tabla}`);
