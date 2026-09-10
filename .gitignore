@@ -20,3 +20,6 @@ spikes/lora-medpsy/out/
 # docs/design/*.dc.html con seed-canvas.mjs. El fuente es lo que se versiona.
 docs/design/ina-igar-diseno-app.html
 docs/design/comparar-direcciones.html
+
+# Capturas del arnes de render: se regeneran, no se versionan
+docs/design/renders/
