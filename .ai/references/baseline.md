@@ -33,3 +33,42 @@ Por definir. Restricción base: `@qvac/sdk` levanta un worker Bare y se comunica
 ## Próxima iniciativa
 
 `runs/mvp-hackathon/`: decidir idea y reto(s), especificar el MVP, arquitectura y plan para 48 h.
+
+## Transporte del nodo: lo que se probó y lo que falta
+
+Probado el 9 sep con `nodo/` corriendo de verdad por primera vez.
+
+**HTTP en la LAN: funciona.** Un POST con una `SolicitudSchema` válida al rol
+`banco` devuelve una `RespuestaBancoSchema` correcta. Con 520 USD de ingreso
+declarado y 300 pedidos: aprobado 300, 6 meses, 12.5% anual, cuota 51.84, que
+respeta el tope del 30% del ingreso. La política de `nodo/credito.mjs` hace lo
+que dice.
+
+**Hyperswarm entre dos procesos en la misma máquina: NO conecta.** Ni con el
+código de `nodo/`, ni con una prueba mínima de dos peers y un topic aislado.
+Cero conexiones tras dos minutos en ambos casos.
+
+La causa, medida: `hyperdht` arranca bien y llega a la red (61 nodos conocidos,
+o sea que el UDP sale), pero reporta **`firewalled: true`**. El nodo está detrás
+de NAT y no acepta entrantes. Dos peers detrás del mismo NAT necesitan que el
+router haga *hairpinning*, y muchos no lo hacen. El firewall de macOS estaba
+desactivado, así que no es eso.
+
+**Lo que esto sí implica:** no se puede demostrar el P2P con dos procesos en el
+Mac. Cualquier ensayo que dependa de eso va a fallar.
+
+**Lo que NO implica todavía:** el caso de la demo es teléfono y laptop, dos
+aparatos distintos. Eso no se ha probado y no se puede probar sin el teléfono.
+Dato en contra: `hyperswarm` 4.17.1 **no trae descubrimiento en LAN**, ni mDNS
+ni multicast, así que dos aparatos en el mismo wifi igual pasan por la DHT
+pública y dependen del mismo hole punching. Puede fallar por la misma razón.
+
+**Plan que no depende de que funcione:** el transporte HTTP en la LAN ya está
+escrito y probado. El teléfono le pega a la IP local de la laptop, sin internet
+y sin nube, que es lo que el reglamento pide. Decirle a eso "los aparatos se
+hablan directo, sin internet" es exacto; decirle "Hyperswarm P2P" cuando en la
+demo salió por HTTP no lo sería.
+
+**Pendiente:** probar Hyperswarm entre teléfono y laptop en cuanto haya
+teléfono. Si falla, queda la opción de `swarmRelays` con relay propio, que los
+docs de QVAC mencionan pero no documentan cómo desplegar.

@@ -32,7 +32,7 @@ Nada más avanza hasta que esto pase.
 - [x] `[J]` **Hecho.** Los costos inventados salieron. Ahora son rangos publicados con fuente (glucosa 6 a 15 USD, ECG 20 a 45), y donde no hay precio citable el campo va ausente y la pantalla no muestra número
 - [x] `[J]` **Hecho.** El especialista entró como parte del tipo `Ruta`, junto con qué hacer ahora, qué examen, dónde y qué síntomas obligan a ir de inmediato. Ver `ADR-008`
 - [x] `[J]` **Hecho.** CD4 fuera de la tabla, con filtro de respaldo en el generador del spike
-- [ ] `[J]` `data/`: historial de dos usuarios ficticios, uno sano y uno con hallazgo. **El sano no debe disparar nada**, esa es media demo
+- [x] `[J]` **Hecho, y son seis.** `data/usuarios/` con seis casos clínicos coherentes generados por `data/generar-usuarios.mjs`. El sano da cero señales, verificado por `eval/run.mjs`
 
 ### Implementación
 
