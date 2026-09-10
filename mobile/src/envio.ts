@@ -2,37 +2,19 @@
  * Transporte del crédito. Tres vocabularios, no mezclarlos:
  *
  *   vía A / vía B     salud: historial vs foto de laboratorio
- *   camino A / B      crédito: Railway vs LAN→pueblo (esta laptop)
- *   QVAC `delegate`   prestar cómputo del modelo; no elige este camino
+ *   camino A / B      crédito: wifi → banco; si no hay red → pueblo, y él envía
+ *   inferencia        MedPsy en el teléfono; si no carga, texto al pueblo
  *
- * Camino B primero: el teléfono deja el JSON en el pueblo (:8788, esta laptop).
- * Camino A si el pueblo no está: POST al banco en Railway. El motor corre
- * solo en el banco. Si A va primero, con wifi la laptop nunca se entera.
+ * Camino A primero: POST al banco por wifi/datos. Camino B si A no responde:
+ * el JSON queda en el pueblo (:8788) y él lo lleva al banco. Nunca fotos.
  */
-import Constants from "expo-constants";
 import { urlBanco } from "./bancoUrl";
+import { urlNodo } from "./nodoUrl";
 import type { Respuesta } from "./core/credito/motor";
 import type { Solicitud } from "./core/schemas";
 
 export { urlBanco };
-
-const NODO_URL_DEMO = "http://192.168.0.19:8788";
-
-function hostDelMetro(): string | undefined {
-  const uri = Constants.expoConfig?.hostUri;
-  if (!uri) return;
-  return uri.replace(/^\w+:\/\//, "").split(":")[0];
-}
-
-/** Nodo del pueblo, LAN, camino B. */
-export function urlNodo(): string {
-  const env = process.env.EXPO_PUBLIC_NODO_URL?.replace(/\/$/, "");
-  if (env) return env;
-  const h = hostDelMetro();
-  if (h && h !== "localhost" && h !== "127.0.0.1") return `http://${h}:8788`;
-  if (h === "localhost" || h === "127.0.0.1") return "http://127.0.0.1:8788";
-  return NODO_URL_DEMO;
-}
+export { urlNodo };
 
 export type Envio =
   | { ok: true; camino: "A" | "B"; respuesta: Respuesta }
@@ -43,13 +25,32 @@ function esFinal(r: { decision?: string } | null): r is Respuesta {
   return r?.decision === "aprobada" || r?.decision === "rechazada" || r?.decision === "revision";
 }
 
-async function pedir(url: string, init: RequestInit, ms: number): Promise<Respuesta | { decision: string; motivo?: string } | null> {
+async function pedir(url: string, init: RequestInit, ms: number): Promise<Respuesta | { decision?: string; motivo?: string } | null> {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
   try {
     const r = await fetch(url, { ...init, signal: ctrl.signal });
+    if (!r.ok) {
+      // Fallo HTTP del banco/nodo: no es crash de la app; solo breadcrumb.
+      const { Sentry } = await import("./sentry");
+      Sentry.addBreadcrumb({
+        category: "envio",
+        level: "warning",
+        message: `HTTP ${r.status}`,
+        data: { host: (() => { try { return new URL(url).host; } catch { return "bad-url"; } })() },
+      });
+    }
     return await r.json() as Respuesta;
-  } catch {
+  } catch (err) {
+    // Abort/red caída son esperados offline — no captureException.
+    if (err instanceof Error && err.name !== "AbortError") {
+      const { Sentry } = await import("./sentry");
+      Sentry.addBreadcrumb({
+        category: "envio",
+        level: "info",
+        message: err.message.slice(0, 120),
+      });
+    }
     return null;
   } finally {
     clearTimeout(t);
@@ -64,24 +65,24 @@ function post(sol: Solicitud) {
   };
 }
 
-/** Pueblo primero (laptop). Banco remoto solo si el pueblo no responde. */
+/** Wifi al banco. Si no hay red, el pueblo lo envía. */
 export async function enviarSolicitud(sol: Solicitud): Promise<Envio> {
+  const a = await pedir(`${urlBanco()}/solicitud`, post(sol), 8000);
+  if (esFinal(a)) return { ok: true, camino: "A", respuesta: a };
+
   const nodo = urlNodo();
-  const b = await pedir(`${nodo}/solicitud`, post(sol), 5000);
+  const b = await pedir(`${nodo}/solicitud`, post(sol), 8000);
   if (esFinal(b)) return { ok: true, camino: "B", respuesta: b };
   if (b?.decision === "pendiente") {
     return { ok: false, camino: "B", pendiente: true, detalle: "En el nodo del pueblo. Él se la lleva al banco." };
   }
-
-  const a = await pedir(`${urlBanco()}/solicitud`, post(sol), 8000);
-  if (esFinal(a)) return { ok: true, camino: "A", respuesta: a };
-  return { ok: false, camino: null, pendiente: false, detalle: "Sin el nodo del pueblo y sin red al banco." };
+  return { ok: false, camino: null, pendiente: false, detalle: "Sin red y sin el nodo del pueblo." };
 }
 
-/** Misma prioridad: pueblo, luego banco remoto. */
+/** Misma prioridad: banco remoto, luego pueblo. */
 export async function consultarRespuesta(id: string): Promise<Respuesta | null> {
-  const b = await pedir(`${urlNodo()}/respuesta/${id}`, {}, 3000);
-  if (esFinal(b)) return b;
   const a = await pedir(`${urlBanco()}/respuesta/${id}`, {}, 4000);
-  return esFinal(a) ? a : null;
+  if (esFinal(a)) return a;
+  const b = await pedir(`${urlNodo()}/respuesta/${id}`, {}, 4000);
+  return esFinal(b) ? b : null;
 }

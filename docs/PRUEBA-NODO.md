@@ -14,7 +14,9 @@ Camino B (sin internet):
 ```
 
 No confundir con las **vías de salud** (vía A = historial, vía B = examen en
-papel) ni con QVAC `delegate` (prestar cómputo del modelo).
+papel) ni con la **inferencia**: MedPsy en el teléfono; si no carga, POST de
+texto a `:8788/inferir`. Eso no es el camino B del crédito. QVAC `delegate`
+no es el plan: no atraviesa NAT.
 
 El objetivo de la escena sin señal es el camino B: el teléfono le habla a la
 laptop **sin internet y sin nube**. HTTP en la LAN está medido. Hyperswarm entre
@@ -106,6 +108,17 @@ Lo que se afirme en el video tiene que ser lo que corrió en el video.
 
 ---
 
+## Inferencia: teléfono, luego pueblo
+
+El OCR nunca sale. MedPsy sí puede pedir ayuda: `completarMedPsy` carga el
+modelo en el iPhone; si falla, POST `{ system, user }` a `http://<pueblo>:8788/inferir`.
+La primera carga en la laptop tarda (~90 s). Las fotos no van en ese cuerpo.
+
+```bash
+curl -s http://127.0.0.1:8788/salud
+# { ok, rol: "corregimiento", inferir: true }
+```
+
 ## C7: el esquema ya cierra
 
 El 10 de septiembre `SolicitudSchema` dejaba pasar `motivo_de_salud` y
@@ -118,5 +131,6 @@ antes de escribir. Un POST con esos campos extra responde 400.
 
 - [ ] Camino A en el iPhone: wifi encendido, POST a Railway, decisión en pantalla.
 - [ ] Camino B en el iPhone: wifi apagado / solo LAN, POST al pueblo `:8788`.
+- [ ] Inferencia: MedPsy local; si el teléfono no puede, POST `/inferir` (texto).
 - [ ] Cola en SQLite. Hoy `pendiente` es estado en memoria; `expo-sqlite` está
       en `package.json` y no se usa. Eso cierra `C8` y `C9`.

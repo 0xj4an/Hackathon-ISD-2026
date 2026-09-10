@@ -4,9 +4,8 @@
 //             no interviene. El telefono no necesita al pueblo.
 //   camino B: telefono --LAN :8788--> este proceso (ROL=corregimiento)
 //             --HTTP--> banco remoto, cuando el pueblo tiene salida.
-//
-// QVAC `delegate` (prestar el modelo) no es este desvio.
-// Las fotos no viajan.
+//   inferir:  el telefono corre MedPsy; si no puede, POST /inferir (texto).
+//             Solo ROL=corregimiento. Las fotos no viajan.
 import { createServer } from "node:http";
 import { mkdirSync, writeFileSync, readdirSync, readFileSync, existsSync } from "node:fs";
 import { aceptar, recibir } from "./credito.mjs";
@@ -37,12 +36,12 @@ function json(res, code, body) {
   res.end(JSON.stringify(body));
 }
 
-function leerCuerpo(req) {
+function leerCuerpo(req, max = LIMITE) {
   return new Promise((resolve, reject) => {
     let b = "";
     req.on("data", (d) => {
       b += d;
-      if (b.length > LIMITE) {
+      if (b.length > max) {
         req.destroy();
         reject(Object.assign(new Error("demasiado grande"), { code: 413 }));
       }
@@ -214,7 +213,7 @@ createServer(async (req, res) => {
   if (req.method === "OPTIONS") { res.statusCode = 204; res.end(); return; }
 
   if (req.method === "GET" && (req.url === "/" || req.url === "/salud")) {
-    json(res, 200, { ok: true, rol: ROL, peers: peers.size });
+    json(res, 200, { ok: true, rol: ROL, peers: peers.size, inferir: ROL === "corregimiento" });
     return;
   }
 
@@ -238,6 +237,24 @@ createServer(async (req, res) => {
       const code = e.code === 413 ? 413 : e?.name === "ZodError" || e instanceof SyntaxError ? 400 : 500;
       log(`rechazo ${code} ${e.message ?? e}`);
       json(res, code, { decision: "revision", motivo: "solicitud invalida" });
+    }
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/inferir") {
+    if (ROL !== "corregimiento") {
+      json(res, 404, { motivo: "solo el pueblo infiere" });
+      return;
+    }
+    try {
+      const raw = await leerCuerpo(req, 200_000);
+      const { inferir } = await import("./inferir.mjs");
+      const out = await inferir(JSON.parse(raw || "{}"));
+      json(res, 200, out);
+    } catch (e) {
+      const code = e.code === 413 ? 413 : e instanceof SyntaxError || /foto|imagen|system|user|pedido/i.test(e.message ?? "") ? 400 : 503;
+      log(`inferir ${code} ${e.message ?? e}`);
+      json(res, code, { motivo: e.message ?? "no pude inferir" });
     }
     return;
   }

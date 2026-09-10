@@ -5,7 +5,7 @@
 
 App Expo para zonas rurales de Panamá: detecta una señal de riesgo de salud, explica qué examen conviene y permite solicitar un crédito fotografiando documentos. Las fotos nunca salen del teléfono. El JSON va al banco remoto por **camino A** (wifi/datos, directo a Railway) o por **camino B** (sin internet: LAN al nodo del pueblo, y él al banco). **La demo se graba en un iPhone 17 Pro Max**; el usuario del brief es rural con Android. El Xiaomi 14T Pro se descartó porque Bare aborta al arrancar.
 
-Toda la inferencia corre en el dispositivo con [`@qvac/sdk`](https://docs.qvac.tether.io) **0.18.2**. Ningún servicio remoto participa en la IA.
+La inferencia intenta MedPsy en el teléfono con [`@qvac/sdk`](https://docs.qvac.tether.io) **0.18.2**. Si el modelo no carga, el **texto** (nunca la foto) va al nodo del pueblo por LAN. Ningún proveedor de IA remoto.
 
 ## Modelos (nombres honestos)
 | Uso | Modelo | Cuantización | Tamaño |

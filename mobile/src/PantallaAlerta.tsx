@@ -3,7 +3,8 @@
  *
  * Las señales las deciden las reglas de `core/reglas.ts`, no el modelo
  * (`ADR-005`). Esta pantalla muestra esas reglas de inmediato. MedPsy entra
- * después, solo para redactar `mensaje`. Si falla, se queda lo de las reglas.
+ * después, solo para redactar `mensaje`: primero en el teléfono, si no puede
+ * pide al pueblo. Si los dos fallan, se queda lo de las reglas.
  *
  * Por qué tres pasos y no uno. La primera versión ponía el hallazgo, las cuatro
  * señales completas, la ruta y las diez líneas del paquete en la misma pantalla.

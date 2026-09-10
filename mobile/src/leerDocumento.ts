@@ -228,6 +228,7 @@ function uint8ToBase64(bytes: Uint8Array): string {
 }
 
 async function extraerConLlm(clave: ClaveDocumento, textoOcr: string, confianzaOcr?: number) {
+  // Texto, no la foto. Si MedPsy no carga aquí, completarMedPsy pide al pueblo.
   const confianza =
     typeof confianzaOcr === "number" ? `\nOCR confidence (mean): ${confianzaOcr.toFixed(2)}` : "";
   return completarMedPsy({

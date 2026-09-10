@@ -10,10 +10,10 @@ test("camino A apunta al banco remoto por https", () => {
   assert.equal(u.endsWith("/"), false);
 });
 
-test("el teléfono pega al pueblo antes que a Railway", () => {
+test("el teléfono intenta el banco (wifi) antes que el pueblo", () => {
   const src = readFileSync(new URL("../../mobile/src/envio.ts", import.meta.url), "utf8");
   const fn = src.slice(src.indexOf("export async function enviarSolicitud"));
-  const pueblo = fn.indexOf("urlNodo()");
   const banco = fn.indexOf("urlBanco()");
-  assert.ok(pueblo >= 0 && banco > pueblo);
+  const pueblo = fn.indexOf("urlNodo()");
+  assert.ok(banco >= 0 && pueblo > banco);
 });

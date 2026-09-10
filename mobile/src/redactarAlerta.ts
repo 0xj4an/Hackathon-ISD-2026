@@ -1,8 +1,8 @@
 /**
  * Pasa la señal ya decidida por MedPsy y valida el JSON.
  *
- * Si el modelo falla, no se inventa nada: la pantalla sigue mostrando las
- * reglas (`ADR-005`, `ADR-007`).
+ * Si el teléfono y el pueblo fallan, no se inventa nada: la pantalla sigue
+ * mostrando las reglas (`ADR-005`, `ADR-007`).
  */
 import { pedirMensaje, type AlertaParse } from "./core/alerta";
 import type { Medicion, Senal } from "./core/reglas";

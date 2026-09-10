@@ -22,11 +22,11 @@ La app decide su modo en arranque con `getSystemResources()`, que ya existe en
 | --- | --- | --- |
 | **Completo** | RAM holgada (el iPhone 17 Pro Max y similares) | MedPsy Q8_0 (2.1 GB) más el adaptador. Autónomo total |
 | **Ligero** | RAM ajustada | MedPsy **Q4_0** (~1.1 GB) más el adaptador. Autónomo total |
-| **Delegado** | RAM insuficiente | Solo OCR en el teléfono. El LLM corre en el nodo del corregimiento, por P2P |
+| **Delegado** | RAM insuficiente | Solo OCR en el teléfono. El LLM corre en el nodo del corregimiento, por HTTP en la LAN (texto, nunca fotos). QVAC `delegate` no atraviesa NAT; no es este modo |
 
 En los tres modos las fotos se borran en el teléfono y nunca salen. En modo
 delegado viaja **texto**, nunca imágenes, y sigue cumpliendo el reglamento
-("en el dispositivo o delegada por P2P").
+("en el dispositivo o en el nodo local; nunca un proveedor remoto").
 
 ## Alternativas consideradas
 

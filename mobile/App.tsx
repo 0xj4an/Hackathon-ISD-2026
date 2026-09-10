@@ -11,6 +11,8 @@
 //
 // Firmar intenta el banco remoto si hay wifi (camino A). Si no hay internet,
 // deja el JSON en el nodo del pueblo (camino B). Las fotos no salen.
+// La alerta y la extracción intentan MedPsy en el teléfono. Si el modelo
+// no carga, el texto va al pueblo; las fotos no.
 // `PantallaDatos` sigue en el repo (deudas y personas a cargo, pantalla 11 del
 // mapa) pero el camino de la demo pasa por lo leído → cuota → banco.
 //
@@ -29,6 +31,7 @@ import PantallaBanco from "./src/PantallaBanco";
 import PantallaExamen from "./src/PantallaExamen";
 import { solicitudDeLectura, type LecturaCredito } from "./src/lectura";
 import { consultarRespuesta, enviarSolicitud } from "./src/envio";
+import { marcarPasoSentry, marcarUsuarioSentry } from "./src/sentry";
 import type { Respuesta } from "./src/core/credito/motor";
 import type { Solicitud } from "./src/core/schemas";
 import type { Usuario } from "./src/usuarios";
@@ -88,6 +91,21 @@ export default function App() {
       ? r.detalle
       : `${r.detalle} La solicitud queda pendiente.`);
   };
+
+  useEffect(() => {
+    marcarUsuarioSentry(usuario?.correo);
+  }, [usuario]);
+
+  useEffect(() => {
+    if (enRegistro) return marcarPasoSentry("registro");
+    if (!usuario) return marcarPasoSentry("entrada");
+    if (!conectado) return marcarPasoSentry("salud");
+    if (!revisado) return marcarPasoSentry("revision");
+    if (enExamen) return marcarPasoSentry("examen");
+    if (!credito) return marcarPasoSentry("alerta");
+    if (credito.monto === undefined) return marcarPasoSentry("credito");
+    marcarPasoSentry(paso, pendiente ? { pendiente: true } : undefined);
+  }, [usuario, conectado, revisado, enExamen, enRegistro, credito, paso, pendiente]);
 
   useEffect(() => {
     if (!pendiente || !solicitud) return;

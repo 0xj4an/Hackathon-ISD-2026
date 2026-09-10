@@ -676,8 +676,8 @@
         cruza hacia afuera es un JSON de solicitud, y ese JSON no lleva el motivo de salud.
         Tres nombres que no se mezclan: <b>v&iacute;a A / v&iacute;a B</b> son salud (historial vs
         examen en papel); <b>camino A / camino B</b> son transporte del cr&eacute;dito (wifi al
-        banco vs LAN al pueblo); <code>delegate</code> de QVAC es prestar c&oacute;mputo del modelo,
-        y no elige el camino.
+        banco vs LAN al pueblo); la <b>inferencia</b> es MedPsy en el tel&eacute;fono y, si no
+        carga, texto al pueblo. Eso no elige el camino del cr&eacute;dito.
       </p>
     </div>
 
@@ -711,7 +711,7 @@
           <line x1="236" y1="150" x2="236" y2="174" class="svg-linea" marker-end="url(#punta)"></line>
           <line x1="236" y1="238" x2="236" y2="262" class="svg-linea" marker-end="url(#punta)"></line>
 
-          <text x="44" y="368" class="t-eti">Ninguna inferencia ocurre fuera de esta caja.</text>
+          <text x="44" y="368" class="t-eti">MedPsy aqu&iacute; primero; si no carga, texto al pueblo.</text>
 
           <line x1="488" y1="30" x2="488" y2="404" class="svg-borde"></line>
           <text x="488" y="20" class="t-zona" text-anchor="middle">BORDE DEL APARATO</text>
@@ -740,16 +740,15 @@
           <text x="910" y="364" class="t-eti" text-anchor="end">la respuesta vuelve por donde sali&oacute;</text>
 
           <path d="M 660 256 V 214 H 436" class="svg-tenue" marker-end="url(#punta-tenue)"></path>
-          <text x="512" y="206" class="t-sub">modelo por LAN</text>
+          <text x="512" y="206" class="t-sub">texto al pueblo si MedPsy no carga</text>
         </svg>
       </div>
       <figcaption>
         Hay dos caminos hacia el banco y la app toma el que encuentre: <b>camino A</b>, con
         datos o wifi, habla directo; <b>camino B</b>, sin internet, deja el JSON en el nodo del
-        corregimiento. Por los dos cruza el mismo JSON. La flecha punteada es la otra raz&oacute;n
-        de existir del nodo: reparte el <code>.gguf</code> por wifi local y, si el tel&eacute;fono
-        no alcanza a correr el modelo, QVAC <code>delegate</code> presta el c&oacute;mputo. Eso no es
-        el camino B. Incluso ah&iacute; viaja texto, nunca im&aacute;genes.
+        corregimiento. Por los dos cruza el mismo JSON. La flecha punteada es otra raz&oacute;n
+        de existir del nodo: si el tel&eacute;fono no alcanza a correr MedPsy, pide el texto
+        por LAN. Eso no es el camino B. Incluso ah&iacute; viaja texto, nunca im&aacute;genes.
       </figcaption>
     </figure>
   </section>
@@ -1157,10 +1156,10 @@
             habla directo con el banco</strong> (Railway), sin intermediario, que es lo que va a
             pasar la mayor&iacute;a de las veces. <strong>Camino B:</strong> solo cuando no hay internet
             el JSON va por LAN al nodo del pueblo y &eacute;l se lo lleva al banco cuando tiene
-            salida. Ese mismo nodo reparte los pesos del modelo por LAN. Si el tel&eacute;fono no
-            alcanza a correr MedPsy, QVAC <code>delegate</code> presta c&oacute;mputo: es otro oficio,
-            no el camino B. Ninguno de los tres es indispensable cuando hay se&ntilde;al. No
-            confundir con las v&iacute;as de salud: v&iacute;a A es el historial, v&iacute;a B es el examen en papel.
+            salida. Si el tel&eacute;fono no alcanza a correr MedPsy, ese mismo nodo recibe el
+            texto y completa: es otro oficio, no el camino B. Ninguno de los dos caminos
+            de cr&eacute;dito es indispensable cuando hay se&ntilde;al. No confundir con las v&iacute;as de
+            salud: v&iacute;a A es el historial, v&iacute;a B es el examen en papel.
           </p>
           <dl class="detalles">
             <div class="detalle"><dt>Camino A</dt><dd>Wifi o datos: directo al banco</dd></div>
@@ -1465,7 +1464,7 @@
           <tr>
             <td class="destacado">Delegado</td>
             <td>RAM insuficiente</td>
-            <td>Solo el OCR. El modelo corre en el nodo del corregimiento, y viaja texto</td>
+            <td>Solo el OCR. El modelo corre en el nodo del corregimiento por HTTP LAN, y viaja texto</td>
           </tr>
         </tbody>
       </table>
@@ -1502,7 +1501,7 @@
           <li><b>El modelo en el flujo</b>: el prompt, el schema y el limpiador existen, pero la pantalla a&uacute;n muestra solo las reglas</li>
           <li><b>El log de rendimiento</b>, que es entregable del reto Tether y se hace ahora o no se hace</li>
           <li><b>La lectura de las fotos</b>: el OCR, la extracci&oacute;n a JSON y el borrado que la pantalla promete. El prompt y el schema del examen ya est&aacute;n escritos</li>
-          <li><b>Los dos caminos en el iPhone</b>: el c&oacute;digo ya intenta Railway (A) y el pueblo (B); falta verificarlo en el aparato</li>
+          <li><b>Los dos caminos en el iPhone</b>: wifi primero al banco (A); si no hay red, el pueblo (B). MedPsy local; si no carga, texto al pueblo</li>
           <li><b>La cola en SQLite</b>, la firma, el LoRA y el video</li>
         </ul>
       </div>

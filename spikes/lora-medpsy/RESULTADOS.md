@@ -122,7 +122,7 @@ También se arregló el puntuador para el arreglo: se compara **marcador por
 marcador**, emparejando por código. Compararlo como texto sería todo o nada, y
 un marcador mal haría fallar los cinco.
 
-La medición base con la tarea corregida dejó al descubierto el hueco de verdad:
+### Medición base (antes de entrenar)
 
 | Tarea | JSON válido base | Campos base |
 | --- | --- | --- |
@@ -134,15 +134,32 @@ La medición base con la tarea corregida dejó al descubierto el hueco de verdad
 **El modelo base solo produce JSON parseable para un informe de laboratorio 1 de
 cada 22 veces.** En la app eso es una pantalla vacía el 95% del tiempo.
 
-Ese es el hueco que el LoRA tiene que cerrar, y es la primera vez que lo vemos,
-porque hasta ahora se medía con el prompt equivocado.
+Ese es el hueco que el LoRA tiene que cerrar. No es truncamiento: con
+`predict: 512` y salidas de ~135 tokens sobra sitio.
 
-**Pregunta abierta:** todavía no sabemos *por qué* falla. No es truncamiento: con
-`predict: 512` y una salida máxima de 135 tokens sobra sitio. Se inspecciona
-cuando termine el entrenamiento, para no cargar una segunda copia del modelo de
-2.1 GB mientras entrena.
+### Entrenamiento y tabla final
 
-*(Resultado de la corrida 3: pendiente.)*
+`learningRate: 2e-5`, 1 época, ~8066 s (~2 h 14 m). Adaptador 33.3 MB en
+`out/trained-lora-adapter.gguf`. Números crudos: `out/resultados.json`.
+
+| Tarea | JSON válido base | JSON válido LoRA | Campos base | Campos LoRA |
+| --- | --- | --- | --- | --- |
+| cédula | 100% | 100% | 65% | 64% |
+| ingresos | 100% | 100% | 86% | 82% |
+| extracto | 100% | 100% | 97% | 97% |
+| **laboratorio** | **5%** | **68%** | 67% | 53% |
+
+**Lo que importa:** laboratorio pasó de 1/22 a **15/22 JSON válido**. El hueco
+que rompía la vía B se reduce de un 95% de pantallas vacías a un ~32%.
+
+**Matices.** Los “campos” del base en lab (67% sobre 6 lecturas) casi no cuentan:
+solo un caso parseaba. Con LoRA se puntúan 77 lecturas y el % baja a 53%: más
+honesto, y todavía hay qué mejorar en el valor leído. Ingresos cae 4 puntos
+(86 → 82), lejos del destrozo de la corrida 2 (89 → 70).
+
+**Criterio para la app:** el adaptador **sí cierra el hueco de parseo** de lab.
+Antes de meterlo al producto, conviene un `diag.mjs` sobre los 7 lab que siguen
+sin JSON y confirmar en el iPhone que ingresos no se siente peor.
 
 ---
 

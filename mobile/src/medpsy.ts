@@ -1,10 +1,12 @@
 /**
  * Un solo MedPsy en RAM. Lo usan la alerta y la extracción de documentos.
  *
- * OCR vive aparte: detector y LLM a la vez se quedan sin grafo. Quien necesite
- * el lector de texto suelta MedPsy antes, y al revés.
+ * Primero el teléfono. Si el modelo no carga o no completa, el texto (nunca
+ * la foto) va al nodo del pueblo. OCR vive aparte: detector y LLM a la vez
+ * se quedan sin grafo.
  */
 import { getAppLogger, recordError, recordInference, type InferenceTask } from "./perf/logger";
+import { urlNodo } from "./nodoUrl";
 
 const CTX = 2048;
 const MEDPSY = "HEALTHCARE_1_7B_MEDICAL_Q8_0";
@@ -85,6 +87,51 @@ export async function soltarMedPsy(): Promise<void> {
   }
 }
 
+async function completarEnNodo(opts: {
+  system: string;
+  user: string;
+  task: InferenceTask;
+  temp?: number;
+  predict?: number;
+  onProgreso?: (p: ProgresoMedPsy) => void;
+}): Promise<string> {
+  opts.onProgreso?.({ detalle: "El teléfono no pudo. Pidiendo al nodo del pueblo…" });
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 180_000);
+  try {
+    const r = await fetch(`${urlNodo()}/inferir`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        system: opts.system,
+        user: opts.user,
+        temp: opts.temp ?? 0.1,
+        predict: opts.predict ?? 220,
+      }),
+      signal: ctrl.signal,
+    });
+    const data = await r.json() as { text?: string; motivo?: string };
+    if (!r.ok || typeof data?.text !== "string" || !data.text.trim()) {
+      throw new Error(data?.motivo ?? "el nodo no respondió");
+    }
+    await recordInference({
+      task: opts.task,
+      model: MEDPSY,
+      quant: "Q8_0",
+      lora: null,
+      ctx_size: CTX,
+      device_cfg: "nodo-lan",
+      ttft_ms: null,
+      load_ms: null,
+      stats: { origen: "nodo" },
+    });
+    getAppLogger().info(`${opts.task} nodo ${data.text.length} chars`);
+    return data.text;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 export async function completarMedPsy(opts: {
   system: string;
   user: string;
@@ -93,41 +140,46 @@ export async function completarMedPsy(opts: {
   predict?: number;
   onProgreso?: (p: ProgresoMedPsy) => void;
 }): Promise<string> {
-  inflight++;
   try {
-    const s = await sdk();
-    const modelId = await asegurarMedPsy(opts.onProgreso);
-    const t1 = Date.now();
-    let first: number | null = null;
-    let text = "";
-    const r = s.completion({
-      modelId,
-      stream: true,
-      generationParams: { temp: opts.temp ?? 0.1, predict: opts.predict ?? 220 },
-      history: [
-        { role: "system", content: opts.system },
-        { role: "user", content: opts.user },
-      ],
-    });
-    for await (const tok of r.tokenStream) {
-      if (first === null) first = Date.now() - t1;
-      text += tok;
+    inflight++;
+    try {
+      const s = await sdk();
+      const modelId = await asegurarMedPsy(opts.onProgreso);
+      const t1 = Date.now();
+      let first: number | null = null;
+      let text = "";
+      const r = s.completion({
+        modelId,
+        stream: true,
+        generationParams: { temp: opts.temp ?? 0.1, predict: opts.predict ?? 220 },
+        history: [
+          { role: "system", content: opts.system },
+          { role: "user", content: opts.user },
+        ],
+      });
+      for await (const tok of r.tokenStream) {
+        if (first === null) first = Date.now() - t1;
+        text += tok;
+      }
+      const f = await r.final;
+      await recordInference({
+        task: opts.task,
+        model: MEDPSY,
+        quant: "Q8_0",
+        lora: null,
+        ctx_size: CTX,
+        device_cfg: "cpu",
+        ttft_ms: first,
+        load_ms: llmLoadMs,
+        stats: f?.stats ?? {},
+      });
+      getAppLogger().info(`${opts.task} ${text.length} chars`);
+      return text;
+    } finally {
+      inflight--;
     }
-    const f = await r.final;
-    await recordInference({
-      task: opts.task,
-      model: MEDPSY,
-      quant: "Q8_0",
-      lora: null,
-      ctx_size: CTX,
-      device_cfg: "cpu",
-      ttft_ms: first,
-      load_ms: llmLoadMs,
-      stats: f?.stats ?? {},
-    });
-    getAppLogger().info(`${opts.task} ${text.length} chars`);
-    return text;
-  } finally {
-    inflight--;
+  } catch (err) {
+    recordError("medpsy.local", err);
+    return completarEnNodo(opts);
   }
 }

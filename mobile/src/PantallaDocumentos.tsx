@@ -1,8 +1,7 @@
 /**
  * Carga de documentos: primero las fotos, luego se achican y se leen juntas.
- *
- * SQLite no entra todavía. El JSON vive en esta pantalla hasta que confirmemos
- * si la cola lo necesita.
+ * El OCR no sale del teléfono. MedPsy extrae campos aquí; si no carga, el
+ * texto va al pueblo. Las fotos se borran.
  */
 import { useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";

@@ -120,9 +120,9 @@ prueba de que corre local, y no se puede fingir.
 > El monto no lo inventamos: es lo que cuesta el paquete. La persona elige
 > pagar el máximo o lo justo.
 >
-> La solicitud va al nodo del corregimiento, que corre en esta laptop, por la
-> red local. Sin nube. El banco responde: aprobado, 12 meses, 11.1% anual,
-> cuota de 81 balboas al mes.
+> La solicitud intenta el banco por wifi. Si no hay internet, queda en el nodo
+> del pueblo, esta laptop, y él se la lleva. El banco responde: aprobado,
+> 12 meses, 11.1% anual, cuota de 81 balboas al mes.
 >
 > Esa cuota cabe en el 30% del ingreso, y el motor lo verifica antes de aprobar.
 > No es un modelo de juguete: tiene elegibilidad, capacidad de pago, scorecard,
@@ -206,8 +206,9 @@ reproducir.
 ## Lo que NO se dice
 
 - **"Hyperswarm P2P"** si la demo salió por HTTP. Camino A se dice "el teléfono
-  habla con el banco, con wifi". Camino B se dice "los aparatos se hablan en
-  la red local, sin internet". Ver [`PRUEBA-NODO.md`](PRUEBA-NODO.md).
+  habla con el banco, con wifi". Camino B se dice "sin internet, el pueblo se
+  lo lleva al banco". Inferencia: "el teléfono intenta el modelo; si no puede,
+  le pide el texto al nodo". Ver [`PRUEBA-NODO.md`](PRUEBA-NODO.md).
 - **"Diagnostica"**, "detecta enfermedades", "sabe qué tienes". Detecta valores
   fuera de rango y sugiere una ruta.
 - Cualquier cifra que no se vea en pantalla en ese momento.

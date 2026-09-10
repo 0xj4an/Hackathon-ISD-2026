@@ -40,7 +40,8 @@ con reglas y muestra el resultado sin pasarlo por el modelo.
 ### 1.2 La rama de documentos ya lee; falta cola y envío
 
 `PantallaDocumentos` toma foto o archivo, corre `ocr()` + MedPsy → JSON y borra
-la copia (`leerDocumento.ts`). Sigue `PantallaLeido`, la cuota con `preCalificar()`
+la copia (`leerDocumento.ts`). MedPsy es local primero; si no carga, el texto
+va al pueblo. Sigue `PantallaLeido`, la cuota con `preCalificar()`
 y el envío: **camino A** al banco remoto si hay wifi, **camino B** al nodo del
 pueblo si no. Falta verificar en el iPhone.
 
@@ -63,11 +64,11 @@ lo que pasó, lo que falló, el error literal y el SHA.
 ### 1.3 P2P no conecta
 
 Hyperswarm entre dos procesos del Mac no conecta (NAT, `firewalled`, sin mDNS).
-La demo de crédito va por HTTP en la LAN. La regla del hackathon se cumple igual
-(**la inferencia corre en el dispositivo**), pero los cinco retos valoran Pears.
+La demo de crédito va por HTTP en la LAN. Inferencia: MedPsy en el teléfono;
+si no puede, HTTP de texto al pueblo. QVAC `delegate` no es el plan (NAT).
 
 - [ ] Decidir: o se hace andar el transporte, o el guion del video no promete P2P y se explica por qué. Lo segundo es honesto y barato; lo primero suma en Technical
-- [ ] `ADR-013` volvió a 0.18.2 justo para recuperar `delegate`. Si no se usa, ese ADR pierde su motivo
+- [ ] El video no promete QVAC `delegate`. El respaldo de MedPsy es HTTP al pueblo
 
 ---
 

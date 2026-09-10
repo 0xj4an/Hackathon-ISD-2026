@@ -32,7 +32,7 @@ docs/     brief, guion del video, decisiones
 Modelos (nombres honestos): `HEALTHCARE_1_7B_MEDICAL_Q8_0` (MedPsy 1.7B, Q8_0) para la alerta; `OCR_LATIN` para documentos; `QWEN3_1_7B_INST_Q4` o el mismo MedPsy para extracción a JSON; opcional `VISIONPSY_NANO_460M_MULTIMODAL_Q8_0_1`. SDK fijado en **0.18.2** (0.19 eliminó la delegación P2P y es breaking; no actualizar).
 
 ## Reglas duras
-- Ninguna inferencia fuera del dispositivo. El nodo/banco solo recibe JSON, nunca imágenes ni prompts.
+- Inferencia: MedPsy en el teléfono primero. Si no puede, POST de texto al nodo local. Nunca imágenes. Ningún proveedor de IA remoto. El banco solo recibe JSON de crédito, nunca fotos ni el motivo de salud.
 - `README` declara la base preexistente: la plantilla AI Engineering Kit.
 - Log de rendimiento desde el primer día (`perf/perf.jsonl`): cada inferencia real registra modelo, cuantización, hardware, tokens, TTFT, tok/s.
 - Disclaimers de salud visibles. Validación de entradas antes del modelo. Sin VIH en el demo público.
