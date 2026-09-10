@@ -12,7 +12,6 @@
  * haber corrido de verdad en un aparato de verdad.
  */
 import { File, Paths } from "expo-file-system";
-import * as Sharing from "expo-sharing";
 import { PERF_FILE, QVAC_FILE, getAppLogger, recordError } from "./logger";
 
 export type Registro = {
@@ -59,8 +58,9 @@ export async function compartirRegistro(nombre: string): Promise<string | null> 
   const { file, texto } = leer(nombre);
   if (texto === null) return `Todavía no hay ${nombre}. Corre una inferencia primero.`;
   if (!texto.trim()) return `${nombre} esta vacio.`;
-  if (!(await Sharing.isAvailableAsync())) return "Este aparato no puede compartir archivos.";
   try {
+    const Sharing = await import("expo-sharing");
+    if (!(await Sharing.isAvailableAsync())) return "Este aparato no puede compartir archivos.";
     await Sharing.shareAsync(file.uri, {
       mimeType: "application/x-ndjson",
       dialogTitle: `Registro ${nombre}`,

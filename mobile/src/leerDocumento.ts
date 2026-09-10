@@ -11,7 +11,6 @@
  */
 import { Image } from "react-native";
 import { File, Paths } from "expo-file-system";
-import * as ImageManipulator from "expo-image-manipulator";
 import {
   SYSTEM_EXTRACCION_CEDULA,
   SYSTEM_EXTRACCION_EXTRACTO,
@@ -207,7 +206,8 @@ function medidaDe(uri: string): Promise<{ width: number; height: number }> {
 
 /** JPEG chico, lado largo <= 1280. El detector no traga la foto nativa del 17 Pro Max. */
 async function achicar(uri: string): Promise<string> {
-  const acciones: ImageManipulator.Action[] = [];
+  type Accion = { resize: { width?: number; height?: number } };
+  const acciones: Accion[] = [];
   try {
     const { width, height } = await medidaDe(uri);
     const largo = Math.max(width, height);
@@ -219,6 +219,8 @@ async function achicar(uri: string): Promise<string> {
     acciones.push({ resize: { width: MAX_LADO } });
   }
   try {
+    // El nativo no entra al arranque: si no está linkeado, Release se queda en blanco.
+    const ImageManipulator = await import("expo-image-manipulator");
     const out = await ImageManipulator.manipulateAsync(uri, acciones, {
       compress: 0.7,
       format: ImageManipulator.SaveFormat.JPEG,

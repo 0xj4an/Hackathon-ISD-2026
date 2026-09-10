@@ -30,22 +30,43 @@ let unsubscribeServer: (() => void) | null = null;
 let cachedSystem: unknown = null;
 let errorHandlerInstalled = false;
 
-const appLog = getLogger("app", {
-  level: "info",
-  enableConsole: true,
-  transports: [
-    (level, namespace, message) => {
-      void appendJson(QVAC_FILE, {
-        ts: new Date().toISOString(),
-        kind: "app",
-        level,
-        namespace,
-        message,
-      });
-      emitUi(`${level} ${namespace} ${message}`);
-    },
-  ],
-});
+type AppLog = {
+  debug: (message: string) => void;
+  info: (message: string) => void;
+  warn: (message: string) => void;
+  error: (message: string) => void;
+};
+
+function crearLogger(): AppLog {
+  try {
+    return getLogger("app", {
+      level: "info",
+      enableConsole: true,
+      transports: [
+        (level, namespace, message) => {
+          void appendJson(QVAC_FILE, {
+            ts: new Date().toISOString(),
+            kind: "app",
+            level,
+            namespace,
+            message,
+          });
+          emitUi(`${level} ${namespace} ${message}`);
+        },
+      ],
+    });
+  } catch (err) {
+    console.warn("getLogger falló", err);
+    return {
+      debug: (message) => console.debug(message),
+      info: (message) => console.info(message),
+      warn: (message) => console.warn(message),
+      error: (message) => console.error(message),
+    };
+  }
+}
+
+const appLog = crearLogger();
 
 export function logPath(name: string): string {
   return new File(Paths.document, name).uri;

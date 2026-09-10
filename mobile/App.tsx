@@ -22,12 +22,10 @@ import PantallaEntrada from "./src/PantallaEntrada";
 import PantallaRevision from "./src/PantallaRevision";
 import PantallaAlerta from "./src/PantallaAlerta";
 import PantallaCredito from "./src/PantallaCredito";
-import PantallaDocumentos from "./src/PantallaDocumentos";
 import PantallaLeido from "./src/PantallaLeido";
 import PantallaCuota from "./src/PantallaCuota";
 import PantallaBanco from "./src/PantallaBanco";
 import PantallaExamen from "./src/PantallaExamen";
-import PantallaRegistro from "./src/PantallaRegistro";
 import { solicitudDeLectura, type LecturaCredito } from "./src/lectura";
 import { decidir, type Respuesta, type Solicitud } from "./src/core/credito/motor";
 import type { Usuario } from "./src/usuarios";
@@ -64,7 +62,12 @@ export default function App() {
 
   // Fuera del camino de la demo a proposito: los registros son para nosotros,
   // no para el usuario, y no aparecen en el flujo que se graba.
-  if (enRegistro) return <PantallaRegistro onVolver={() => setEnRegistro(false)} />;
+  // require() y no import: expo-sharing no puede tumbar el arranque.
+  if (enRegistro) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const PantallaRegistro = require("./src/PantallaRegistro").default;
+    return <PantallaRegistro onVolver={() => setEnRegistro(false)} />;
+  }
 
   if (!usuario) {
     return <PantallaEntrada onEntrar={setUsuario} onRegistro={() => setEnRegistro(true)} />;
@@ -146,6 +149,8 @@ export default function App() {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const PantallaDocumentos = require("./src/PantallaDocumentos").default;
   return (
     <PantallaDocumentos
       monto={monto}
