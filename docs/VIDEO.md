@@ -37,7 +37,8 @@ El reglamento pide cosas concretas, y cada una necesita su plano:
 ### 0:00 a 0:35 · El problema (hooks)
 
 **Se ve:** open de 35 s, cine + documental. **No empieza con el logo.** Primer
-fotograma: el número. Nombre a los ~24 s. Corte duro al teléfono (sin fundido).
+fotograma: **4 de cada 10 adultos**. A los 2.5 s: tienen presión alta. Luego
+un examen es un viaje. Nombre a los ~24 s. Corte duro al teléfono (sin fundido).
 Beats: `media_lab/.ai/runs/2026-09-10-ina-igar/07-open-35s.md`. El animático
 [`intro.html`](intro.html) (22 s, marca primero) queda obsoleto para este corte.
 
@@ -50,7 +51,7 @@ Beats: `media_lab/.ai/runs/2026-09-10-ina-igar/07-open-35s.md`. El animático
 > teléfono. Sin internet.
 
 **Por qué así:** ese día el jurado revisa más de 50 proyectos. Un letrero de
-marca a los 0 s se parece a los otros 49. Un silencio + **4 de cada 10** no.
+marca a los 0 s se parece a los otros 49. Un silencio + **4 de cada 10 adultos** no.
 
 ### 0:35 a 1:10 · Detectar
 
