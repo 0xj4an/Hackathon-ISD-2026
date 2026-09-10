@@ -1,14 +1,9 @@
 import { Component, type ReactNode } from "react";
 import { SafeAreaView, Text } from "react-native";
 import { registerRootComponent } from "expo";
-import * as Sentry from "@sentry/react-native";
+import { iniciarSentry, Sentry } from "./src/sentry";
 
-Sentry.init({
-  dsn: "https://f0fa21d5e86f121f6900b1a131703422@o4512063261179904.ingest.us.sentry.io/4512063272648704",
-  sendDefaultPii: true,
-  tracesSampleRate: 1.0,
-  enableLogs: true,
-});
+iniciarSentry();
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);
 // It also ensures that whether you load the app in Expo Go or in a native build,
