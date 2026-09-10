@@ -126,10 +126,12 @@ async function completarEnNodo(opts: {
   onProgreso?: (p: ProgresoMedPsy) => void;
 }): Promise<string> {
   opts.onProgreso?.({ detalle: "El teléfono no pudo. Delegando al nodo…" });
+  const nodo = urlNodo();
+  if (!nodo) throw new Error("sin URL del pueblo (Metro en LAN o override en demo)");
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 180_000);
   try {
-    const r = await fetch(`${urlNodo()}/inferir`, {
+    const r = await fetch(`${nodo}/inferir`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({

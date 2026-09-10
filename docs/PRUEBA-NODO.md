@@ -50,11 +50,15 @@ recibe y reenvía. Arranque:
 ```bash
 cd nodo && npm run corregimiento
 # HTTP en :8788, BANCO_URL ya apunta a Railway
-ipconfig getifaddr en0        # la IP de la laptop. Hoy: 192.168.0.19
+ipconfig getifaddr en0        # solo para saber la IP; la app la toma sola de Metro
 ```
 
-Teléfono y laptop **en el mismo wifi**. Si la red aísla clientes (café, hotel),
-probar con el hotspot del teléfono.
+Teléfono y laptop **en el mismo wifi**. Arranca Expo en LAN (no tunnel): la app
+resuelve el pueblo como `http://<IP-de-Metro>:8788`. Si cambias de red, Metro
+trae la IP nueva — **no hay que reeditar `.env` ni el código**.
+
+Si usas un build sin Metro (o tunnel), en Entrada → *Solo para demostración* →
+**Pueblo** puedes pegar la IP y Probar `/salud`. Eso se guarda en el teléfono.
 
 Desde el navegador del teléfono: `http://<IP>:8788/respuesta/loquesea` debe
 responder `{"decision":"pendiente"}`. Si no carga, el problema es la red.

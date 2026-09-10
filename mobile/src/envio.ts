@@ -125,6 +125,15 @@ export async function enviarSolicitud(sol: Solicitud): Promise<Envio> {
   }
 
   const nodo = urlNodo();
+  if (!nodo) {
+    lineas.push("pueblo sin URL (Metro no está en LAN ni hay override)");
+    const tecnico = armarTecnico(sol.id, lineas);
+    const detalle = "Sin red y sin el nodo del pueblo (URL desconocida).";
+    reportarEnvioSentry({
+      ok: false, envio: null, pendiente: false, detalle, tecnico, modo: modo(), nodoHost: "",
+    });
+    return { ok: false, envio: null, pendiente: false, tecnico, detalle };
+  }
   const b = await pedir(`${nodo}/solicitud`, post(sol), 8000);
   lineas.push(lineaPedido("pueblo", b));
   const tecnico = armarTecnico(sol.id, lineas);
@@ -156,6 +165,8 @@ export async function consultarRespuesta(id: string): Promise<Respuesta | null> 
     const a = await pedir(`${urlBanco()}/respuesta/${id}`, {}, 4000);
     if (esFinal(a.body)) return a.body;
   }
-  const b = await pedir(`${urlNodo()}/respuesta/${id}`, {}, 4000);
+  const nodo = urlNodo();
+  if (!nodo) return null;
+  const b = await pedir(`${nodo}/respuesta/${id}`, {}, 4000);
   return esFinal(b.body) ? b.body : null;
 }

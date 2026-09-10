@@ -1,13 +1,20 @@
 /**
- * Entrada: correo primero; abajo, controles de demo (modo + caso).
+ * Entrada: correo primero; abajo, controles de demo (modo + caso + pueblo).
  * El historial se lee siempre; el examen se ofrece tras el resultado.
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { USUARIOS, buscarPorCorreo, type Usuario } from "./usuarios";
 import {
   MODOS, fijarModo, usuarioDelModo, etiquetaModo, type ModoId,
 } from "./modo";
+import {
+  etiquetaOrigen,
+  fijarUrlNodo,
+  limpiarUrlNodo,
+  probarNodo,
+  resolverNodo,
+} from "./nodoUrl";
 import { Pantalla, Encabezado, Boton, Pie } from "./ui/componentes";
 import { COLOR, TIPO, ESPACIO, DISPLAY, TOQUE } from "./ui/tokens";
 
@@ -35,6 +42,21 @@ export default function PantallaEntrada({
   const [error, setError] = useState("");
   const [modoSel, setModoSel] = useState<ModoId>("local-wifi");
   const [demoAbierta, setDemoAbierta] = useState(false);
+  const [puebloEdit, setPuebloEdit] = useState("");
+  const [puebloInfo, setPuebloInfo] = useState(() => resolverNodo());
+  const [puebloPrueba, setPuebloPrueba] = useState("");
+  const [probando, setProbando] = useState(false);
+
+  const refrescarPueblo = () => {
+    const r = resolverNodo();
+    setPuebloInfo(r);
+    setPuebloEdit(r.url.replace(/^https?:\/\//, ""));
+    return r;
+  };
+
+  useEffect(() => {
+    if (demoAbierta) refrescarPueblo();
+  }, [demoAbierta]);
 
   const entrar = () => {
     const usuario = buscarPorCorreo(correo) ?? (correo.trim() === "" ? usuarioDelModo() : undefined);
@@ -49,11 +71,34 @@ export default function PantallaEntrada({
     if (error) setError("");
   };
 
+  const guardarPueblo = async () => {
+    const n = await fijarUrlNodo(puebloEdit);
+    setPuebloPrueba(n ? "Guardado." : "URL inválida.");
+    refrescarPueblo();
+  };
+
+  const usarAuto = async () => {
+    await limpiarUrlNodo();
+    setPuebloPrueba("Auto (Metro / env).");
+    refrescarPueblo();
+  };
+
+  const probar = async () => {
+    setProbando(true);
+    setPuebloPrueba("Probando…");
+    if (puebloEdit.trim()) await fijarUrlNodo(puebloEdit);
+    const r = await probarNodo();
+    setPuebloPrueba(r.ok ? `Conecta · ${r.detalle}` : `No llega · ${r.detalle}`);
+    refrescarPueblo();
+    setProbando(false);
+  };
+
   const casoActivo = USUARIOS.find(u => u.correo === correo.trim().toLowerCase());
   const modoActivo = MODOS.find(e => e.id === modoSel) ?? MODOS[0];
   const demoResumen = [
     etiquetaModo(modoActivo),
     casoActivo ? (CASO_CORTO[casoActivo.id] ?? casoActivo.id) : "correo libre",
+    puebloInfo.url ? etiquetaOrigen(puebloInfo.origen) : "sin pueblo",
   ].join(" · ");
 
   return (
@@ -104,7 +149,7 @@ export default function PantallaEntrada({
         {demoAbierta ? (
           <View style={s.demoCuerpo}>
             <Text style={s.demoAyuda}>
-              WiFi y dónde corre el modelo. El historial se lee siempre; el examen se ofrece después del resultado.
+              WiFi, modelo y nodo del pueblo. La IP se toma de Metro en LAN; si cambias de red, no hay que reeditar código.
             </Text>
 
             <Text style={s.demoEtiqueta}>Modo · el teléfono</Text>
@@ -136,6 +181,51 @@ export default function PantallaEntrada({
                   </Pressable>
                 );
               })}
+            </View>
+
+            <Text style={s.demoEtiqueta}>Pueblo · LAN :8788</Text>
+            <View style={s.puebloCaja}>
+              <Text style={s.puebloOrigen}>
+                Ahora: {puebloInfo.url || "—"} · {etiquetaOrigen(puebloInfo.origen)}
+              </Text>
+              <TextInput
+                value={puebloEdit}
+                onChangeText={setPuebloEdit}
+                placeholder="192.168.x.x o host:8788"
+                placeholderTextColor={COLOR.apagado}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="url"
+                accessibilityLabel="URL o IP del nodo del pueblo"
+                style={s.puebloCampo}
+              />
+              <View style={s.puebloAcciones}>
+                <Pressable
+                  onPress={() => { void guardarPueblo(); }}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [s.puebloBtn, pressed && s.press]}
+                >
+                  <Text style={s.puebloBtnTexto}>Guardar</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => { void usarAuto(); }}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [s.puebloBtn, pressed && s.press]}
+                >
+                  <Text style={s.puebloBtnTexto}>Auto</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => { void probar(); }}
+                  disabled={probando}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [s.puebloBtn, s.puebloBtnFuerte, pressed && s.press]}
+                >
+                  <Text style={[s.puebloBtnTexto, s.puebloBtnTextoFuerte]}>
+                    {probando ? "…" : "Probar"}
+                  </Text>
+                </Pressable>
+              </View>
+              {puebloPrueba ? <Text style={s.puebloPrueba}>{puebloPrueba}</Text> : null}
             </View>
 
             <Text style={s.demoEtiqueta}>Caso</Text>
@@ -243,6 +333,23 @@ const s = StyleSheet.create({
   modoMas: { fontSize: 12, fontWeight: "700", color: COLOR.apagado },
   modoModelo: { fontSize: 13.5, fontWeight: "800", color: COLOR.tinta },
   modoDetalle: { fontSize: 12, lineHeight: 16, color: COLOR.gris },
+
+  puebloCaja: { paddingHorizontal: 14, gap: 8, marginBottom: 8 },
+  puebloOrigen: { fontSize: 12, lineHeight: 16, color: COLOR.gris },
+  puebloCampo: {
+    borderWidth: 1, borderColor: COLOR.separador, backgroundColor: COLOR.fondo,
+    paddingHorizontal: 12, minHeight: 44,
+    fontSize: 14, fontWeight: "600", color: COLOR.tinta,
+  },
+  puebloAcciones: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  puebloBtn: {
+    borderWidth: 1, borderColor: COLOR.separador, backgroundColor: COLOR.fondo,
+    paddingHorizontal: 12, minHeight: 40, justifyContent: "center",
+  },
+  puebloBtnFuerte: { backgroundColor: COLOR.tinta, borderColor: COLOR.tinta },
+  puebloBtnTexto: { fontSize: 12.5, fontWeight: "700", color: COLOR.tinta },
+  puebloBtnTextoFuerte: { color: COLOR.fondo },
+  puebloPrueba: { fontSize: 12, lineHeight: 16, color: COLOR.gris },
 
   puesto: { backgroundColor: COLOR.hundido, borderColor: COLOR.tinta },
   press: { opacity: 0.85 },

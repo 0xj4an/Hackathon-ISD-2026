@@ -18,7 +18,7 @@
 // Para depurar el bloque 0 en un teléfono nuevo, cambiar el import por
 // `./src/SmokeTest` y montarlo directo: aísla si el problema es el teléfono,
 // Expo o el SDK, en vez de nuestro código.
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import PantallaEntrada from "./src/PantallaEntrada";
 import PantallaSalud from "./src/PantallaSalud";
 import PantallaRevision from "./src/PantallaRevision";
@@ -43,6 +43,8 @@ import type { Respuesta } from "./src/core/credito/motor";
 import type { Solicitud } from "./src/core/schemas";
 import { buscarPorCorreo, type Usuario } from "./src/usuarios";
 import { fijarModo, resetModo } from "./src/modo";
+import { cargarUrlNodo } from "./src/nodoUrl";
+import { IrInicioContext } from "./src/ui/componentes";
 
 /** Lo que cuesta el paquete, y el monto que la persona decidió pedir. */
 type Credito = { min: number; max: number; monto?: number };
@@ -88,6 +90,16 @@ export default function App() {
     soltarCredito();
   };
 
+  /** Marca Ina Igar → pantalla de entrada (también cierra registro). */
+  const irInicio = () => {
+    setEnRegistro(false);
+    salir();
+  };
+
+  const conInicio = (nodo: ReactNode) => (
+    <IrInicioContext.Provider value={irInicio}>{nodo}</IrInicioContext.Provider>
+  );
+
   const cerrarPendiente = async (id: string) => {
     setPendiente(false);
     setAviso(undefined);
@@ -127,6 +139,7 @@ export default function App() {
     let vivo = true;
     void (async () => {
       try {
+        await cargarUrlNodo();
         await iniciarColaSqlite();
         const p = await leerPendiente();
         if (!vivo || !p) return;
@@ -213,7 +226,7 @@ export default function App() {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const PantallaRegistro: typeof import("./src/PantallaRegistro").default =
       require("./src/PantallaRegistro").default;
-    return <PantallaRegistro onVolver={() => setEnRegistro(false)} />;
+    return conInicio(<PantallaRegistro onVolver={() => setEnRegistro(false)} />);
   }
 
   if (!usuario) {
@@ -232,26 +245,26 @@ export default function App() {
   // sin este paso la app salta del correo a un hallazgo y nadie entiende de
   // donde salieron los numeros.
   if (!conectado) {
-    return (
+    return conInicio(
       <PantallaSalud
         usuario={usuario}
         onListo={() => setConectado(true)}
         onVolver={salir}
-      />
+      />,
     );
   }
 
   if (!revisado) {
-    return (
+    return conInicio(
       <PantallaRevision
         usuario={usuario}
         onListo={() => setRevisado(true)}
-      />
+      />,
     );
   }
 
   if (enExamen) {
-    return (
+    return conInicio(
       <PantallaExamen
         usuario={usuario}
         onVolver={() => setEnExamen(false)}
@@ -259,24 +272,24 @@ export default function App() {
           setEnExamen(false);
           setCredito({ min, max });
         }}
-      />
+      />,
     );
   }
 
   if (!credito) {
-    return (
+    return conInicio(
       <PantallaAlerta
         usuario={usuario}
         onVolver={salir}
         onPedirCredito={(min, max) => setCredito({ min, max })}
         onSubirExamen={() => setEnExamen(true)}
-      />
+      />,
     );
   }
 
   const monto = credito.monto;
   if (monto === undefined) {
-    return (
+    return conInicio(
       <PantallaCredito
         costoMin={credito.min}
         costoMax={credito.max}
@@ -285,7 +298,7 @@ export default function App() {
           setCredito({ ...credito, monto: pedido });
         }}
         onVolver={() => setCredito(null)}
-      />
+      />,
     );
   }
 
@@ -293,7 +306,7 @@ export default function App() {
     const destino = solicitud?.extracto?.banco
       ? `Cuenta en ${solicitud.extracto.banco}`
       : "tu cuenta registrada";
-    return (
+    return conInicio(
       <PantallaDesembolso
         respuesta={respuesta}
         destino={destino}
@@ -302,12 +315,12 @@ export default function App() {
           // Sale del caso entero. Si solo soltamos crédito, cae otra vez en Alerta.
           salir();
         }}
-      />
+      />,
     );
   }
 
   if (paso === "firma" && respuesta) {
-    return (
+    return conInicio(
       <PantallaFirma
         respuesta={respuesta}
         onConfirmar={hash => {
@@ -315,12 +328,12 @@ export default function App() {
           setPaso("desembolso");
         }}
         onVolver={() => setPaso("banco")}
-      />
+      />,
     );
   }
 
   if (paso === "banco" && respuesta) {
-    return (
+    return conInicio(
       <PantallaBanco
         respuesta={respuesta}
         onContinuar={() => setPaso("firma")}
@@ -328,12 +341,12 @@ export default function App() {
           setRespuesta(null);
           setPaso("cuota");
         }}
-      />
+      />,
     );
   }
 
   if (paso === "cuota" && solicitud) {
-    return (
+    return conInicio(
       <PantallaCuota
         solicitud={solicitud}
         enviando={enviando}
@@ -342,12 +355,12 @@ export default function App() {
         tecnico={tecnicoEnvio}
         onFirmar={() => { void mandar(solicitud); }}
         onVolver={() => setPaso("leido")}
-      />
+      />,
     );
   }
 
   if (paso === "leido" && lectura) {
-    return (
+    return conInicio(
       <PantallaLeido
         lectura={lectura}
         onFirmar={() => {
@@ -355,14 +368,14 @@ export default function App() {
           setPaso("cuota");
         }}
         onVolver={() => setPaso("captura")}
-      />
+      />,
     );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const PantallaDocumentos: typeof import("./src/PantallaDocumentos").default =
     require("./src/PantallaDocumentos").default;
-  return (
+  return conInicio(
     <PantallaDocumentos
       monto={monto}
       lecturaInicial={lectura ?? undefined}
@@ -374,6 +387,6 @@ export default function App() {
         soltarCredito();
         setCredito({ min: credito.min, max: credito.max });
       }}
-    />
+    />,
   );
 }

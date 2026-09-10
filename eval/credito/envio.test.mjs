@@ -23,3 +23,10 @@ test("sinWifiDemo salta el banco vía modo", () => {
   assert.match(src, /sinWifiDemo/);
   assert.match(src, /from \"\.\/modo\"/);
 });
+
+test("nodoUrl no hardcodea IP de demo", () => {
+  const src = readFileSync(new URL("../../mobile/src/nodoUrl.ts", import.meta.url), "utf8");
+  assert.doesNotMatch(src, /192\.168\.0\.\d+/);
+  assert.match(src, /hostDelMetro|hostUri/);
+  assert.match(src, /fijarUrlNodo/);
+});

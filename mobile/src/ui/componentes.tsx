@@ -9,12 +9,15 @@
  * - **Modo denso**: `BarraVeredicto` en lugar del bloque, `FilaLista` de 13 px,
  *   y `BandaTotal` abajo tomando el relevo como elemento dominante.
  */
-import { useState, type ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import {
   SafeAreaView, ScrollView, View, Text, Pressable, StyleSheet,
 } from "react-native";
 import Pictograma, { type Simbolo } from "./Pictograma";
 import { COLOR, TIPO, ESPACIO, TOQUE } from "./tokens";
+
+/** Tocar la marca lleva al inicio. Lo pone App; en entrada no hay provider. */
+export const IrInicioContext = createContext<(() => void) | null>(null);
 
 export function Pantalla({ children, scroll = true }: { children: ReactNode; scroll?: boolean }) {
   return (
@@ -31,9 +34,21 @@ export function Pantalla({ children, scroll = true }: { children: ReactNode; scr
 }
 
 export function Encabezado({ meta, onVolver }: { meta?: string; onVolver?: () => void }) {
+  const irInicio = useContext(IrInicioContext);
   return (
     <View style={s.encabezado}>
-      <Text style={s.marca}>Ina Igar</Text>
+      {irInicio ? (
+        <Pressable
+          onPress={irInicio}
+          accessibilityRole="button"
+          accessibilityLabel="Ir al inicio"
+          hitSlop={12}
+        >
+          <Text style={s.marca}>Ina Igar</Text>
+        </Pressable>
+      ) : (
+        <Text style={s.marca}>Ina Igar</Text>
+      )}
       {onVolver ? (
         <Pressable onPress={onVolver} accessibilityRole="button" accessibilityLabel="Volver" hitSlop={12}>
           <Text style={s.meta}>{meta ?? "Volver"}</Text>
