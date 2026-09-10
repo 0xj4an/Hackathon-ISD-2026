@@ -66,6 +66,8 @@ Los significados salen del diccionario escolar *Gayamar sabga* (gunagaya-españo
 
 ## Contexto compartido del equipo
 - `docs/CHECKLIST.md`: **el plan de trabajo que se sigue**, por bloques y con criterios de aceptación.
+- `docs/PRUEBA-TELEFONO.md`: lo que se vio en el iPhone físico, incluidas las fallas.
+- `docs/PRUEBA-NODO.md`: HTTP y Hyperswarm, medido, no recordado.
 - `docs/BRIEF.md`: qué construimos, flujo y arquitectura.
 - `.ai/`: contexto estable (reglas del hackathon, los 5 retos, referencia del SDK QVAC, línea base) y decisiones.
 - `spikes/`: experimentos de validación con sus scripts, para que el jurado pueda repetirlos. `spikes/README.md` explica cómo.

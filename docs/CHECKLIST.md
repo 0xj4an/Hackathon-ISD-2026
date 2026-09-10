@@ -50,6 +50,8 @@ de `PantallaExamen.tsx`: *"Cuando `ocr()` exista"*.
 
 Material listo para probarlo: `data/documentos/` tiene los seis ficticios
 (nítido y difícil de cada uno) más `esperado.json` como ground truth.
+Cada corrida en el iPhone se anota en [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md):
+lo que pasó, lo que falló, el error literal y el SHA.
 
 ### 1.3 P2P no conecta
 
