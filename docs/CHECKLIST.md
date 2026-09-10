@@ -1,7 +1,6 @@
 # Checklist
 
 `[x]` hecho y comprobado. `[~]` a medias, dice qué falta. `[ ]` sin empezar.
-`[J]` es 0xj4an, `[A]` es Artur.
 
 Ordenado por lo que decide el resultado, no por horario. El detalle de cada
 punto está en [`02-stack-y-plan.md`](../.ai/runs/mvp-hackathon/02-stack-y-plan.md).
@@ -22,16 +21,16 @@ donde se llama a `completion()` es `SmokeTest.tsx`.
 
 Tres cosas, en este orden.
 
-### 1.1 El modelo tiene que entrar al producto `[A]`
+### 1.1 El modelo tiene que entrar al producto
 
 Technical pesa 35% y mide **uso genuino de QVAC**. Una app que detecta con
 reglas y nunca llama al modelo es un motor de reglas con un smoke test al lado.
 
-- [ ] `[A]` `PantallaAlerta` invoca `completion()` con `SYSTEM_ALERTA` y valida con `AlertaSchema`. Hoy muestra solo la salida de las reglas
-- [ ] `[A]` El modelo se carga una vez al arrancar, no por pantalla. `ADR-007` dice que la descarga no bloquea el onboarding
-- [ ] `[A]` `perf/logger.ts` se conecta al flujo de producto. Hoy solo lo importa `SmokeTest.tsx`, así que `perf/perf.jsonl` solo tendría líneas del smoke, y es **entregable obligatorio** de Tether Psy
+- [ ] `PantallaAlerta` invoca `completion()` con `SYSTEM_ALERTA` y valida con `AlertaSchema`. Hoy muestra solo la salida de las reglas
+- [ ] El modelo se carga una vez al arrancar, no por pantalla. `ADR-007` dice que la descarga no bloquea el onboarding
+- [ ] `perf/logger.ts` se conecta al flujo de producto. Hoy solo lo importa `SmokeTest.tsx`, así que `perf/perf.jsonl` solo tendría líneas del smoke, y es **entregable obligatorio** de Tether Psy
 
-### 1.2 La rama de documentos es una cáscara `[A]`
+### 1.2 La rama de documentos es una cáscara
 
 La foto se toma y no se lee. `PantallaExamen.tsx` lo dice en un comentario:
 *"Cuando `ocr()` exista"*.
@@ -43,22 +42,22 @@ exista, esos mismos campos llegan rellenos y con su confianza, y ninguna de las
 dos pantallas cambia. La rama sigue siendo cáscara en lo que importa (no lee, no
 borra, no guarda, no envía), pero ya llega a un número.
 
-- [ ] `[A]` `ocr()` sobre la foto, extracción a JSON con `SYSTEM_EXTRACCION_*`, validación con `CedulaSchema` e `IngresosSchema`
-- [ ] `[A]` **Borrar la foto** después de extraer. Cierra C6, y el README ya promete que las fotos no salen del teléfono
-- [ ] `[A]` Persistencia y cola. `expo-sqlite` no se importa en ninguna parte y `pendiente` hoy es solo un estilo de texto
-- [ ] `[A]` Envío al nodo por HTTP. La app todavía no hace un solo `fetch`
+- [ ] `ocr()` sobre la foto, extracción a JSON con `SYSTEM_EXTRACCION_*`, validación con `CedulaSchema` e `IngresosSchema`
+- [ ] **Borrar la foto** después de extraer. Cierra C6, y el README ya promete que las fotos no salen del teléfono
+- [ ] Persistencia y cola. `expo-sqlite` no se importa en ninguna parte y `pendiente` hoy es solo un estilo de texto
+- [ ] Envío al nodo por HTTP. La app todavía no hace un solo `fetch`
 
 Material listo para probarlo: `data/documentos/` tiene los seis ficticios
 (nítido y difícil de cada uno) más `esperado.json` como ground truth.
 
-### 1.3 P2P no conecta `[A]`
+### 1.3 P2P no conecta
 
 Hyperswarm entre dos procesos del Mac no conecta (NAT, `firewalled`, sin mDNS).
 La demo de crédito va por HTTP en la LAN. La regla del hackathon se cumple igual
 (**la inferencia corre en el dispositivo**), pero los cinco retos valoran Pears.
 
-- [ ] `[A]` Decidir: o se hace andar el transporte, o el guion del video no promete P2P y se explica por qué. Lo segundo es honesto y barato; lo primero suma en Technical
-- [ ] `[A]` `ADR-013` volvió a 0.18.2 justo para recuperar `delegate`. Si no se usa, ese ADR pierde su motivo
+- [ ] Decidir: o se hace andar el transporte, o el guion del video no promete P2P y se explica por qué. Lo segundo es honesto y barato; lo primero suma en Technical
+- [ ] `ADR-013` volvió a 0.18.2 justo para recuperar `delegate`. Si no se usa, ese ADR pierde su motivo
 
 ---
 
@@ -67,17 +66,17 @@ La demo de crédito va por HTTP en la LAN. La regla del hackathon se cumple igua
 - [ ] Wi-Fi apagado: la solicitud queda en cola y la app lo dice
 - [ ] Wi-Fi encendido: la solicitud sale, el banco responde, la respuesta vuelve
 - [ ] **Ensayarla tres veces seguidas** con el iPhone en la mano. Lo que falla, falla aquí y no grabando
-- [ ] `[J]` Disclaimers de salud visibles **en pantalla**, no en el README
+- [ ] Disclaimers de salud visibles **en pantalla**, no en el README
 
 ---
 
 ## 3. Entregables
 
-- [ ] `[J]` Guion en `docs/VIDEO.md`
-- [ ] `[J]` Video <= 5 min, español, enlace sin login. Es lo primero que mira el jurado del reto General
-- [ ] `[A]` `perf/perf.jsonl` con una línea por inferencia real (ver 1.1)
-- [~] `[A]` README: falta cerrar la fila "Extracción a JSON" de la tabla de modelos. Hardware, cuantización y base preexistente ya están
-- [x] `[A]` **Declarar la base preexistente**: una línea, la plantilla AI Engineering Kit. Omitirlo descalifica
+- [ ] Guion en `docs/VIDEO.md`
+- [ ] Video <= 5 min, español, enlace sin login. Es lo primero que mira el jurado del reto General
+- [ ] `perf/perf.jsonl` con una línea por inferencia real (ver 1.1)
+- [~] README: falta cerrar la fila "Extracción a JSON" de la tabla de modelos. Hardware, cuantización y base preexistente ya están
+- [x] **Declarar la base preexistente**: una línea, la plantilla AI Engineering Kit. Omitirlo descalifica
 
 ---
 
@@ -85,15 +84,15 @@ La demo de crédito va por HTTP en la LAN. La regla del hackathon se cumple igua
 
 No es núcleo. `RESULTADOS.md` lo dice: capa de las últimas horas.
 
-- [ ] `[A]` Entrenar con `caffeinate -i`, o el Mac se duerme como en el spike
-- [ ] `[A]` Cargar el adaptador y volver a correr la evaluación
-- [ ] `[A]` **La tabla antes/después.** Si se llega, es el activo más fuerte para Technical y para "calidad de dominio medible" de Tether Psy
+- [ ] Entrenar con `caffeinate -i`, o el Mac se duerme como en el spike
+- [ ] Cargar el adaptador y volver a correr la evaluación
+- [ ] **La tabla antes/después.** Si se llega, es el activo más fuerte para Technical y para "calidad de dominio medible" de Tether Psy
 
 ---
 
 ## 5. Lo que ya está
 
-### Dominio `[J]`
+### Dominio
 
 - [x] 14 señales sobre 9 variables, cada una con su `fuente`. Ver [`ADR-008`](../.ai/adr/ADR-008-que-variables-vigilamos.md) y [`salud.md`](../.ai/references/salud.md)
 - [x] Costos con fuente en rangos publicados; donde no hay precio citable, el campo va ausente y la pantalla no muestra número
@@ -106,7 +105,7 @@ No es núcleo. `RESULTADOS.md` lo dice: capa de las últimas horas.
 - [x] `data/documentos/`: seis imágenes sintéticas (nítida y difícil de cada documento) más `esperado.json`
 - [~] Los tres documentos y sus campos están decididos. Falta **qué pasa si falta uno**, y cómo se capturan `deudas_mensuales_usd` y `personas_a_cargo`
 
-### Implementación `[A]`
+### Implementación
 
 - [x] Las dos vías de detección en `mobile/src/core/`, evaluadas por `eval/run.mjs`
 - [x] `eval/run.mjs` cubre vía A, vía B e integridad de rutas. Determinista, sin teléfono, exit 1 si algo falla
