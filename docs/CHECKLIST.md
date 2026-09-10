@@ -23,11 +23,13 @@ En código, la rama de salud ya pide a MedPsy la redacción (`redactarAlerta` �
 desde esos flujos. El LoRA del spike se midió otra vez (tres corridas en
 `spikes/lora-medpsy/RESULTADOS.md`).
 
-Lo que falta no es “inventar el producto”, es **cerrar en el aparato**. La
-única corrida registrada de documentos en iPhone terminó en `invalid input`:
+Lo que falta no es “inventar el producto”, es **cerrar en el aparato**. Qué
+tocar en el iPhone, en avión, está en [`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md).
+El resultado de cada corrida se anota en [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
+La única corrida registrada de documentos en iPhone terminó en `invalid input`:
 el OCR rechazó la foto. Hay un arreglo escrito (JPEG compatible, base64) que
-**nadie ha visto funcionar todavía**. Ver [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
-Sin esa corrida no se graba el video, y C6–C10 siguen abiertos en la práctica.
+**nadie ha visto funcionar todavía**. Sin esa corrida no se graba el video, y
+C6–C10 siguen abiertos en la práctica.
 
 ---
 

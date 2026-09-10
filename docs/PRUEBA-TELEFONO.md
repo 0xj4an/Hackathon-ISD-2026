@@ -18,6 +18,9 @@ El emulador no cuenta. La demo es un **iPhone 17 Pro Max**.
 | [`docs/PRUEBA-NODO.md`](PRUEBA-NODO.md) | HTTP y Hyperswarm laptop ↔ teléfono | Sí |
 | Fotos de cédulas reales, pantallazos con PII | Nada. Ni sintéticas si se ve una cara real | Nunca |
 
+Qué probar en el iPhone con el Release de ahora (avión, correo, fotos, qué
+cuenta como éxito): [`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md).
+
 Los documentos de prueba son los de [`data/documentos/`](../data/documentos/):
 Mariela Quiros, `esperado.json`. Fotografiar el JPG en la pantalla del Mac o
 subirlo desde Archivos. No una cédula verdadera.
