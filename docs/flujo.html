@@ -417,11 +417,23 @@
     height: 66px; border: 1px dashed var(--line); border-radius: 3px; margin-top: 9px;
     display: grid; place-items: center; color: var(--ink-3); font-size: 9px; font-family: var(--mono);
   }
+  .b-etiqueta {
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-3); margin-top: 16px;
+  }
+  .b-campo {
+    display: flex; align-items: center; gap: 2px;
+    border: 1px solid var(--line); border-bottom-width: 2px; border-bottom-color: var(--teal);
+    border-radius: 3px; background: var(--surface);
+    padding: 10px 11px; margin-top: 6px;
+    font-family: var(--mono); font-size: 10.5px; color: var(--ink);
+  }
+  .b-cursor { width: 1.5px; height: 13px; background: var(--teal); display: inline-block; }
 
   /* ---------- tablas ---------- */
 
   .tabla-envoltura { overflow-x: auto; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); }
-  table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14.5px; }
+  table { border-collapse: collapse; width: 100%; min-width: 780px; font-size: 14.5px; }
   th, td { text-align: left; padding: 12px 15px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
   tbody tr:last-child td { border-bottom: 0; }
   th {
@@ -445,6 +457,7 @@
     padding: 2px 6px; color: var(--ink-2); background: var(--surface-2);
     white-space: nowrap;
   }
+  .correo { font-family: var(--mono); font-size: 12px; color: var(--ink); }
   .urg { font-family: var(--mono); font-size: 11px; font-weight: 500; }
   .urg.inmediata { color: var(--rust); }
   .urg.prioritaria { color: var(--amber); }
@@ -541,7 +554,7 @@
 
     <figure>
       <div class="lienzo">
-        <svg viewBox="0 0 980 430" role="img" aria-label="Diagrama: dentro del tel&eacute;fono corren la alerta de salud, la lectura de documentos y la cola; hacia el nodo del corregimiento y el banco solo cruza un JSON de solicitud, y vuelve un JSON de respuesta.">
+        <svg viewBox="0 0 980 430" role="img" aria-label="Diagrama: dentro del tel&eacute;fono corren la alerta de salud, la lectura de documentos y la cola. De la cola salen dos caminos hacia el banco: directo cuando hay datos o wifi, y por el nodo del corregimiento cuando no hay internet. Por los dos cruza el mismo JSON de solicitud, y la respuesta vuelve por donde sali&oacute;.">
           <defs>
             <marker id="punta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" class="relleno-linea"></path>
@@ -574,33 +587,37 @@
           <line x1="488" y1="30" x2="488" y2="404" class="svg-borde"></line>
           <text x="488" y="20" class="t-zona" text-anchor="middle">BORDE DEL APARATO</text>
 
-          <rect x="548" y="112" width="176" height="104" rx="8" class="svg-caja"></rect>
-          <text x="566" y="146" class="t-titulo">Nodo del</text>
-          <text x="566" y="164" class="t-titulo">corregimiento</text>
-          <text x="566" y="188" class="t-sub">laptop del corresponsal</text>
+          <rect x="790" y="96" width="174" height="88" rx="8" class="svg-caja"></rect>
+          <text x="808" y="128" class="t-titulo">Banco</text>
+          <text x="808" y="150" class="t-sub">modelo de cr&eacute;dito</text>
+          <text x="808" y="166" class="t-sub">de juguete, declarado</text>
 
-          <rect x="788" y="112" width="176" height="104" rx="8" class="svg-caja"></rect>
-          <text x="806" y="146" class="t-titulo">Banco</text>
-          <text x="806" y="170" class="t-sub">modelo de cr&eacute;dito</text>
-          <text x="806" y="186" class="t-sub">de juguete, declarado</text>
+          <rect x="600" y="256" width="176" height="88" rx="8" class="svg-caja"></rect>
+          <text x="618" y="288" class="t-titulo">Nodo del</text>
+          <text x="618" y="306" class="t-titulo">corregimiento</text>
+          <text x="618" y="328" class="t-sub">laptop del corresponsal</text>
 
-          <path d="M 428 283 H 500 V 150 H 544" class="svg-linea" marker-end="url(#punta)"></path>
-          <text x="434" y="275" class="t-eti">solicitud (JSON firmado)</text>
+          <path d="M 428 286 H 500 V 140 H 784" class="svg-linea" marker-end="url(#punta)"></path>
+          <text x="560" y="132" class="t-eti">con datos o wifi, directo al banco</text>
+          <text x="560" y="158" class="t-sub">solicitud (JSON firmado)</text>
 
-          <path d="M 544 182 H 524 V 322 H 432" class="svg-linea" marker-end="url(#punta)"></path>
-          <text x="434" y="340" class="t-eti">respuesta (JSON)</text>
+          <path d="M 428 300 H 594" class="svg-linea" marker-end="url(#punta)"></path>
+          <text x="496" y="292" class="t-eti">sin internet</text>
 
-          <line x1="724" y1="150" x2="784" y2="150" class="svg-linea" marker-end="url(#punta)"></line>
-          <text x="754" y="142" class="t-eti" text-anchor="middle">cifrada</text>
-          <line x1="784" y1="182" x2="724" y2="182" class="svg-linea" marker-end="url(#punta)"></line>
-          <text x="754" y="200" class="t-eti" text-anchor="middle">monto, plazo, tasa</text>
+          <path d="M 776 300 H 830 V 190" class="svg-linea" marker-end="url(#punta)"></path>
+          <text x="792" y="322" class="t-sub">cifrada, por P2P</text>
 
-          <path d="M 544 124 H 436" class="svg-tenue" marker-end="url(#punta-tenue)"></path>
-          <text x="490" y="116" class="t-sub" text-anchor="middle">modelo por LAN</text>
+          <path d="M 920 190 V 372 H 470" class="svg-linea" marker-end="url(#punta)"></path>
+          <text x="910" y="364" class="t-eti" text-anchor="end">la respuesta vuelve por donde sali&oacute;</text>
+
+          <path d="M 660 256 V 214 H 436" class="svg-tenue" marker-end="url(#punta-tenue)"></path>
+          <text x="512" y="206" class="t-sub">modelo por LAN</text>
         </svg>
       </div>
       <figcaption>
-        La flecha punteada es la tercera raz&oacute;n de existir del nodo: reparte el
+        Hay dos caminos hacia el banco y la app toma el que encuentre: con datos o wifi habla
+        directo, y solo cuando no hay internet aparece el nodo del corregimiento. Por los dos
+        cruza el mismo JSON. La flecha punteada es la otra raz&oacute;n de existir del nodo: reparte el
         <code>.gguf</code> por wifi local y, en modo delegado, presta el c&oacute;mputo al tel&eacute;fono que no
         alcanza. Incluso ah&iacute; viaja texto, nunca im&aacute;genes.
       </figcaption>
@@ -612,7 +629,7 @@
       <p class="eyebrow">El camino</p>
       <h2>Paso a paso, lo que ve la persona</h2>
       <p class="prosa">
-        Las dos primeras pantallas est&aacute;n escritas y corren en Expo hoy. Las que van en
+        Las pantallas de marco s&oacute;lido est&aacute;n escritas y corren en Expo hoy. Las que van en
         marco punteado son <strong>bocetos</strong>, la propuesta de qu&eacute; dice cada pantalla, no c&oacute;digo
         que exista todav&iacute;a.
       </p>
@@ -623,16 +640,55 @@
       <article class="parada demo">
         <div class="hito"><span class="num">0</span><span class="hilo"></span></div>
         <div class="cuerpo">
-          <span class="chip listo">En el tel&eacute;fono</span>
-          <h3>Elegir con qu&eacute; caso entrar</h3>
+          <span class="chip falta">Reemplaza al selector de casos</span>
+          <h3>Entrar con el correo</h3>
           <p class="prosa">
-            Esta pantalla no existir&iacute;a en producci&oacute;n: la app leer&iacute;a el historial de quien la usa.
-            Est&aacute; porque el video dura cinco minutos y tiene que mostrar varios cuadros
-            cl&iacute;nicos, y lo declara en pantalla en vez de esconderlo.
+            Escribes <code>insulina@gmail.com</code>, das enter y entras con el historial de esa
+            persona. <strong>No hay login de verdad</strong>: no hay contrase&ntilde;a, no hay servidor y
+            nada sale del tel&eacute;fono. El correo es la llave del caso, y cada correo abre un cuadro
+            cl&iacute;nico distinto, que es lo que deja mostrar varios en cinco minutos de video.
+            En producci&oacute;n la app leer&iacute;a el historial de quien la usa y esta pantalla no existir&iacute;a,
+            as&iacute; que lo declara en pantalla en vez de esconderlo.
           </p>
           <dl class="detalles">
             <div class="detalle"><dt>Datos</dt><dd>Seis historiales sint&eacute;ticos de 65 mediciones cada uno</dd></div>
+            <div class="detalle"><dt>Hoy en c&oacute;digo</dt><dd>Un selector de tarjetas, que se cambia por este campo</dd></div>
             <div class="detalle"><dt>Sale del tel&eacute;fono</dt><dd><em>Nada</em></dd></div>
+          </dl>
+        </div>
+        <div class="aparato">
+          <div class="telefono boceto">
+            <div class="pantalla">
+              <p class="b-titulo">Ina Igar</p>
+              <p class="b-texto">
+                Entra con tu correo. No pedimos contrase&ntilde;a y nada de esto viaja a ning&uacute;n lado.
+              </p>
+              <p class="b-etiqueta">Correo</p>
+              <div class="b-campo"><span>insulina@gmail.com</span><span class="b-cursor"></span></div>
+              <p class="b-boton">Entrar</p>
+              <p class="b-nota">
+                Demo: cada correo abre un historial sint&eacute;tico distinto. Ninguno corresponde a
+                una persona real.
+              </p>
+            </div>
+          </div>
+          <p class="pie-aparato">boceto</p>
+        </div>
+      </article>
+
+      <article class="parada demo">
+        <div class="hito"><span class="num">0b</span><span class="hilo"></span></div>
+        <div class="cuerpo">
+          <span class="chip listo">En el tel&eacute;fono</span>
+          <h3>Lo que hay hoy: el selector de casos</h3>
+          <p class="prosa">
+            Esta es la pantalla que corre en el Android ahora mismo, y la que el campo de correo
+            va a reemplazar. Sirve para lo mismo, cargar un historial, y ya calcula por cada caso
+            cu&aacute;ntas se&ntilde;ales dispara y cu&aacute;l es la peor. Ese c&aacute;lculo se conserva: solo cambia la
+            puerta de entrada.
+          </p>
+          <dl class="detalles">
+            <div class="detalle"><dt>Archivo</dt><dd>mobile/src/PantallaUsuarios.tsx</dd></div>
           </dl>
         </div>
         <div class="aparato">
@@ -873,15 +929,19 @@
         <div class="hito"><span class="num">5</span><span class="hilo"></span></div>
         <div class="cuerpo">
           <span class="chip falta">Por construir</span>
-          <h3>El nodo del corregimiento hace de cartero</h3>
+          <h3>Sale por el primer camino que aparezca</h3>
           <p class="prosa">
-            Cuando vuelve el wifi, o cuando el tel&eacute;fono descubre por Hyperswarm la laptop del
-            corresponsal, el JSON viaja cifrado hasta el banco. Ese mismo nodo es el que reparte
-            los pesos del modelo por LAN y el que presta c&oacute;mputo en modo delegado. Tres oficios,
-            un solo aparato.
+            Hay dos, y el nodo es el segundo. <strong>Con datos o wifi el tel&eacute;fono habla directo
+            con el banco</strong>, sin intermediario, que es lo que va a pasar la mayor&iacute;a de las
+            veces. Solo cuando no hay internet entra el otro camino: el tel&eacute;fono descubre por
+            Hyperswarm la laptop del corresponsal y el JSON viaja cifrado a trav&eacute;s de ella. Ese
+            mismo nodo reparte los pesos del modelo por LAN y presta c&oacute;mputo en modo delegado.
+            Tres oficios, un solo aparato, y ninguno indispensable cuando hay se&ntilde;al.
           </p>
           <dl class="detalles">
-            <div class="detalle"><dt>Sale del tel&eacute;fono</dt><dd><em>El JSON de solicitud, y solo eso</em></dd></div>
+            <div class="detalle"><dt>Camino 1</dt><dd>Datos o wifi: directo al banco</dd></div>
+            <div class="detalle"><dt>Camino 2</dt><dd>Sin internet: por el nodo del corregimiento</dd></div>
+            <div class="detalle"><dt>Sale del tel&eacute;fono</dt><dd><em>El mismo JSON por los dos</em></dd></div>
           </dl>
         </div>
         <div class="aparato">
@@ -889,14 +949,17 @@
             <div class="pantalla">
               <p class="b-titulo">Enviada</p>
               <p class="b-texto">
-                Sali&oacute; por el nodo del corregimiento. Ninguna foto viaj&oacute; con ella.
+                Volvieron los datos y sali&oacute; sola. Ninguna foto viaj&oacute; con ella.
               </p>
               <div class="b-bloque">
-                <div class="b-fila"><span class="k">camino</span><span class="v">Nodo del corregimiento</span></div>
+                <div class="b-fila"><span class="k">camino</span><span class="v">Datos m&oacute;viles<br>directo al banco</span></div>
                 <div class="b-fila"><span class="k">contenido</span><span class="v">JSON firmado</span></div>
                 <div class="b-fila"><span class="k">im&aacute;genes</span><span class="v">Ninguna</span></div>
               </div>
               <p class="b-estado ok">Entregada al banco</p>
+              <p class="b-nota">
+                Sin internet dir&iacute;a: sali&oacute; por el nodo del corregimiento.
+              </p>
             </div>
           </div>
           <p class="pie-aparato">boceto</p>
@@ -1055,9 +1118,10 @@
       <p class="prosa">
         Historiales sint&eacute;ticos, 65 mediciones cada uno. Los seis disparan exactamente las
         se&ntilde;ales que se les pidieron, verificado corriendo <code>detectarSenales</code> sobre los
-        seis archivos. El caso A es el m&aacute;s importante de todos: que la app <strong>no diga
-        nada</strong> responde de una a la cr&iacute;tica obvia de cualquier app de salud, que asusta por
-        gusto.
+        seis archivos. La columna "entra con" es el correo que abre cada uno en la demo, y son
+        una propuesta: cambiarlos es cambiar una constante. El caso A es el m&aacute;s importante de
+        todos: que la app <strong>no diga nada</strong> responde de una a la cr&iacute;tica obvia de
+        cualquier app de salud, que asusta por gusto.
       </p>
     </div>
 
@@ -1066,6 +1130,7 @@
         <thead>
           <tr>
             <th scope="col">Caso</th>
+            <th scope="col">Entra con</th>
             <th scope="col">Qui&eacute;n</th>
             <th scope="col">Se&ntilde;ales que dispara</th>
             <th scope="col">Urgencia</th>
@@ -1074,36 +1139,42 @@
         <tbody>
           <tr>
             <td class="destacado"><span class="caso-id">A</span> &middot; Sin hallazgos</td>
+            <td><span class="correo">control@gmail.com</span></td>
             <td>Mujer, 34</td>
             <td><span class="codigos"><span class="codigo">ninguna</span></span></td>
             <td><span class="urg ninguna">sin se&ntilde;ales</span></td>
           </tr>
           <tr>
             <td class="destacado"><span class="caso-id">B</span> &middot; Diabetes sin diagnosticar</td>
+            <td><span class="correo">insulina@gmail.com</span></td>
             <td>Hombre, 52</td>
             <td><span class="codigos"><span class="codigo">GLU_ALTA</span><span class="codigo">PRES_ALTA</span><span class="codigo">PESO_BAJA</span><span class="codigo">IMC_SOBREPESO</span></span></td>
             <td><span class="urg prioritaria">Prioritaria</span></td>
           </tr>
           <tr>
             <td class="destacado"><span class="caso-id">C</span> &middot; Hipertensi&oacute;n no controlada</td>
+            <td><span class="correo">presion@gmail.com</span></td>
             <td>Mujer, 61</td>
             <td><span class="codigos"><span class="codigo">PRES_ALTA</span><span class="codigo">IMC_OBESIDAD</span></span></td>
             <td><span class="urg prioritaria">Prioritaria</span></td>
           </tr>
           <tr>
             <td class="destacado"><span class="caso-id">D</span> &middot; Cuadro respiratorio agudo</td>
+            <td><span class="correo">fiebre@gmail.com</span></td>
             <td>Hombre, 28</td>
             <td><span class="codigos"><span class="codigo">TAQUI</span><span class="codigo">SAT_BAJA</span><span class="codigo">FIEBRE</span><span class="codigo">RESP_ALTA</span></span></td>
             <td><span class="urg prioritaria">Prioritaria</span></td>
           </tr>
           <tr>
             <td class="destacado"><span class="caso-id">E</span> &middot; Hipoglucemia</td>
+            <td><span class="correo">azucar@gmail.com</span></td>
             <td>Mujer, 45</td>
             <td><span class="codigos"><span class="codigo">GLU_MUY_BAJA</span></span></td>
             <td><span class="urg inmediata">Inmediata</span></td>
           </tr>
           <tr>
             <td class="destacado"><span class="caso-id">F</span> &middot; Prediabetes</td>
+            <td><span class="correo">limite@gmail.com</span></td>
             <td>Hombre, 39</td>
             <td><span class="codigos"><span class="codigo">GLU_LIMITE</span><span class="codigo">IMC_SOBREPESO</span></span></td>
             <td><span class="urg rutinaria">Rutinaria</span></td>
@@ -1181,7 +1252,9 @@
           <li><b>El bloque 0</b>: el tel&eacute;fono todav&iacute;a no ha cargado MedPsy ni soltado el primer token</li>
           <li><b>El modelo en el flujo</b>: el prompt, el schema y el limpiador existen, pero la pantalla a&uacute;n muestra solo las reglas</li>
           <li><b>El log de rendimiento</b>, que es entregable del reto Tether y se hace ahora o no se hace</li>
-          <li><b>C&aacute;mara, OCR, borrado de foto, cola, Hyperswarm</b>, el eval, el LoRA y el video</li>
+          <li><b>La pantalla de correo</b>, que reemplaza al selector de casos que hay hoy</li>
+          <li><b>Los dos caminos de salida</b>: el env&iacute;o directo al banco por HTTP y el rodeo por Hyperswarm</li>
+          <li><b>C&aacute;mara, OCR, borrado de foto, cola</b>, el eval, el LoRA y el video</li>
         </ul>
       </div>
     </div>
