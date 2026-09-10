@@ -23,6 +23,12 @@ export const COLOR = {
   separador: "#E2E2E2",
   /** Fondo hundido, para campos y estados apagados. */
   hundido: "#F2F2F2",
+  /**
+   * Texto que todavía no vale: el placeholder de un campo vacío, el paso de la
+   * revisión que no ha ocurrido. Más claro que `gris`, y a propósito: no está
+   * pensado para leerse, está pensado para verse como un hueco.
+   */
+  apagado: "#9A9A9A",
 
   inmediata: "#C42B18",
   prioritaria: "#A85F00",

@@ -110,7 +110,7 @@ const s = StyleSheet.create({
   marcadorActivo: { borderColor: COLOR.tinta },
   marcadorHecho: { borderColor: COLOR.rutinaria, backgroundColor: COLOR.rutinaria },
   textos: { flex: 1 },
-  pasoTitulo: { fontSize: 16, lineHeight: 21, fontWeight: "600", color: "#B4B4B4" },
+  pasoTitulo: { fontSize: 16, lineHeight: 21, fontWeight: "600", color: COLOR.apagado },
   pasoTituloVivo: { color: COLOR.tinta },
   pasoResultado: { ...TIPO.denso, fontSize: 14, color: COLOR.rutinaria, marginTop: 3 },
 });
