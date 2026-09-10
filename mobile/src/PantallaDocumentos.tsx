@@ -8,8 +8,11 @@
  * permitirse.
  */
 import { useState } from "react";
-import { SafeAreaView, ScrollView, Text, View, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { Pantalla, Encabezado, BarraVeredicto, Franja, Etiqueta, Pie } from "./ui/componentes";
+import Pictograma from "./ui/Pictograma";
+import { COLOR, TIPO, ESPACIO, DISPLAY, TOQUE } from "./ui/tokens";
 
 type Clave = "cedula" | "ingresos" | "extracto";
 
@@ -66,110 +69,112 @@ export default function PantallaDocumentos({
   const faltan = DOCUMENTOS.filter(d => d.obligatorio && !tomados[d.clave]).length;
 
   return (
-    <SafeAreaView style={s.pantalla}>
-      <ScrollView contentContainerStyle={s.cuerpo}>
-        <Pressable onPress={onVolver} accessibilityRole="button" style={s.volver}>
-          <Text style={s.volverTexto}>Volver</Text>
-        </Pressable>
+    <Pantalla>
+      <Encabezado meta="Volver" onVolver={onVolver} />
 
-        <Text style={s.titulo}>Tus documentos</Text>
+      <BarraVeredicto color={COLOR.prioritaria} texto="Tus documentos" derecha={`B/. ${monto}`} />
+
+      <View style={s.arriba}>
+        <Text style={s.titular}>Se leen{"\n"}aquí dentro</Text>
         <Text style={s.parrafo}>
-          Para el crédito de B/. {monto} hacen falta dos documentos, y un tercero que es
-          opcional. Se fotografían aquí y se leen aquí mismo, en el teléfono.
+          Hacen falta dos documentos, y un tercero que es opcional. Se fotografían con este
+          teléfono y no viajan a ningún lado.
         </Text>
+      </View>
 
-        {error ? <Text style={s.error}>{error}</Text> : null}
+      {error ? <Franja color={COLOR.inmediata} titulo="No se pudo" texto={error} /> : null}
 
-        <View style={s.lista}>
-          {DOCUMENTOS.map(d => (
-            <View key={d.clave} style={[s.tarjeta, tomados[d.clave] && s.tarjetaLista]}>
-              <View style={s.cabecera}>
-                <Text style={s.nombre}>{d.nombre}</Text>
-                {d.obligatorio ? null : <Text style={s.opcional}>Opcional</Text>}
-              </View>
-              <Text style={s.ayuda}>{d.ayuda}</Text>
-
-              {tomados[d.clave] ? (
-                <View style={s.estado}>
-                  <Text style={s.estadoTexto}>Foto tomada</Text>
-                  <Pressable
-                    onPress={() => tomarFoto(d.clave)}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Repetir la foto de ${d.nombre}`}
-                  >
-                    <Text style={s.repetir}>Repetir</Text>
-                  </Pressable>
+      <View style={s.lista}>
+        {DOCUMENTOS.map((d, i) => {
+          const listo = !!tomados[d.clave];
+          return (
+            <View key={d.clave} style={[s.fila, i === DOCUMENTOS.length - 1 ? null : s.separador]}>
+              <Pictograma
+                simbolo={listo ? "listo" : "documento"}
+                tamano={30}
+                color={listo ? COLOR.rutinaria : COLOR.tinta}
+              />
+              <View style={s.textos}>
+                <View style={s.cabecera}>
+                  <Text style={s.nombre}>{d.nombre}</Text>
+                  {d.obligatorio ? null : <Text style={s.opcional}>Opcional</Text>}
                 </View>
-              ) : (
+                <Text style={s.ayuda}>{d.ayuda}</Text>
+
                 <Pressable
                   onPress={() => tomarFoto(d.clave)}
                   accessibilityRole="button"
-                  accessibilityLabel={`Tomar la foto de ${d.nombre}`}
-                  style={({ pressed }) => [s.boton, pressed && s.botonPress]}
+                  accessibilityLabel={
+                    listo ? `Repetir la foto de ${d.nombre}` : `Tomar la foto de ${d.nombre}`
+                  }
+                  style={({ pressed }) => [s.accion, listo && s.accionListo, pressed && s.accionPress]}
                 >
-                  <Text style={s.botonTexto}>Tomar foto</Text>
+                  <Text style={[s.accionTexto, listo && s.accionTextoListo]}>
+                    {listo ? "Foto tomada. Repetir" : "Tomar foto"}
+                  </Text>
                 </Pressable>
-              )}
+              </View>
             </View>
-          ))}
-        </View>
+          );
+        })}
+      </View>
 
-        <View style={s.privacidad}>
-          <Text style={s.privacidadTitulo}>Qué pasa con las fotos</Text>
-          <Text style={s.privacidadTexto}>
-            Se leen en este teléfono para sacar los datos escritos y se borran. Ninguna imagen
-            viaja al banco.
-          </Text>
-        </View>
-
-        <Text style={s.pendiente}>
-          {faltan > 0
-            ? `Faltan ${faltan} ${faltan === 1 ? "documento" : "documentos"} para poder enviar.`
-            : "Ya están los obligatorios. El envío se conecta en el siguiente bloque."}
+      <View style={s.privacidad}>
+        <Text style={s.privacidadTitulo}>Qué pasa con las fotos</Text>
+        <Text style={s.privacidadTexto}>
+          Se leen en este teléfono para sacar los datos escritos y se borran. Ninguna imagen viaja
+          al banco.
         </Text>
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+
+      <Etiqueta>Estado</Etiqueta>
+      <Text style={s.estado}>
+        {faltan > 0
+          ? `Faltan ${faltan} ${faltan === 1 ? "documento" : "documentos"} para poder enviar.`
+          : "Ya están los obligatorios."}
+      </Text>
+
+      <Pie>
+        La lectura en el dispositivo y el envío al banco se conectan en el siguiente bloque. Hasta
+        entonces la pantalla dice que el documento está tomado, no leído.
+      </Pie>
+    </Pantalla>
   );
 }
 
 const s = StyleSheet.create({
-  pantalla: { flex: 1, backgroundColor: "#F4F6F4" },
-  cuerpo: { padding: 20, paddingTop: 40, paddingBottom: 48 },
-  volver: { marginBottom: 20 },
-  volverTexto: { fontSize: 14, color: "#0E6E6C", fontWeight: "600" },
-  titulo: { fontSize: 24, fontWeight: "700", color: "#0F1512" },
-  parrafo: { fontSize: 15, lineHeight: 22, color: "#4E5A55", marginTop: 10 },
-  error: {
-    fontSize: 13.5, lineHeight: 20, color: "#A2402F",
-    backgroundColor: "#F6E4DF", borderRadius: 3, padding: 12, marginTop: 16,
+  arriba: { paddingHorizontal: ESPACIO.borde, paddingTop: 18, paddingBottom: 16, gap: 10 },
+  titular: { ...DISPLAY, fontSize: 34, lineHeight: 35, letterSpacing: -1.2, color: COLOR.tinta },
+  parrafo: { fontSize: 15, lineHeight: 21, color: COLOR.gris },
+
+  lista: { borderTopWidth: 3, borderTopColor: COLOR.tinta },
+  separador: { borderBottomWidth: 1, borderBottomColor: COLOR.separador },
+  fila: {
+    flexDirection: "row", alignItems: "flex-start", gap: 14,
+    paddingHorizontal: ESPACIO.borde, paddingVertical: 15,
   },
-  lista: { gap: 12, marginTop: 24 },
-  tarjeta: {
-    backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D3DAD6",
-    borderRadius: 4, padding: 16,
-  },
-  tarjetaLista: { borderColor: "#0E6E6C" },
+  textos: { flex: 1, gap: 3 },
   cabecera: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
-  nombre: { fontSize: 16, fontWeight: "600", color: "#0F1512", flex: 1 },
-  opcional: { fontSize: 11, color: "#818C87", textTransform: "uppercase", letterSpacing: 0.6 },
-  ayuda: { fontSize: 13.5, lineHeight: 19, color: "#818C87", marginTop: 4 },
-  boton: {
-    backgroundColor: "#EAEEEB", borderRadius: 3,
-    paddingVertical: 12, alignItems: "center", marginTop: 14,
+  nombre: { fontSize: 17, fontWeight: "700", color: COLOR.tinta, flex: 1 },
+  opcional: { ...TIPO.etiqueta, fontSize: 11, color: COLOR.gris },
+  ayuda: { fontSize: 13.5, lineHeight: 18, color: COLOR.gris },
+
+  accion: {
+    minHeight: TOQUE, marginTop: 10, paddingHorizontal: 14,
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 3, borderColor: COLOR.tinta,
   },
-  botonPress: { backgroundColor: "#DDE3DF" },
-  botonTexto: { fontSize: 14.5, fontWeight: "600", color: "#0E6E6C" },
-  estado: {
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-    marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: "#EAEEEB",
-  },
-  estadoTexto: { fontSize: 14, fontWeight: "600", color: "#0E6E6C" },
-  repetir: { fontSize: 13.5, color: "#818C87" },
+  accionListo: { borderColor: COLOR.rutinaria },
+  accionPress: { opacity: 0.8 },
+  accionTexto: { ...TIPO.barra, fontSize: 13, letterSpacing: 0.4, color: COLOR.tinta },
+  accionTextoListo: { color: COLOR.rutinaria },
+
   privacidad: {
-    backgroundColor: "#DCEBEA", borderWidth: 1, borderColor: "#0E6E6C",
-    borderRadius: 4, padding: 16, marginTop: 24,
+    backgroundColor: COLOR.rutinaria, marginTop: 22,
+    paddingHorizontal: ESPACIO.borde, paddingVertical: 15, gap: 4,
   },
-  privacidadTitulo: { fontSize: 14, fontWeight: "700", color: "#0E6E6C", marginBottom: 6 },
-  privacidadTexto: { fontSize: 13.5, lineHeight: 20, color: "#2F4746" },
-  pendiente: { fontSize: 13, lineHeight: 19, color: "#818C87", marginTop: 20 },
+  privacidadTitulo: { ...TIPO.barra, fontSize: 13, letterSpacing: 0.6, color: COLOR.sobreColor },
+  privacidadTexto: { fontSize: 13.5, lineHeight: 19, color: COLOR.sobreColor },
+
+  estado: { fontSize: 15, lineHeight: 21, fontWeight: "700", color: COLOR.tinta, paddingHorizontal: ESPACIO.borde },
 });

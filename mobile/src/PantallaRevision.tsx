@@ -11,10 +11,12 @@
  * redactar el mensaje, la espera dejará de ser puesta y será la de verdad.
  */
 import { useEffect, useState } from "react";
-import { SafeAreaView, View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import type { Usuario } from "./usuarios";
 import { detectarSenales } from "./core/reglas";
 import { armarPaquete } from "./core/paquete";
+import { Pantalla, Encabezado } from "./ui/componentes";
+import { COLOR, TIPO, ESPACIO, DISPLAY } from "./ui/tokens";
 
 /** Lo que tarda cada paso en pantalla. No es el tiempo de cálculo, es el de lectura. */
 const RITMO_MS = 600;
@@ -58,13 +60,12 @@ export default function PantallaRevision({
   }, []);
 
   return (
-    <SafeAreaView style={s.pantalla}>
+    <Pantalla scroll={false}>
+      <Encabezado meta="aquí dentro" />
+
       <View style={s.cuerpo}>
-        <Text style={s.marca}>Ina Igar</Text>
-        <Text style={s.titulo}>Revisando tu historial</Text>
-        <Text style={s.parrafo}>
-          Todo esto ocurre aquí dentro. Nada se envía a ningún lado.
-        </Text>
+        <Text style={s.titular}>Revisando{"\n"}tu historial</Text>
+        <Text style={s.parrafo}>Todo esto ocurre en este teléfono. Nada se envía a ningún lado.</Text>
 
         <View style={s.pasos}>
           {pasos.map((p, i) => {
@@ -72,7 +73,13 @@ export default function PantallaRevision({
             const activo = i === hechos;
             return (
               <View key={p.titulo} style={s.paso}>
-                <View style={[s.marcador, hecho && s.marcadorHecho, activo && s.marcadorActivo]} />
+                <View
+                  style={[
+                    s.marcador,
+                    activo && s.marcadorActivo,
+                    hecho && s.marcadorHecho,
+                  ]}
+                />
                 <View style={s.textos}>
                   <Text style={[s.pasoTitulo, (hecho || activo) && s.pasoTituloVivo]}>
                     {p.titulo}
@@ -84,26 +91,26 @@ export default function PantallaRevision({
           })}
         </View>
       </View>
-    </SafeAreaView>
+    </Pantalla>
   );
 }
 
 const s = StyleSheet.create({
-  pantalla: { flex: 1, backgroundColor: "#F4F6F4" },
-  cuerpo: { flex: 1, padding: 20, paddingTop: 40, justifyContent: "center" },
-  marca: { fontSize: 15, fontWeight: "700", color: "#818C87", letterSpacing: 0.3 },
-  titulo: { fontSize: 24, fontWeight: "700", color: "#0F1512", marginTop: 10 },
-  parrafo: { fontSize: 14.5, lineHeight: 21, color: "#4E5A55", marginTop: 8 },
-  pasos: { marginTop: 34, gap: 22 },
-  paso: { flexDirection: "row", alignItems: "flex-start", gap: 14 },
+  cuerpo: { flex: 1, paddingHorizontal: ESPACIO.borde, justifyContent: "center", paddingBottom: 40 },
+  titular: { ...DISPLAY, fontSize: 38, lineHeight: 38, letterSpacing: -1.2, color: COLOR.tinta },
+  parrafo: { fontSize: 15, lineHeight: 21, color: COLOR.gris, marginTop: 10 },
+
+  pasos: { marginTop: 38, gap: 4 },
+  paso: { flexDirection: "row", alignItems: "flex-start", gap: 14, paddingVertical: 12 },
+  /** Cuadrado, no círculo: en señalética no hay nada redondo salvo un pictograma. */
   marcador: {
-    width: 10, height: 10, borderRadius: 5, marginTop: 5,
-    borderWidth: 1, borderColor: "#D3DAD6", backgroundColor: "#FFFFFF",
+    width: 14, height: 14, marginTop: 4,
+    borderWidth: 3, borderColor: COLOR.separador, backgroundColor: COLOR.fondo,
   },
-  marcadorActivo: { borderColor: "#0E6E6C" },
-  marcadorHecho: { borderColor: "#0E6E6C", backgroundColor: "#0E6E6C" },
+  marcadorActivo: { borderColor: COLOR.tinta },
+  marcadorHecho: { borderColor: COLOR.rutinaria, backgroundColor: COLOR.rutinaria },
   textos: { flex: 1 },
-  pasoTitulo: { fontSize: 15, lineHeight: 21, color: "#A6B0AB" },
-  pasoTituloVivo: { color: "#0F1512", fontWeight: "600" },
-  pasoResultado: { fontSize: 13.5, lineHeight: 19, color: "#0E6E6C", marginTop: 3 },
+  pasoTitulo: { fontSize: 16, lineHeight: 21, fontWeight: "600", color: "#B4B4B4" },
+  pasoTituloVivo: { color: COLOR.tinta },
+  pasoResultado: { ...TIPO.denso, fontSize: 14, color: COLOR.rutinaria, marginTop: 3 },
 });

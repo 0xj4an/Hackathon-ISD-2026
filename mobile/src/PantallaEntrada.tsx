@@ -6,10 +6,10 @@
  * la app leería el historial de quien la usa y esta pantalla no existiría.
  */
 import { useState } from "react";
-import {
-  SafeAreaView, ScrollView, Text, View, TextInput, Pressable, StyleSheet,
-} from "react-native";
+import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { USUARIOS, buscarPorCorreo, type Usuario } from "./usuarios";
+import { Pantalla, Encabezado, Boton, Etiqueta, Pie } from "./ui/componentes";
+import { COLOR, TIPO, ESPACIO, DISPLAY } from "./ui/tokens";
 
 const NO_EXISTE = "No hay ningún historial con ese correo. Revisa cómo lo escribiste.";
 
@@ -30,23 +30,22 @@ export default function PantallaEntrada({ onEntrar }: { onEntrar: (u: Usuario) =
   };
 
   return (
-    <SafeAreaView style={s.pantalla}>
-      <ScrollView contentContainerStyle={s.cuerpo} keyboardShouldPersistTaps="handled">
-        <Text style={s.marca}>Ina Igar</Text>
-        <Text style={s.sub}>camino de la medicina</Text>
+    <Pantalla>
+      <Encabezado meta="camino de la medicina" />
 
-        <Text style={s.titulo}>Entra con tu correo</Text>
-        <Text style={s.parrafo}>
-          No pedimos contraseña y nada de esto viaja a ningún lado.
-        </Text>
+      <View style={s.arriba}>
+        <Text style={s.titular}>Entra con{"\n"}tu correo</Text>
+        <Text style={s.parrafo}>No pedimos contraseña y nada de esto viaja a ningún lado.</Text>
+      </View>
 
-        <Text style={s.etiqueta}>Correo</Text>
+      <Etiqueta>Correo</Etiqueta>
+      <View style={s.campoCaja}>
         <TextInput
           value={correo}
           onChangeText={escribir}
           onSubmitEditing={entrar}
           placeholder="tucorreo@gmail.com"
-          placeholderTextColor="#A6B0AB"
+          placeholderTextColor="#9A9A9A"
           keyboardType="email-address"
           inputMode="email"
           autoCapitalize="none"
@@ -55,80 +54,68 @@ export default function PantallaEntrada({ onEntrar }: { onEntrar: (u: Usuario) =
           accessibilityLabel="Correo con el que entras"
           style={[s.campo, error ? s.campoError : null]}
         />
+      </View>
 
-        {error ? <Text style={s.error}>{error}</Text> : null}
+      {error ? <Text style={s.error}>{error}</Text> : null}
 
-        <Pressable
-          onPress={entrar}
-          accessibilityRole="button"
-          accessibilityLabel="Entrar"
-          style={({ pressed }) => [s.boton, pressed && s.botonPress]}
-        >
-          <Text style={s.botonTexto}>Entrar</Text>
-        </Pressable>
+      <Boton texto="Entrar" onPress={entrar} />
 
-        <View style={s.aviso}>
-          <Text style={s.avisoTexto}>
-            Pantalla de demostración. Cada correo abre un historial sintético completo:
-            ninguno corresponde a una persona real.
-          </Text>
-        </View>
+      <View style={s.aviso}>
+        <Text style={s.avisoTitulo}>Pantalla de demostración</Text>
+        <Text style={s.avisoTexto}>
+          Cada correo abre un historial sintético completo. Ninguno corresponde a una persona real.
+        </Text>
+      </View>
 
-        <Text style={s.etiqueta}>Correos de la demo</Text>
-        <View style={s.lista}>
-          {USUARIOS.map(u => (
-            <Pressable
-              key={u.id}
-              onPress={() => escribir(u.correo)}
-              accessibilityRole="button"
-              accessibilityLabel={`Usar el correo ${u.correo}`}
-              style={({ pressed }) => [s.correo, pressed && s.correoPress]}
-            >
-              <Text style={s.correoTexto}>{u.correo}</Text>
-            </Pressable>
-          ))}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      <Etiqueta>Correos de la demo</Etiqueta>
+      <View style={s.lista}>
+        {USUARIOS.map(u => (
+          <Pressable
+            key={u.id}
+            onPress={() => escribir(u.correo)}
+            accessibilityRole="button"
+            accessibilityLabel={`Usar el correo ${u.correo}`}
+            style={({ pressed }) => [s.correo, pressed && s.correoPress]}
+          >
+            <Text style={s.correoTexto}>{u.correo}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <Pie>Toda la inteligencia corre en este teléfono. Ningún servicio remoto participa.</Pie>
+    </Pantalla>
   );
 }
 
 const s = StyleSheet.create({
-  pantalla: { flex: 1, backgroundColor: "#F4F6F4" },
-  cuerpo: { padding: 20, paddingTop: 40, paddingBottom: 48 },
-  marca: { fontSize: 30, fontWeight: "700", color: "#0F1512" },
-  sub: { fontSize: 14, color: "#818C87", marginTop: 2 },
-  titulo: { fontSize: 19, fontWeight: "600", color: "#0F1512", marginTop: 34 },
-  parrafo: { fontSize: 14, lineHeight: 21, color: "#4E5A55", marginTop: 6 },
-  etiqueta: {
-    fontSize: 12, color: "#818C87", marginTop: 24, marginBottom: 6,
-    textTransform: "uppercase", letterSpacing: 0.8,
-  },
+  arriba: { paddingHorizontal: ESPACIO.borde, paddingTop: 18, paddingBottom: 4, gap: 10 },
+  titular: { ...DISPLAY, fontSize: 42, lineHeight: 42, letterSpacing: -1.4, color: COLOR.tinta },
+  parrafo: { fontSize: 15, lineHeight: 21, color: COLOR.gris },
+
+  campoCaja: { paddingHorizontal: ESPACIO.borde },
   campo: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1, borderColor: "#D3DAD6",
-    borderBottomWidth: 2, borderBottomColor: "#0E6E6C",
-    borderRadius: 3, paddingHorizontal: 14, paddingVertical: 13,
-    fontSize: 16, color: "#0F1512",
+    borderWidth: 3, borderColor: COLOR.tinta, backgroundColor: COLOR.fondo,
+    paddingHorizontal: 14, minHeight: 58,
+    fontSize: 17, fontWeight: "600", color: COLOR.tinta,
   },
-  campoError: { borderBottomColor: "#A2402F" },
-  error: { fontSize: 13, lineHeight: 19, color: "#A2402F", marginTop: 8 },
-  boton: {
-    backgroundColor: "#0E6E6C", borderRadius: 3,
-    paddingVertical: 14, alignItems: "center", marginTop: 16,
+  campoError: { borderColor: COLOR.inmediata },
+  error: {
+    fontSize: 13.5, lineHeight: 19, fontWeight: "600", color: COLOR.inmediata,
+    paddingHorizontal: ESPACIO.borde, marginTop: 8,
   },
-  botonPress: { backgroundColor: "#0B5654" },
-  botonTexto: { fontSize: 15, fontWeight: "600", color: "#F4F6F4" },
+
   aviso: {
-    backgroundColor: "#F7EBD5", borderLeftWidth: 3, borderLeftColor: "#B77812",
-    padding: 14, borderRadius: 3, marginTop: 28,
+    backgroundColor: COLOR.prioritaria, marginTop: 26,
+    paddingHorizontal: ESPACIO.borde, paddingVertical: 14, gap: 3,
   },
-  avisoTexto: { fontSize: 13, lineHeight: 19, color: "#6B5310" },
-  lista: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  avisoTitulo: { ...TIPO.barra, fontSize: 13, letterSpacing: 0.6, color: COLOR.sobreColor },
+  avisoTexto: { fontSize: 13.5, lineHeight: 18, color: COLOR.sobreColor },
+
+  lista: { flexDirection: "row", flexWrap: "wrap", gap: 8, paddingHorizontal: ESPACIO.borde },
   correo: {
-    borderWidth: 1, borderColor: "#D3DAD6", borderRadius: 3,
-    paddingHorizontal: 10, paddingVertical: 7, backgroundColor: "#FFFFFF",
+    borderWidth: 2, borderColor: COLOR.tinta, paddingHorizontal: 11,
+    minHeight: 40, justifyContent: "center",
   },
-  correoPress: { backgroundColor: "#EAEEEB" },
-  correoTexto: { fontSize: 13, color: "#4E5A55" },
+  correoPress: { backgroundColor: COLOR.hundido },
+  correoTexto: { fontSize: 13, fontWeight: "700", color: COLOR.tinta },
 });

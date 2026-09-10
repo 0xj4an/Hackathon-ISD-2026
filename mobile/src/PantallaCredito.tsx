@@ -8,7 +8,9 @@
  * ninguna de las fotos.
  */
 import { useState } from "react";
-import { SafeAreaView, ScrollView, Text, View, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { Pantalla, Encabezado, BarraVeredicto, FilaRuta, Boton, Etiqueta, Pie } from "./ui/componentes";
+import { COLOR, TIPO, ESPACIO, DISPLAY } from "./ui/tokens";
 
 export default function PantallaCredito({
   costoMin, costoMax, onContinuar, onVolver,
@@ -26,116 +28,93 @@ export default function PantallaCredito({
   ];
 
   return (
-    <SafeAreaView style={s.pantalla}>
-      <ScrollView contentContainerStyle={s.cuerpo}>
-        <Pressable onPress={onVolver} accessibilityRole="button" style={s.volver}>
-          <Text style={s.volverTexto}>Volver a la alerta</Text>
-        </Pressable>
+    <Pantalla>
+      <Encabezado meta="Volver" onVolver={onVolver} />
 
-        <Text style={s.titulo}>Crédito de salud</Text>
+      <BarraVeredicto color={COLOR.prioritaria} texto="Crédito de salud" />
+
+      <View style={s.arriba}>
+        <Text style={s.titular}>¿Por cuánto{"\n"}lo pides?</Text>
         <Text style={s.parrafo}>
           Atender todo cuesta entre B/. {costoMin} y B/. {costoMax}. Puedes pedirlo desde aquí,
           sin bajar al pueblo.
         </Text>
+      </View>
 
-        <Text style={s.etiqueta}>Cuánto necesitas</Text>
-        <View style={s.montos}>
-          {opciones.map(o => {
-            const elegido = o.valor === monto;
-            return (
-              <Pressable
-                key={o.titulo}
-                onPress={() => setMonto(o.valor)}
-                accessibilityRole="radio"
-                accessibilityState={{ selected: elegido }}
-                accessibilityLabel={`${o.titulo}, ${o.valor} balboas. ${o.ayuda}`}
-                style={({ pressed }) => [s.monto, elegido && s.montoElegido, pressed && s.montoPress]}
-              >
-                <Text style={[s.montoCifra, elegido && s.montoCifraElegida]}>B/. {o.valor}</Text>
-                <Text style={s.montoTitulo}>{o.titulo}</Text>
-                <Text style={s.montoAyuda}>{o.ayuda}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
+      <View style={s.montos}>
+        {opciones.map(o => {
+          const elegido = o.valor === monto;
+          return (
+            <Pressable
+              key={o.titulo}
+              onPress={() => setMonto(o.valor)}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: elegido }}
+              accessibilityLabel={`${o.titulo}, ${o.valor} balboas. ${o.ayuda}`}
+              style={({ pressed }) => [s.monto, elegido && s.montoElegido, pressed && s.montoPress]}
+            >
+              <Text style={[s.montoCifra, elegido && s.montoTextoElegido]}>B/. {o.valor}</Text>
+              <Text style={[s.montoTitulo, elegido && s.montoTextoElegido]}>{o.titulo}</Text>
+              <Text style={[s.montoAyuda, elegido && s.montoAyudaElegida]}>{o.ayuda}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
 
-        <Text style={s.etiqueta}>Qué te vamos a pedir</Text>
-        <View style={s.lista}>
-          <Punto texto="Una foto de tu cédula" />
-          <Punto texto="Una foto de tu comprobante de ingresos" />
-          <Punto texto="Una foto de tu extracto bancario, si lo tienes. Baja la tasa" />
-        </View>
+      <Etiqueta>Qué te vamos a pedir</Etiqueta>
+      <View style={s.filas}>
+        <FilaRuta simbolo="documento" etiqueta="Obligatorio" valor="Una foto de tu cédula" />
+        <FilaRuta simbolo="documento" etiqueta="Obligatorio" valor="Una foto de tu comprobante de ingresos" />
+        <FilaRuta simbolo="moneda" etiqueta="Opcional, baja la tasa" valor="Una foto de tu extracto bancario" ultima />
+      </View>
 
-        <View style={s.privacidad}>
-          <Text style={s.privacidadTitulo}>Qué ve el banco</Text>
-          <Text style={s.privacidadTexto}>
-            Las fotos se leen en este teléfono y se borran. Al banco solo le llegan los datos
-            escritos y que el préstamo es de salud. No le llega qué se te detectó.
-          </Text>
-        </View>
+      <View style={s.privacidad}>
+        <Text style={s.privacidadTitulo}>Qué ve el banco</Text>
+        <Text style={s.privacidadTexto}>
+          Las fotos se leen en este teléfono. Al banco solo le llegan los datos escritos y que el
+          préstamo es de salud. No le llega qué se te detectó.
+        </Text>
+      </View>
 
-        <Pressable
-          onPress={() => onContinuar(monto)}
-          accessibilityRole="button"
-          accessibilityLabel={`Cargar mis documentos para pedir ${monto} balboas`}
-          style={({ pressed }) => [s.boton, pressed && s.botonPress]}
-        >
-          <Text style={s.botonTexto}>Cargar mis documentos</Text>
-        </Pressable>
+      <Boton
+        texto="Cargar mis documentos"
+        onPress={() => onContinuar(monto)}
+        etiqueta={`Cargar mis documentos para pedir ${monto} balboas`}
+      />
+      <Boton texto="Ahora no" tono="borde" onPress={onVolver} />
 
-        <Pressable onPress={onVolver} accessibilityRole="button" style={s.secundario}>
-          <Text style={s.secundarioTexto}>Ahora no</Text>
-        </Pressable>
-      </ScrollView>
-    </SafeAreaView>
+      <Pie>
+        El modelo de crédito del nodo es de juguete, hecho para demostrar el flujo. No representa
+        ninguna política real.
+      </Pie>
+    </Pantalla>
   );
 }
 
-const Punto = ({ texto }: { texto: string }) => (
-  <View style={s.punto}>
-    <View style={s.vineta} />
-    <Text style={s.puntoTexto}>{texto}</Text>
-  </View>
-);
-
 const s = StyleSheet.create({
-  pantalla: { flex: 1, backgroundColor: "#F4F6F4" },
-  cuerpo: { padding: 20, paddingTop: 40, paddingBottom: 48 },
-  volver: { marginBottom: 20 },
-  volverTexto: { fontSize: 14, color: "#0E6E6C", fontWeight: "600" },
-  titulo: { fontSize: 24, fontWeight: "700", color: "#0F1512" },
-  parrafo: { fontSize: 15, lineHeight: 22, color: "#4E5A55", marginTop: 10 },
-  etiqueta: {
-    fontSize: 12, color: "#818C87", marginTop: 26, marginBottom: 8,
-    textTransform: "uppercase", letterSpacing: 0.8,
-  },
-  montos: { flexDirection: "row", gap: 10 },
+  arriba: { paddingHorizontal: ESPACIO.borde, paddingTop: 18, paddingBottom: 16, gap: 10 },
+  titular: { ...DISPLAY, fontSize: 34, lineHeight: 35, letterSpacing: -1.2, color: COLOR.tinta },
+  parrafo: { fontSize: 15, lineHeight: 21, color: COLOR.gris },
+
+  montos: { flexDirection: "row", gap: 10, paddingHorizontal: ESPACIO.borde },
   monto: {
-    flex: 1, paddingVertical: 14, paddingHorizontal: 12,
-    backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D3DAD6", borderRadius: 3,
+    flex: 1, paddingVertical: 14, paddingHorizontal: 12, gap: 2,
+    borderWidth: 3, borderColor: COLOR.separador, backgroundColor: COLOR.fondo,
   },
-  montoElegido: { borderColor: "#0E6E6C", borderWidth: 2, backgroundColor: "#DCEBEA" },
-  montoPress: { backgroundColor: "#EAEEEB" },
-  montoCifra: { fontSize: 18, fontWeight: "700", color: "#4E5A55" },
-  montoCifraElegida: { color: "#0E6E6C" },
-  montoTitulo: { fontSize: 13.5, fontWeight: "600", color: "#0F1512", marginTop: 4 },
-  montoAyuda: { fontSize: 12, lineHeight: 17, color: "#818C87", marginTop: 2 },
-  lista: { gap: 10 },
-  punto: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
-  vineta: { width: 5, height: 5, borderRadius: 3, backgroundColor: "#818C87", marginTop: 8 },
-  puntoTexto: { flex: 1, fontSize: 14.5, lineHeight: 21, color: "#4E5A55" },
+  montoElegido: { borderColor: COLOR.tinta, backgroundColor: COLOR.tinta },
+  montoPress: { opacity: 0.85 },
+  montoCifra: { ...DISPLAY, fontSize: 22, lineHeight: 24, color: COLOR.tinta },
+  montoTitulo: { fontSize: 14, fontWeight: "700", color: COLOR.tinta },
+  montoAyuda: { fontSize: 12.5, lineHeight: 17, color: COLOR.gris },
+  montoTextoElegido: { color: COLOR.sobreColor },
+  montoAyudaElegida: { color: COLOR.sobreTinta },
+
+  filas: { borderTopWidth: 3, borderTopColor: COLOR.tinta },
+
   privacidad: {
-    backgroundColor: "#DCEBEA", borderWidth: 1, borderColor: "#0E6E6C",
-    borderRadius: 4, padding: 16, marginTop: 26,
+    backgroundColor: COLOR.rutinaria, marginTop: 22,
+    paddingHorizontal: ESPACIO.borde, paddingVertical: 15, gap: 4,
   },
-  privacidadTitulo: { fontSize: 14, fontWeight: "700", color: "#0E6E6C", marginBottom: 6 },
-  privacidadTexto: { fontSize: 13.5, lineHeight: 20, color: "#2F4746" },
-  boton: {
-    backgroundColor: "#0E6E6C", borderRadius: 3,
-    paddingVertical: 15, alignItems: "center", marginTop: 26,
-  },
-  botonPress: { backgroundColor: "#0B5654" },
-  botonTexto: { fontSize: 15, fontWeight: "600", color: "#F4F6F4" },
-  secundario: { alignItems: "center", paddingVertical: 14, marginTop: 4 },
-  secundarioTexto: { fontSize: 14, color: "#818C87" },
+  privacidadTitulo: { ...TIPO.barra, fontSize: 13, letterSpacing: 0.6, color: COLOR.sobreColor },
+  privacidadTexto: { fontSize: 13.5, lineHeight: 19, color: COLOR.sobreColor },
 });

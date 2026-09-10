@@ -1,0 +1,103 @@
+/**
+ * Señalética: la dirección visual de Ina Igar.
+ *
+ * La app no es una interfaz, es un letrero. Bloques de color a sangre, una
+ * palabra por pantalla, un solo botón. Está pensada para leerse a pleno sol,
+ * de lejos, y a tamaño diminuto en el video del jurado.
+ *
+ * Dos reglas gobiernan todo lo demás:
+ *
+ * 1. **Un solo color de señal por pantalla.** Manda el más urgente; los otros
+ *    esperan su turno. El negro no es una señal, es el cierre: el total y el
+ *    estado del envío.
+ * 2. **Un solo elemento dominante por pantalla.** Cuando hay una lista larga
+ *    (el paquete son diez líneas) el veredicto se encoge a barra y el total
+ *    en negro toma el relevo. Lo que se conserva no es el tamaño de la letra,
+ *    es que siempre haya una cosa que mande.
+ */
+
+export const COLOR = {
+  fondo: "#FFFFFF",
+  tinta: "#101010",
+  gris: "#6B6B6B",
+  separador: "#E2E2E2",
+  /** Fondo hundido, para campos y estados apagados. */
+  hundido: "#F2F2F2",
+
+  inmediata: "#C42B18",
+  prioritaria: "#A85F00",
+  rutinaria: "#0B7A4B",
+
+  /** Texto sobre bloque de color. Blanco puro, siempre. */
+  sobreColor: "#FFFFFF",
+  /** Texto secundario sobre el bloque negro. */
+  sobreTinta: "#B0B0B0",
+} as const;
+
+/**
+ * La familia de display.
+ *
+ * El diseño se dibujó con Archivo Black. Meterla de verdad obliga a instalar
+ * `expo-font` y a un prebuild, y el bloque 0 (MedPsy cargando en el teléfono)
+ * todavía no está cerrado: no se le mete un módulo nativo nuevo a un build que
+ * no se ha probado. Mientras tanto el peso 900 del sistema da la Roboto Black
+ * de Android, que es una grotesca negra y sostiene la dirección.
+ *
+ * Para cambiar a Archivo cuando el bloque 0 esté verde:
+ *   1. `npx expo install expo-font`
+ *   2. poner los .ttf en `assets/fonts/`
+ *   3. cargarlos con `useFonts` en `App.tsx`
+ *   4. añadir `fontFamily: "ArchivoBlack"` aquí abajo
+ * Nada más cambia: todas las pantallas leen de esta constante.
+ */
+export const DISPLAY = {
+  fontWeight: "900",
+  letterSpacing: -0.4,
+} as const;
+
+/** Escala tipográfica. El piso es 13: por debajo no baja ni en modo denso. */
+export const TIPO = {
+  /** El veredicto. Una o dos palabras, nunca más. */
+  veredicto: { ...DISPLAY, fontSize: 38, lineHeight: 38, letterSpacing: -1 },
+  /** Cifra grande: el valor medido, el total, el monto aprobado. */
+  cifra: { ...DISPLAY, fontSize: 54, lineHeight: 46, letterSpacing: -2 },
+  cifraMedia: { ...DISPLAY, fontSize: 30, lineHeight: 32, letterSpacing: -1 },
+  /** Título de pantalla en modo denso. */
+  titulo: { ...DISPLAY, fontSize: 23, lineHeight: 25 },
+  /** El wordmark y las barras. */
+  barra: { ...DISPLAY, fontSize: 13, letterSpacing: 1.3, textTransform: "uppercase" },
+  /** Cuerpo en modo señal. Nunca por debajo de 13. */
+  cuerpo: { fontSize: 16, lineHeight: 21, fontWeight: "600" },
+  /** Cuerpo en modo denso, el piso absoluto. */
+  denso: { fontSize: 13, lineHeight: 17, fontWeight: "600" },
+  /** Etiqueta de campo: DÓNDE, QUIÉN, CUESTA. */
+  etiqueta: {
+    fontSize: 12, fontWeight: "700", letterSpacing: 1.4,
+    textTransform: "uppercase",
+  },
+  /** Pie: fuentes, disclaimers, avisos legales. */
+  pie: { fontSize: 11, lineHeight: 16 },
+} as const;
+
+export const ESPACIO = { borde: 20, entre: 14, apretado: 8 } as const;
+
+/** Altura mínima de cualquier cosa que se toque. */
+export const TOQUE = 48;
+
+export type Urgencia = "Inmediata" | "Prioritaria" | "Rutinaria";
+
+export const COLOR_URGENCIA: Record<Urgencia, string> = {
+  Inmediata: COLOR.inmediata,
+  Prioritaria: COLOR.prioritaria,
+  Rutinaria: COLOR.rutinaria,
+};
+
+/**
+ * La urgencia dicha como la diría un letrero, no como la nombra el código.
+ * "Prioritaria" no le dice nada a nadie; "anda pronto" sí.
+ */
+export const VERBO_URGENCIA: Record<Urgencia, string> = {
+  Inmediata: "Anda ya",
+  Prioritaria: "Anda pronto",
+  Rutinaria: "Sin prisa",
+};

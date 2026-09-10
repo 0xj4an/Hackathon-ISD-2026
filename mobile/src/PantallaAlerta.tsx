@@ -1,118 +1,67 @@
 /**
- * Pantalla del caso: qué se detectó y qué hacer.
+ * Pantalla del caso: qué se detectó, qué hacer, y cuánto cuesta.
  *
  * Las señales las deciden las reglas de `core/reglas.ts`, no el modelo
  * (`ADR-005`). Esta pantalla muestra el resultado de esas reglas tal cual, con
  * su fuente citada. El modelo entra después, para redactar el mensaje en
  * español sencillo, y no puede cambiar ni el umbral ni la ruta.
+ *
+ * El orden importa y viene de `ADR-010`: primero la señal con su instrucción
+ * inmediata, el paquete debajo. En una urgencia el costo no compite con el
+ * "anda ya", pero tampoco se calla: la atención de urgencia es justo lo que la
+ * gente no puede pagar, y por eso no va.
  */
-import { SafeAreaView, ScrollView, Text, View, Pressable, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import type { Usuario } from "./usuarios";
 import { detectarSenales, type Senal } from "./core/reglas";
 import { armarPaquete, mensajeCredito, type Paquete } from "./core/paquete";
+import {
+  Pantalla, Encabezado, Veredicto, BarraVeredicto, FilaLista,
+  BandaTotal, Franja, Boton, Etiqueta, LeyendaEstimado, Pie,
+} from "./ui/componentes";
+import {
+  COLOR, TIPO, ESPACIO, DISPLAY, COLOR_URGENCIA, VERBO_URGENCIA, type Urgencia,
+} from "./ui/tokens";
 
-const COLOR = {
-  Inmediata: "#A2402F",
-  Prioritaria: "#B77812",
-  Rutinaria: "#0E6E6C",
-} as const;
-
-const QUE_HACER = {
-  emergencia: "Anda ya",
-  autocuidado: "Hazlo ahora",
-  consulta: "Consulta",
-  examen: "Examen",
-  examen_y_consulta: "Examen y consulta",
-} as const;
+const ORDEN: Record<Urgencia, number> = { Inmediata: 0, Prioritaria: 1, Rutinaria: 2 };
 
 const DISCLAIMER =
-  "Esto es orientación automática y local, no un diagnóstico. Confirma con un profesional de salud.";
+  "Esto es orientación automática y local, no un diagnóstico. Cada umbral sale de una guía citada, y nadie de este equipo es profesional de salud.";
 
+const balboas = (min: number, max: number) =>
+  min === max ? `B/. ${min}` : `B/. ${min} a ${max}`;
+
+/** Una señal: el color manda, y debajo va la ruta con su fuente. */
 function Tarjeta({ senal }: { senal: Senal }) {
-  const c = COLOR[senal.urgencia];
+  const color = COLOR_URGENCIA[senal.urgencia];
   const r = senal.ruta;
   return (
-    <View style={[s.tarjeta, { borderLeftColor: c }]}>
-      <View style={s.cabecera}>
-        <Text style={[s.urgencia, { color: c }]}>{senal.urgencia}</Text>
-        <Text style={s.tipoRuta}>{QUE_HACER[r.tipo]}</Text>
-      </View>
+    <View style={s.tarjeta}>
+      <View style={[s.barraColor, { backgroundColor: color }]} />
+      <View style={s.tarjetaCuerpo}>
+        <Text style={[s.tarjetaUrgencia, { color }]}>{VERBO_URGENCIA[senal.urgencia]}</Text>
+        <Text style={s.tarjetaDescripcion}>{senal.descripcion}</Text>
 
-      <Text style={s.descripcion}>{senal.descripcion}</Text>
+        {r.ahora ? <Text style={[s.tarjetaAhora, { color }]}>{r.ahora}</Text> : null}
 
-      {r.ahora ? (
-        <View style={[s.ahora, { backgroundColor: c + "18" }]}>
-          <Text style={[s.ahoraTexto, { color: c }]}>{r.ahora}</Text>
+        <View style={s.tarjetaDatos}>
+          {r.examen ? <Dato k="Examen" v={r.examen} /> : null}
+          <Dato k="Dónde" v={r.donde} />
+          <Dato k="Quién" v={r.especialista} />
+          {senal.costo ? (
+            <Dato k="Cuesta" v={`${balboas(senal.costo.min_usd, senal.costo.max_usd)}, aproximado`} />
+          ) : null}
         </View>
-      ) : null}
 
-      <View style={s.datos}>
-        {r.examen ? <Dato k="Examen" v={r.examen} /> : null}
-        {senal.costo ? (
-          <Dato k="Costo" v={`B/. ${senal.costo.min_usd} a ${senal.costo.max_usd}, aproximado`} />
+        {r.vigilar ? (
+          <View style={s.vigilar}>
+            <Text style={s.vigilarK}>Ve de inmediato si aparece</Text>
+            <Text style={s.vigilarV}>{r.vigilar}</Text>
+          </View>
         ) : null}
-        <Dato k="Dónde" v={r.donde} />
-        <Dato k="Quién" v={r.especialista} />
+
+        <Text style={s.fuente}>{senal.fuente}</Text>
       </View>
-
-      {r.vigilar ? (
-        <Text style={s.vigilar}>
-          <Text style={s.vigilarK}>Ve de inmediato si aparece: </Text>{r.vigilar}
-        </Text>
-      ) : null}
-
-      <Text style={s.fuente}>{senal.fuente}</Text>
-    </View>
-  );
-}
-
-/**
- * Lo que cuesta atender todo, junto. Sin este bloque el crédito no se puede
- * ofrecer con honestidad: nadie sabe por cuánto pedirlo (`ADR-010`).
- */
-function BloqueP({ paquete, onPedir }: {
-  paquete: Paquete;
-  onPedir?: (min: number, max: number) => void;
-}) {
-  const p = paquete;
-  return (
-    <View style={s.paquete}>
-      <Text style={s.paqueteTitulo}>{p.titulo}</Text>
-
-      {p.lineas.map(l => (
-        <View key={l.concepto} style={s.linea}>
-          <Text style={s.lineaConcepto}>
-            {l.concepto}
-            {l.estimado ? <Text style={s.marcaEstimado}>  estimado</Text> : null}
-          </Text>
-          <Text style={s.lineaMonto}>
-            {l.min === l.max ? `B/. ${l.min}` : `B/. ${l.min} a ${l.max}`}
-          </Text>
-        </View>
-      ))}
-
-      <View style={s.total}>
-        <Text style={s.totalK}>Todo junto</Text>
-        <Text style={s.totalV}>B/. {p.total_min} a {p.total_max}</Text>
-      </View>
-
-      <View style={s.credito}>
-        <Text style={s.creditoTexto}>
-          {mensajeCredito(p)}
-        </Text>
-      </View>
-
-      {onPedir ? (
-        <Pressable
-          onPress={() => onPedir(p.total_min, p.total_max)}
-          accessibilityRole="button"
-          style={s.boton}
-        >
-          <Text style={s.botonTexto}>Pedir el crédito</Text>
-        </Pressable>
-      ) : null}
-
-      <Text style={s.fuente}>{p.nota}</Text>
     </View>
   );
 }
@@ -124,139 +73,191 @@ const Dato = ({ k, v }: { k: string; v: string }) => (
   </View>
 );
 
+/**
+ * Lo que cuesta atender todo, junto, en modo denso: la barra reemplaza al
+ * bloque de veredicto y el total en negro toma el relevo como elemento
+ * dominante. Sin este bloque el crédito no se puede ofrecer con honestidad,
+ * porque nadie sabe por cuánto pedirlo (`ADR-010`).
+ */
+function BloqueP({ paquete, onPedir }: {
+  paquete: Paquete;
+  onPedir?: (min: number, max: number) => void;
+}) {
+  const p = paquete;
+  const hayEstimados = p.lineas.some(l => l.estimado);
+  return (
+    <View style={s.paquete}>
+      <BarraVeredicto
+        color={COLOR.prioritaria}
+        texto="Lo que cuesta atenderlo"
+        derecha={p.meses > 0 ? `${p.meses} meses` : undefined}
+      />
+      <Text style={s.paqueteTitulo}>{p.titulo}</Text>
+
+      <View style={s.lineas}>
+        {p.lineas.map((l, i) => (
+          <FilaLista
+            key={l.concepto}
+            concepto={l.concepto}
+            monto={l.min === l.max ? `${l.min}` : `${l.min} a ${l.max}`}
+            estimado={l.estimado}
+            ultima={i === p.lineas.length - 1}
+          />
+        ))}
+      </View>
+
+      {hayEstimados ? <LeyendaEstimado /> : null}
+
+      <BandaTotal etiqueta={p.meses > 0 ? "Todo el año" : "Todo junto"} valor={balboas(p.total_min, p.total_max)} />
+
+      <Text style={s.credito}>{mensajeCredito(p)}</Text>
+
+      {onPedir ? (
+        <Boton
+          texto="Pedir un crédito de salud"
+          tono="prioritaria"
+          onPress={() => onPedir(p.total_min, p.total_max)}
+        />
+      ) : null}
+
+      <Pie>{p.nota}</Pie>
+    </View>
+  );
+}
+
 export default function PantallaAlerta({
-  usuario, onVolver, onPedirCredito,
+  usuario, onVolver, onPedirCredito, onSubirExamen,
 }: {
   usuario: Usuario;
   onVolver: () => void;
   onPedirCredito?: (costoMin: number, costoMax: number) => void;
+  /** Vía B: la persona trae un examen de laboratorio en papel. */
+  onSubirExamen?: () => void;
 }) {
-  const orden = { Inmediata: 0, Prioritaria: 1, Rutinaria: 2 } as const;
   const senales = detectarSenales(usuario.mediciones)
-    .sort((a, b) => orden[a.urgencia] - orden[b.urgencia]);
+    .sort((a, b) => ORDEN[a.urgencia] - ORDEN[b.urgencia]);
   const paquete = armarPaquete(senales);
+  const peor = senales[0];
 
+  if (senales.length === 0) {
+    return (
+      <Pantalla>
+        <Encabezado meta="Salir" onVolver={onVolver} />
+        <Veredicto
+          color={COLOR.rutinaria}
+          palabra={"Todo\nen orden"}
+          detalle="Ninguna de tus mediciones se salió de rango. No hay nada que hacer hoy."
+          simbolo="listo"
+        />
+        <Etiqueta>Lo que revisé</Etiqueta>
+        <Text style={s.sanoTexto}>
+          {usuario.mediciones.length} mediciones de los últimos meses, contra las 14 reglas de
+          referencia. Te aviso solo cuando algo se salga de rango.
+        </Text>
+        {onSubirExamen ? (
+          <Boton texto="Subir un examen de laboratorio" tono="borde" onPress={onSubirExamen} />
+        ) : null}
+
+        <Pie>
+          Estar en rango no descarta una enfermedad. Si te sientes mal, ve al centro de salud sin
+          esperar a que esta app diga nada.
+        </Pie>
+      </Pantalla>
+    );
+  }
 
   return (
-    <SafeAreaView style={s.pantalla}>
-      <ScrollView contentContainerStyle={s.cuerpo}>
-        <Pressable onPress={onVolver} accessibilityRole="button" style={s.volver}>
-          <Text style={s.volverTexto}>Salir</Text>
-        </Pressable>
+    <Pantalla>
+      <Encabezado meta="Salir" onVolver={onVolver} />
 
-        <Text style={s.nombre}>{usuario.nombre}</Text>
-        <Text style={s.meta}>
-          {usuario.sexo === "mujer" ? "Mujer" : "Hombre"}, {usuario.edad} años ·{" "}
-          {usuario.mediciones.length} mediciones
+      <Veredicto
+        color={COLOR_URGENCIA[peor.urgencia]}
+        palabra={VERBO_URGENCIA[peor.urgencia]}
+        detalle={peor.ruta.ahora ?? peor.ruta.examen ?? peor.ruta.donde}
+        simbolo={peor.urgencia === "Rutinaria" ? "listo" : "alerta"}
+      />
+
+      <View style={s.contexto}>
+        <Text style={s.contextoCifra}>{senales.length}</Text>
+        <Text style={s.contextoTexto}>
+          {senales.length === 1 ? "señal en tus mediciones" : "señales en tus mediciones"}
+          {"\n"}
+          <Text style={s.contextoMeta}>
+            {usuario.sexo === "mujer" ? "Mujer" : "Hombre"}, {usuario.edad} años, {usuario.mediciones.length} mediciones
+          </Text>
         </Text>
+      </View>
 
-        {senales.length === 0 ? (
-          <View style={s.sano}>
-            <Text style={s.sanoTitulo}>Nada fuera de rango</Text>
-            <Text style={s.sanoTexto}>
-              Todas las mediciones están dentro de los rangos de referencia. No hay nada que
-              hacer hoy. Sigue midiéndote como siempre.
-            </Text>
-          </View>
-        ) : (
-          <>
-            <Text style={s.cuenta}>
-              {senales.length} {senales.length === 1 ? "señal detectada" : "señales detectadas"}
-            </Text>
-            {senales.map(x => <Tarjeta key={x.codigo} senal={x} />)}
-            {paquete ? (
-              <>
-                <Text style={s.seccion}>Cuánto cuesta atenderlo</Text>
-                <BloqueP paquete={paquete} onPedir={onPedirCredito} />
-              </>
-            ) : null}
-          </>
-        )}
+      {peor.ruta.vigilar ? (
+        <Franja
+          color={COLOR.inmediata}
+          titulo="Ve ya si aparece"
+          texto={peor.ruta.vigilar}
+        />
+      ) : null}
 
-        <Text style={s.disclaimer}>{DISCLAIMER}</Text>
-      </ScrollView>
-    </SafeAreaView>
+      <View style={s.tarjetas}>
+        {senales.map(x => <Tarjeta key={x.codigo} senal={x} />)}
+      </View>
+
+      {paquete ? <BloqueP paquete={paquete} onPedir={onPedirCredito} /> : null}
+
+      {onSubirExamen ? (
+        <View style={s.examen}>
+          <Etiqueta>¿Te hiciste un examen?</Etiqueta>
+          <Text style={s.examenTexto}>
+            Si traes un examen de laboratorio en papel, la app te dice qué significa cada número.
+          </Text>
+          <Boton texto="Subir un examen de laboratorio" tono="borde" onPress={onSubirExamen} />
+        </View>
+      ) : null}
+
+      <Pie>{DISCLAIMER}</Pie>
+    </Pantalla>
   );
 }
 
 const s = StyleSheet.create({
-  pantalla: { flex: 1, backgroundColor: "#F4F6F4" },
-  cuerpo: { padding: 20, paddingTop: 40, paddingBottom: 48 },
-  volver: { marginBottom: 20 },
-  volverTexto: { fontSize: 14, color: "#0E6E6C", fontWeight: "600" },
-  nombre: { fontSize: 24, fontWeight: "700", color: "#0F1512" },
-  meta: { fontSize: 13, color: "#818C87", marginTop: 3, marginBottom: 22 },
-  cuenta: { fontSize: 13, color: "#4E5A55", marginBottom: 12, fontWeight: "600" },
+  contexto: {
+    flexDirection: "row", alignItems: "center", gap: 14,
+    paddingHorizontal: ESPACIO.borde, paddingTop: 18, paddingBottom: 16,
+    borderBottomWidth: 3, borderBottomColor: COLOR.tinta,
+  },
+  contextoCifra: { ...DISPLAY, fontSize: 46, lineHeight: 42, letterSpacing: -2, color: COLOR.tinta },
+  contextoTexto: { flex: 1, fontSize: 15, lineHeight: 20, fontWeight: "700", color: COLOR.tinta },
+  contextoMeta: { fontSize: 13.5, fontWeight: "400", color: COLOR.gris },
 
-  sano: {
-    backgroundColor: "#DCEBEA", borderWidth: 1, borderColor: "#0E6E6C",
-    borderRadius: 4, padding: 20,
+  sanoTexto: {
+    fontSize: 15, lineHeight: 21, color: COLOR.gris, paddingHorizontal: ESPACIO.borde,
   },
-  sanoTitulo: { fontSize: 17, fontWeight: "700", color: "#0E6E6C", marginBottom: 8 },
-  sanoTexto: { fontSize: 14, lineHeight: 21, color: "#2F4746" },
 
-  tarjeta: {
-    backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D3DAD6",
-    borderLeftWidth: 4, borderRadius: 4, padding: 16, marginBottom: 12,
-  },
-  cabecera: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 8 },
-  urgencia: { fontSize: 12, fontWeight: "700", letterSpacing: 0.4 },
-  tipoRuta: {
-    fontSize: 11, color: "#4E5A55", backgroundColor: "#EAEEEB",
-    paddingHorizontal: 8, paddingVertical: 3, borderRadius: 2, overflow: "hidden",
-  },
-  descripcion: { fontSize: 15, lineHeight: 22, color: "#0F1512" },
-  ahora: { marginTop: 12, padding: 12, borderRadius: 3 },
-  ahoraTexto: { fontSize: 14.5, fontWeight: "700", lineHeight: 20 },
-  datos: { marginTop: 14, gap: 8 },
-  dato: { flexDirection: "row", gap: 10 },
-  datoK: { fontSize: 12.5, color: "#818C87", width: 62 },
-  datoV: { fontSize: 13.5, color: "#0F1512", flex: 1, lineHeight: 19 },
-  vigilar: {
-    marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: "#F3DED9",
-    fontSize: 13, lineHeight: 19, color: "#A2402F",
-  },
-  vigilarK: { fontWeight: "700" },
-  fuente: {
-    marginTop: 14, paddingTop: 10, borderTopWidth: 1, borderTopColor: "#EAEEEB",
-    fontSize: 11.5, lineHeight: 17, color: "#818C87", fontStyle: "italic",
-  },
-  seccion: {
-    fontSize: 13, color: "#4E5A55", fontWeight: "600",
-    marginTop: 18, marginBottom: 12,
-  },
-  paquete: {
-    backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D3DAD6",
-    borderRadius: 4, padding: 16,
-  },
-  paqueteTitulo: { fontSize: 15, fontWeight: "700", color: "#0F1512", marginBottom: 14 },
-  linea: {
-    flexDirection: "row", alignItems: "flex-start", gap: 12,
-    paddingVertical: 6,
-  },
-  lineaConcepto: { flex: 1, fontSize: 13, lineHeight: 19, color: "#2F3733" },
-  marcaEstimado: { fontSize: 10.5, color: "#B77812", fontStyle: "italic" },
-  lineaMonto: {
-    fontSize: 13, color: "#0F1512", fontVariant: ["tabular-nums"], fontWeight: "600",
-  },
-  total: {
-    flexDirection: "row", justifyContent: "space-between", alignItems: "baseline",
-    marginTop: 10, paddingTop: 12, borderTopWidth: 1, borderTopColor: "#D3DAD6",
-  },
-  totalK: { fontSize: 14, fontWeight: "700", color: "#0F1512" },
-  totalV: {
-    fontSize: 16, fontWeight: "700", color: "#0F1512", fontVariant: ["tabular-nums"],
-  },
-  boton: {
-    marginTop: 12, backgroundColor: "#0E6E6C", borderRadius: 3,
-    paddingVertical: 14, alignItems: "center",
-  },
-  botonTexto: { color: "#FFFFFF", fontSize: 15, fontWeight: "700" },
-  credito: { marginTop: 14, padding: 12, borderRadius: 3, backgroundColor: "#DCEBEA" },
-  creditoTexto: { fontSize: 13.5, lineHeight: 20, color: "#0E6E6C", fontWeight: "600" },
+  tarjetas: { marginTop: 4 },
+  tarjeta: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: COLOR.separador },
+  barraColor: { width: 10 },
+  tarjetaCuerpo: { flex: 1, paddingVertical: 15, paddingLeft: 14, paddingRight: ESPACIO.borde },
+  tarjetaUrgencia: { ...TIPO.etiqueta, marginBottom: 4 },
+  tarjetaDescripcion: { fontSize: 16, lineHeight: 22, fontWeight: "700", color: COLOR.tinta },
+  tarjetaAhora: { fontSize: 15, lineHeight: 20, fontWeight: "900", marginTop: 8 },
 
-  disclaimer: {
-    marginTop: 26, padding: 14, backgroundColor: "#EAEEEB", borderRadius: 3,
-    fontSize: 12.5, lineHeight: 19, color: "#4E5A55",
+  tarjetaDatos: { marginTop: 12, gap: 7 },
+  dato: { flexDirection: "row", gap: 12 },
+  datoK: { ...TIPO.etiqueta, fontSize: 11, color: COLOR.gris, width: 62, paddingTop: 2 },
+  datoV: { flex: 1, fontSize: 14, lineHeight: 19, fontWeight: "600", color: COLOR.tinta },
+
+  vigilar: { marginTop: 12, borderLeftWidth: 4, borderLeftColor: COLOR.inmediata, paddingLeft: 10, gap: 1 },
+  vigilarK: { ...TIPO.etiqueta, fontSize: 11, color: COLOR.inmediata },
+  vigilarV: { fontSize: 13.5, lineHeight: 18, color: COLOR.tinta },
+
+  fuente: { ...TIPO.pie, color: COLOR.gris, marginTop: 12 },
+
+  paquete: { marginTop: 22 },
+  paqueteTitulo: {
+    ...TIPO.titulo, color: COLOR.tinta,
+    paddingHorizontal: ESPACIO.borde, paddingTop: 16, paddingBottom: 12,
+  },
+  lineas: { borderTopWidth: 3, borderTopColor: COLOR.tinta },
+  credito: {
+    fontSize: 14.5, lineHeight: 20, fontWeight: "600", color: COLOR.tinta,
+    paddingHorizontal: ESPACIO.borde, marginTop: 14,
   },
 });
