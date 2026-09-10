@@ -121,7 +121,7 @@ function leerCuerpo(req) {
 
 async function delBanco() {
   const r = await fetch(`${BANCO_URL}/solicitudes`, {
-    signal: AbortSignal.timeout(2500),
+    signal: AbortSignal.timeout(8000),
   });
   if (!r.ok) throw new Error(String(r.status));
   const filas = await r.json();

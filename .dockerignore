@@ -1,0 +1,5 @@
+**/node_modules
+nodo/state
+nodo/probe-p2p.mjs
+.git
+**/.DS_Store

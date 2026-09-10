@@ -7,7 +7,15 @@
   "scripts": {
     "start": "ROL=banco PORT=8787 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON index.mjs",
     "banco": "ROL=banco PORT=8787 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON index.mjs",
-    "corregimiento": "ROL=corregimiento PORT=8788 BANCO_URL=http://127.0.0.1:8787 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON index.mjs"
+    "corregimiento": "ROL=corregimiento PORT=8788 BANCO_URL=https://banco-production-3755.up.railway.app node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON index.mjs"
   },
-  "dependencies": { "hyperswarm": "^4.8.0", "b4a": "^1.6.7", "hypercore-crypto": "^3.4.2" }
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "b4a": "^1.6.7",
+    "hypercore-crypto": "^3.4.2",
+    "hyperswarm": "^4.8.0",
+    "zod": "^4.5.4"
+  }
 }

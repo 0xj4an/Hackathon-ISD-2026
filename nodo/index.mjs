@@ -2,13 +2,10 @@
 // por HTTP en la LAN, sin internet. Este proceso es quien envia y recibe
 // del banco cuando tiene salida.
 //
-//   telefono --LAN--> nodo pueblo :8788 --(cuando hay salida)--> banco :8787
+//   telefono --LAN--> nodo pueblo :8788 --HTTP--> banco remoto
 //
-// Hyperswarm entre pueblo y banco se intenta; si no hay peer (NAT), se usa
-// HTTP al banco desde aqui. El telefono nunca ve esa pata.
-import Hyperswarm from "hyperswarm";
-import crypto from "hypercore-crypto";
-import b4a from "b4a";
+// En Railway el banco es HTTP puro (SKIP_P2P). En local se intenta Hyperswarm
+// entre pueblo y banco; si no hay peer, el HTTP es el camino que vale.
 import { createServer } from "node:http";
 import { mkdirSync, writeFileSync, readdirSync, readFileSync, existsSync } from "node:fs";
 import { aceptar, recibir } from "./credito.mjs";
@@ -16,15 +13,14 @@ import { aceptar, recibir } from "./credito.mjs";
 const ROL = process.env.ROL || "banco";
 const PORT = Number(process.env.PORT || (ROL === "corregimiento" ? 8788 : 8787));
 const BANCO_URL = (process.env.BANCO_URL || "http://127.0.0.1:8787").replace(/\/$/, "");
+const SKIP_P2P = process.env.SKIP_P2P === "1" || Boolean(process.env.RAILWAY_ENVIRONMENT);
 const TOPIC_NAME = process.env.TOPIC || "isd-hackathon-credito-salud-v1";
 const STATE = new URL(`./state/${ROL}/`, import.meta.url).pathname;
 mkdirSync(STATE, { recursive: true });
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), `[${ROL}]`, ...a);
 
 const LIMITE = 32_000;
-const swarm = new Hyperswarm();
 const peers = new Set();
-const topic = crypto.hash(b4a.from(TOPIC_NAME));
 const enviarPeer = (sock, obj) => sock.write(JSON.stringify(obj) + "\n");
 
 function cors(res) {
@@ -116,11 +112,7 @@ async function comoCartero(raw) {
   const sol = aceptar(JSON.parse(raw));
   guardar(sol.id, ".json", sol);
   log(`recibida ${sol.id} monto ${sol.monto_solicitado_usd}`);
-  const dest = [...peers];
-  if (dest.length) {
-    for (const p of dest) enviarPeer(p, { tipo: "solicitud", data: sol });
-    log(`reenvio P2P ${sol.id} a ${dest.length} peer(s)`);
-  }
+  for (const p of peers) enviarPeer(p, { tipo: "solicitud", data: sol });
   try {
     await empujarHttp(sol);
   } catch (e) {
@@ -134,7 +126,7 @@ async function empujarHttp(sol) {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(sol),
-    signal: AbortSignal.timeout(4000),
+    signal: AbortSignal.timeout(Number(process.env.BANCO_TIMEOUT_MS || 12000)),
   });
   const data = await r.json();
   if (!data?.decision || data.decision === "pendiente") return;
@@ -147,10 +139,7 @@ async function reenviarPendientes(sock) {
   if (ROL !== "corregimiento") return;
   for (const sol of pendientes()) {
     const dest = sock ? [sock] : [...peers];
-    if (dest.length) {
-      for (const p of dest) enviarPeer(p, { tipo: "solicitud", data: sol });
-      log(`reenvio P2P ${sol.id} a ${dest.length} peer(s)`);
-    }
+    for (const p of dest) enviarPeer(p, { tipo: "solicitud", data: sol });
     try {
       await empujarHttp(sol);
     } catch (e) {
@@ -185,24 +174,39 @@ async function onMensaje(msg, sock, id) {
   }
 }
 
-swarm.on("connection", (sock, info) => {
-  const id = b4a.toString(info.publicKey, "hex").slice(0, 8);
-  peers.add(sock);
-  log(`peer conectado ${id}`);
-  let buf = "";
-  sock.on("data", (d) => {
-    buf += b4a.toString(d);
-    let i;
-    while ((i = buf.indexOf("\n")) >= 0) {
-      const line = buf.slice(0, i);
-      buf = buf.slice(i + 1);
-      if (line.trim()) void onMensaje(JSON.parse(line), sock, id);
-    }
+async function arrancarP2P() {
+  if (SKIP_P2P) {
+    log("p2p omitido (banco remoto por HTTP)");
+    return;
+  }
+  const [{ default: Hyperswarm }, crypto, { default: b4a }] = await Promise.all([
+    import("hyperswarm"),
+    import("hypercore-crypto"),
+    import("b4a"),
+  ]);
+  const swarm = new Hyperswarm();
+  const topic = crypto.hash(b4a.from(TOPIC_NAME));
+  swarm.on("connection", (sock, info) => {
+    const id = b4a.toString(info.publicKey, "hex").slice(0, 8);
+    peers.add(sock);
+    log(`peer conectado ${id}`);
+    let buf = "";
+    sock.on("data", (d) => {
+      buf += b4a.toString(d);
+      let i;
+      while ((i = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, i);
+        buf = buf.slice(i + 1);
+        if (line.trim()) void onMensaje(JSON.parse(line), sock, id);
+      }
+    });
+    sock.on("close", () => { peers.delete(sock); log(`peer cerrado ${id}`); });
+    sock.on("error", (e) => log("error peer", e.message));
+    if (ROL === "corregimiento") void reenviarPendientes(sock);
   });
-  sock.on("close", () => { peers.delete(sock); log(`peer cerrado ${id}`); });
-  sock.on("error", (e) => log("error peer", e.message));
-  if (ROL === "corregimiento") void reenviarPendientes(sock);
-});
+  await swarm.join(topic, { server: true, client: true }).flushed();
+  log(`p2p topic=${TOPIC_NAME} key=${b4a.toString(swarm.keyPair.publicKey, "hex").slice(0, 16)}…`);
+}
 
 createServer(async (req, res) => {
   cors(res);
@@ -243,6 +247,4 @@ createServer(async (req, res) => {
 
 if (ROL === "corregimiento") setInterval(() => { void reenviarPendientes(); }, 4000);
 
-swarm.join(topic, { server: true, client: true }).flushed().then(() => {
-  log(`p2p topic=${TOPIC_NAME} key=${b4a.toString(swarm.keyPair.publicKey, "hex").slice(0, 16)}…`);
-}).catch((e) => log("p2p join", e.message));
+arrancarP2P().catch((e) => log("p2p", e.message));
