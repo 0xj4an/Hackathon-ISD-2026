@@ -22,7 +22,7 @@ const DIR = resolve(import.meta.dirname);
 const OUT = resolve(DIR, "out");
 mkdirSync(OUT, { recursive: true });
 
-const EPOCHS = Number(process.env.EPOCHS || 2);
+const EPOCHS = Number(process.env.EPOCHS || 1);
 const t0 = Date.now();
 const ts = () => `[${((Date.now() - t0) / 1000).toFixed(0)}s]`;
 
@@ -118,7 +118,7 @@ const handle = finetune({
     outputParametersDir: OUT,
     checkpointSaveDir: resolve(OUT, "ckpt"),
     numberOfEpochs: EPOCHS,
-    learningRate: 2e-4,
+    learningRate: Number(process.env.LR || 2e-5),
     lrMin: 1e-8,
     contextLength: 1024,
     loraRank: 8,
