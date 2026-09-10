@@ -1,5 +1,5 @@
 app = "isd-hyperdht-relay"
-primary_region = "mia"
+primary_region = "dfw"
 
 [build]
   dockerfile = "Dockerfile.relay"

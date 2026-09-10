@@ -2,15 +2,22 @@
  * Peer HyperDHT con UDP público. Su publicKey va en swarmRelays de QVAC
  * (provider y consumer). Sin esto, delegate aborta el holepunch.
  *
- *   DHT_PORT=49737 DHT_HOST=0.0.0.0 node relay.mjs
- * En Fly: DHT_HOST=fly-global-services
+ *   DHT_PORT=49737 node relay.mjs
+ * En Fly: DHT_HOST=fly-global-services (se resuelve a IPv4; udx no acepta nombres)
  */
+import { lookup } from "node:dns/promises";
 import DHT from "hyperdht";
 import b4a from "b4a";
 
 const PORT = Number(process.env.DHT_PORT || 49737);
-const HOST = process.env.DHT_HOST || undefined;
 const seed = process.env.RELAY_SEED;
+
+async function ipv4(host) {
+  if (!host) return;
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(host)) return host;
+  const { address } = await lookup(host, { family: 4 });
+  return address;
+}
 
 const opts = {
   port: PORT,
@@ -18,7 +25,8 @@ const opts = {
   firewalled: false,
   anyPort: false,
 };
-if (HOST) opts.host = HOST;
+const host = await ipv4(process.env.DHT_HOST);
+if (host) opts.host = host;
 if (seed && /^[0-9a-f]{64}$/i.test(seed)) {
   opts.keyPair = DHT.keyPair(b4a.from(seed, "hex"));
 }
@@ -32,6 +40,7 @@ function estado() {
     publicKey: b4a.toString(node.defaultKeyPair.publicKey, "hex"),
     firewalled: node.firewalled,
     ephemeral: node.ephemeral,
+    bind: host || "default",
     host: node.host,
     port: node.port,
   };
