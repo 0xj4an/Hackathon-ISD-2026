@@ -41,6 +41,8 @@ export const IngresosSchema = z.object({
   empleador_o_actividad: z.string(),
   ingreso_mensual_usd: z.number().min(100).max(20000),
   tipo: z.enum(["asalariado", "independiente", "jubilado", "otro"]),
+  /** De la carta laboral. Es la variable mas predictiva despues del ingreso. */
+  antiguedad_meses: z.number().int().min(0).max(600).optional(),
   fecha_documento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   confianza: z.number().min(0).max(1),
 });
@@ -78,11 +80,28 @@ export const SolicitudSchema = z.object({
   monto_solicitado_usd: z.number().min(25).max(5000),
   cedula: CedulaSchema,
   ingresos: IngresosSchema,
+  /**
+   * Lo que la persona ya paga al mes en otras deudas. Sin este campo la
+   * capacidad de pago seria front-end (solo sobre el ingreso) y mentiria: el
+   * Acuerdo 4-2013 mide las fuentes de recursos disponibles, no el ingreso.
+   * Lo declara la persona; si hay extracto se contrasta y manda el mayor.
+   */
+  deudas_mensuales_usd: z.number().min(0).max(20000).default(0),
+  /** Escala el minimo vital del hogar. */
+  personas_a_cargo: z.number().int().min(0).max(15).default(0),
   extracto: ExtractoSchema.optional(),
   firma_hash: z.string().optional(),
   estado: z.enum(["borrador", "pendiente", "enviada", "respondida", "aceptada", "rechazada"]),
 });
 export type Solicitud = z.infer<typeof SolicitudSchema>;
+
+/** Por que salio esta decision. Lo que un banco llama adverse action. */
+export const FactorSchema = z.object({
+  variable: z.string(),
+  valor: z.number(),
+  puntos: z.number().int(),
+  que_cambiaria: z.string(),
+});
 
 /** 4) Respuesta del banco (nodo mock). */
 export const RespuestaBancoSchema = z.object({
@@ -92,6 +111,14 @@ export const RespuestaBancoSchema = z.object({
   plazo_meses: z.number().int().optional(),
   tasa_anual_pct: z.number().optional(),
   cuota_mensual_usd: z.number().optional(),
+  grado: z.enum(["A", "B", "C", "D", "E"]).optional(),
+  pd_pct: z.number().min(0).max(100).optional(),
+  tasa_componentes: z.object({
+    fondeo: z.number(), riesgo: z.number(), opex: z.number(),
+    capital: z.number(), margen: z.number(),
+  }).optional(),
+  factores: z.array(FactorSchema).default([]),
+  politica_version: z.string().optional(),
   motivo: z.string(),
   ts: z.string().datetime(),
 });
