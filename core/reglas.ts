@@ -8,13 +8,15 @@
 
 /** Tipos que Health Connect expone y que sabemos interpretar. */
 export type TipoMedicion =
-  | "glucosa_ayunas"   // BloodGlucoseRecord con relationToMeal = ayunas
-  | "presion_sist"     // BloodPressureRecord.systolic
-  | "presion_diast"    // BloodPressureRecord.diastolic
-  | "pulso_reposo"     // RestingHeartRateRecord
-  | "saturacion_o2"    // OxygenSaturationRecord
-  | "temperatura"      // BodyTemperatureRecord
-  | "peso";            // WeightRecord
+  | "glucosa_ayunas"          // BloodGlucoseRecord con relationToMeal = ayunas
+  | "presion_sist"            // BloodPressureRecord.systolic
+  | "presion_diast"           // BloodPressureRecord.diastolic
+  | "pulso_reposo"            // RestingHeartRateRecord
+  | "saturacion_o2"           // OxygenSaturationRecord
+  | "temperatura"             // BodyTemperatureRecord
+  | "frecuencia_respiratoria" // RespiratoryRateRecord
+  | "peso"                    // WeightRecord
+  | "estatura";               // HeightRecord, en metros
 
 export type Medicion = { ts: string; tipo: TipoMedicion; valor: number };
 
@@ -51,7 +53,27 @@ const promedio = (v: number[]) => v.reduce((a, b) => a + b, 0) / v.length;
 export function detectarSenales(m: Medicion[]): Senal[] {
   const out: Senal[] = [];
 
-  // --- Glucosa en ayunas. ADA: 100 a 125 alterada, 126 o más criterio de diabetes.
+  // --- Hipoglucemia. Es aguda: una sola lectura basta, no se espera tendencia.
+  // ADA: nivel 1 entre 54 y 70 (valor de alerta), nivel 2 por debajo de 54
+  // (hipoglucemia clínicamente significativa, requiere acción inmediata).
+  const gluTodas = m.filter(x => x.tipo === "glucosa_ayunas").map(x => x.valor);
+  const gluBaja = gluTodas.slice(-3).find(v => v < 70);
+  if (gluBaja !== undefined) {
+    const grave = gluBaja < 54;
+    out.push({
+      codigo: grave ? "GLU_MUY_BAJA" : "GLU_BAJA",
+      descripcion: `glucosa en ${gluBaja.toFixed(0)} mg/dL (por debajo de ${grave ? 54 : 70})`,
+      examen: grave
+        ? "Tomar azúcar de absorción rápida ahora y acudir a un centro de salud"
+        : "Tomar azúcar de absorción rápida y consultar si se repite",
+      urgencia: grave ? "Inmediata" : "Prioritaria",
+      fuente: grave
+        ? "ADA: por debajo de 54 mg/dL es hipoglucemia clínicamente significativa, requiere acción inmediata"
+        : "ADA: entre 54 y 70 mg/dL es valor de alerta de hipoglucemia, requiere carbohidrato de acción rápida",
+    });
+  }
+
+  // --- Glucosa en ayunas alta. ADA: 100 a 125 alterada, 126 o más criterio de diabetes.
   const glu = ultimos(m, "glucosa_ayunas", 3);
   if (glu.length >= 3) {
     const prom = promedio(glu);
@@ -146,6 +168,70 @@ export function detectarSenales(m: Medicion[]): Senal[] {
       urgencia: "Prioritaria",
       fuente: "38 grados o más se considera fiebre. Los signos de alarma citados son los de la OMS para dengue grave",
     });
+  }
+
+  // --- Frecuencia respiratoria. Normal en adultos: 12 a 20 por minuto.
+  const resp = m.filter(x => x.tipo === "frecuencia_respiratoria").map(x => x.valor);
+  const respUlt = resp.slice(-3);
+  const respAlta = respUlt.find(v => v > 25);
+  if (respAlta !== undefined) {
+    out.push({
+      codigo: "RESP_MUY_ALTA",
+      descripcion: `frecuencia respiratoria de ${respAlta.toFixed(0)} por minuto (normal 12 a 20)`,
+      examen: "Acudir a un centro de salud ahora",
+      urgencia: "Inmediata",
+      fuente: "Por encima de 25 respiraciones por minuto en adultos se considera señal de alarma",
+    });
+  } else if (respUlt.length >= 3 && respUlt.every(v => v > 20)) {
+    out.push({
+      codigo: "RESP_ALTA",
+      descripcion: `frecuencia respiratoria por encima de 20 por minuto en 3 mediciones (promedio ${promedio(respUlt).toFixed(0)})`,
+      examen: "Consulta general",
+      urgencia: "Prioritaria",
+      fuente: "Taquipnea en adultos es más de 20 respiraciones por minuto. Normal: 12 a 20",
+    });
+  }
+
+  // --- Índice de masa corporal. Necesita peso y estatura.
+  const pesos = m.filter(x => x.tipo === "peso");
+  const estatura = m.filter(x => x.tipo === "estatura").slice(-1)[0]?.valor;
+  const pesoUlt = pesos.slice(-1)[0]?.valor;
+  if (pesoUlt !== undefined && estatura !== undefined && estatura > 0.5 && estatura < 2.6) {
+    const imc = pesoUlt / (estatura * estatura);
+    if (imc >= 30) {
+      out.push({
+        codigo: "IMC_OBESIDAD",
+        descripcion: `índice de masa corporal de ${imc.toFixed(1)} (obesidad a partir de 30)`,
+        examen: "Consulta general, glucosa en ayunas y perfil lipídico",
+        costo: PRECIO_GLUCOSA,
+        urgencia: "Rutinaria",
+        fuente: "OMS: en adultos, IMC de 30 o más es obesidad. El IMC es un indicador aproximado de grasa corporal",
+      });
+    } else if (imc >= 25) {
+      out.push({
+        codigo: "IMC_SOBREPESO",
+        descripcion: `índice de masa corporal de ${imc.toFixed(1)} (sobrepeso a partir de 25)`,
+        examen: "Consulta general",
+        urgencia: "Rutinaria",
+        fuente: "OMS: en adultos, IMC de 25 o más es sobrepeso. El IMC es un indicador aproximado de grasa corporal",
+      });
+    }
+  }
+
+  // --- Pérdida de peso involuntaria. Más del 5% en 6 meses amerita estudio.
+  if (pesos.length >= 2) {
+    const primero = pesos[0], ultimo = pesos[pesos.length - 1];
+    const dias = (Date.parse(ultimo.ts) - Date.parse(primero.ts)) / 86400000;
+    const caida = (primero.valor - ultimo.valor) / primero.valor;
+    if (Number.isFinite(dias) && dias >= 60 && dias <= 400 && caida > 0.05) {
+      out.push({
+        codigo: "PESO_BAJA",
+        descripcion: `pérdida de ${(caida * 100).toFixed(0)}% del peso en ${Math.round(dias)} días, de ${primero.valor.toFixed(1)} a ${ultimo.valor.toFixed(1)} kg`,
+        examen: "Consulta general. Si no fue intencional, amerita estudio",
+        urgencia: "Prioritaria",
+        fuente: "Perder más del 5% del peso corporal en 6 a 12 meses sin proponérselo amerita evaluación médica",
+      });
+    }
   }
 
   return out;

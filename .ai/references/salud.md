@@ -220,6 +220,85 @@ dice en pantalla, no solo aquí.
 
 ---
 
+## 6c. Segunda ronda: lo que faltaba vigilar
+
+Revisión posterior. Encontró un hueco de seguridad y tres variables que se
+estaban leyendo o descartando sin razón.
+
+### El hueco: solo detectábamos glucosa **alta**
+
+`GLU_ALTA` y `GLU_LIMITE` miran hacia arriba. **La hipoglucemia no la veía
+nadie**, y a diferencia de la glucosa alta es **aguda**: no es un riesgo a diez
+años, es alguien que se puede desmayar hoy.
+
+La ADA la clasifica en niveles:
+
+| Nivel | Glucosa | Qué significa |
+| --- | --- | --- |
+| 1 | 54 a 70 mg/dL | Valor de alerta. Requiere carbohidrato de acción rápida |
+| 2 | Menos de 54 mg/dL | Clínicamente significativa. **Requiere acción inmediata** |
+| 3 | Cualquier valor | Evento grave con alteración del estado, requiere ayuda de otra persona |
+
+Implementado como `GLU_BAJA` (Prioritaria) y `GLU_MUY_BAJA` (Inmediata). **Una
+sola lectura basta**: esperar tres tomas para avisar de una hipoglucemia sería
+absurdo. El mensaje dice qué hacer, tomar azúcar de absorción rápida, no solo
+que hay un problema.
+
+Fuente: [ADA, Glycemic Goals and Hypoglycemia](https://diabetesjournals.org/care/article/48/Supplement_1/S128/157561/6-Glycemic-Goals-and-Hypoglycemia-Standards-of).
+
+### Corrección: la frecuencia respiratoria sí es señal
+
+Una versión anterior de este documento la puso junto a pasos y sueño como
+"contexto, no señal". **Estaba mal.** Tiene umbral clínico claro y es de los
+signos vitales que más rápido indican deterioro.
+
+| Frecuencia respiratoria | Lectura |
+| --- | --- |
+| 12 a 20 por minuto | Normal en adultos |
+| Más de 20 | Taquipnea |
+| Más de 25 | Señal de alarma |
+| Menos de 12 | Bradipnea |
+
+Implementado como `RESP_ALTA` (3 mediciones sobre 20, Prioritaria) y
+`RESP_MUY_ALTA` (una sobre 25, Inmediata). Health Connect la expone como
+`RespiratoryRateRecord`.
+
+### El peso, que se leía y se tiraba
+
+Estaba declarado y sin ninguna regla. Ahora sostiene dos señales:
+
+**Índice de masa corporal.** La OMS define en adultos sobrepeso a partir de
+**25** y obesidad a partir de **30**, con la fórmula peso en kg dividido por la
+estatura en metros al cuadrado. Requiere `HeightRecord`, que Health Connect
+también expone. La propia OMS advierte que el IMC es *"a surrogate marker of
+fatness"*, un indicador aproximado, y eso se dice en pantalla.
+
+Importa para Panamá: la obesidad es el tercer factor que MINSA nombra junto a
+hipertensión y diabetes al hablar de riesgo de muerte por dengue e influenza.
+
+**Pérdida de peso involuntaria.** Perder más del **5% del peso corporal en 6 a
+12 meses** sin proponérselo amerita evaluación médica, y por encima del 10% se
+considera desnutrición proteico-energética. Es una señal de tendencia pura: no
+la ve ningún valor suelto, solo la serie. La regla pide al menos 60 días de
+historial para no confundirse con fluctuación normal.
+
+Fuentes: [OMS, obesidad y sobrepeso](https://www.who.int/news-room/fact-sheets/detail/obesity-and-overweight),
+[Merck Manual, involuntary weight loss](https://www.merckmanuals.com/professional/special-subjects/nonspecific-symptoms/involuntary-weight-loss).
+
+### Lo que se decidió NO vigilar, y por qué
+
+Esto también es una decisión, y conviene tenerla escrita.
+
+| Dato | Health Connect lo expone | Por qué no |
+| --- | --- | --- |
+| **Bradicardia** (pulso bajo 60) | Sí, `RestingHeartRateRecord` | Es normal en personas entrenadas y **solo importa acompañada de síntomas** (mareo, desmayo, confusión) que la app no puede observar. Alertar por el número solo generaría falsos positivos en cualquiera que haga deporte |
+| **Variabilidad cardiaca** | Sí, `HeartRateVariabilityRmssdRecord` | No tiene umbral clínico simple y universal. Es útil comparada contra la propia línea base de la persona, no contra una tabla |
+| **Pasos** | Sí, `StepsRecord` | Es contexto de estilo de vida. La OMS recomienda actividad física, pero "caminó poco" no es un hallazgo que mande a nadie al laboratorio |
+| **Sueño** | Sí, `SleepSessionRecord` | Igual: factor de riesgo a largo plazo, no señal accionable hoy |
+
+La regla que separa una columna de la otra: **¿un valor fuera de rango cambia lo
+que la persona debería hacer esta semana?** Si no, es contexto.
+
 ## 7. Lo que hay que decir en pantalla, y en el video
 
 Esto no es letra chica, es parte del criterio de evaluación.
