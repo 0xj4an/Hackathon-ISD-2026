@@ -11,10 +11,21 @@ export type LecturaCredito = {
   fotosBorradas: number;
 };
 
+/** UUID para el id de la solicitud. Hermes no tiene `crypto.randomUUID`. */
+function nuevoId(): string {
+  const desdeApi = globalThis.crypto?.randomUUID?.();
+  if (desdeApi) return desdeApi;
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 /** Arma el JSON que sale del teléfono. Solo campos de SolicitudSchema. */
 export function solicitudDeLectura(monto: number, lectura: LecturaCredito): Solicitud {
   return {
-    id: crypto.randomUUID(),
+    id: nuevoId(),
     creada: new Date().toISOString(),
     proposito: "salud",
     monto_solicitado_usd: monto,
