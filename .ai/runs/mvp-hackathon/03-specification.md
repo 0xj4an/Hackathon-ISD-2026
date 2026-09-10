@@ -44,7 +44,7 @@ cola y viaja al banco cuando hay red o cuando aparece el nodo del corregimiento.
 | A1c | Explicación de la señal | `Senal` (venga de donde venga) -> MedPsy la redacta -> `AlertaSchema` |
 | A2 | Lectura de cédula | Foto -> `ocr()` -> LLM extrae -> `CedulaSchema` -> **se borra la foto** |
 | A3 | Lectura de comprobante de ingresos | Igual que A2 -> `IngresosSchema` |
-| A4 | Validaciones en código | `core/validaciones.ts` sobre el JSON extraído, antes de armar la solicitud |
+| A4 | Validaciones en código | `mobile/src/core/validaciones.ts` sobre el JSON extraído, antes de armar la solicitud |
 | A5 | Cola offline | SQLite, estado `pendiente`, la app dice que no hay señal |
 | A6 | Transporte | HTTP local cuando hay red; Hyperswarm al nodo del corregimiento cuando no |
 | A6b | **El nodo reparte el modelo** | El nodo sirve los 2.1 GB de pesos (y el adaptador LoRA) a los teléfonos por P2P local, sin internet. Ver abajo |
@@ -116,7 +116,7 @@ cosas de forma distinta**.
 | Qué mira | Una **tendencia**: el valor viene mal N días seguidos | Un **valor suelto** contra su rango de referencia |
 | Necesita historia | Sí, sin serie temporal no hay señal | No, con un dato basta |
 | Ejemplo | "glucosa en ayunas sobre 126 en las últimas 3 tomas" | "hemoglobina 9.1 g/dL, rango 12 a 16, anemia" |
-| Estado hoy | `core/reglas.ts`, **14 señales** sobre 9 variables, cada una con su fuente (`ADR-008`) | **`core/marcadores.ts`**, con los 8 marcadores, sus rangos y el clasificador |
+| Estado hoy | `mobile/src/core/reglas.ts`, **14 señales** sobre 9 variables, cada una con su fuente (`ADR-008`) | **`mobile/src/core/marcadores.ts`**, con los 8 marcadores, sus rangos y el clasificador |
 
 **Las dos desembocan en el mismo tipo `Senal`** (`codigo`, `descripcion`,
 `examen`, `costo_usd`, `urgencia`) y de ahí en adelante el flujo es uno solo:
@@ -126,9 +126,9 @@ deciden en código, el modelo sigue solo redactando.
 
 ### Los 8 marcadores de la vía B ya están escritos
 
-En `core/marcadores.ts`, con rango y siguiente paso:
+En `mobile/src/core/marcadores.ts`, con rango y siguiente paso:
 glicemia en ayunas, hemoglobina, plaquetas, creatinina, linfocitos CD4,
-colesterol total, hematocrito y TSH. Hay que moverlos a `core/reglas.ts` como
+colesterol total, hematocrito y TSH. Hay que moverlos a `mobile/src/core/reglas.ts` como
 `reglasRango()`. Es trabajo de copiar y adaptar, no de diseñar.
 
 > **Quitar `linfocitos CD4` del demo.** Su siguiente paso es "referir a programa
@@ -203,7 +203,7 @@ fingir que está.
 | C1 | MedPsy carga en el 14T Pro y produce texto en español | Captura con "modelo cargado" y TTFT en ms |
 | C2 | TTFT medido con `gpu` y con `cpu`, y se usa el mejor | Dos líneas en `perf.jsonl` con `device_cfg` distinto |
 | C3 | Las reglas de tendencia (vía A) disparan con el historial del usuario con hallazgo | `eval/run.mjs` recorre el historial y las cuenta |
-| C3b | Las reglas de rango (vía B) clasifican bien los 8 marcadores, alto, bajo y normal | `eval/run.mjs` contra los casos de `core/marcadores.ts` |
+| C3b | Las reglas de rango (vía B) clasifican bien los 8 marcadores, alto, bajo y normal | `eval/run.mjs` contra los casos de `mobile/src/core/marcadores.ts` |
 | C3c | **El usuario sano no dispara ninguna alerta** | `eval/run.mjs` sobre su historial completo: cero señales |
 | C3d | `linfocitos CD4` no aparece en pantalla ni en el video | Grep en la app y revisión del guion |
 | C4 | Toda salida del modelo pasa por `limpiarJson()` antes de `JSON.parse` | Grep: cero `JSON.parse` sin `limpiarJson` en el repo |
@@ -308,7 +308,7 @@ Se resuelven con evidencia, no con opinión, antes de construir sobre ellas:
 | | Entrenamiento del LoRA en el Mac y el README |
 
 Frontera: los valores de dominio (umbrales, examenes, costos, politica de
-credito) viven dentro de `core/reglas.ts`, `core/marcadores.ts` y
+credito) viven dentro de `mobile/src/core/reglas.ts`, `mobile/src/core/marcadores.ts` y
 `nodo/credito.mjs`. `0xj4an` los revisa y edita ahi; Artur no los cambia sin
 avisar. `core/` se mueve a `mobile/src/core/` (`ADR-004`); una vez movido, los
 cambios de schema se avisan antes de tocar.

@@ -39,7 +39,7 @@ Hacerlo con wifi antes de la demo, no delante del jurado.
 
 `eval/` (pendiente) corre un set de casos sintéticos contra el flujo y reporta
 % de JSON válido y % de campos correctos. Los rangos de referencia contra los
-que se clasifica están en [`core/marcadores.ts`](core/marcadores.ts).
+que se clasifica están en [`mobile/src/core/marcadores.ts`](mobile/src/core/marcadores.ts).
 
 ## Seguridad y límites
 - No es un diagnóstico. La alerta es orientativa y lo dice en pantalla. Validación de rangos y consistencia antes de invocar el modelo.

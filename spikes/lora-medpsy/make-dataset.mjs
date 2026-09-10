@@ -4,7 +4,7 @@
 //   - EXTRACCION: texto OCR ruidoso de una cedula panamena -> JSON de campos.
 //   - TRIAJE:     una lectura de laboratorio -> JSON con hallazgo y siguiente paso.
 //
-// Los rangos de laboratorio salen de core/marcadores.ts, la misma tabla que usa
+// Los rangos de laboratorio salen de mobile/src/core/marcadores.ts, la misma tabla que usa
 // la app, para que el adaptador aprenda exactamente lo que el producto valida.
 // Todo es sintetico: ninguna cedula ni resultado corresponde a una persona real.
 //
@@ -22,9 +22,9 @@ const pick = (a) => a[Math.floor(rnd() * a.length)];
 const int = (lo, hi) => lo + Math.floor(rnd() * (hi - lo + 1));
 
 // ---------------------------------------------------------------- MARCADORES
-// Se leen de core/marcadores.ts por regex en vez de importar, para no arrastrar
+// Se leen de mobile/src/core/marcadores.ts por regex en vez de importar, para no arrastrar
 // un paso de compilacion de TypeScript dentro del spike.
-const SRC = readFileSync(resolve(DIR, "../../core/marcadores.ts"), "utf8");
+const SRC = readFileSync(resolve(DIR, "../../mobile/src/core/marcadores.ts"), "utf8");
 
 // Se extrae campo por campo dentro de cada objeto `{ codigo: ... }`, en vez de
 // exigir un orden fijo. Asi el generador no se rompe (ni se salta un marcador
@@ -50,14 +50,14 @@ const MARCADORES = bloques.map((b) => ({
   pasoBajo: campo(b, "pasoBajo"),
 })).filter((m) => m.codigo && m.nombre && m.min !== undefined && m.max !== undefined);
 
-if (MARCADORES.length === 0) throw new Error("no pude leer core/marcadores.ts");
+if (MARCADORES.length === 0) throw new Error("no pude leer mobile/src/core/marcadores.ts");
 
 // CD4 ya no esta en la tabla (su siguiente paso mencionaba VIH y el brief lo
 // prohibe). El filtro se queda como red de seguridad por si alguien lo repone.
 const USABLES = MARCADORES.filter((m) => m.codigo !== "CD4");
 
 // ------------------------------------------------------------------ CEDULAS
-// Formato panameno, el mismo regex que valida CedulaSchema en core/schemas.ts.
+// Formato panameno, el mismo regex que valida CedulaSchema en mobile/src/core/schemas.ts.
 const NOMBRES = ["Ana Lucia", "Jose Manuel", "Maria Elena", "Carlos Alberto", "Rosa Idalia",
   "Luis Fernando", "Yaritza", "Ricardo", "Digna Esther", "Omar", "Marisol", "Eduardo"];
 const APELLIDOS = ["Gonzalez", "Rodriguez", "Batista", "Quintero", "Moreno", "Sanchez",

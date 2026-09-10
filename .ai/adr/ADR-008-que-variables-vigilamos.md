@@ -15,7 +15,7 @@
 **14 señales sobre 9 variables**, repartidas en dos vías que desembocan en el
 mismo tipo `Senal` (`ADR-003` y la sección "Las dos vías" de la especificación).
 
-### Vía A: el historial del teléfono (`core/reglas.ts`)
+### Vía A: el historial del teléfono (`mobile/src/core/reglas.ts`)
 
 | Señal | Variable | Dispara cuando | Urgencia | Fuente del umbral |
 | --- | --- | --- | --- | --- |
@@ -34,7 +34,7 @@ mismo tipo `Senal` (`ADR-003` y la sección "Las dos vías" de la especificació
 | `IMC_SOBREPESO` | Peso + estatura | **IMC >= 25** | Rutinaria | OMS, sobrepeso |
 | `PESO_BAJA` | Peso (serie) | **Caída > 5%** en 60 a 400 días | Prioritaria | Pérdida involuntaria amerita estudio |
 
-### Vía B: exámenes de laboratorio (`core/marcadores.ts`)
+### Vía B: exámenes de laboratorio (`mobile/src/core/marcadores.ts`)
 
 7 marcadores clasificados contra su rango. La urgencia sale del desvío: más de
 1.8 veces el límite superior o menos de la mitad del inferior es Inmediata.

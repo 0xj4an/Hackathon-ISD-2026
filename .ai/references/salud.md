@@ -30,7 +30,7 @@ Fuentes: [MINSA, análisis de situación de salud](https://www.minsa.gob.pa/site
 [Infobae, prevalencia](https://www.infobae.com/panama/2026/05/15/hipertension-arterial-y-diabetes-tipo-2-acechan-la-salud-de-los-panamenos/).
 
 **Consecuencia para el proyecto:** glucosa y presión arterial, que ya son las dos
-señales principales de `core/reglas.ts`, son exactamente las dos enfermedades
+señales principales de `mobile/src/core/reglas.ts`, son exactamente las dos enfermedades
 crónicas más prevalentes del país. Eso no fue suerte, pero conviene decirlo en el
 README y en el video: **el proyecto ataca el problema número uno de Panamá**, y
 hay cifras oficiales para sostenerlo.
@@ -87,7 +87,7 @@ días distintos, no tres seguidas en la misma tarde.
 
 ### Lo que falta: la diastólica
 
-`core/reglas.ts` solo mira `presion_sist`. La OMS define hipertensión por
+`mobile/src/core/reglas.ts` solo mira `presion_sist`. La OMS define hipertensión por
 sistólica **o** diastólica. Alguien con 130/95 es hipertenso y hoy la app no lo
 detecta. `BloodPressureRecord` trae las dos.
 
@@ -95,7 +95,7 @@ detecta. `BloodPressureRecord` trae las dos.
 
 ## 4. Vía B: laboratorio
 
-Los 8 marcadores de `core/marcadores.ts`, revisados contra fuente.
+Los 8 marcadores de `mobile/src/core/marcadores.ts`, revisados contra fuente.
 
 | Marcador | Rango en el código | Veredicto |
 | --- | --- | --- |
@@ -114,7 +114,7 @@ Los 8 marcadores de `core/marcadores.ts`, revisados contra fuente.
 
 ### Defecto 1: la hemoglobina no distingue sexo
 
-`core/marcadores.ts` usa **12 a 16 g/dL para todo el mundo**.
+`mobile/src/core/marcadores.ts` usa **12 a 16 g/dL para todo el mundo**.
 
 La OMS, en su guía actualizada de 2024, define anemia con umbrales **distintos
 por sexo**: menos de **120 g/L (12 g/dL) en mujeres no embarazadas** y menos de
@@ -137,7 +137,7 @@ Fuente: [OMS, guideline on haemoglobin cutoffs to define anaemia](https://iris.w
 
 ### Defecto 2: un solo valor no sugiere dengue
 
-`core/marcadores.ts` dice hoy:
+`mobile/src/core/marcadores.ts` dice hoy:
 
 - plaquetas bajas -> *"descartar dengue, repetir en 24 h"*
 - hematocrito alto -> *"descartar dengue con signos de alarma"*
@@ -172,7 +172,7 @@ Fuentes: [OMS, dengue y dengue grave](https://www.who.int/news-room/fact-sheets/
 
 ## 6. Qué se cambió
 
-Los seis, aplicados. `core/marcadores.ts` y `core/reglas.ts` compilan en estricto
+Los seis, aplicados. `mobile/src/core/marcadores.ts` y `mobile/src/core/reglas.ts` compilan en estricto
 y las reglas están probadas caso por caso.
 
 | # | Cambio | Estado |

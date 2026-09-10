@@ -1,7 +1,7 @@
 // Genera el historial de los usuarios ficticios de la demo.
 //
 // Los datos son 100% sinteticos: ninguna medicion corresponde a una persona
-// real. El formato es el normalizado que consume `core/reglas.ts`, el mismo al
+// real. El formato es el normalizado que consume `mobile/src/core/reglas.ts`, el mismo al
 // que traduciria un importador desde un export de Google Health o Apple Health.
 //
 // Cada usuario cuenta UNA historia clinica coherente, no valores sueltos que

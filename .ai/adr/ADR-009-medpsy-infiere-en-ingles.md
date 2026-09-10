@@ -22,7 +22,7 @@ añadiría otro modelo.
 
 ## Consecuencias
 
-- `core/prompts.ts` y el smoke pasan a inglés.
+- `mobile/src/core/prompts.ts` y el smoke pasan a inglés.
 - `AlertaSchema.mensaje` es texto para la persona, sin exigir español.
 - C1 se verifica con texto en inglés, no en español.
 

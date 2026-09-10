@@ -118,7 +118,7 @@ desarrollador.
   tablero.
 - **MedPsy tiene funcion central**, no decorativa. Es el requisito duro de
   Tether Psy y se cumple de forma natural.
-- **Las senales las detectan reglas (`core/reglas.ts`), el modelo solo
+- **Las senales las detectan reglas (`mobile/src/core/reglas.ts`), el modelo solo
   explica.** Esto es exactamente el "manejo responsable de riesgos" que pide
   Tether Psy, y ademas evita que un 1.7B invente rangos de referencia (el spike
   de LoRA lo vio inventar "plaquetas 45-60").
@@ -131,7 +131,7 @@ desarrollador.
 
 - **Tres documentos con OCR es tres veces el trabajo.** Cedula + comprobante de
   ingresos alcanza. `ExtractoSchema` ya esta como `.optional()` en
-  `core/schemas.ts`, o sea que el esquema ya anticipo este recorte: usarlo.
+  `mobile/src/core/schemas.ts`, o sea que el esquema ya anticipo este recorte: usarlo.
 - **La firma con trazo** es lo primero que se cae si falta tiempo. Un boton
   "Acepto" que guarda un hash cumple el mismo papel en el video.
 - **TranslatePsy** no entra. Suma poco y cuesta un modelo mas en un telefono que
@@ -195,8 +195,8 @@ cuanto cuestan, la politica de credito, que se le pide al usuario y como se ve
 la app. Artur implementa: movil, `core/`, `nodo/`, transporte y evaluacion.
 
 Los valores de dominio se quedan donde estan hoy y se revisan ahi: los umbrales
-y los examenes en `core/reglas.ts`, los rangos de laboratorio en
-`core/marcadores.ts`, la politica de credito en `nodo/credito.mjs`. Si en algun
+y los examenes en `mobile/src/core/reglas.ts`, los rangos de laboratorio en
+`mobile/src/core/marcadores.ts`, la politica de credito en `nodo/credito.mjs`. Si en algun
 momento estorban dentro de la logica, se sacan; hoy no estorban.
 
 ### Bloque 0 · DESBLOQUEO (nada mas importa)
@@ -227,23 +227,23 @@ o el backend de GPU.
 
 **`0xj4an` (dominio):**
 
-- Revisar los umbrales de la via A, que hoy estan en `core/reglas.ts` puestos a
+- Revisar los umbrales de la via A, que hoy estan en `mobile/src/core/reglas.ts` puestos a
   ojo: hecho, ver `ADR-008`. Las reglas pasaron de 4 a 14 senales,
   sistolica >= 140 en 3 tomas. Confirmar cada uno contra una fuente citable.
-- Revisar el examen y el costo de cada senal, tambien en `core/reglas.ts`. Los
+- Revisar el examen y el costo de cada senal, tambien en `mobile/src/core/reglas.ts`. Los
   costos de hoy (25, 8, 40, 15 USD) son inventados y la app se los muestra al
   usuario: o se sostienen o se etiquetan como estimados en pantalla.
 - **Anadir el especialista.** Hoy `Senal` tiene `examen` y `costo_usd` pero
   nadie dice quien interpreta el resultado, que es la mitad de lo que hace util
   la alerta.
-- **Quitar `linfocitos CD4`** de `core/marcadores.ts`: su siguiente paso
+- **Quitar `linfocitos CD4`** de `mobile/src/core/marcadores.ts`: su siguiente paso
   menciona VIH y el BRIEF lo prohibe.
 - `data/`: el historial de **dos usuarios ficticios**, uno sano y uno con
   hallazgo. El sano no debe disparar nada: esa es media demo.
 
 **Artur (implementacion):**
 
-- Pantalla 1, alerta de salud. `core/reglas.ts` sobre mediciones sinteticas ->
+- Pantalla 1, alerta de salud. `mobile/src/core/reglas.ts` sobre mediciones sinteticas ->
   `SYSTEM_ALERTA` -> `limpiarJson()` -> `AlertaSchema.parse()`. Que se vea en el
   telefono.
 - **`perf/logger.ts` desde ya.** Cada `completion()` escribe una linea en
@@ -260,7 +260,7 @@ o el backend de GPU.
   archivo, `getLogger()` con transporte propio.
 - **Las dos vias de deteccion** (ver `03-specification.md`, seccion "Las dos
   vias"). `reglasTendencia()` sobre el historial y `reglasRango()` sobre
-  `core/marcadores.ts`, ambas devolviendo el mismo tipo `Senal`.
+  `mobile/src/core/marcadores.ts`, ambas devolviendo el mismo tipo `Senal`.
 - El importador de `data/` al formato normalizado.
 
 ### Bloque 2 · flujo completo, UI fea
@@ -356,7 +356,7 @@ El spike nuevo vive en `spikes/lora-medpsy/`, con sus scripts adentro, y ya
 apunta al blanco correcto de entrada (extraccion, no solo triaje). Lo que hay que
 producir:
 
-- `make-dataset.mjs`: genera el JSONL a partir de `core/marcadores.ts` y de los
+- `make-dataset.mjs`: genera el JSONL a partir de `mobile/src/core/marcadores.ts` y de los
   documentos sinteticos. Codigo propio, sin dependencias del curso.
 - `spike.mjs`: carga `HEALTHCARE_1_7B_MEDICAL_Q8_0`, mide el base, entrena,
   mide con el adaptador, imprime la tabla antes/despues.
@@ -406,7 +406,7 @@ su propio catalogo y va a notar la eleccion; explicarla suma, esconderla resta.
 ### Dataset
 
 - ~300 ejemplos: 200 de extraccion (cedula e ingresos, con ruido de OCR) y 100
-  de triaje a partir de `core/marcadores.ts`.
+  de triaje a partir de `mobile/src/core/marcadores.ts`.
 - 30 de validacion, disjuntos.
 - Formato JSONL de mensajes, el mismo que ya consume el spike.
 
@@ -460,7 +460,7 @@ Para que `adapterPath` exista en el telefono, en orden de esfuerzo:
 ### Lo que hay que limpiar si o si
 
 El spike lo dejo documentado: **`</think>` se fuga aunque `reasoning_budget: 0`.**
-`core/prompts.ts` ya tiene `limpiarJson()` para eso. Que **toda** salida del
+`mobile/src/core/prompts.ts` ya tiene `limpiarJson()` para eso. Que **toda** salida del
 modelo pase por ahi antes de `JSON.parse`. Sin excepciones.
 
 ### Entrenar en el telefono (opcional, solo si sobra tiempo)

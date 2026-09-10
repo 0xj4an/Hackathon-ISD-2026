@@ -17,16 +17,16 @@
 
 ## Decisión
 
-`core/reglas.ts` decide, en código determinista, **qué** señal existe, **qué**
+`mobile/src/core/reglas.ts` decide, en código determinista, **qué** señal existe, **qué**
 examen corresponde, **cuánto** cuesta y **qué** urgencia tiene. El LLM recibe la
 señal ya decidida y solo la redacta en español sencillo.
 
-El prompt lo dice explícito (`core/prompts.ts`): no diagnosticar, no nombrar
+El prompt lo dice explícito (`mobile/src/core/prompts.ts`): no diagnosticar, no nombrar
 enfermedades como certeza, no dar tratamiento, máximo 3 frases. El disclaimer se
 pasa como literal para que el modelo no lo reescriba.
 
 Lo mismo aplica al crédito: `nodo/credito.mjs` decide con aritmética (cuota
-máxima 30% del ingreso), no con un modelo. Y `core/validaciones.ts` valida el
+máxima 30% del ingreso), no con un modelo. Y `mobile/src/core/validaciones.ts` valida el
 JSON extraído en código, nunca confiando en la salida del LLM.
 
 ## Alternativas consideradas

@@ -17,7 +17,7 @@ la extracción es donde un JSON mal formado rompe el flujo, sus datos de
 entrenamiento son sintéticos y gratis en vez de criterios clínicos inventados, y
 medirla produce de paso el set de evaluación que el reto Tether Psy exige.
 
-Los rangos de laboratorio salen de `core/marcadores.ts`, la misma tabla que
+Los rangos de laboratorio salen de `mobile/src/core/marcadores.ts`, la misma tabla que
 valida la app. `CD4` queda fuera del dataset: su siguiente paso menciona VIH y
 el brief lo prohíbe en la demo pública.
 

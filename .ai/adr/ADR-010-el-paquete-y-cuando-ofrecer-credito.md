@@ -20,7 +20,7 @@ Eso deja dos huecos que se tapan solos:
 
 ## Decision
 
-Se cotiza un **paquete por condicion a un ano** (`core/paquete.ts`), no un
+Se cotiza un **paquete por condicion a un ano** (`mobile/src/core/paquete.ts`), no un
 examen suelto. Un ano es el ciclo de control completo: diagnostico, equipo,
 examenes de seguimiento, consultas de control y el medicamento de todos los
 dias.

@@ -38,7 +38,7 @@ Nada más avanza hasta que esto pase.
 
 - [ ] `[A]` Pantalla 1: reglas sobre mediciones sintéticas, `SYSTEM_ALERTA`, `limpiarJson()`, `AlertaSchema.parse()`. Visible en el teléfono
 - [ ] `[A]` `perf/logger.ts` **desde ya**. Si no se hace ahora no se hace nunca, y es entregable de Tether Psy. Las métricas salen de `stats` de `await result.final`, no de la API de logging. Volcar `stats` entero sin filtrar y medir TTFT a mano con `Date.now()`
-- [ ] `[A]` Las dos vías: `reglasTendencia()` sobre el historial y `reglasRango()` sobre `core/marcadores.ts`, ambas devolviendo `Senal`
+- [ ] `[A]` Las dos vías: `reglasTendencia()` sobre el historial y `reglasRango()` sobre `mobile/src/core/marcadores.ts`, ambas devolviendo `Senal`
 - [ ] `[A]` Importador de `data/` al formato normalizado
 
 ---
@@ -109,9 +109,9 @@ Nada más avanza hasta que esto pase.
 | [ ] C1 | MedPsy carga en el 14T Pro y produce texto en español | Captura con "modelo cargado" y TTFT |
 | [ ] C2 | TTFT medido con `gpu` y `cpu`, se usa el mejor | Dos líneas en `perf.jsonl` con `device_cfg` distinto |
 | [ ] C3 | La vía A dispara con el historial del usuario con hallazgo | `eval/run.mjs` las cuenta |
-| [ ] C3b | La vía B clasifica bien los marcadores: alto, bajo y normal | `eval/run.mjs` contra `core/marcadores.ts` |
+| [ ] C3b | La vía B clasifica bien los marcadores: alto, bajo y normal | `eval/run.mjs` contra `mobile/src/core/marcadores.ts` |
 | [ ] C3c | **El usuario sano no dispara ninguna alerta** | `eval/run.mjs` sobre su historial: cero señales |
-| [x] C3d | `linfocitos CD4` no aparece en pantalla ni en el video | **Fuera de `core/marcadores.ts`.** Falta revisar el guion cuando exista |
+| [x] C3d | `linfocitos CD4` no aparece en pantalla ni en el video | **Fuera de `mobile/src/core/marcadores.ts`.** Falta revisar el guion cuando exista |
 | [ ] C4 | Toda salida del modelo pasa por `limpiarJson()` | Grep: cero `JSON.parse` sin `limpiarJson` |
 | [ ] C5 | La alerta valida contra `AlertaSchema` | `.parse()` sin excepción en 20 corridas |
 | [ ] C6 | La foto se borra tras extraer | Listar el directorio: cero imágenes |
