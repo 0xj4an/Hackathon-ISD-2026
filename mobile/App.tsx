@@ -63,6 +63,7 @@ export default function App() {
   const [enviando, setEnviando] = useState(false);
   const [pendiente, setPendiente] = useState(false);
   const [aviso, setAviso] = useState<string | undefined>();
+  const [tecnicoEnvio, setTecnicoEnvio] = useState<string | undefined>();
   const [colaLista, setColaLista] = useState(false);
 
   const soltarCredito = () => {
@@ -74,6 +75,7 @@ export default function App() {
     setEnviando(false);
     setPendiente(false);
     setAviso(undefined);
+    setTecnicoEnvio(undefined);
   };
 
   const salir = () => {
@@ -89,6 +91,7 @@ export default function App() {
   const cerrarPendiente = async (id: string) => {
     setPendiente(false);
     setAviso(undefined);
+    setTecnicoEnvio(undefined);
     await borrarPendiente(id);
   };
 
@@ -97,6 +100,7 @@ export default function App() {
     setEnviando(true);
     const r = await enviarSolicitud(sol);
     setEnviando(false);
+    setTecnicoEnvio(r.tecnico);
     if (r.ok) {
       await cerrarPendiente(sol.id);
       setRespuesta(r.respuesta);
@@ -176,6 +180,7 @@ export default function App() {
       const r = await enviarSolicitud(solicitud);
       ocupado = false;
       if (!vivo) return;
+      setTecnicoEnvio(r.tecnico);
       if (r.ok) {
         await cerrarPendiente(solicitud.id);
         setRespuesta(r.respuesta);
@@ -191,6 +196,8 @@ export default function App() {
             costo_max: credito.max,
           });
         }
+      } else {
+        setAviso(`${r.detalle} La solicitud queda pendiente.`);
       }
     };
     const id = setInterval(tick, 4000);
@@ -332,6 +339,7 @@ export default function App() {
         enviando={enviando}
         pendiente={pendiente}
         aviso={aviso}
+        tecnico={tecnicoEnvio}
         onFirmar={() => { void mandar(solicitud); }}
         onVolver={() => setPaso("leido")}
       />

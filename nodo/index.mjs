@@ -231,6 +231,8 @@ async function arrancarP2P() {
 }
 
 createServer(async (req, res) => {
+  const desde = req.socket.remoteAddress?.replace(/^::ffff:/, "") ?? "?";
+  log(`HTTP ${req.method} ${req.url} ← ${desde}`);
   cors(res);
   if (req.method === "OPTIONS") { res.statusCode = 204; res.end(); return; }
 

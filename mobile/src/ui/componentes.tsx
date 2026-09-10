@@ -234,7 +234,7 @@ export function DetalleTecnico({ texto, onEnviar }: { texto: string; onEnviar?: 
       {abierto ? (
         <>
           <Text selectable style={s.falloTecnico}>{texto}</Text>
-          {onEnviar ? <Boton texto="Enviar detalle" tono="borde" onPress={onEnviar} /> : null}
+          {onEnviar ? <Boton texto="Copiar o enviar detalle" tono="borde" onPress={onEnviar} /> : null}
         </>
       ) : null}
     </View>

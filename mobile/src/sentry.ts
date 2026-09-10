@@ -96,4 +96,47 @@ export function marcarPasoSentry(paso: string, datos?: Record<string, string | n
   Sentry.setTag("paso", paso);
 }
 
+/**
+ * Fallo blando de transporte (pueblo/banco). No es crash: crea issue revisable
+ * con modo, destino y el log técnico (sin PII de docs).
+ */
+export function reportarEnvioSentry(opts: {
+  ok: boolean;
+  envio: "banco" | "pueblo" | null;
+  pendiente?: boolean;
+  detalle?: string;
+  tecnico: string;
+  modo: string;
+  nodoHost: string;
+}) {
+  const level = opts.ok ? "info" : "warning";
+  Sentry.addBreadcrumb({
+    category: "envio",
+    level,
+    message: opts.ok ? `ok:${opts.envio}` : (opts.detalle ?? "envio falló"),
+    data: scrub({
+      envio: opts.envio,
+      pendiente: opts.pendiente ?? false,
+      modo: opts.modo,
+      nodo: opts.nodoHost,
+    }) as Record<string, unknown>,
+  });
+  if (opts.ok) return;
+
+  Sentry.withScope(scope => {
+    scope.setLevel("warning");
+    scope.setTag("flujo", "credito-envio");
+    scope.setTag("modo", opts.modo);
+    scope.setTag("envio", opts.envio ?? "ninguno");
+    scope.setTag("nodo_host", opts.nodoHost);
+    scope.setExtra("tecnico", opts.tecnico.slice(0, 2000));
+    if (opts.detalle) scope.setExtra("detalle", opts.detalle.slice(0, 400));
+    Sentry.captureMessage(
+      opts.pendiente
+        ? "credito: pendiente en pueblo"
+        : "credito: sin banco ni nodo",
+    );
+  });
+}
+
 export { Sentry };

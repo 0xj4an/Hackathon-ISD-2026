@@ -12,14 +12,16 @@
  * Modo denso: la lista de condiciones se come al veredicto, así que el que
  * manda es la cifra de la cuota arriba y la banda negra del total abajo.
  */
+import { Share } from "react-native";
 import { preCalificar, type Solicitud } from "./core/credito/motor";
 import {
   Pantalla, Encabezado, BarraVeredicto, Cifra, FilaRuta, BandaTotal, Franja, Boton, Etiqueta,
+  DetalleTecnico,
 } from "./ui/componentes";
 import { COLOR } from "./ui/tokens";
 
 export default function PantallaCuota({
-  solicitud, onFirmar, onVolver, enviando, pendiente, aviso,
+  solicitud, onFirmar, onVolver, enviando, pendiente, aviso, tecnico,
 }: {
   solicitud: Solicitud;
   onFirmar: () => void;
@@ -27,9 +29,16 @@ export default function PantallaCuota({
   enviando?: boolean;
   pendiente?: boolean;
   aviso?: string;
+  /** Log de envío (modo, URLs, HTTP, errores) para pegar al depurar. */
+  tecnico?: string;
 }) {
   const pre = preCalificar(solicitud);
   const techo = `B/. ${pre.capacidad.cuota_max.toFixed(2)}`;
+
+  const enviarDetalle = () => {
+    if (!tecnico) return;
+    void Share.share({ message: tecnico, title: "Detalle envío Ina Igar" }).catch(() => {});
+  };
 
   if (!pre.viable) {
     return (
@@ -72,6 +81,10 @@ export default function PantallaCuota({
           "va al banco si hay wifi; si no, al nodo del pueblo, en esta red local."
         )}
       />
+
+      {tecnico ? (
+        <DetalleTecnico texto={tecnico} onEnviar={enviarDetalle} />
+      ) : null}
 
       <Boton
         texto={enviando ? "Enviando…" : pendiente ? "Reintentar" : "Firmar y enviar"}
