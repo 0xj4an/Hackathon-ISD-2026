@@ -289,8 +289,8 @@ export default function App() {
         respuesta={respuesta}
         destino={destino}
         onListo={() => {
-          setCredito(null);
-          soltarCredito();
+          // Sale del caso entero. Si solo soltamos crédito, cae otra vez en Alerta.
+          salir();
         }}
       />
     );
