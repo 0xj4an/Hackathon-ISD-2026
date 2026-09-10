@@ -2,10 +2,11 @@
  * URL del nodo del pueblo (:8788). Sin IPs hardcodeadas.
  *
  * Orden: override manual → hallazgo LAN → IP de Metro → EXPO_PUBLIC_NODO_URL.
- * En la misma WiFi, la app sonda el /24 buscando /salud con servicio inaigar-pueblo.
+ * En la misma WiFi, la app sonda el /24 buscando /salud del corregimiento.
  */
 import Constants from "expo-constants";
 import * as Network from "expo-network";
+import { NetworkStateType } from "expo-network";
 import {
   deleteAsync,
   documentDirectory,
@@ -16,13 +17,15 @@ import {
 const PUERTO = 8788;
 const ARCHIVO = "pueblo-url.txt";
 const SERVICIO = "inaigar-pueblo";
-const SONDEO_MS = 450;
-const CONCURRENCIA = 40;
+const SONDEO_MS = 400;
+const CONCURRENCIA = 48;
 
 /** undefined = aún no cargó disco; null = sin override. */
 let override: string | null | undefined;
 /** Último pueblo hallado en la LAN (sesión). */
 let hallado: string | null = null;
+/** Evita dos barridos LAN a la vez. */
+let barrido: Promise<{ url: string; detalle: string } | null> | null = null;
 
 export type OrigenNodo = "manual" | "lan" | "metro" | "env" | "ninguno";
 
@@ -37,7 +40,10 @@ function esIpLan(host: string): boolean {
 function hostDelMetro(): string | undefined {
   const uri = Constants.expoConfig?.hostUri;
   if (!uri) return;
-  return uri.replace(/^\w+:\/\//, "").split(":")[0];
+  const host = uri.replace(/^\w+:\/\//, "").split(":")[0];
+  // Tunnel Expo no es el pueblo.
+  if (!host || host.includes("exp.direct") || host.includes("exp.host")) return;
+  return host;
 }
 
 /** Acepta URL completa o solo host / host:puerto. */
@@ -89,9 +95,10 @@ export async function fijarUrlNodo(raw: string): Promise<string | null> {
   return n;
 }
 
-/** Quita el override: vuelve a LAN / Metro / env. */
+/** Quita override y hallazgo de sesión. */
 export async function limpiarUrlNodo(): Promise<void> {
   override = null;
+  hallado = null;
   if (!documentDirectory) return;
   try {
     await deleteAsync(`${documentDirectory}${ARCHIVO}`, { idempotent: true });
@@ -106,7 +113,7 @@ async function esPueblo(url: string): Promise<boolean> {
   try {
     const r = await fetch(`${url}/salud`, { method: "GET", signal: ctrl.signal });
     if (!r.ok) return false;
-    const data = await r.json() as { servicio?: string; rol?: string; ok?: boolean };
+    const data = await r.json() as { servicio?: string; rol?: string };
     return data?.servicio === SERVICIO || data?.rol === "corregimiento";
   } catch {
     return false;
@@ -116,78 +123,114 @@ async function esPueblo(url: string): Promise<boolean> {
 }
 
 function prefijoLan(ip: string): string | null {
+  if (!ip || ip === "0.0.0.0" || ip.startsWith("127.")) return null;
   const m = ip.match(/^(\d+\.\d+\.\d+)\.\d+$/);
   return m && esIpLan(ip) ? m[1] : null;
 }
 
-/**
- * Busca el pueblo en la misma WiFi: Metro primero, luego el /24 del teléfono.
- * No hace falta rebuild ni pegar IP al cambiar de red.
- */
-export async function descubrirPuebloLan(): Promise<{ url: string; detalle: string } | null> {
-  const candidatos: string[] = [];
-  const metro = hostDelMetro();
-  if (metro && esIpLan(metro)) candidatos.push(`http://${metro}:${PUERTO}`);
-
-  try {
-    const ip = await Network.getIpAddressAsync();
-    const pref = prefijoLan(ip);
-    if (pref) {
-      for (let i = 1; i <= 254; i++) {
-        const url = `http://${pref}.${i}:${PUERTO}`;
-        if (!candidatos.includes(url)) candidatos.push(url);
-      }
-    }
-  } catch {
-    /* sin IP local: solo Metro */
+function ordenarHosts(pref: string, propios: string[]): string[] {
+  const prioridad = new Set([1, 19, 20, 100, 101, 254]);
+  const outs: string[] = [];
+  for (const h of propios) {
+    if (!outs.includes(h)) outs.push(h);
   }
-
-  if (!candidatos.length) return null;
-
-  // Metro (y los primeros del rango) primero; el resto en paralelo acotado.
-  const vistos = new Set<string>();
-  let idx = 0;
-  let encontrado: string | null = null;
-
-  const worker = async () => {
-    while (!encontrado && idx < candidatos.length) {
-      const i = idx++;
-      const url = candidatos[i];
-      if (vistos.has(url)) continue;
-      vistos.add(url);
-      if (await esPueblo(url)) {
-        encontrado = url;
-        return;
-      }
-    }
-  };
-
-  await Promise.all(Array.from({ length: Math.min(CONCURRENCIA, candidatos.length) }, () => worker()));
-
-  if (!encontrado) return null;
-  hallado = encontrado;
-  return { url: encontrado, detalle: "hallado en la WiFi" };
+  for (const n of [...prioridad].sort((a, b) => a - b)) {
+    const h = `${pref}.${n}`;
+    if (!outs.includes(h)) outs.push(h);
+  }
+  for (let i = 1; i <= 254; i++) {
+    const h = `${pref}.${i}`;
+    if (!outs.includes(h)) outs.push(h);
+  }
+  return outs;
 }
 
-/** Resuelve URL: si no hay, intenta descubrir en LAN. */
+/**
+ * Busca el pueblo en la misma WiFi: Metro primero, luego el /24 del teléfono.
+ */
+export async function descubrirPuebloLan(): Promise<{ url: string; detalle: string } | null> {
+  if (barrido) return barrido;
+  barrido = (async () => {
+    const candidatos: string[] = [];
+    const metro = hostDelMetro();
+    if (metro && esIpLan(metro)) candidatos.push(`http://${metro}:${PUERTO}`);
+
+    try {
+      const estado = await Network.getNetworkStateAsync();
+      const enLan =
+        estado.type === NetworkStateType.WIFI
+        || estado.type === NetworkStateType.VPN
+        || estado.type === NetworkStateType.UNKNOWN;
+      if (enLan) {
+        const ip = await Network.getIpAddressAsync();
+        const pref = prefijoLan(ip);
+        if (pref) {
+          const propios = metro && esIpLan(metro) && metro.startsWith(`${pref}.`)
+            ? [metro]
+            : [];
+          for (const h of ordenarHosts(pref, propios)) {
+            const url = `http://${h}:${PUERTO}`;
+            if (!candidatos.includes(url)) candidatos.push(url);
+          }
+        }
+      }
+    } catch {
+      /* sin IP local: solo Metro */
+    }
+
+    if (!candidatos.length) return null;
+
+    let idx = 0;
+    let encontrado: string | null = null;
+
+    const worker = async () => {
+      while (!encontrado && idx < candidatos.length) {
+        const i = idx++;
+        const url = candidatos[i];
+        if (await esPueblo(url)) {
+          encontrado = url;
+          return;
+        }
+      }
+    };
+
+    await Promise.all(
+      Array.from({ length: Math.min(CONCURRENCIA, candidatos.length) }, () => worker()),
+    );
+
+    if (!encontrado) return null;
+    hallado = encontrado;
+    return { url: encontrado, detalle: "hallado en la WiFi" };
+  })();
+
+  try {
+    return await barrido;
+  } finally {
+    barrido = null;
+  }
+}
+
+/** Resuelve URL viva del pueblo; si la actual murió, vuelve a barrer la LAN. */
 export async function asegurarUrlNodo(): Promise<string> {
   const ya = urlNodo();
-  if (ya) {
-    if (await esPueblo(ya)) return ya;
-  }
+  if (ya && await esPueblo(ya)) return ya;
+  if (ya && hallado === ya) hallado = null;
   const d = await descubrirPuebloLan();
-  return d?.url ?? ya;
+  return d?.url ?? "";
 }
 
 export async function probarNodo(
-  url = urlNodo(),
+  url?: string,
 ): Promise<{ ok: boolean; detalle: string }> {
-  let destino = url;
+  let destino = url?.trim() ? normalizarPueblo(url) : urlNodo();
+  if (destino && !(await esPueblo(destino))) destino = null;
+
   if (!destino) {
     const d = await descubrirPuebloLan();
     if (!d) return { ok: false, detalle: "Sin pueblo en esta WiFi. ¿Corre el nodo en la laptop?" };
     destino = d.url;
   }
+
   try {
     const t0 = Date.now();
     const r = await fetch(`${destino}/salud`, { method: "GET" });

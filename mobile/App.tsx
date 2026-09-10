@@ -140,7 +140,6 @@ export default function App() {
     void (async () => {
       try {
         await cargarUrlNodo();
-        await descubrirPuebloLan().catch(() => null);
         await iniciarColaSqlite();
         const p = await leerPendiente();
         if (!vivo || !p) return;
@@ -156,6 +155,8 @@ export default function App() {
         setPaso("cuota");
       } finally {
         if (vivo) setColaLista(true);
+        // No bloquea la UI: el envío también llama asegurarUrlNodo.
+        void descubrirPuebloLan().catch(() => null);
       }
     })();
     return () => { vivo = false; };

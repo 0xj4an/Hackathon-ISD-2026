@@ -81,6 +81,7 @@ export default function PantallaEntrada({
   const usarAuto = async () => {
     await limpiarUrlNodo();
     setPuebloPrueba("Buscando en la WiFi…");
+    refrescarPueblo();
     const d = await descubrirPuebloLan();
     setPuebloPrueba(d ? `Hallado · ${d.url}` : "Auto: no hay pueblo en esta WiFi.");
     refrescarPueblo();
@@ -90,7 +91,8 @@ export default function PantallaEntrada({
     setProbando(true);
     setPuebloPrueba("Probando…");
     if (puebloEdit.trim()) await fijarUrlNodo(puebloEdit);
-    const r = await probarNodo();
+    else await limpiarUrlNodo();
+    const r = await probarNodo(puebloEdit.trim() || undefined);
     setPuebloPrueba(r.ok ? `Conecta · ${r.detalle}` : `No llega · ${r.detalle}`);
     refrescarPueblo();
     setProbando(false);
