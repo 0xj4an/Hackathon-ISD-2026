@@ -91,7 +91,7 @@ export default function PantallaSalud({
         />
 
         <Hecho etiqueta="Lecturas" texto={fraseLecturas(resumen)} />
-        <Hecho etiqueta="Meses" texto={fraseMeses(resumen)} ultima />
+        <Hecho etiqueta="Periodo" texto={fraseMeses(resumen)} ultima />
 
         <Etiqueta>Variables</Etiqueta>
         <View style={s.lista}>

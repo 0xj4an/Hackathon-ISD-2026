@@ -94,7 +94,13 @@ export function fraseLecturas(r: ResumenHistorial) {
 
 export function fraseMeses(r: ResumenHistorial) {
   if (r.mesesLista.length === 0) return "Sin fechas";
+  // Con historiales largos, enumerar cada mes no se lee. El rango compacto sí.
+  if (r.mesesLista.length > 3) {
+    const t = r.rango[0].toUpperCase() + r.rango.slice(1);
+    return `${t} (${r.meses} meses)`;
+  }
   const lista = yLista(r.mesesLista);
   const t = lista[0].toUpperCase() + lista.slice(1);
   return r.anio.includes("–") ? t : `${t} de ${r.anio}`;
 }
+

@@ -8,8 +8,9 @@
 import { useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { USUARIOS, buscarPorCorreo, type Usuario } from "./usuarios";
+import { detectarSenales } from "./core/reglas";
 import { Pantalla, Encabezado, Boton, Etiqueta, Pie } from "./ui/componentes";
-import { COLOR, TIPO, ESPACIO, DISPLAY, TOQUE } from "./ui/tokens";
+import { COLOR, TIPO, ESPACIO, DISPLAY, TOQUE, COLOR_URGENCIA } from "./ui/tokens";
 
 const NO_EXISTE = "No hay ningún historial con ese correo. Revisa cómo lo escribiste.";
 
@@ -69,23 +70,45 @@ export default function PantallaEntrada({
       <View style={s.aviso}>
         <Text style={s.avisoTitulo}>Pantalla de demostración</Text>
         <Text style={s.avisoTexto}>
-          Cada correo abre un historial sintético completo. Ninguno corresponde a una persona real.
+          Cada correo abre un historial sintético de ~un año. Ninguno corresponde a una persona real. Algunas personas tienen varias alertas porque el mismo cuadro las junta.
         </Text>
       </View>
 
-      <Etiqueta>Correos de la demo</Etiqueta>
+      <Etiqueta>Casos de la demo</Etiqueta>
       <View style={s.lista}>
-        {USUARIOS.map(u => (
-          <Pressable
-            key={u.id}
-            onPress={() => escribir(u.correo)}
-            accessibilityRole="button"
-            accessibilityLabel={`Usar el correo ${u.correo}`}
-            style={({ pressed }) => [s.correo, pressed && s.correoPress]}
-          >
-            <Text style={s.correoTexto}>{u.correo}</Text>
-          </Pressable>
-        ))}
+        {USUARIOS.map(u => {
+          const senales = detectarSenales(u.mediciones);
+          const peor = senales.find(x => x.urgencia === "Inmediata")
+            ?? senales.find(x => x.urgencia === "Prioritaria")
+            ?? senales[0];
+          const puesto = correo.trim().toLowerCase() === u.correo;
+          return (
+            <Pressable
+              key={u.id}
+              onPress={() => escribir(u.correo)}
+              accessibilityRole="button"
+              accessibilityLabel={`Usar el correo ${u.correo}, caso ${u.caso}`}
+              style={({ pressed }) => [s.fila, puesto && s.filaPuesta, pressed && s.filaPress]}
+            >
+              <View style={s.filaTextos}>
+                <Text style={s.filaCaso}>{u.caso}</Text>
+                <Text style={s.filaCorreo}>{u.correo}</Text>
+              </View>
+              {senales.length === 0 ? (
+                <Text style={[s.filaPill, { color: COLOR_URGENCIA.Rutinaria }]}>Sin alertas</Text>
+              ) : (
+                <View style={s.filaEstado}>
+                  <Text style={[s.filaPill, { color: COLOR_URGENCIA[peor!.urgencia] }]}>
+                    {peor!.urgencia}
+                  </Text>
+                  <Text style={s.filaCuenta}>
+                    {senales.length} {senales.length === 1 ? "alerta" : "alertas"}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          );
+        })}
       </View>
 
       <Pressable onLongPress={onRegistro} delayLongPress={800} accessibilityRole="button">
@@ -119,11 +142,18 @@ const s = StyleSheet.create({
   avisoTitulo: { ...TIPO.barra, fontSize: 13, letterSpacing: 0.6, color: COLOR.sobreColor },
   avisoTexto: { fontSize: 13.5, lineHeight: 18, color: COLOR.sobreColor },
 
-  lista: { flexDirection: "row", flexWrap: "wrap", gap: 8, paddingHorizontal: ESPACIO.borde },
-  correo: {
-    borderWidth: 2, borderColor: COLOR.tinta, paddingHorizontal: 11,
-    minHeight: TOQUE, justifyContent: "center",
+  lista: { borderTopWidth: 3, borderTopColor: COLOR.tinta },
+  fila: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    paddingHorizontal: ESPACIO.borde, paddingVertical: 14, minHeight: TOQUE + 8,
+    borderBottomWidth: 1, borderBottomColor: COLOR.separador,
   },
-  correoPress: { backgroundColor: COLOR.hundido },
-  correoTexto: { fontSize: 13, fontWeight: "700", color: COLOR.tinta },
+  filaPuesta: { backgroundColor: COLOR.hundido },
+  filaPress: { backgroundColor: COLOR.hundido },
+  filaTextos: { flex: 1, gap: 2 },
+  filaCaso: { ...DISPLAY, fontSize: 17, lineHeight: 20, color: COLOR.tinta },
+  filaCorreo: { fontSize: 13, fontWeight: "600", color: COLOR.gris },
+  filaEstado: { alignItems: "flex-end", gap: 2 },
+  filaPill: { ...TIPO.etiqueta, fontSize: 11 },
+  filaCuenta: { fontSize: 12, color: COLOR.gris },
 });

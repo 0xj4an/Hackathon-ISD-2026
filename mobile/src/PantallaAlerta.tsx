@@ -203,10 +203,12 @@ function Alerta({ peor, demas, lecturas, periodo, mensaje, fallo, redactando, on
       {demas.length > 0 ? (
         <>
           <Etiqueta>
-            {demas.length === 1 ? "También encontré esto" : `También encontré estas ${demas.length}`}
+            {demas.length === 1
+              ? "También encontré esto en el mismo historial"
+              : `También encontré estas ${demas.length} en el mismo historial`}
           </Etiqueta>
           <Text style={s.deDonde}>
-            En las mismas {lecturas} lecturas. {periodo}. Qué hacer con cada una, en el siguiente paso.
+            Misma persona, {lecturas} lecturas. {periodo}. Arriba va lo más urgente; aquí el resto. Qué hacer con cada una, en el siguiente paso.
           </Text>
           <View style={s.resumenes}>
             {demas.map(x => <Resumen key={x.codigo} senal={x} />)}

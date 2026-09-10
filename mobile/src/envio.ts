@@ -10,6 +10,7 @@
  */
 import { urlBanco } from "./bancoUrl";
 import { urlNodo } from "./nodoUrl";
+import { Sentry } from "./sentry";
 import type { Respuesta } from "./core/credito/motor";
 import type { Solicitud } from "./core/schemas";
 
@@ -25,30 +26,32 @@ function esFinal(r: { decision?: string } | null): r is Respuesta {
   return r?.decision === "aprobada" || r?.decision === "rechazada" || r?.decision === "revision";
 }
 
+function hostDe(url: string) {
+  try { return new URL(url).host; } catch { return "bad-url"; }
+}
+
 async function pedir(url: string, init: RequestInit, ms: number): Promise<Respuesta | { decision?: string; motivo?: string } | null> {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
   try {
     const r = await fetch(url, { ...init, signal: ctrl.signal });
     if (!r.ok) {
-      // Fallo HTTP del banco/nodo: no es crash de la app; solo breadcrumb.
-      const { Sentry } = await import("./sentry");
       Sentry.addBreadcrumb({
         category: "envio",
         level: "warning",
         message: `HTTP ${r.status}`,
-        data: { host: (() => { try { return new URL(url).host; } catch { return "bad-url"; } })() },
+        data: { host: hostDe(url) },
       });
     }
     return await r.json() as Respuesta;
   } catch (err) {
     // Abort/red caída son esperados offline — no captureException.
     if (err instanceof Error && err.name !== "AbortError") {
-      const { Sentry } = await import("./sentry");
       Sentry.addBreadcrumb({
         category: "envio",
         level: "info",
         message: err.message.slice(0, 120),
+        data: { host: hostDe(url) },
       });
     }
     return null;
