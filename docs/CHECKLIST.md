@@ -33,8 +33,15 @@ reglas y nunca llama al modelo es un motor de reglas con un smoke test al lado.
 
 ### 1.2 La rama de documentos es una cáscara `[A]`
 
-Se toma la foto y ahí muere. `PantallaExamen.tsx` lo dice en un comentario:
+La foto se toma y no se lee. `PantallaExamen.tsx` lo dice en un comentario:
 *"Cuando `ocr()` exista"*.
+
+Lo que ya no pasa es que el flujo muera ahí: `PantallaDatos.tsx` (la pantalla 11
+del mapa, "lo que se leyó, **editable**") recoge los campos a mano y
+`PantallaCuota.tsx` calcula la cuota en el teléfono, sin señal. Cuando `ocr()`
+exista, esos mismos campos llegan rellenos y con su confianza, y ninguna de las
+dos pantallas cambia. La rama sigue siendo cáscara en lo que importa (no lee, no
+borra, no guarda, no envía), pero ya llega a un número.
 
 - [ ] `[A]` `ocr()` sobre la foto, extracción a JSON con `SYSTEM_EXTRACCION_*`, validación con `CedulaSchema` e `IngresosSchema`
 - [ ] `[A]` **Borrar la foto** después de extraer. Cierra C6, y el README ya promete que las fotos no salen del teléfono
