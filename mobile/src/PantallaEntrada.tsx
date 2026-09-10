@@ -14,15 +14,15 @@ import { COLOR, TIPO, ESPACIO, DISPLAY, TOQUE } from "./ui/tokens";
 const NO_EXISTE = "No hay ningún historial con ese correo. Revisa cómo lo escribiste.";
 
 const CASO_CORTO: Record<string, string> = {
-  sano: "Control",
+  sano: "Sano",
   diabetes: "Diabetes",
-  hipertension: "Presión",
-  respiratorio: "Fiebre",
-  hipoglucemia: "Azúcar",
-  prediabetes: "Límite",
-  "glu-leve": "Alerta",
-  "sat-critica": "Oxígeno",
-  "resp-grave": "Ahogo",
+  hipertension: "Hipertensión",
+  respiratorio: "Respiratorio",
+  hipoglucemia: "Hipoglucemia",
+  prediabetes: "Prediabetes",
+  "glu-leve": "Azúcar baja",
+  "sat-critica": "Oxígeno crítico",
+  "resp-grave": "Respiración alta",
 };
 
 export default function PantallaEntrada({
