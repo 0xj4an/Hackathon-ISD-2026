@@ -33,9 +33,12 @@ reglas y nunca llama al modelo es un motor de reglas con un smoke test al lado.
 ### 1.2 La rama de documentos ya lee; falta cola y envío
 
 `PantallaDocumentos` toma foto o archivo, corre `ocr()` + MedPsy → JSON y borra
-la copia (`leerDocumento.ts`). `PantallaDatos.tsx` (pantalla 11 del mapa, editable)
-y `PantallaCuota.tsx` ya calculan la cuota en el teléfono, sin señal. Falta
-verificar la lectura en el iPhone, y todavía no hay cola ni envío.
+la copia (`leerDocumento.ts`). Sigue `PantallaLeido` (lo que se leyó), la cuota
+con `preCalificar()` y la respuesta de `decidir()` en el teléfono. Falta
+verificar en el iPhone, y todavía no hay cola ni envío.
+
+`PantallaDatos.tsx` (pantalla 11 del mapa, editable, deudas y personas a cargo)
+sigue en el repo; el camino de la demo no pasa por ella todavía.
 
 La rama del examen tiene el mismo hueco de lectura y lo dice en un comentario
 de `PantallaExamen.tsx`: *"Cuando `ocr()` exista"*.
@@ -110,7 +113,7 @@ No es núcleo. `RESULTADOS.md` lo dice: capa de las últimas horas.
 - [x] `eval/credito/contrato.test.mjs` llama al `decidir()` real del nodo y valida contra `RespuestaBancoSchema` en los tres caminos
 - [x] El nodo importa el motor de crédito en vez de tener su propia política
 - [x] Nueve pantallas escritas y navegación en `App.tsx`
-- [x] La cuota se calcula **en el teléfono y sin señal**: `PantallaDatos.tsx` recoge los campos y `PantallaCuota.tsx` corre `preCalificar()` del mismo motor que usa el banco, rotulado como estimado
+- [x] La cuota se calcula **en el teléfono y sin señal**: `PantallaLeido` muestra lo extraído, `PantallaCuota` corre `preCalificar()` y `PantallaBanco` muestra `decidir()`. `PantallaDatos` sigue en el repo para deudas y personas a cargo
 - [x] `data/generar-usuarios.mjs` produce el formato normalizado y `PantallaUsuarios.tsx` lo consume
 - [x] `core/` unificado en `mobile/src/core/`, sin duplicado en la raíz
 

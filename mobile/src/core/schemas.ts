@@ -52,6 +52,9 @@ export const ExtractoSchema = z.object({
   meses_cubiertos: z.number().int().min(1).max(12),
   confianza: z.number().min(0).max(1),
 });
+export type Cedula = z.infer<typeof CedulaSchema>;
+export type Ingresos = z.infer<typeof IngresosSchema>;
+export type Extracto = z.infer<typeof ExtractoSchema>;
 
 /**
  * Examen de laboratorio fotografiado (vía B). El modelo transcribe lo que dice

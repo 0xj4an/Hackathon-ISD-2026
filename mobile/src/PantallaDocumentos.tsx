@@ -14,6 +14,8 @@ import { COLOR, TIPO, ESPACIO, DISPLAY, TOQUE } from "./ui/tokens";
 import { leerDocumento, soltarLectores, type ProgresoLectura } from "./leerDocumento";
 import type { ClaveDocumento } from "./core/extraccion";
 import type { Problema } from "./core/validaciones";
+import { CedulaSchema, IngresosSchema, ExtractoSchema } from "./core/schemas";
+import type { LecturaCredito } from "./lectura";
 import { recordError } from "./perf/logger";
 
 type Documento = {
@@ -60,33 +62,33 @@ const FALLO_CAMARA = "No se pudo abrir la cámara. Intenta otra vez.";
 const FALLO_ARCHIVO = "No se pudo abrir el archivo. Prueba con una foto JPG o PNG.";
 const NO_IMAGEN = "Por ahora solo fotos (JPG o PNG). Si es un PDF, sácale una foto.";
 
-const ETIQUETAS: Record<string, string> = {
-  numero: "Cédula",
-  nombre: "Nombre",
-  fecha_nacimiento: "Nacimiento",
-  fecha_expiracion: "Vence",
-  confianza: "Confianza",
-  empleador_o_actividad: "Actividad",
-  ingreso_mensual_usd: "Ingreso al mes",
-  tipo: "Tipo",
-  fecha_documento: "Fecha",
-  banco: "Banco",
-  saldo_promedio_usd: "Saldo promedio",
-  meses_cubiertos: "Meses cubiertos",
-};
+function semilla(lectura?: LecturaCredito): Record<ClaveDocumento, EstadoDoc> {
+  if (!lectura) {
+    return { cedula: { fase: "vacio" }, ingresos: { fase: "vacio" }, extracto: { fase: "vacio" } };
+  }
+  const n = 2 + (lectura.extracto ? 1 : 0);
+  const listo = (datos: object, i: number): EstadoDoc => ({
+    fase: "listo",
+    datos: datos as Record<string, unknown>,
+    problemas: [],
+    borrada: lectura.fotosBorradas >= i,
+  });
+  return {
+    cedula: listo(lectura.cedula, 1),
+    ingresos: listo(lectura.ingresos, 2),
+    extracto: lectura.extracto ? listo(lectura.extracto, n) : { fase: "vacio" },
+  };
+}
 
 export default function PantallaDocumentos({
-  monto, onListo, onVolver,
+  monto, onVolver, onListo, lecturaInicial,
 }: {
   monto: number;
-  onListo: (conExtracto: boolean) => void;
   onVolver: () => void;
+  onListo: (lectura: LecturaCredito) => void;
+  lecturaInicial?: LecturaCredito;
 }) {
-  const [estados, setEstados] = useState<Record<ClaveDocumento, EstadoDoc>>({
-    cedula: { fase: "vacio" },
-    ingresos: { fase: "vacio" },
-    extracto: { fase: "vacio" },
-  });
+  const [estados, setEstados] = useState<Record<ClaveDocumento, EstadoDoc>>(() => semilla(lecturaInicial));
   const [error, setError] = useState("");
   const ocupado = Object.values(estados).some(e => e.fase === "leyendo");
 
@@ -179,7 +181,25 @@ export default function PantallaDocumentos({
   };
 
   const faltan = DOCUMENTOS.filter(d => d.obligatorio && estados[d.clave].fase !== "listo").length;
-  const listos = DOCUMENTOS.filter(d => estados[d.clave].fase === "listo").length;
+
+  const continuar = () => {
+    const ced = estados.cedula;
+    const ing = estados.ingresos;
+    if (ced.fase !== "listo" || ing.fase !== "listo") return;
+    try {
+      const cedula = CedulaSchema.parse(ced.datos);
+      const ingresos = IngresosSchema.parse(ing.datos);
+      const ext = estados.extracto;
+      const extracto = ext.fase === "listo" ? ExtractoSchema.parse(ext.datos) : undefined;
+      const fotosBorradas = DOCUMENTOS.filter(d => {
+        const e = estados[d.clave];
+        return e.fase === "listo" && e.borrada;
+      }).length;
+      onListo({ cedula, ingresos, extracto, fotosBorradas });
+    } catch {
+      setError("Los datos leídos no cuadran. Repite una foto.");
+    }
+  };
 
   return (
     <Pantalla>
@@ -219,23 +239,24 @@ export default function PantallaDocumentos({
         </Text>
       </View>
 
-      <Etiqueta>Estado</Etiqueta>
-      <Text style={s.estado}>
-        {faltan > 0
-          ? `Faltan ${faltan} ${faltan === 1 ? "documento" : "documentos"} para poder enviar. ${listos} leídos.`
-          : "Ya están los obligatorios. El envío al nodo va en el siguiente paso."}
-      </Text>
-
-      <Boton
-        texto={faltan > 0 ? "Faltan documentos" : "Continuar"}
-        onPress={() => { if (faltan === 0) onListo(estados.extracto.fase === "listo"); }}
-        tono={faltan > 0 ? "borde" : "tinta"}
-        etiqueta="Continuar a confirmar tus datos"
-      />
+      {faltan === 0 ? (
+        <Boton
+          texto="Ver lo que se leyó"
+          tono="rutinaria"
+          onPress={continuar}
+          etiqueta="Ver los datos leídos y las fotos borradas"
+        />
+      ) : (
+        <>
+          <Etiqueta>Estado</Etiqueta>
+          <Text style={s.estado}>
+            Faltan {faltan} {faltan === 1 ? "documento" : "documentos"} obligatorios.
+          </Text>
+        </>
+      )}
 
       <Pie>
-        La lectura corre aquí: OCR, extracción a JSON y borrado de la copia. Después
-        se confirman los campos y se ve la cuota. El envío al banco todavía no está conectado.
+        Primero se leen. Después se ve lo que quedó, sin las fotos.
       </Pie>
     </Pantalla>
   );
@@ -271,29 +292,13 @@ function FilaDocumento({
         </Text>
 
         {listo ? (
-          <View style={s.campos}>
-            {Object.entries(estado.datos).filter(([k]) => k !== "confianza").map(([k, v]) => (
-              <View key={k} style={s.campo}>
-                <Text style={s.campoK}>{ETIQUETAS[k] ?? k}</Text>
-                <Text style={s.campoV}>{formatear(k, v)}</Text>
-              </View>
-            ))}
-            {typeof estado.datos.confianza === "number" ? (
-              <Text style={s.confianza}>{Math.round(estado.datos.confianza * 100)}%</Text>
-            ) : null}
-            {estado.problemas.map(p => (
-              <Text key={p.campo} style={s.problema}>{p.mensaje}</Text>
-            ))}
-            <Text style={s.ayuda}>
-              {estado.borrada ? "Copia de la imagen borrada." : "No se pudo borrar la copia."}
-            </Text>
-          </View>
+          <Text style={s.ayuda}>
+            {estado.borrada ? "Leído y copia borrada." : "Leído. No se pudo borrar la copia."}
+          </Text>
         ) : null}
 
         {error ? (
-          <View style={s.campos}>
-            <Text style={s.problema}>{estado.mensaje}</Text>
-          </View>
+          <Text style={s.problema}>{estado.mensaje}</Text>
         ) : null}
 
         {estado.fase !== "leyendo" ? (
@@ -331,15 +336,6 @@ function FilaDocumento({
   );
 }
 
-function formatear(clave: string, v: unknown): string {
-  if (clave === "ingreso_mensual_usd" || clave === "saldo_promedio_usd") {
-    const n = typeof v === "number" ? v : Number(v);
-    return Number.isFinite(n) ? `B/. ${n.toFixed(2)}` : String(v);
-  }
-  if (typeof v === "number") return Number.isInteger(v) ? String(v) : v.toFixed(2);
-  return String(v);
-}
-
 const s = StyleSheet.create({
   arriba: { paddingHorizontal: ESPACIO.borde, paddingTop: 18, paddingBottom: 16, gap: 10 },
   titular: { ...DISPLAY, fontSize: 34, lineHeight: 35, letterSpacing: -1.2, color: COLOR.tinta },
@@ -356,12 +352,6 @@ const s = StyleSheet.create({
   nombre: { fontSize: 17, fontWeight: "700", color: COLOR.tinta, flex: 1 },
   opcional: { ...TIPO.etiqueta, fontSize: 11, color: COLOR.gris },
   ayuda: { fontSize: 13.5, lineHeight: 18, color: COLOR.gris },
-
-  campos: { marginTop: 10, gap: 6 },
-  campo: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", gap: 12 },
-  campoK: { ...TIPO.etiqueta, fontSize: 11, color: COLOR.gris, width: 96 },
-  campoV: { ...TIPO.denso, fontSize: 15, color: COLOR.tinta, flex: 1, textAlign: "right" },
-  confianza: { ...TIPO.denso, color: COLOR.rutinaria, textAlign: "right" },
   problema: { ...TIPO.denso, color: COLOR.inmediata },
 
   acciones: { flexDirection: "row", gap: 8, marginTop: 10 },

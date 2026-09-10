@@ -2,49 +2,62 @@
 //
 // El camino principal, en orden: se entra con un correo, se revisa el historial
 // de esa persona, se ve la alerta con lo que cuesta atenderla, se elige el monto
-// del crédito y se cargan los documentos. El correo no es un login: es la llave
-// del caso de la demo, y la pantalla lo dice.
+// del crédito, se leen los documentos, se revisa lo leído, se ve la cuota y el
+// banco responde. El correo no es un login: es la llave del caso de la demo.
 //
 // De la alerta cuelga la vía B, que no es un paso del camino sino una salida
 // lateral: la persona trae un examen de laboratorio en papel y la app se lo lee.
 // Vuelve a la alerta, no sigue hacia el crédito.
 //
+// Firmar y enviar corre `decidir()` aquí mismo, con bureau de demo en mora 0.
+// La cola SQLite y el HTTP al nodo siguen pendientes.
+// `PantallaDatos` sigue en el repo (deudas y personas a cargo, pantalla 11 del
+// mapa) pero el camino de la demo pasa por lo leído → cuota → banco.
+//
 // Para depurar el bloque 0 en un teléfono nuevo, cambiar el import por
 // `./src/SmokeTest` y montarlo directo: aísla si el problema es el teléfono,
 // Expo o el SDK, en vez de nuestro código.
 import { useState } from "react";
-import { Alert } from "react-native";
 import PantallaEntrada from "./src/PantallaEntrada";
 import PantallaRevision from "./src/PantallaRevision";
 import PantallaAlerta from "./src/PantallaAlerta";
 import PantallaCredito from "./src/PantallaCredito";
 import PantallaDocumentos from "./src/PantallaDocumentos";
-import PantallaDatos from "./src/PantallaDatos";
+import PantallaLeido from "./src/PantallaLeido";
 import PantallaCuota from "./src/PantallaCuota";
+import PantallaBanco from "./src/PantallaBanco";
 import PantallaExamen from "./src/PantallaExamen";
+import { solicitudDeLectura, type LecturaCredito } from "./src/lectura";
+import { decidir, type Respuesta, type Solicitud } from "./src/core/credito/motor";
 import type { Usuario } from "./src/usuarios";
-import type { Solicitud } from "./src/core/credito/motor";
 
 /** Lo que cuesta el paquete, y el monto que la persona decidió pedir. */
 type Credito = { min: number; max: number; monto?: number };
+type PasoCredito = "captura" | "leido" | "cuota" | "banco";
 
 export default function App() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [revisado, setRevisado] = useState(false);
   const [credito, setCredito] = useState<Credito | null>(null);
   const [enExamen, setEnExamen] = useState(false);
-  /** Documentos fotografiados: si hubo extracto, se preguntan sus campos. */
-  const [conExtracto, setConExtracto] = useState<boolean | null>(null);
-  /** Los campos confirmados. Con esto ya se puede calcular la cuota aqui mismo. */
+  const [paso, setPaso] = useState<PasoCredito>("captura");
+  const [lectura, setLectura] = useState<LecturaCredito | null>(null);
   const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
+  const [respuesta, setRespuesta] = useState<Respuesta | null>(null);
+
+  const soltarCredito = () => {
+    setPaso("captura");
+    setLectura(null);
+    setSolicitud(null);
+    setRespuesta(null);
+  };
 
   const salir = () => {
     setUsuario(null);
     setRevisado(false);
     setCredito(null);
     setEnExamen(false);
-    setConExtracto(null);
-    setSolicitud(null);
+    soltarCredito();
   };
 
   if (!usuario) return <PantallaEntrada onEntrar={setUsuario} />;
@@ -68,49 +81,75 @@ export default function App() {
     );
   }
 
-  if (credito.monto === undefined) {
+  const monto = credito.monto;
+  if (monto === undefined) {
     return (
       <PantallaCredito
         costoMin={credito.min}
         costoMax={credito.max}
-        onContinuar={monto => setCredito({ ...credito, monto })}
+        onContinuar={pedido => {
+          soltarCredito();
+          setCredito({ ...credito, monto: pedido });
+        }}
         onVolver={() => setCredito(null)}
       />
     );
   }
 
-  if (conExtracto === null) {
+  if (paso === "banco" && respuesta) {
     return (
-      <PantallaDocumentos
-        monto={credito.monto}
-        onListo={setConExtracto}
-        onVolver={() => setCredito({ min: credito.min, max: credito.max })}
+      <PantallaBanco
+        respuesta={respuesta}
+        onAceptar={() => {
+          setCredito(null);
+          soltarCredito();
+        }}
+        onVolver={() => {
+          setRespuesta(null);
+          setPaso("cuota");
+        }}
       />
     );
   }
 
-  if (!solicitud) {
+  if (paso === "cuota" && solicitud) {
     return (
-      <PantallaDatos
-        monto={credito.monto}
-        conExtracto={conExtracto}
-        onListo={setSolicitud}
-        onVolver={() => setConExtracto(null)}
+      <PantallaCuota
+        solicitud={solicitud}
+        onFirmar={() => {
+          setRespuesta(decidir(solicitud, { bureau: { peor_mora_dias: 0 } }));
+          setPaso("banco");
+        }}
+        onVolver={() => setPaso("leido")}
+      />
+    );
+  }
+
+  if (paso === "leido" && lectura) {
+    return (
+      <PantallaLeido
+        lectura={lectura}
+        onFirmar={() => {
+          setSolicitud(solicitudDeLectura(monto, lectura));
+          setPaso("cuota");
+        }}
+        onVolver={() => setPaso("captura")}
       />
     );
   }
 
   return (
-    <PantallaCuota
-      solicitud={solicitud}
-      onFirmar={() =>
-        Alert.alert(
-          "Todavía no se envía",
-          "La firma, la cola y el envío al banco se conectan en el siguiente bloque. " +
-            "La cuota que ves ya la calculó este teléfono, sin señal.",
-        )
-      }
-      onVolver={() => setSolicitud(null)}
+    <PantallaDocumentos
+      monto={monto}
+      lecturaInicial={lectura ?? undefined}
+      onListo={siguiente => {
+        setLectura(siguiente);
+        setPaso("leido");
+      }}
+      onVolver={() => {
+        soltarCredito();
+        setCredito({ min: credito.min, max: credito.max });
+      }}
     />
   );
 }
