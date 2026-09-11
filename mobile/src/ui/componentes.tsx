@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import Pictograma, { type Simbolo } from "./Pictograma";
 import ConsolaDemo from "../ConsolaDemo";
-import { etiquetaModoCorta, useFichaModo } from "../modo";
+import { etiquetaModo, useFichaModo } from "../modo";
 import { COLOR, TIPO, ESPACIO, TOQUE } from "./tokens";
 
 /** Tocar la marca lleva al inicio. Lo pone App; en entrada no hay provider. */
@@ -27,11 +27,11 @@ function CintaModo() {
     <View
       style={[s.cinta, { backgroundColor: f.color }]}
       accessibilityRole="text"
-      accessibilityLabel={`Modo: ${etiquetaModoCorta(f.id)}`}
+      accessibilityLabel={etiquetaModo(f)}
     >
-      <Text style={s.cintaTexto} numberOfLines={1}>
-        {etiquetaModoCorta(f.id)}
-      </Text>
+      <Text style={s.cintaTexto} numberOfLines={1}>{f.wifi}</Text>
+      <Text style={s.cintaMas}>+</Text>
+      <Text style={s.cintaTexto} numberOfLines={1}>{f.modelo}</Text>
     </View>
   );
 }
@@ -288,6 +288,9 @@ export const LeyendaEstimado = () => (
 const s = StyleSheet.create({
   pantalla: { flex: 1, backgroundColor: COLOR.fondo },
   cinta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     paddingHorizontal: ESPACIO.borde,
     paddingVertical: 5,
   },
@@ -296,6 +299,14 @@ const s = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: 0.4,
     color: COLOR.sobreColor,
+    flexShrink: 1,
+  },
+  cintaMas: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: COLOR.sobreColor,
+    opacity: 0.7,
+    flexShrink: 0,
   },
   scroll: { paddingTop: 16, paddingBottom: 32 },
   fijo: { flex: 1, paddingTop: 16 },
