@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Copia assets canónicos de docs/design/marca → landing + mobile.
+# Tras copiar, endurece la tinta (stipple → opaca) para icon/splash/web marks.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 M="$ROOT/docs/design/marca"
@@ -13,4 +14,5 @@ cp -f "$M/ina-igar-demo-16x9.png" "$ROOT/landing/og.png"
 cp -f "$M/ina-igar-icon.png" "$ROOT/mobile/assets/icon.png"
 cp -f "$M/ina-igar-icon.png" "$ROOT/mobile/assets/adaptive-icon.png"
 cp -f "$M/ina-igar-splash.png" "$ROOT/mobile/assets/splash-icon.png"
+python3 "$ROOT/scripts/harden-huellas.py"
 echo "marca → landing + mobile OK"
