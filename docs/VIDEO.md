@@ -34,27 +34,25 @@ El reglamento pide cosas concretas, y cada una necesita su plano:
 
 ## Minuto a minuto
 
-### 0:00 a 0:35 · El problema (hooks)
+### 0:00 a 0:16 · El problema (hooks)
 
-**Se ve:** open de 35 s, cine + documental. **No empieza con el logo.** Primer
-fotograma: **4 de cada 10 adultos**. A los 2.5 s: tienen una condición no
-diagnosticada. Luego
-un examen es un viaje. Nombre a los ~24 s. Corte duro al teléfono (sin fundido).
-Beats: `media_lab/.ai/runs/2026-09-10-ina-igar/07-open-35s.md`. El animático
-[`intro.html`](intro.html) (22 s, marca primero) queda obsoleto para este corte.
+**Se ve:** open de 16 s, cine + documental. **No empieza con el logo.** Primer
+fotograma: **4 de cada 10 adultos**. A ~0.8 s: tienen una condición no
+diagnosticada. Un examen es un viaje. Preguntas. Nombre y lema a los 12 s.
+Corte duro al teléfono. Beats:
+`media_lab/.ai/runs/2026-09-10-ina-igar/07-open-35s.md`.
 
-**Se dice** (pausar 2 s al arranque; el cartel habla solo):
+**Se dice** (pausar ~1 s al arranque; el cartel habla solo):
 
-> En Panamá, 4 de cada 10 adultos viven con presión alta. Y no todos lo saben.
-> En el interior, un examen es bajar al pueblo, pagar de una vez, y volver.
-> Mucha gente no baja: no sabe si vale la pena, ni cuánto va a costar.
-> Ina Igar es el Camino de la medicina, en gunagaya. Dos preguntas. En el
-> teléfono. Sin internet.
+> En Panamá, 4 de cada 10 adultos viven con presión alta.
+> Un examen es bajar al pueblo, pagar, y volver.
+> ¿Vale la pena? ¿Cuánto cuesta?
+> Ina Igar, camino de la medicina. En el teléfono.
 
-**Por qué así:** ese día el jurado revisa más de 50 proyectos. Un letrero de
-marca a los 0 s se parece a los otros 49. Un silencio + **4 de cada 10 adultos** no.
+**Por qué así:** 16 s deja sitio a una demo de más de 3 min. El jurado sigue
+viendo el número antes que el logo.
 
-### 0:35 a 1:10 · Detectar
+### 0:16 a 0:51 · Detectar
 
 **Se ve:** entrar con `insulina@gmail.com` (o chip Caso diabetes). Pantalla de
 salud simulada. Revisión pasando el historial. La alerta: primero las reglas,
