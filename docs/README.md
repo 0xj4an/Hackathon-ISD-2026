@@ -10,6 +10,7 @@ heredado; no es ops del hackathon.
 |---|---|
 | Estado vivo, URLs Railway, qué falta | [`ESTADO.md`](ESTADO.md) |
 | Ítems abiertos / criterios | [`CHECKLIST.md`](CHECKLIST.md) |
+| Cómo venderlo, qué pegar dónde | [`VENTA.md`](VENTA.md) |
 | Narrativa y flujo de producto | [`BRIEF.md`](BRIEF.md) |
 | Decisiones irreversibles | [`.ai/adr/`](../.ai/adr/) (`ADR-001` reemplazada por `013`) |
 | Evidencia iPhone | [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md) |
@@ -29,10 +30,11 @@ Entrada pública: [`../README.md`](../README.md). Contexto para agentes: [`.ai/C
 
 ## Lectura corta
 
-1. [`ESTADO.md`](ESTADO.md) — qué está medido hoy.
-2. [`BRIEF.md`](BRIEF.md) — qué es el producto.
-3. [`CHECKLIST.md`](CHECKLIST.md) — qué falta cerrar.
-4. ADRs si vas a cambiar una decisión.
+1. [`VENTA.md`](VENTA.md) — frase, rúbrica, qué pegar en Dojo / YouTube / pitch.
+2. [`ESTADO.md`](ESTADO.md) — qué está medido hoy.
+3. [`BRIEF.md`](BRIEF.md) — qué es el producto.
+4. [`CHECKLIST.md`](CHECKLIST.md) — qué falta cerrar.
+5. ADRs si vas a cambiar una decisión.
 
 ## Histórico (no ops)
 

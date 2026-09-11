@@ -10,7 +10,7 @@ Dos tuberías: **inferencia** (MedPsy / LoRA / QVAC delegate) y **solicitud**
 (JSON al banco o al pueblo). Nunca un proveedor de IA remoto.
 
 **Sitio:** [isd-hackathon-landing-production.up.railway.app](https://isd-hackathon-landing-production.up.railway.app/) · [pitch](https://isd-hackathon-landing-production.up.railway.app/pitch)  
-**Estado vivo:** [`docs/ESTADO.md`](docs/ESTADO.md) · **mapa:** [`docs/README.md`](docs/README.md)
+**Estado vivo:** [`docs/ESTADO.md`](docs/ESTADO.md) · **cómo venderlo:** [`docs/VENTA.md`](docs/VENTA.md) · **mapa:** [`docs/README.md`](docs/README.md)
 
 ## Qué hace
 
@@ -107,7 +107,7 @@ Septiembre en `docs/superpowers/` es nuestro.
 
 ## Docs del equipo
 
-Ver [`docs/README.md`](docs/README.md): ESTADO, CHECKLIST, BRIEF, PRUEBA-*, ADRs.
+Ver [`docs/README.md`](docs/README.md): VENTA, ESTADO, CHECKLIST, BRIEF, PRUEBA-*, ADRs.
 
 ## Licencia
 

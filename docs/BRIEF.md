@@ -77,31 +77,24 @@ Producto: Android + Health Connect. Demo de hoy: **iPhone 17 Pro Max**.
 - 0xj4an: mobile (Expo + QVAC), cola, transporte, perf log, video.
 - Artur: prompts y validaciones (core), datos sintéticos, banco, eval, README y guion.
 
+Cómo venderlo y qué pegar dónde: [`VENTA.md`](VENTA.md).
 Abierto / foto viva: [`CHECKLIST.md`](CHECKLIST.md), [`ESTADO.md`](ESTADO.md).
 Ensayo previo al video: [`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md).
 Guion: [`VIDEO.md`](VIDEO.md).
 
 ## Texto para Dojo (pegar)
 
-**Short description**
+El campo Description de Dojo es **máximo 500**. La ficha ya está pegada
+(11 sep). Fuente: [`VENTA.md`](VENTA.md).
 
-Ina Igar: cualquier hallazgo, una ruta, un crédito. MedPsy, OCR, LoRA y QVAC delegate en el teléfono o en el pueblo. Las fotos no salen. El banco ve un JSON.
+**Description (341)**
 
-**Description**
+Cualquier hallazgo. Una ruta. Un crédito. Lee Apple Salud, Health Connect o un papel de lab. Las reglas marcan el rango; MedPsy redacta la ruta y el costo del año. OCR de cédula: las fotos se borran. El banco ve un JSON, nunca la imagen. Tres caminos: modelo local, sin red, o QVAC delegate al pueblo. LoRA lab-v3: 5%→68%. No es diagnóstico.
 
-App de salud y crédito para quien vive lejos, con señal intermitente.
+**URLs**
 
-Lee Apple Salud, Health Connect o un papel de laboratorio. Catorce umbrales citados. Las reglas marcan el rango. MedPsy redacta qué se vio, qué hacer, a quién ver y cuánto cuesta el año. El caso sano no dispara. No es diagnóstico.
-
-El crédito es ese monto —consulta, controles, medicamento— no un mínimo de consumo. OCR de cédula, ingresos y extracto en el aparato. Las fotos se borran. El banco recibe JSON: nunca la imagen ni el hallazgo clínico.
-
-Tres caminos. WiFi: MedPsy aquí, JSON al banco. Sin red: la alerta no se apaga; el crédito va al pueblo. Si este teléfono no corre 2.1 GB: QVAC delegate, el pueblo presta el cómputo.
-
-LoRA lab-v3: JSON válido de laboratorio 5 % → 68 %. Delegate medido 72 veces. Eval 9/9.
-
-Siguiente: origination real, un LoRA por documento, malla de pueblos, Health Connect en Android de gama media.
-
-Sitio: https://isd-hackathon-landing-production.up.railway.app/
-Pitch: https://isd-hackathon-landing-production.up.railway.app/pitch
-Repo: https://github.com/0xj4an/Hackathon-ISD-2026
+- Demo video: https://youtu.be/oiW3VXyl36Q
+- Live demo: https://isd-hackathon-landing-production.up.railway.app/
+- Pitch: https://isd-hackathon-landing-production.up.railway.app/pitch
+- Repo: https://github.com/0xj4an/Hackathon-ISD-2026
 
