@@ -2,7 +2,7 @@
  * Adaptador LoRA de laboratorio. Archivo aparte del MedPsy base: para
  * reemplazarlo basta cambiar el asset y `LORA_LAB_VERSION`.
  *
- * Corrida 3: lab JSON 5% → 68%. No se pone en cédula/ingresos/alerta.
+ * Corrida 4: lab JSON 9% → 45%, campos 76%. No se pone en cédula/ingresos/alerta.
  */
 import { Asset } from "expo-asset";
 import { File, Paths } from "expo-file-system";
@@ -10,7 +10,7 @@ import { recordError } from "./perf/logger";
 import { reportarLoraSentry } from "./sentry";
 
 /** Subir esto al cambiar el `.gguf` (y el nombre del asset). */
-export const LORA_LAB_VERSION = "lab-v3";
+export const LORA_LAB_VERSION = "lab-v4";
 export const LORA_LAB_NOMBRE = `lora-${LORA_LAB_VERSION}.gguf`;
 
 let rutaCache: string | null = null;
@@ -46,7 +46,7 @@ export async function rutaLoraLab(): Promise<string | null> {
       return rutaCache;
     }
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const mod = require("../assets/models/lora-lab-v3.gguf");
+    const mod = require("../assets/models/lora-lab-v4.gguf");
     const asset = Asset.fromModule(mod);
     await asset.downloadAsync();
     const origenUri = asset.localUri ?? asset.uri;

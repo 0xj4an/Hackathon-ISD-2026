@@ -8,7 +8,7 @@ Tres caminos: [`ADR-006`](../.ai/adr/ADR-006-tres-modos-segun-el-telefono.md).
 Release **`1.0.5+2`**. Esta noche: iPhone `192.168.0.17` → pueblo `:8788` →
 **crédito aprobado** (`POST /solicitud` monto 920). Sentry: `credito: ok via
 pueblo`, `alerta: ok`, `lectura: ok`, `inferencia: extraccion @p2p-delegate`.
-LoRA `lab-v3` se nombra en carga, resultados y consola. Falta ensayos ×3 +
+LoRA `lab-v4` se nombra en carga, resultados y consola. Falta ensayos ×3 +
 `perf.jsonl` + video.
 
 ## Qué ya está medido
@@ -23,7 +23,7 @@ LoRA `lab-v3` se nombra en carga, resultados y consola. Falta ensayos ×3 +
 | Banco directo (`local-wifi`) | Medido 10 sep (`credito: ok via banco`) |
 | Pueblo LAN (`credito: ok via pueblo`) | Medido 10 y **11 sep 00:05** |
 | Inferencia `nodo-offline` | Sentry: `extraccion @p2p-delegate` (72 eventos) |
-| LoRA `lab-v3` | Asset + UI (carga y resultados). Sentry `lora: lab-v3 cache/copy` |
+| LoRA `lab-v4` | Asset + UI (carga y resultados). Sentry `lora: lab-v4 cache/copy` |
 | Consola teléfono + laptop `/consola` | Código: cinta de modo, consola negra, LoRA chip |
 | Sentry | Viva. SoT: [`SENTRY.md`](SENTRY.md) |
 

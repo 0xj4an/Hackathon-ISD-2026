@@ -23,6 +23,7 @@ const OUT = resolve(DIR, "out");
 mkdirSync(OUT, { recursive: true });
 
 const EPOCHS = Number(process.env.EPOCHS || 1);
+const SKIP_TRAIN = process.env.SKIP_TRAIN === "1";
 /** Un informe con 5 marcadores no cabe en 220 tokens: el JSON sale cortado. */
 const PREDICT = Number(process.env.PREDICT || 512);
 const t0 = Date.now();
@@ -165,49 +166,59 @@ console.log(`${ts()} casos de evaluacion: ${CASOS.length} (` +
 const base = await medir("BASE (sin adaptador)", {});
 
 // ---------------------------------------------------------------- 2) entrenar
-const ftId = await loadModel({
-  modelSrc: HEALTHCARE_1_7B_MEDICAL_Q8_0,
-  modelType: "llm",
-  modelConfig: { ctx_size: 2048 },
-});
-console.log(`\n${ts()} === ENTRENANDO ${EPOCHS} epoca(s) ===`);
-const tEntrena = Date.now();
-const handle = finetune({
-  modelId: ftId,
-  options: {
-    trainDatasetDir: resolve(DIR, "train.jsonl"), // lab-only; ver make-dataset.mjs
-    validation: { type: "dataset", path: resolve(DIR, "eval.jsonl") },
-    outputParametersDir: OUT,
-    checkpointSaveDir: resolve(OUT, "ckpt"),
-    numberOfEpochs: EPOCHS,
-    learningRate: Number(process.env.LR || 2e-5),
-    lrMin: 1e-8,
-    contextLength: 1024,
-    loraRank: 8,
-    loraAlpha: 16,
-    assistantLossOnly: true,
-    loraModules: "attn_q,attn_k,attn_v,attn_o,ffn_gate,ffn_up,ffn_down",
-  },
-});
+let segundos = Number(process.env.TRAIN_SECS || 0);
+if (!SKIP_TRAIN) {
+  const ftId = await loadModel({
+    modelSrc: HEALTHCARE_1_7B_MEDICAL_Q8_0,
+    modelType: "llm",
+    modelConfig: { ctx_size: 2048 },
+  });
+  console.log(`\n${ts()} === ENTRENANDO ${EPOCHS} epoca(s) ===`);
+  const tEntrena = Date.now();
+  const handle = finetune({
+    modelId: ftId,
+    options: {
+      trainDatasetDir: resolve(DIR, "train.jsonl"), // lab-only; ver make-dataset.mjs
+      validation: { type: "dataset", path: resolve(DIR, "eval.jsonl") },
+      outputParametersDir: OUT,
+      checkpointSaveDir: resolve(OUT, "ckpt"),
+      numberOfEpochs: EPOCHS,
+      learningRate: Number(process.env.LR || 2e-5),
+      lrMin: 1e-8,
+      contextLength: 1024,
+      loraRank: 8,
+      loraAlpha: 16,
+      assistantLossOnly: true,
+      loraModules: "attn_q,attn_k,attn_v,attn_o,ffn_gate,ffn_up,ffn_down",
+    },
+  });
 
-let ultimaEpoca = -1, pasos = 0;
-for await (const p of handle.progressStream) {
-  pasos++;
-  if (p.current_epoch !== ultimaEpoca || pasos % 20 === 0) {
-    ultimaEpoca = p.current_epoch;
-    console.log(`${ts()} ${p.is_train ? "train" : "val"} epoca ${p.current_epoch} lote ${p.current_batch}/${p.total_batches} loss ${p.loss?.toFixed?.(3)} eta ${(p.eta_ms / 1000).toFixed(0)}s`);
+  let ultimaEpoca = -1, pasos = 0;
+  for await (const p of handle.progressStream) {
+    pasos++;
+    if (p.current_epoch !== ultimaEpoca || pasos % 20 === 0) {
+      ultimaEpoca = p.current_epoch;
+      console.log(`${ts()} ${p.is_train ? "train" : "val"} epoca ${p.current_epoch} lote ${p.current_batch}/${p.total_batches} loss ${p.loss?.toFixed?.(3)} eta ${(p.eta_ms / 1000).toFixed(0)}s`);
+    }
   }
+  const res = await handle.result;
+  segundos = (Date.now() - tEntrena) / 1000;
+  console.log(`${ts()} finetune ${res.status} en ${segundos.toFixed(0)}s (${(segundos / EPOCHS).toFixed(0)}s por epoca)`);
+  await unloadModel({ modelId: ftId });
+} else {
+  console.log(`\n${ts()} SKIP_TRAIN: sin finetune, se mide el .gguf ya escrito`);
 }
-const res = await handle.result;
-const segundos = (Date.now() - tEntrena) / 1000;
-console.log(`${ts()} finetune ${res.status} en ${segundos.toFixed(0)}s (${(segundos / EPOCHS).toFixed(0)}s por epoca)`);
-await unloadModel({ modelId: ftId });
 
 const ggufs = readdirSync(OUT).filter((f) => f.endsWith(".gguf"))
-  .map((f) => ({ f, mb: +(statSync(resolve(OUT, f)).size / 1048576).toFixed(1) }))
-  .sort((a, b) => b.mb - a.mb);
+  .map((f) => {
+    const st = statSync(resolve(OUT, f));
+    return { f, mb: +(st.size / 1048576).toFixed(1), mtime: st.mtimeMs };
+  })
+  .sort((a, b) => b.mtime - a.mtime);
 if (ggufs.length === 0) { console.log("__SIN_ADAPTADOR__"); await close(); process.exit(1); }
-const adaptador = ggufs[0];
+const adaptador = process.env.ADAPTER
+  ? (ggufs.find((g) => g.f === process.env.ADAPTER) ?? ggufs[0])
+  : ggufs[0];
 console.log(`${ts()} adaptador: ${adaptador.f} (${adaptador.mb} MB)`);
 
 // ---------------------------------------------------------------- 3) con LoRA

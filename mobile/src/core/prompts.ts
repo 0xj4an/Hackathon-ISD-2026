@@ -37,7 +37,7 @@ No extra text.`;
 
 /**
  * Lab report. Copied from `spikes/lora-medpsy/system-laboratorio.txt`:
- * lab-v3 was trained on this Spanish prompt. English here is OOD and
+ * lab-v4 was trained on this Spanish prompt. English here is OOD and
  * the adapter stops emitting JSON (ADR-009 reopen: Spanish parses better).
  */
 export const SYSTEM_EXTRACCION_LABORATORIO = `Recibes el texto OCR (puede tener errores) de un informe de laboratorio de Panama.

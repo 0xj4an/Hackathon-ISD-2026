@@ -37,7 +37,7 @@ aviso.
    (consulta, controles, medicamento).
 4. Te ofrece el crédito. El examen **no** hace falta para pedirlo.
 5. Si tienes el papel de laboratorio, lo fotografías. OCR aquí. Un LoRA
-   (`lab-v3`) saca los marcadores. Puede salir algo que Health no vio.
+   (`lab-v4`) saca los marcadores. Puede salir algo que Health no vio.
 6. Fotografías cédula, ingresos y extracto. OCR aquí. Las fotos se borran.
 7. La solicitud sale al banco (si hay wifi) o espera / pasa por un nodo P2P
    (si no hay red, o si este teléfono no puede correr el modelo de 2.1 GB).
@@ -102,7 +102,7 @@ Detalle de URLs y qué está medido: [`docs/ESTADO.md`](docs/ESTADO.md).
 | | Hoy (esta demo) | Después |
 |---|---|---|
 | Salud | Dataset de prueba, mismo formato que Apple Health y Google Health | Conexión real |
-| LoRA | `lab-v3` lee el examen (5 % → 68 %) | Más trainings |
+| LoRA | `lab-v4` lee el examen (JSON 9 % → 45 %, campos 76 %) | Más trainings |
 | Banco | El motor responde. No suelta la plata | Desembolso real |
 | Nodos | Un peer en la demo | Nodos P2P en más pueblos |
 

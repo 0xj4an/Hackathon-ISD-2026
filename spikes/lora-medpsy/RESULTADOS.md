@@ -163,6 +163,35 @@ sin JSON y confirmar en el iPhone que ingresos no se siente peor.
 
 ---
 
+## Corrida 4: solo laboratorio, dígitos legibles
+
+El dataset de la corrida 3 convertía `15` → `I5`. El puntuador contaba fallo
+de lectura cuando el dígito no estaba en el texto. Train mezclaba 176 ejemplos
+de cédula/ingresos/extracto que la app no carga con este adaptador.
+
+Corrida 4: train **228 lab-only**, ruido de dígitos fuera, plantillas con código
+e intervalo de referencia (el distractor real). `learningRate: 2e-5`, 1 época,
+7001 s (~1 h 57 m). Eval mixto, 66 casos (22 lab). Números:
+`out/resultados-corrida-4.json`.
+
+| Tarea | JSON válido base | JSON válido LoRA | Campos base | Campos LoRA |
+| --- | --- | --- | --- | --- |
+| cédula | 100% | 100% | 65% | 64% |
+| ingresos | 100% | 100% | 98% | 89% |
+| extracto | 100% | 100% | 94% | 88% |
+| **laboratorio** | **9%** | **45%** | 0% | **76%** |
+
+**Lo que importa:** en este eval el valor se puede leer. Lab JSON 2/22 →
+**10/22**. Campos de las lecturas que sí parsean: **76%** (corrida 3: 53% sobre
+un eval con dígitos rotos). Ingresos/extracto bajan un poco; el adaptador **no
+se carga** ahí.
+
+El 45% de JSON no se compara 1:1 con el 68% de v3: el set cambió. En producto
+entra `lab-v4` porque el hueco que medíamos mal era el valor, no solo el
+parseo.
+
+---
+
 ## Lo que queda dicho, salga como salga
 
 - **El adaptador de la corrida 2 no se lleva a la app.** Cambia un problema por

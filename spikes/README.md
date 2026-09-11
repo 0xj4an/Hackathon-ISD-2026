@@ -6,7 +6,7 @@ Código propio del equipo, dentro de la ventana del hackathon.
 
 Adaptador LoRA sobre MedPsy Q8_0 para **examen de laboratorio** (ADR-002/003).
 Evidencia y cómo repetir: [`lora-medpsy/RESULTADOS.md`](lora-medpsy/RESULTADOS.md).
-En producto: `mobile/assets/models/lora-lab-v3.gguf` (solo lab; no cédula/alerta).
+En producto: `mobile/assets/models/lora-lab-v4.gguf` (solo lab; no cédula/alerta).
 
 ```bash
 cd spikes && npm install
