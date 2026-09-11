@@ -59,13 +59,22 @@ p{margin:0 0 12px;max-width:62ch}
 .stack .r{display:grid;grid-template-columns:9.5rem 1fr;gap:14px;padding:12px 16px;border-bottom:1px solid currentColor;flex:1;align-items:center}
 .stack .r:last-child{border-bottom:0}
 .stack .r .k{font-family:var(--sans);font-size:13px;letter-spacing:-.02em;text-transform:uppercase}
-.mega{
-  font-family:var(--sans);font-size:clamp(5rem,18vw,11rem);line-height:.78;letter-spacing:-.07em;
-  margin:0 0 8px;text-transform:uppercase;
+.cols{
+  display:grid;grid-template-columns:1fr 1fr 1fr;flex:0 0 auto;
+  border:1px solid currentColor;
 }
-.mini{flex:0 0 auto;margin-top:auto}
-.mini .r{flex:0;padding:8px 14px}
-.mini .r .k{font-size:12px}
+.cols>div{padding:18px 16px;border-right:1px solid currentColor}
+.cols>div:last-child{border-right:0}
+.cols .k{font-family:var(--sans);font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;opacity:.8}
+.cols .n{font-family:var(--sans);font-size:clamp(1.6rem,3.4vw,2.6rem);line-height:.9;letter-spacing:-.04em;text-transform:uppercase;margin:0 0 14px}
+.cols p{margin:0;font-size:clamp(14px,1.45vw,17px);max-width:none}
+.train{
+  display:grid;grid-template-columns:repeat(3,1fr);margin-top:auto;flex:0 0 auto;
+  border:1px solid currentColor;font-size:11px;line-height:1.35;
+}
+.train>div{padding:10px 12px;border-right:1px solid currentColor}
+.train>div:last-child{border-right:0}
+.train b{display:block;font-family:var(--sans);font-size:12px;letter-spacing:.03em;text-transform:uppercase;margin-bottom:4px}
 .mark{position:absolute;right:-6%;bottom:8%;width:min(42vw,380px);opacity:.07;pointer-events:none;transform:rotate(-12deg)}
 .ink .mark{filter:invert(1);opacity:.08}
 .hot .mark{filter:brightness(0) invert(1);opacity:.1}
@@ -82,9 +91,10 @@ p{margin:0 0 12px;max-width:62ch}
 .nav button:disabled{opacity:.3}
 @media(max-width:820px){
   h2{font-size:clamp(1.5rem,8vw,2.4rem)}
-  .split,.stack .r{grid-template-columns:1fr}
+  .split,.stack .r,.cols,.train{grid-template-columns:1fr}
   .stack .r{gap:4px}
-  .split>*{border-right:0;border-bottom:1px solid currentColor}
+  .split>*,.cols>div,.train>div{border-right:0;border-bottom:1px solid currentColor}
+  .cols>div:last-child,.train>div:last-child{border-bottom:0}
 }
 @media(prefers-reduced-motion:reduce){.deck{scroll-behavior:auto}}
 @media print{
@@ -97,7 +107,7 @@ p{margin:0 0 12px;max-width:62ch}
 </head>
 <body>
 <nav class="bar" aria-label="Diapositivas">
-  <span id="n">01 / 08</span>
+  <span id="n">01 / 09</span>
   <div class="dots" id="dots"></div>
   <div class="nav">
     <button type="button" id="prev" aria-label="Anterior">‹</button>
@@ -136,12 +146,25 @@ p{margin:0 0 12px;max-width:62ch}
 </section>
 
 <section class="s">
-  <div class="top"><b>Qué hace</b><span>03</span></div>
+  <div class="top"><b>Quién gana</b><span>03</span></div>
+  <div class="body">
+    <div class="stack">
+      <div class="r"><div class="k">Gente · tratar</div><div>Prediabetes, el año son B/. 72 a 170. Diabetes, B/. 641 a 920. El examen son B/. 6 a 15. Tratar a tiempo sale menos. El crédito es para poder tratar.</div></div>
+      <div class="r"><div class="k">Gente · papeles</div><div>La cédula, el sueldo, el extracto y el examen se leen en el teléfono y se borran. El asesor no se queda con copias. No hay WhatsApp, no hay fotocopia en un cajón. Eso es lo que evita la suplantación. Al banco solo van números.</div></div>
+      <div class="r"><div class="k">Sistema</div><div>Hipertensión, 42%. Diabetes, 15% de los mayores de 15. El 37% del gasto es de bolsillo. Quien se entera en casa no viaja primero y no llega de urgencia. El expediente clínico no circula en el banco.</div></div>
+      <div class="r"><div class="k">Banco</div><div>Cada quien que se trata es un crédito de B/. 72 a 920. El banco presta sin guardar fotos y sin ver la enfermedad. El asesor no maneja documentos. Menos fraude. Puede servir a quien está lejos de la sucursal.</div></div>
+    </div>
+  </div>
+  <div class="foot">Paquetes de la app · Decreto 36 · MINSA · ENSPA/OPS. Las fotos no salen. El banco ve nombre, cédula, sueldo y monto.</div>
+</section>
+
+<section class="s">
+  <div class="top"><b>Qué hace</b><span>04</span></div>
   <div class="body">
     <div class="stack">
       <div class="r"><div class="k">1. Monitorea</div><div>Se conecta a Apple Health o Google Health y mira los datos que ya tiene tu teléfono.</div></div>
       <div class="r"><div class="k">2. Avisa</div><div>Si hay una anomalía, te lo dice y te recomienda qué hacer. Si estás bien, no molesta.</div></div>
-      <div class="r"><div class="k">3. Lee el examen</div><div>Si cargas un laboratorio, te ayuda a leerlo y detecta si algo está mal.</div></div>
+      <div class="r"><div class="k">3. Lee el examen</div><div>Si tienes un laboratorio, lo subes. Lo leemos. Puede salir algo que Apple Health o Google Health no vieron.</div></div>
       <div class="r"><div class="k">4. Cotiza</div><div>Calcula el costo de exámenes, medicina y tratamiento, si hay que atenderse.</div></div>
       <div class="r"><div class="k">5. Presta</div><div>Si no tienes dinero, te ofrece el crédito. El banco no ve tu salud. Solo ve un crédito de salud.</div></div>
     </div>
@@ -150,7 +173,7 @@ p{margin:0 0 12px;max-width:62ch}
 </section>
 
 <section class="s">
-  <div class="top"><b>Stack</b><span>04 · con qué está hecha</span></div>
+  <div class="top"><b>Stack</b><span>05 · con qué está hecha</span></div>
   <div class="body">
     <div class="stack">
       <div class="r"><div class="k">App</div><div>Expo y React Native. Corre en el teléfono.</div></div>
@@ -165,21 +188,37 @@ p{margin:0 0 12px;max-width:62ch}
 </section>
 
 <section class="s hot">
-  <div class="top"><b>El examen</b><span>05</span></div>
+  <div class="top"><b>LoRA · training · tuning</b><span>06</span></div>
   <div class="body">
-    <p class="mega">5% → 68%</p>
-    <p class="lead">Eso es lo que corrige: leer el laboratorio. El modelo solo no servía. LoRA v3 sí.</p>
-    <div class="stack mini">
-      <div class="r"><div class="k">v1</div><div>2e-4, 2 épocas. Rompió el modelo: extracción 100% a 0%. Triaje 91% a 0%.</div></div>
-      <div class="r"><div class="k">v2</div><div>2e-5, 1 época. No rompió, no sirvió: 71% a 66%. Ingresos 89% a 70%.</div></div>
-      <div class="r"><div class="k">v3</div><div>2e-5, 1 época. Lab JSON 5% a 68% (1/22 a 15/22). 33 MB. Ese es el de la app.</div></div>
+    <h2>Para leer el examen.</h2>
+    <div class="cols">
+      <div>
+        <div class="k">Para qué</div>
+        <p class="n">Marcadores</p>
+        <p>Sacar del laboratorio código, nombre, valor y unidad. No dice si está alto o bajo. El rango lo marca el catálogo, no el modelo.</p>
+      </div>
+      <div>
+        <div class="k">Por qué</div>
+        <p class="n">No leía</p>
+        <p>Sin LoRA acertaba 1 de cada 22 laboratorios. Las otras 21, nada. Por eso se entrenó.</p>
+      </div>
+      <div>
+        <div class="k">Dónde</div>
+        <p class="n">Después de avisar</p>
+        <p>La app ya te avisó. El crédito ya está. Si tienes el laboratorio, lo subes. LoRA lo lee. Puede salir algo que Apple Health o Google Health no vieron.</p>
+      </div>
+    </div>
+    <div class="train">
+      <div><b>v1</b>2e-4, 2 épocas. Rompió: extracción 100% a 0%. Triaje 91% a 0%.</div>
+      <div><b>v2</b>2e-5, 1 época. No rompió. No sirvió: 71% a 66%.</div>
+      <div><b>v3</b>2e-5, 1 época. Lab JSON 5% a 68%. 33 MB. Ese quedó en la app.</div>
     </div>
   </div>
-  <div class="foot">Tres trainings corridos, no estimados. v1 y v2 se quedan fuera. v3 es lab-v3.</div>
+  <div class="foot">El examen no abre el crédito. Entra después de la alerta, si lo tienes. LoRA solo corre ahí. lab-v3, 33 MB.</div>
 </section>
 
 <section class="s ink">
-  <div class="top"><b>Siempre corre</b><span>06</span></div>
+  <div class="top"><b>Siempre corre</b><span>07</span></div>
   <div class="body">
     <h2>Tengas wifi o no. Tu teléfono corra los modelos o no. La app sigue.</h2>
     <div class="stack">
@@ -193,7 +232,7 @@ p{margin:0 0 12px;max-width:62ch}
 </section>
 
 <section class="s">
-  <div class="top"><b>Roadmap</b><span>07</span></div>
+  <div class="top"><b>Roadmap</b><span>08</span></div>
   <div class="body">
     <div class="stack">
       <div class="r"><div class="k">Salud</div><div>Hoy: datos de prueba, mismo formato que Apple Health y Google Health. Después: conexión real a Apple Health y Google Health. Eso toma tiempo. No lo tuvimos.</div></div>
@@ -207,7 +246,7 @@ p{margin:0 0 12px;max-width:62ch}
 
 <section class="s ink">
   <img class="mark" src="/huellas-mark-blanco.png" width="1024" height="1024" alt="">
-  <div class="top"><b>Ina · medicina · Igar · camino</b><span>08</span></div>
+  <div class="top"><b>Ina · medicina · Igar · camino</b><span>09</span></div>
   <div class="body">
     <h2>Camino de la medicina.</h2>
     <p class="lead">Gunagaya. Se cita porque no es nuestra. Las comarcas son para quienes se armó. Te enteras en casa. El banco te presta para salud y no ve tu salud.</p>
