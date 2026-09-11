@@ -186,7 +186,10 @@ export default function PantallaEntrada({
                 return (
                   <Pressable
                     key={e.id}
-                    onPress={() => setModoSel(e.id)}
+                    onPress={() => {
+                      setModoSel(e.id);
+                      fijarModo(e.id);
+                    }}
                     accessibilityRole="button"
                     accessibilityState={{ selected: puesto }}
                     accessibilityLabel={`${etiquetaModo(e)}. ${e.detalle}`}

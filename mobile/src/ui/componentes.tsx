@@ -14,15 +14,33 @@ import {
   SafeAreaView, ScrollView, View, Text, Pressable, StyleSheet,
 } from "react-native";
 import Pictograma, { type Simbolo } from "./Pictograma";
-import { PuebloEncabezado } from "../ConsolaDemo";
+import ConsolaDemo from "../ConsolaDemo";
+import { etiquetaModoCorta, useFichaModo } from "../modo";
 import { COLOR, TIPO, ESPACIO, TOQUE } from "./tokens";
 
 /** Tocar la marca lleva al inicio. Lo pone App; en entrada no hay provider. */
 export const IrInicioContext = createContext<(() => void) | null>(null);
 
+function CintaModo() {
+  const f = useFichaModo();
+  return (
+    <View
+      style={[s.cinta, { backgroundColor: f.color }]}
+      accessibilityRole="text"
+      accessibilityLabel={`Modo: ${etiquetaModoCorta(f.id)}`}
+    >
+      <Text style={s.cintaTexto} numberOfLines={1}>
+        {etiquetaModoCorta(f.id)}
+      </Text>
+    </View>
+  );
+}
+
 export function Pantalla({ children, scroll = true }: { children: ReactNode; scroll?: boolean }) {
   return (
     <SafeAreaView style={s.pantalla}>
+      <CintaModo />
+      <ConsolaDemo />
       {scroll ? (
         <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled">
           {children}
@@ -51,7 +69,6 @@ export function Encabezado({ meta, onVolver }: { meta?: string; onVolver?: () =>
         <Text style={s.marca}>Ina Igar</Text>
       )}
       <View style={s.encabezadoDer}>
-        <PuebloEncabezado />
         {onVolver ? (
           <Pressable onPress={onVolver} accessibilityRole="button" accessibilityLabel="Volver" hitSlop={12}>
             <Text style={s.meta}>{meta ?? "Volver"}</Text>
@@ -270,8 +287,18 @@ export const LeyendaEstimado = () => (
 
 const s = StyleSheet.create({
   pantalla: { flex: 1, backgroundColor: COLOR.fondo },
-  scroll: { paddingTop: 20, paddingBottom: 32 },
-  fijo: { flex: 1, paddingTop: 20 },
+  cinta: {
+    paddingHorizontal: ESPACIO.borde,
+    paddingVertical: 5,
+  },
+  cintaTexto: {
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 0.4,
+    color: COLOR.sobreColor,
+  },
+  scroll: { paddingTop: 16, paddingBottom: 32 },
+  fijo: { flex: 1, paddingTop: 16 },
 
   encabezado: {
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",

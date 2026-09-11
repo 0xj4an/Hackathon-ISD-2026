@@ -162,19 +162,29 @@
       const p = parenDe(item);
       if (l.includes("sesión"))
         return { t: "El teléfono entró " + p, k: item.modo === "local-wifi" ? "tel" : "http" };
-      if (l.includes("delegate") && (l.includes("→") || l.includes("buscando")))
+      if (l.includes("sin capacidad") || l.includes("delegando"))
+        return { t: "El teléfono delega MedPsy al nodo " + p, k: "http" };
+      if (l.includes("buscando par") || l.includes("par ") && l.includes("conectando"))
         return { t: "El teléfono pide MedPsy al par P2P " + p, k: "p2p" };
-      if (l.includes("delegate") && l.includes("←"))
+      if (l.includes("par conectado") || l.includes("par generando"))
+        return { t: "El par P2P corre MedPsy 1.7B Q8 " + p, k: "p2p" };
+      if (l.includes("par listo"))
         return { t: "El par P2P contestó " + p, k: "p2p" };
-      if (l.includes("delegate falló") || l.includes("par no respondió"))
+      if (l.includes("par no respondió") || l.includes("delegate falló"))
         return { t: "El par no respondió. Pasa al pueblo por HTTP " + p, k: "http" };
-      if (l.includes("/inferir") || l.includes("llegó /inferir"))
-        return { t: "Llegó un pedido de inferencia " + p, k: "http" };
-      if (l.includes("pueblo infirió"))
-        return { t: "El pueblo terminó MedPsy " + p, k: "http" };
+      if (l.includes("cargando") && l.includes("medpsy"))
+        return { t: "Cargando MedPsy 1.7B Q8 " + p, k: "http" };
+      if (l.includes("generando"))
+        return { t: "Generando con MedPsy 1.7B Q8 " + p, k: item.origen === "cel" ? "tel" : "http" };
+      if (l.includes("modelo:"))
+        return { t: String(item.linea ?? "").replace(/^\d{2}:\d{2}:\d{2}\s/, "") + " " + p, k: "http" };
+      if (l.includes("/inferir") || l.includes("nodo corre") || l.includes("pedido:"))
+        return { t: "El pueblo corre MedPsy 1.7B Q8 " + p, k: "http" };
+      if (l.includes("listo ·") || l.includes("pueblo listo") || l.includes("pueblo infirió"))
+        return { t: "MedPsy terminó " + p, k: item.origen === "cel" ? "tel" : "http" };
       if (l.includes("/solicitud") || l.includes("llegó /solicitud"))
         return { t: "Llegó una solicitud de crédito " + p, k: "http" };
-      if (l.includes("medpsy local"))
+      if (l.includes("en este teléfono") || l.includes("medpsy local"))
         return { t: "MedPsy corrió en el teléfono " + p, k: "tel" };
       return { t: String(item.linea ?? "").replace(/^\d{2}:\d{2}:\d{2}\s/, "") + " " + p, k: item.origen === "cel" ? "tel" : "http" };
     }

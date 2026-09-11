@@ -421,19 +421,13 @@ createServer(async (req, res) => {
       const raw = await leerCuerpo(req, 200_000);
       const { inferir } = await import("./inferir.mjs");
       const pedido = JSON.parse(raw || "{}");
-      consola.feed(
-        `llegó /inferir task=${pedido.task ?? "?"} chars=${String(pedido.user ?? "").length}`,
-        { origen: "cel" },
-      );
-      const out = await inferir(pedido);
-      consola.feed(
-        `pueblo infirió ${String(out.text ?? "").length} chars`,
-        { origen: "nodo" },
-      );
+      consola.feed(`llegó HTTP /inferir ${pedido.task ?? "inferencia"}`, { origen: "cel" });
+      const out = await inferir(pedido, (msg) => consola.feed(msg, { origen: "nodo" }));
       json(res, 200, out);
     } catch (e) {
       const code = e.code === 413 ? 413 : e instanceof SyntaxError || /foto|imagen|system|user|pedido/i.test(e.message ?? "") ? 400 : 503;
       log(`inferir ${code} ${e.message ?? e}`);
+      consola.feed(`falló inferir: ${e.message ?? e}`, { origen: "nodo" });
       json(res, code, { motivo: e.message ?? "no pude inferir" });
     }
     return;

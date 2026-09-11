@@ -1,9 +1,8 @@
 /**
- * Nodo del pueblo en el teléfono.
- * El atajo vive en el Encabezado (no flota). El registro solo aparece
- * si se abre: arriba, corto, sin tapar Salir ni los botones de abajo.
+ * Consola negra de demo. Vive en el layout, arriba, para no tapar botones.
+ * Cerrada: una línea. Abierta: el registro. Siempre se ve.
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -12,45 +11,11 @@ import {
   StyleSheet,
   Platform,
 } from "react-native";
-import {
-  clearDemoLog,
-  subscribeDemoLog,
-  togglePanelNodo,
-  setPanelNodo,
-  usePanelNodo,
-  useViaMed,
-} from "./demoLog";
-import { COLOR, TIPO } from "./ui/tokens";
-import { saltarMedPsyLocal } from "./modo";
-import { useState } from "react";
-
-export function PuebloEncabezado() {
-  const via = useViaMed();
-  const abierta = usePanelNodo();
-  const enNodo = saltarMedPsyLocal();
-  const etiqueta = via.via === "p2p" ? "P2P"
-    : via.via === "pueblo" ? "HTTP"
-    : via.via === "local" || !enNodo ? "Tel"
-    : "Nodo";
-  const color = via.via === "p2p" ? COLOR.rutinaria
-    : via.via === "pueblo" ? COLOR.prioritaria
-    : via.via === "local" || !enNodo ? COLOR.tinta
-    : COLOR.gris;
-  return (
-    <Pressable
-      onPress={togglePanelNodo}
-      hitSlop={12}
-      accessibilityRole="button"
-      accessibilityLabel={abierta ? "Cerrar nodo del pueblo" : "Nodo del pueblo"}
-      accessibilityState={{ expanded: abierta }}
-    >
-      <Text style={[s.link, { color }]}>{abierta ? "Cerrar" : etiqueta}</Text>
-    </Pressable>
-  );
-}
+import { clearDemoLog, subscribeDemoLog, useViaMed } from "./demoLog";
+import { COLOR } from "./ui/tokens";
 
 export default function ConsolaDemo() {
-  const abierta = usePanelNodo();
+  const [abierta, setAbierta] = useState(true);
   const [lineas, setLineas] = useState<string[]>([]);
   const via = useViaMed();
   const scroll = useRef<ScrollView>(null);
@@ -62,51 +27,48 @@ export default function ConsolaDemo() {
     return () => clearTimeout(t);
   }, [lineas, abierta]);
 
-  if (!abierta) return null;
-
-  const estado = via.viva
-    ? via.texto
-    : via.via === "p2p" ? "Último: par P2P"
-      : via.via === "pueblo" ? "Último: pueblo HTTP"
-        : via.via === "local" ? "Último: este teléfono"
-          : "Par P2P o HTTP. Las fotos no salen.";
+  const chip = via.via === "p2p" ? "P2P"
+    : via.via === "pueblo" ? "HTTP"
+    : via.via === "local" ? "Tel"
+    : "LOG";
+  const viva = via.viva ? via.texto : lineas[lineas.length - 1] ?? "Nodo del pueblo";
 
   return (
-    <View style={s.capa} pointerEvents="box-none">
-      <View style={s.panel} accessibilityViewIsModal>
-        <View style={s.barra}>
-          <View style={s.barraTxt}>
-            <Text style={s.titulo}>Nodo del pueblo</Text>
-            <Text style={s.sub} numberOfLines={2}>{estado}</Text>
-          </View>
-          <Pressable onPress={clearDemoLog} hitSlop={10} accessibilityRole="button">
-            <Text style={s.accion}>Borrar</Text>
+    <View style={s.caja}>
+      <Pressable
+        onPress={() => setAbierta(v => !v)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: abierta }}
+        accessibilityLabel={abierta ? "Cerrar consola" : "Abrir consola"}
+        style={s.tira}
+      >
+        <Text style={s.chip}>{chip}</Text>
+        <Text style={s.ultima} numberOfLines={1}>{viva}</Text>
+        <Text style={s.chev}>{abierta ? "▴" : "▾"}</Text>
+      </Pressable>
+      {abierta ? (
+        <>
+          <ScrollView
+            ref={scroll}
+            style={s.scroll}
+            contentContainerStyle={s.scrollIn}
+            onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: false })}
+          >
+            {lineas.length === 0 ? (
+              <Text style={s.vacio}>Todavía no hay tráfico.</Text>
+            ) : (
+              lineas.map((l, i) => (
+                <Text key={`${i}-${l.slice(0, 12)}`} style={s.linea} selectable>
+                  {l}
+                </Text>
+              ))
+            )}
+          </ScrollView>
+          <Pressable onPress={clearDemoLog} style={s.borrar} accessibilityRole="button">
+            <Text style={s.borrarTxt}>Borrar</Text>
           </Pressable>
-        </View>
-        <ScrollView
-          ref={scroll}
-          style={s.scroll}
-          contentContainerStyle={s.scrollIn}
-          onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: false })}
-        >
-          {lineas.length === 0 ? (
-            <Text style={s.vacio}>Todavía no hay tráfico.</Text>
-          ) : (
-            lineas.map((l, i) => (
-              <Text key={`${i}-${l.slice(0, 12)}`} style={s.linea} selectable>
-                {l}
-              </Text>
-            ))
-          )}
-        </ScrollView>
-        <Pressable
-          onPress={() => setPanelNodo(false)}
-          style={s.cerrar}
-          accessibilityRole="button"
-        >
-          <Text style={s.cerrarTxt}>Cerrar</Text>
-        </Pressable>
-      </View>
+        </>
+      ) : null}
     </View>
   );
 }
@@ -118,66 +80,52 @@ const mono = Platform.select({
 });
 
 const s = StyleSheet.create({
-  link: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 0.2,
-  },
-  capa: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 999,
-    elevation: 999,
-    justifyContent: "flex-start",
-    paddingTop: Platform.OS === "ios" ? 132 : 76,
-    paddingHorizontal: 16,
-  },
-  panel: {
-    backgroundColor: COLOR.tinta,
-    maxHeight: 220,
-  },
-  barra: {
+  caja: { backgroundColor: COLOR.tinta },
+  tira: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 12,
-    paddingHorizontal: 14,
-    paddingTop: 12,
-    paddingBottom: 8,
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    minHeight: 28,
   },
-  barraTxt: { flex: 1, gap: 3, minWidth: 0 },
-  titulo: {
-    ...TIPO.barra,
+  chip: {
     fontSize: 10,
-    letterSpacing: 0.7,
+    fontWeight: "800",
+    letterSpacing: 0.6,
     color: COLOR.sobreColor,
+    flexShrink: 0,
   },
-  sub: {
-    fontSize: 11,
-    lineHeight: 14,
+  ultima: {
+    flex: 1,
+    fontFamily: mono,
+    fontSize: 10,
+    lineHeight: 13,
     color: COLOR.sobreColor,
-    fontWeight: "600",
+    minWidth: 0,
   },
-  accion: { fontSize: 11, fontWeight: "700", color: COLOR.sobreTinta },
+  chev: { fontSize: 10, color: COLOR.sobreTinta, flexShrink: 0 },
   scroll: { maxHeight: 120 },
-  scrollIn: { paddingHorizontal: 14, paddingBottom: 8, gap: 2 },
+  scrollIn: { paddingHorizontal: 16, paddingBottom: 6, gap: 2 },
   linea: {
     fontFamily: mono,
     fontSize: 10,
     lineHeight: 13,
     color: COLOR.sobreColor,
   },
-  vacio: { fontSize: 11, lineHeight: 14, color: COLOR.sobreTinta, paddingVertical: 4 },
-  cerrar: {
-    minHeight: 44,
+  vacio: { fontSize: 11, color: COLOR.sobreTinta, paddingVertical: 4 },
+  borrar: {
+    minHeight: 36,
     alignItems: "center",
     justifyContent: "center",
     borderTopWidth: 1,
     borderTopColor: "#2A2A2A",
   },
-  cerrarTxt: {
-    ...TIPO.barra,
+  borrarTxt: {
     fontSize: 10,
+    fontWeight: "800",
     letterSpacing: 0.7,
+    textTransform: "uppercase",
     color: COLOR.sobreColor,
   },
 });

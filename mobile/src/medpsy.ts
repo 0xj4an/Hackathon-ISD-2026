@@ -21,6 +21,18 @@ import { breadcrumbApp, marcarRuntimeSentry, reportarModeloSentry } from "./sent
 
 const CTX = 2048;
 const MEDPSY = "HEALTHCARE_1_7B_MEDICAL_Q8_0";
+const MODELO = "MedPsy 1.7B Q8";
+
+function trabajo(task: InferenceTask): string {
+  if (task === "alerta") return "alerta";
+  if (task === "extraccion") return "extraer campos";
+  if (task === "ocr") return "OCR";
+  return task;
+}
+
+function etiquetaModelo(conLora?: boolean): string {
+  return conLora ? `${MODELO} + LoRA ${LORA_LAB_VERSION}` : MODELO;
+}
 
 type Qvac = typeof import("@qvac/sdk");
 type OrigenAsset = Parameters<NonNullable<Qvac["downloadAsset"]>>[0]["assetSrc"];
@@ -95,7 +107,10 @@ export async function asegurarMedPsy(
   opts?: { conLora?: boolean },
 ): Promise<string> {
   const quiereLora = !!opts?.conLora;
-  if (llmId && llmConLora === quiereLora) return llmId;
+  if (llmId && llmConLora === quiereLora) {
+    demoLog(`${etiquetaModelo(quiereLora)} ya en RAM`);
+    return llmId;
+  }
 
   if (cargando) {
     await cargando.catch(() => undefined);
@@ -126,6 +141,7 @@ export async function asegurarMedPsy(
       }
 
       onProgreso?.({ detalle: loraPath ? `Cargando MedPsy + ${LORA_LAB_VERSION}` : "Cargando MedPsy" });
+      demoLog(`cargando ${etiquetaModelo(!!loraPath)}…`);
       llmId = await s.loadModel({
         modelSrc: HEALTHCARE_1_7B_MEDICAL_Q8_0,
         modelType: "llm",
@@ -139,6 +155,7 @@ export async function asegurarMedPsy(
       llmLoadMs = Date.now() - t0;
       llmConLora = !!loraPath;
       loraRutaActiva = loraPath;
+      demoLog(`${etiquetaModelo(!!loraPath)} en RAM · ${llmLoadMs} ms`);
       marcarRuntimeSentry({ lora: llmConLora ? LORA_LAB_VERSION : null });
       reportarModeloSentry({
         paso: "load",
@@ -177,7 +194,8 @@ async function completarEnNodo(opts: {
   const nodo = await asegurarUrlNodo();
   if (!nodo) throw new Error("sin pueblo en esta WiFi");
   marcarVia({ via: "pueblo", viva: true, texto: `Pueblo HTTP · ${hostDe(nodo)}` });
-  demoLog(`→ POST ${hostDe(nodo)}/inferir task=${opts.task} chars=${opts.user.length}`);
+  demoLog(`pueblo ${hostDe(nodo)} · HTTP /inferir`);
+  demoLog(`nodo corre ${MODELO} · ${trabajo(opts.task)} · ${opts.user.length} chars`);
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 180_000);
   const t0 = Date.now();
@@ -188,6 +206,7 @@ async function completarEnNodo(opts: {
       body: JSON.stringify({
         system: opts.system,
         user: opts.user,
+        task: opts.task,
         temp: opts.temp ?? 0.1,
         predict: opts.predict ?? 220,
       }),
@@ -195,10 +214,10 @@ async function completarEnNodo(opts: {
     });
     const data = await r.json() as { text?: string; motivo?: string };
     if (!r.ok || typeof data?.text !== "string" || !data.text.trim()) {
-      demoLog(`← /inferir HTTP ${r.status} fallo (${Date.now() - t0}ms)`);
+      demoLog(`pueblo falló HTTP ${r.status} · ${Date.now() - t0} ms`);
       throw new Error(data?.motivo ?? "el nodo no respondió");
     }
-    demoLog(`← /inferir HTTP ${r.status} ${data.text.length} chars (${Date.now() - t0}ms)`);
+    demoLog(`pueblo listo · ${data.text.length} chars · ${Date.now() - t0} ms`);
     marcarVia({ via: "pueblo", viva: false, texto: `Pueblo HTTP · ${Date.now() - t0} ms` });
     await recordInference({
       task: opts.task,
@@ -230,7 +249,7 @@ async function completarDelegado(opts: {
 }, pk: string): Promise<string> {
   opts.onProgreso?.({ detalle: "Buscando par P2P…" });
   marcarVia({ via: "p2p", viva: true, texto: `Buscando par P2P · ${pk.slice(0, 8)}…` });
-  demoLog(`→ delegate ${pk.slice(0, 8)}… task=${opts.task}`);
+  demoLog(`par ${pk.slice(0, 8)}… · conectando`);
   const s = await sdk();
   const { HEALTHCARE_1_7B_MEDICAL_Q8_0 } = await import("@qvac/sdk/models");
   const t0 = Date.now();
@@ -242,6 +261,7 @@ async function completarDelegado(opts: {
   } as unknown as Parameters<Qvac["loadModel"]>[0]);
   marcarVia({ via: "p2p", viva: true, texto: "Par conectado · mandando el pedido…" });
   opts.onProgreso?.({ detalle: "Par conectado. Mandando el pedido de inferencia…" });
+  demoLog(`par conectado · mandando ${trabajo(opts.task)}`);
   let first: number | null = null;
   let text = "";
   const t1 = Date.now();
@@ -258,12 +278,13 @@ async function completarDelegado(opts: {
     if (first === null) {
       first = Date.now() - t1;
       marcarVia({ via: "p2p", viva: true, texto: "Par P2P · esperando inferencia…" });
+      demoLog("par generando…");
     }
     text += tok;
   }
   try { await s.unloadModel({ modelId, clearStorage: false }); } catch { /* ignore */ }
   if (!text.trim()) throw new Error("delegate vacío");
-  demoLog(`← delegate ${text.length} chars (${Date.now() - t0}ms)`);
+  demoLog(`par listo · ${text.length} chars · ${Date.now() - t0} ms`);
   marcarVia({ via: "p2p", viva: false, texto: `Par P2P · MedPsy · ${Date.now() - t0} ms` });
   await recordInference({
     task: opts.task,
@@ -294,6 +315,8 @@ export async function completarMedPsy(opts: {
     try {
       if (saltarMedPsyLocal()) {
         const pk = claveProveedor();
+        demoLog(`sin capacidad aquí · ${trabajo(opts.task)}`);
+        demoLog(`modelo en el nodo: ${MODELO}`);
         marcarVia({
           via: pk ? "p2p" : "pueblo",
           viva: true,
@@ -305,9 +328,12 @@ export async function completarMedPsy(opts: {
           try { return await completarDelegado(opts, pk); }
           catch (err) {
             recordError("medpsy.delegate", err);
-            demoLog(`delegate falló → HTTP /inferir (${err instanceof Error ? err.message.slice(0, 80) : "fail"})`);
+            demoLog(`par no respondió · paso a pueblo HTTP`);
+            demoLog(err instanceof Error ? err.message.slice(0, 80) : "fail");
             marcarVia({ via: "pueblo", viva: true, texto: "Par no respondió · pueblo HTTP" });
           }
+        } else {
+          demoLog("sin llave P2P · pueblo HTTP");
         }
         return await completarEnNodo(opts);
       }
@@ -316,6 +342,8 @@ export async function completarMedPsy(opts: {
         viva: true,
         texto: opts.conLora ? "MedPsy + LoRA en este teléfono" : "MedPsy en este teléfono",
       });
+      demoLog(`${trabajo(opts.task)} en este teléfono`);
+      demoLog(`modelo: ${etiquetaModelo(opts.conLora)}`);
       const s = await sdk();
       const modelId = await asegurarMedPsy(opts.onProgreso, { conLora: opts.conLora });
       const t1 = Date.now();
@@ -325,6 +353,7 @@ export async function completarMedPsy(opts: {
         task: opts.task,
         lora: opts.conLora ? LORA_LAB_VERSION : "no",
       });
+      demoLog("generando…");
       const r = s.completion({
         modelId,
         stream: true,
@@ -352,9 +381,7 @@ export async function completarMedPsy(opts: {
         out_chars: text.length,
       });
       getAppLogger().info(`${opts.task} ${text.length} chars lora=${llmConLora ? LORA_LAB_VERSION : "no"}`);
-      demoLog(
-        `MedPsy local task=${opts.task} ttft=${first ?? "—"}ms out=${text.length} lora=${llmConLora ? LORA_LAB_VERSION : "no"}`,
-      );
+      demoLog(`listo · ${text.length} chars · primer token ${first ?? "—"} ms`);
       marcarVia({
         via: "local",
         viva: false,

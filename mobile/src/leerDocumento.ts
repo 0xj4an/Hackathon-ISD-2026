@@ -436,8 +436,8 @@ export async function leerDocumentos(
       breadcrumbLectura("extract.start", { n: conTexto.length });
       const delega = saltarMedPsyLocal();
       demoLog(delega
-        ? `docs OCR ok · delegando extracción n=${conTexto.length}`
-        : `docs OCR ok · MedPsy local n=${conTexto.length}`);
+        ? `OCR listo en el teléfono · delegando extraer campos n=${conTexto.length}`
+        : `OCR listo en el teléfono · extraer campos aquí n=${conTexto.length}`);
       aviso({
         paso: "extraccion",
         detalle: delega

@@ -45,28 +45,6 @@ export function useViaMed(): EstadoVia {
   return e;
 }
 
-let panelNodo = false;
-const panelListeners = new Set<(v: boolean) => void>();
-
-export function setPanelNodo(v: boolean) {
-  panelNodo = v;
-  for (const l of panelListeners) l(panelNodo);
-}
-
-export function togglePanelNodo() {
-  setPanelNodo(!panelNodo);
-}
-
-export function usePanelNodo(): boolean {
-  const [v, setV] = useState(panelNodo);
-  useEffect(() => {
-    panelListeners.add(setV);
-    setV(panelNodo);
-    return () => { panelListeners.delete(setV); };
-  }, []);
-  return v;
-}
-
 function stamp(msg: string): string {
   const hora = new Intl.DateTimeFormat("en-GB", {
     timeZone: "America/Panama",

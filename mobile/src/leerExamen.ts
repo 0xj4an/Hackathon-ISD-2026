@@ -16,6 +16,7 @@ import {
   soltarLectores,
   type ProgresoLectura,
 } from "./leerDocumento";
+import { demoLog } from "./demoLog";
 import { getAppLogger, recordError } from "./perf/logger";
 import { breadcrumbLectura, reportarLoteLecturaSentry } from "./sentry";
 
@@ -46,8 +47,10 @@ export async function leerExamenFoto(
   let textoOcr = "";
   breadcrumbLectura("lote.start", { n: 1, kind: "lab" });
   try {
+    demoLog("OCR en este teléfono · examen");
     const ocr = await leerOcrDeUri(uri, aviso);
     textoOcr = ocr.texto;
+    if (textoOcr.trim()) demoLog(`OCR listo · examen · ${textoOcr.length} chars`);
     if (!textoOcr.trim()) {
       reportarLoteLecturaSentry({
         resultados: [{ kind: "lab", ok: false, chars: 0, ms: Date.now() - t0, errorCode: "empty" }],

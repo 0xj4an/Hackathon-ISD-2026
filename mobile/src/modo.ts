@@ -5,6 +5,7 @@
  *   local-offline  inferencia aquí (MedPsy + LoRA) · solicitudes por el nodo
  *   nodo-offline   sin modelo aquí · inferencia y solicitudes en el nodo
  */
+import { useEffect, useState } from "react";
 import { USUARIOS, type Usuario } from "./usuarios";
 import { COLOR } from "./ui/tokens";
 
@@ -52,6 +53,22 @@ export function etiquetaModo(m: Modo): string {
 
 const CASO = "diabetes";
 let activo: ModoId = "local-wifi";
+const modoListeners = new Set<() => void>();
+
+function avisarModo() {
+  for (const l of modoListeners) l();
+}
+
+export function subscribeModo(fn: () => void): () => void {
+  modoListeners.add(fn);
+  return () => { modoListeners.delete(fn); };
+}
+
+export function useFichaModo(): Modo & { titulo: string } {
+  const [, tick] = useState(0);
+  useEffect(() => subscribeModo(() => tick(n => n + 1)), []);
+  return fichaModo();
+}
 
 export function modo(): ModoId {
   return activo;
@@ -78,9 +95,13 @@ export function fijarModo(id: ModoId) {
         : "MedPsy en este teléfono",
     });
     demoLog(`sesión ${etiquetaModoCorta(id)}`);
+    demoLog(id === "nodo-offline"
+      ? "este teléfono no corre MedPsy · el nodo corre MedPsy 1.7B Q8"
+      : "MedPsy 1.7B Q8 en este teléfono");
   } catch {
     /* demoLog opcional en tests */
   }
+  avisarModo();
 }
 
 export function resetModo() {
@@ -90,6 +111,7 @@ export function resetModo() {
     const { marcarVia } = require("./demoLog") as typeof import("./demoLog");
     marcarVia({ via: "local", viva: false, texto: "MedPsy en este teléfono" });
   } catch { /* opcional */ }
+  avisarModo();
 }
 
 export function usuarioDelModo(): Usuario {

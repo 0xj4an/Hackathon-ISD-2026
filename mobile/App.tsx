@@ -30,7 +30,6 @@ import PantallaBanco from "./src/PantallaBanco";
 import PantallaExamen from "./src/PantallaExamen";
 import PantallaFirma from "./src/PantallaFirma";
 import PantallaDesembolso from "./src/PantallaDesembolso";
-import ConsolaDemo from "./src/ConsolaDemo";
 import { demoLog } from "./src/demoLog";
 import { solicitudDeLectura, type LecturaCredito } from "./src/lectura";
 import {
@@ -134,10 +133,7 @@ export default function App() {
 
   const conInicio = (nodo: ReactNode) => (
     <IrInicioContext.Provider value={irInicio}>
-      <View style={shell.flex}>
-        {nodo}
-        <ConsolaDemo />
-      </View>
+      {nodo}
     </IrInicioContext.Provider>
   );
 
@@ -464,7 +460,7 @@ export default function App() {
       <PantallaEntrada
         onEntrar={(u, m) => {
           fijarModo(m);
-          demoLog(`sesión modo=${m} caso=${u.id}`);
+          demoLog(`caso ${u.id}`);
           setUsuario(u);
         }}
         onRegistro={() => setEnRegistro(true)}
