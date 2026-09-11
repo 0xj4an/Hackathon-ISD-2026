@@ -119,6 +119,59 @@ function metaDe(canal: Canal): { aviso: string | null; resto: string } {
   return { aviso: "WiFi no disponible", resto: "pueblo HTTP" };
 }
 
+function copyLora(
+  c: (typeof COPY)[FaseVia][Canal],
+  fase: FaseVia,
+  canal: Canal,
+  lora: string,
+) {
+  const tag = `MedPsy + LoRA ${lora}`;
+  if (fase === "conectando") {
+    return {
+      titulo: canal === "local" ? "En este teléfono" : "Conectando al nodo",
+      detalle: canal === "local"
+        ? `Cargando ${tag} en este teléfono.`
+        : `Este teléfono no tiene capacidad. Delegando ${tag} al nodo.`,
+      barraDe: `Cargando ${tag}…`,
+      pie: c.pie,
+    };
+  }
+  if (fase === "delegando") {
+    return {
+      titulo: canal === "local" ? "Pedido local" : c.titulo,
+      detalle: canal === "local"
+        ? `${tag} recibe el texto en este teléfono. La foto no se mueve.`
+        : `Mandando ${tag} al nodo. La foto no sale.`,
+      barraDe: canal === "local" ? `Pasando el texto a ${tag}…` : c.barraDe,
+      pie: c.pie,
+    };
+  }
+  if (fase === "esperando") {
+    return {
+      titulo: canal === "local" ? `${tag} escribe` : "Esperando inferencia…",
+      detalle: canal === "local"
+        ? `${tag} está corriendo en este teléfono.`
+        : canal === "p2p"
+          ? `${tag} está corriendo en la laptop del pueblo.`
+          : `El pueblo está corriendo ${tag}.`,
+      barraDe: canal === "local"
+        ? `${tag} en el teléfono…`
+        : canal === "p2p"
+          ? `${tag} en el par…`
+          : `${tag} en el pueblo…`,
+      pie: "El LoRA saca los marcadores. Rangos y urgencia los decide el catálogo, no el modelo.",
+    };
+  }
+  return {
+    titulo: canal === "local" ? "Listo aquí" : "Recibiendo del nodo",
+    detalle: canal === "local"
+      ? `${tag} terminó en este teléfono.`
+      : `${tag} corrió en el nodo.`,
+    barraDe: canal === "local" ? `Respuesta ${tag}…` : c.barraDe,
+    pie: "El LoRA saca los marcadores. Rangos y urgencia los decide el catálogo, no el modelo.",
+  };
+}
+
 export default function PantallaViaMed({
   onSalir,
   extra,
@@ -179,31 +232,13 @@ export default function PantallaViaMed({
   }, []);
 
   const meta = metaDe(canal);
-  const conLora = Boolean(lora) && canal === "local";
-  const c = COPY[fase][canal];
-  const titulo = conLora ? `MedPsy + LoRA ${lora}` : c.titulo;
-  const detalle = extra?.trim()
-    ? extra
-    : conLora
-      ? (fase === "conectando"
-        ? `Cargando MedPsy + LoRA ${lora} en este teléfono.`
-        : fase === "delegando"
-          ? `MedPsy + LoRA ${lora} recibe el texto. La foto no se mueve.`
-          : fase === "esperando"
-            ? `MedPsy + LoRA ${lora} está corriendo en este teléfono.`
-            : `MedPsy + LoRA ${lora} terminó en este teléfono.`)
-      : c.detalle;
-  const barraDe = conLora
-    ? (fase === "conectando" ? `Cargando MedPsy + LoRA ${lora}…`
-      : fase === "delegando" ? `Pasando el texto a MedPsy + LoRA ${lora}…`
-        : fase === "esperando" ? `Inferencia MedPsy + LoRA ${lora}…`
-          : `Respuesta MedPsy + LoRA ${lora}…`)
-    : c.barraDe;
+  const conLora = Boolean(lora);
+  const base = COPY[fase][canal];
+  const c = conLora && lora ? copyLora(base, fase, canal, lora) : base;
+  const donde = canal === "local" ? "en el teléfono" : "en el nodo";
   const linea = conLora
-    ? `${MODELO_TELEFONO.linea} + LoRA ${lora} · en el teléfono`
-    : canal === "local"
-      ? `${MODELO_TELEFONO.linea} · en el teléfono`
-      : `${MODELO_TELEFONO.linea} · en el nodo`;
+    ? `${MODELO_TELEFONO.linea} + LoRA ${lora} · ${donde}`
+    : `${MODELO_TELEFONO.linea} · ${donde}`;
   const pctClamped = Math.max(0, Math.min(100, Math.round(pct)));
   const colorBarra = canal === "local" ? COLOR.tinta
     : canal === "p2p" ? COLOR.rutinaria
@@ -223,12 +258,13 @@ export default function PantallaViaMed({
             meta.resto
           )}
         </Text>
-        <Text style={s.titulo} accessibilityLiveRegion="polite">{titulo}</Text>
+        <Text style={s.titulo} accessibilityLiveRegion="polite">{c.titulo}</Text>
         <Text style={s.modelo}>
           {conLora ? `${MODELO_TELEFONO.id} · LoRA ${lora}` : MODELO_TELEFONO.id}
         </Text>
         <Text style={s.linea}>{linea}</Text>
-        <Text style={s.detalle}>{detalle}</Text>
+        <Text style={s.detalle}>{c.detalle}</Text>
+        {extra?.trim() ? <Text style={s.extra}>{extra}</Text> : null}
 
         <View
           style={s.barra}
@@ -239,14 +275,10 @@ export default function PantallaViaMed({
         </View>
         <View style={s.barraTextos}>
           <Text style={s.barraPct}>{pctClamped}%</Text>
-          <Text style={s.barraDe}>{barraDe}</Text>
+          <Text style={s.barraDe}>{c.barraDe}</Text>
         </View>
 
-        <Text style={s.pie}>
-          {conLora
-            ? "El LoRA saca los marcadores. Rangos y urgencia los decide el catálogo, no el modelo."
-            : c.pie}
-        </Text>
+        <Text style={s.pie}>{c.pie}</Text>
       </View>
     </Pantalla>
   );
@@ -271,6 +303,7 @@ const s = StyleSheet.create({
   },
   linea: { fontSize: 14, lineHeight: 18, fontWeight: "700", color: COLOR.gris },
   detalle: { fontSize: 15, lineHeight: 21, color: COLOR.gris, marginTop: 4 },
+  extra: { fontSize: 13.5, lineHeight: 18, color: COLOR.gris },
   barra: { height: 14, backgroundColor: COLOR.hundido, marginTop: 22 },
   barraLlena: { height: 14 },
   barraTextos: { flexDirection: "row", alignItems: "baseline", gap: 12, marginTop: 10 },

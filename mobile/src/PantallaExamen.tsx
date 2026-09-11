@@ -158,7 +158,7 @@ export default function PantallaExamen({
         extra={progreso || "Leyendo el examen"}
         activo={leyendo}
         onListo={() => setMostrandoVia(false)}
-        lora={saltarMedPsyLocal() ? null : LORA_LAB_VERSION}
+        lora={LORA_LAB_VERSION}
       />
     );
   }
@@ -191,8 +191,8 @@ export default function PantallaExamen({
         {conLora ? (
           <Franja
             color={COLOR.tinta}
-            titulo="MedPsy + LoRA"
-            texto={`Marcadores sacados con ${conLora}. Rangos y urgencia los decide el catálogo, no el modelo.`}
+            titulo={`MedPsy + LoRA ${conLora}`}
+            texto="Fine-tuning de laboratorio. Los marcadores salen del LoRA. Rangos y urgencia los decide el catálogo, no el modelo."
           />
         ) : null}
 
@@ -237,8 +237,9 @@ export default function PantallaExamen({
         />
 
         <Pie>
-          Los rangos salen del catálogo de marcadores, cada uno con su fuente. Esto es orientación
-          automática y local, no un diagnóstico.
+          {conLora
+            ? `Marcadores: MedPsy + LoRA ${conLora} (fine-tuning). Rangos y urgencia: catálogo, cada uno con su fuente. No es un diagnóstico.`
+            : "Los rangos salen del catálogo de marcadores, cada uno con su fuente. Esto es orientación automática y local, no un diagnóstico."}
         </Pie>
       </Pantalla>
     );

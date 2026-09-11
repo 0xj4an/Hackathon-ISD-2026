@@ -126,7 +126,7 @@ export async function leerExamenFoto(
       ok: true,
       lecturas: lecturas.sort((a, b) => ORDEN[a.urgencia] - ORDEN[b.urgencia]),
       textoOcr,
-      lora: saltarMedPsyLocal() ? null : LORA_LAB_VERSION,
+      lora: LORA_LAB_VERSION,
     };
   } catch (err) {
     recordError("examen.foto", err);
