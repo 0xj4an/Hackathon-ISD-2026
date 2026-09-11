@@ -126,7 +126,6 @@ export default function PantallaDocumentos({
 }) {
   const [estados, setEstados] = useState<Record<ClaveDocumento, EstadoDoc>>(() => semilla(lecturaInicial));
   const [error, setError] = useState("");
-  const [demoAbierta, setDemoAbierta] = useState(false);
   const [analizando, setAnalizando] = useState(false);
   const ocupado = Object.values(estados).some(e => e.fase === "leyendo") || analizando;
   const hayCola = DOCUMENTOS.some(d => estados[d.clave].fase === "enCola");
@@ -351,47 +350,16 @@ export default function PantallaDocumentos({
         </>
       )}
 
-      <View style={s.demo}>
-        <Pressable
-          onPress={() => setDemoAbierta(v => !v)}
-          accessibilityRole="button"
-          accessibilityState={{ expanded: demoAbierta }}
-          accessibilityLabel="Opciones de demostración"
-          style={({ pressed }) => [s.demoCabecera, pressed && s.demoPress]}
-        >
-          <View style={s.demoCabeceraTextos}>
-            <Text style={s.demoBadge}>Demo options</Text>
-            <Text style={s.demoResumen}>Saltar OCR con datos de Mariela</Text>
-          </View>
-          <Text style={s.demoChevron}>{demoAbierta ? "▴" : "▾"}</Text>
-        </Pressable>
-        {demoAbierta ? (
-          <View style={s.demoCuerpo}>
-            <Text style={s.demoAyuda}>
-              Rellena cédula, ingresos y extracto con el caso de demo. No corre OCR.
-            </Text>
-            <Boton
-              texto="Llenar con demo"
-              tono="borde"
-              onPress={() => {
-                if (ocupado) return;
-                setError("");
-                setEstados(semilla(DEMO_LECTURA));
-              }}
-            />
-            <Boton
-              texto="Llenar y continuar"
-              tono="prioritaria"
-              onPress={() => {
-                if (ocupado) return;
-                setError("");
-                setEstados(semilla(DEMO_LECTURA));
-                onListo(DEMO_LECTURA);
-              }}
-            />
-          </View>
-        ) : null}
-      </View>
+      <Boton
+        texto="Llenar y continuar"
+        tono="prioritaria"
+        onPress={() => {
+          if (ocupado) return;
+          setError("");
+          setEstados(semilla(DEMO_LECTURA));
+          onListo(DEMO_LECTURA);
+        }}
+      />
 
       <Pie>
         Si un dato no cuadra, toma otra foto. Las imágenes no salen de este teléfono.
@@ -626,26 +594,4 @@ const s = StyleSheet.create({
   privacidadTexto: { fontSize: 13.5, lineHeight: 19, color: COLOR.sobreColor },
 
   estado: { fontSize: 15, lineHeight: 21, fontWeight: "700", color: COLOR.tinta, paddingHorizontal: ESPACIO.borde },
-
-  demo: {
-    marginTop: 28,
-    marginHorizontal: ESPACIO.borde,
-    borderWidth: 1,
-    borderColor: COLOR.separador,
-    backgroundColor: COLOR.hundido,
-  },
-  demoCabecera: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  demoCabeceraTextos: { flex: 1, gap: 2, minWidth: 0 },
-  demoBadge: { ...TIPO.etiqueta, fontSize: 10, letterSpacing: 0.8, color: COLOR.gris },
-  demoResumen: { fontSize: 13, lineHeight: 17, color: COLOR.tinta, fontWeight: "600" },
-  demoChevron: { fontSize: 14, color: COLOR.gris },
-  demoPress: { opacity: 0.85 },
-  demoCuerpo: { paddingHorizontal: 14, paddingBottom: 14, gap: 8 },
-  demoAyuda: { fontSize: 13, lineHeight: 18, color: COLOR.gris, marginBottom: 4 },
 });

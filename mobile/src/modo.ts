@@ -1,10 +1,9 @@
 /**
- * Demo: capacidad × red. Independiente del tronco de producto
- * (historial → resultado → crédito/examen).
+ * Tres caminos. Dos ejes: WiFi al banco × modelo en el teléfono.
  *
- *   local-wifi     MedPsy local + envío al banco
- *   local-offline  MedPsy local + pueblo/pendiente
- *   nodo-offline   par P2P (delegate) o pueblo /inferir + pendiente
+ *   local-wifi     inferencia aquí (MedPsy + LoRA) · solicitudes al banco
+ *   local-offline  inferencia aquí (MedPsy + LoRA) · solicitudes por el nodo
+ *   nodo-offline   sin modelo aquí · inferencia y solicitudes en el nodo
  */
 import { USUARIOS, type Usuario } from "./usuarios";
 import { COLOR } from "./ui/tokens";
@@ -26,7 +25,7 @@ export const MODOS: Modo[] = [
     wifi: "WiFi disponible",
     modelo: "Modelo local",
     detalle: "MedPsy en este teléfono. El crédito sale directo al banco.",
-    franja: "WiFi disponible · modelo local. El banco está al alcance.",
+    franja: "WiFi disponible · MedPsy en este teléfono. El banco está al alcance.",
     color: COLOR.rutinaria,
   },
   {
@@ -34,15 +33,15 @@ export const MODOS: Modo[] = [
     wifi: "WiFi no disponible",
     modelo: "Modelo local",
     detalle: "MedPsy en este teléfono. Sin internet: pueblo o pendiente.",
-    franja: "WiFi no disponible · modelo local. El crédito va al pueblo o queda pendiente.",
+    franja: "WiFi no disponible · MedPsy en este teléfono. El crédito va al pueblo o queda pendiente.",
     color: COLOR.prioritaria,
   },
   {
     id: "nodo-offline",
     wifi: "WiFi no disponible",
     modelo: "Delegar al nodo",
-    detalle: "MedPsy no corre aquí. Primero el par P2P; si no entra, el pueblo por HTTP.",
-    franja: "WiFi no disponible · par P2P o pueblo.",
+    detalle: "Este teléfono no corre MedPsy. El pedido va al par P2P o al pueblo HTTP.",
+    franja: "WiFi no disponible · MedPsy en el nodo del pueblo.",
     color: COLOR.inmediata,
   },
 ];
@@ -68,10 +67,28 @@ export function fijarModo(id: ModoId) {
   } catch {
     /* Sentry opcional en tests */
   }
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { marcarVia } = require("./demoLog") as typeof import("./demoLog");
+    marcarVia({
+      via: id === "nodo-offline" ? "p2p" : "local",
+      viva: false,
+      texto: id === "nodo-offline"
+        ? "Sin capacidad aquí · delegando al nodo"
+        : "MedPsy en este teléfono",
+    });
+  } catch {
+    /* demoLog opcional en tests */
+  }
 }
 
 export function resetModo() {
   activo = "local-wifi";
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { marcarVia } = require("./demoLog") as typeof import("./demoLog");
+    marcarVia({ via: "local", viva: false, texto: "MedPsy en este teléfono" });
+  } catch { /* opcional */ }
 }
 
 export function usuarioDelModo(): Usuario {

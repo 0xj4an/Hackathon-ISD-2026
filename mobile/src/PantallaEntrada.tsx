@@ -167,7 +167,7 @@ export default function PantallaEntrada({
         {demoAbierta ? (
           <View style={s.demoCuerpo}>
             <Text style={s.demoAyuda}>
-              WiFi, modelo y nodo del pueblo. En la misma red la app busca sola el nodo (:8788); no hace falta pegar IP al cambiar de WiFi.
+              WiFi, modelo y nodo del pueblo. En la misma red la app busca sola el nodo (:8788).
             </Text>
 
             <Text style={s.demoEtiqueta}>Modo · el teléfono</Text>

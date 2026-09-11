@@ -294,6 +294,13 @@ export async function completarMedPsy(opts: {
     try {
       if (saltarMedPsyLocal()) {
         const pk = claveProveedor();
+        marcarVia({
+          via: pk ? "p2p" : "pueblo",
+          viva: true,
+          texto: pk
+            ? "Sin capacidad aquí. Delegando al nodo por P2P."
+            : "Sin capacidad aquí. Delegando al nodo por HTTP.",
+        });
         if (pk) {
           try { return await completarDelegado(opts, pk); }
           catch (err) {
@@ -304,6 +311,11 @@ export async function completarMedPsy(opts: {
         }
         return await completarEnNodo(opts);
       }
+      marcarVia({
+        via: "local",
+        viva: true,
+        texto: opts.conLora ? "MedPsy + LoRA en este teléfono" : "MedPsy en este teléfono",
+      });
       const s = await sdk();
       const modelId = await asegurarMedPsy(opts.onProgreso, { conLora: opts.conLora });
       const t1 = Date.now();
@@ -313,7 +325,6 @@ export async function completarMedPsy(opts: {
         task: opts.task,
         lora: opts.conLora ? LORA_LAB_VERSION : "no",
       });
-      marcarVia({ via: "local", viva: true, texto: opts.conLora ? `MedPsy + LoRA en este teléfono` : "MedPsy en este teléfono" });
       const r = s.completion({
         modelId,
         stream: true,

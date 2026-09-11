@@ -1,122 +1,123 @@
 /**
- * Fases de inferencia para el video, como el envío al banco:
- * conectar → mandar/delegar → esperar → recibir. Cada una dura lo suficiente
- * para grabarse; la barra no llega a 100 hasta que MedPsy termina de verdad.
+ * Fases de inferencia para el video.
+ *
+ * Dos caminos, según la ruta elegida al entrar:
+ * - local-wifi / local-offline → MedPsy en este teléfono.
+ * - nodo-offline → se simula un teléfono sin modelo: inferencia en el nodo.
  */
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Pantalla, Encabezado } from "./ui/componentes";
 import { COLOR, DISPLAY, ESPACIO, TIPO } from "./ui/tokens";
 import { MODELO_TELEFONO } from "./modelosMarca";
-import { saltarMedPsyLocal } from "./modo";
-import { useViaMed } from "./demoLog";
+import { modo, saltarMedPsyLocal } from "./modo";
+import { useViaMed, type ViaMed } from "./demoLog";
 import { ENVIO_MS, animarPct, sleep } from "./envioVisual";
 
 type Canal = "p2p" | "pueblo" | "local";
 type FaseVia = "conectando" | "delegando" | "esperando" | "recibiendo";
 
 const COPY: Record<FaseVia, Record<Canal, {
-  titulo: string; detalle: string; pie: string; barraDe: string; meta: string;
+  titulo: string; detalle: string; pie: string; barraDe: string;
 }>> = {
   conectando: {
+    local: {
+      titulo: "En este teléfono",
+      detalle: "Cargando MedPsy en este teléfono.",
+      pie: "La inferencia no sale al pueblo ni a la nube.",
+      barraDe: "Cargando MedPsy…",
+    },
     p2p: {
-      meta: "Nodo del pueblo · par P2P",
-      titulo: "Conectando…",
-      detalle: "Abriendo el par P2P. El teléfono busca la laptop del pueblo.",
-      pie: "Misma WiFi. Sin nube.",
+      titulo: "Conectando al nodo",
+      detalle: "Este teléfono no tiene capacidad para correr el modelo. Delegando al nodo por P2P.",
+      pie: "La inferencia corre en la laptop. La foto no sale.",
       barraDe: "Handshake con el par…",
     },
     pueblo: {
-      meta: "Nodo del pueblo · HTTP",
-      titulo: "Conectando…",
-      detalle: "Abriendo canal con el pueblo por HTTP.",
-      pie: "Solo la WiFi del corregimiento.",
+      titulo: "Conectando al nodo",
+      detalle: "Este teléfono no tiene capacidad para correr el modelo. Delegando al nodo por HTTP.",
+      pie: "La inferencia corre en el pueblo. La foto no sale.",
       barraDe: "Abriendo el canal…",
-    },
-    local: {
-      meta: "Este teléfono",
-      titulo: "Conectando…",
-      detalle: "Cargando MedPsy en este teléfono.",
-      pie: "Nada sale a internet.",
-      barraDe: "Cargando el modelo…",
     },
   },
   delegando: {
+    local: {
+      titulo: "Pedido local",
+      detalle: "MedPsy recibe el texto en este teléfono. La foto no se mueve.",
+      pie: "El umbral lo deciden las reglas, no el modelo.",
+      barraDe: "Pasando el texto a MedPsy…",
+    },
     p2p: {
-      meta: "Nodo del pueblo · par P2P",
       titulo: "Delegando…",
-      detalle: "El teléfono manda el pedido de inferencia al par. La foto no sale.",
+      detalle: "Mandando el pedido de inferencia al par. La foto no sale.",
       pie: "QVAC delegate. El modelo corre en la laptop.",
       barraDe: "Enviando el request…",
     },
     pueblo: {
-      meta: "Nodo del pueblo · HTTP",
       titulo: "Mandando el request…",
       detalle: "POST /inferir al pueblo. Solo texto, sin foto ni cédula.",
-      pie: "Si el par no entra, este es el plan B.",
+      pie: "Plan B si el par no entra.",
       barraDe: "Subiendo el pedido…",
-    },
-    local: {
-      meta: "Este teléfono",
-      titulo: "Mandando el pedido…",
-      detalle: "MedPsy recibe el texto aquí mismo.",
-      pie: "El umbral lo deciden las reglas, no el modelo.",
-      barraDe: "Pasando el texto a MedPsy…",
     },
   },
   esperando: {
-    p2p: {
-      meta: "Nodo del pueblo · par P2P",
-      titulo: "Esperando inferencia…",
-      detalle: "MedPsy está escribiendo en la laptop del pueblo.",
-      pie: "La foto no salió. Solo fue el pedido.",
-      barraDe: "Inferencia en el par…",
-    },
-    pueblo: {
-      meta: "Nodo del pueblo · HTTP",
-      titulo: "Esperando inferencia…",
-      detalle: "El pueblo está corriendo MedPsy. Esperamos la respuesta.",
-      pie: "Sin foto y sin cédula.",
-      barraDe: "Inferencia en el pueblo…",
-    },
     local: {
-      meta: "Este teléfono",
-      titulo: "Esperando inferencia…",
-      detalle: "MedPsy está redactando en este teléfono.",
+      titulo: "MedPsy escribe",
+      detalle: "La inferencia está corriendo en este teléfono.",
       pie: "Nada sale.",
       barraDe: "Inferencia en el teléfono…",
     },
-  },
-  recibiendo: {
     p2p: {
-      meta: "Nodo del pueblo · par P2P",
-      titulo: "Recibiendo…",
-      detalle: "Bajando la respuesta del par. El modelo no corrió en la nube.",
-      pie: "Siguiente: el hallazgo, que lo deciden las reglas.",
-      barraDe: "Llegó la inferencia…",
+      titulo: "Esperando inferencia…",
+      detalle: "MedPsy está escribiendo en la laptop del pueblo.",
+      pie: "Este teléfono no puede correr MedPsy. La inferencia está en el nodo.",
+      barraDe: "Inferencia en el par…",
     },
     pueblo: {
-      meta: "Nodo del pueblo · HTTP",
-      titulo: "Recibiendo…",
-      detalle: "Bajando la respuesta del pueblo.",
-      pie: "Siguiente: el hallazgo, que lo deciden las reglas.",
-      barraDe: "Llegó la inferencia…",
+      titulo: "Esperando inferencia…",
+      detalle: "El pueblo está corriendo MedPsy.",
+      pie: "Este teléfono no puede correr MedPsy. La inferencia está en el nodo.",
+      barraDe: "Inferencia en el pueblo…",
     },
+  },
+  recibiendo: {
     local: {
-      meta: "Este teléfono",
-      titulo: "Recibiendo…",
-      detalle: "MedPsy terminó. Bajando el texto.",
+      titulo: "Listo aquí",
+      detalle: "MedPsy terminó en este teléfono.",
       pie: "Siguiente: el hallazgo, que lo deciden las reglas.",
-      barraDe: "Llegó la inferencia…",
+      barraDe: "Respuesta local…",
+    },
+    p2p: {
+      titulo: "Recibiendo del nodo",
+      detalle: "Bajando la respuesta. El modelo corrió en el nodo: este teléfono no tenía capacidad.",
+      pie: "Siguiente: el hallazgo, que lo deciden las reglas.",
+      barraDe: "Llegó del par…",
+    },
+    pueblo: {
+      titulo: "Recibiendo del nodo",
+      detalle: "Bajando la respuesta. El modelo corrió en el nodo: este teléfono no tenía capacidad.",
+      pie: "Siguiente: el hallazgo, que lo deciden las reglas.",
+      barraDe: "Llegó del pueblo…",
     },
   },
 };
 
-function canalDe(via: ReturnType<typeof useViaMed>["via"]): Canal {
+function canalDe(via: ViaMed): Canal {
   if (via === "pueblo") return "pueblo";
-  if (via === "local") return "local";
   if (via === "p2p") return "p2p";
+  if (via === "local") return "local";
   return saltarMedPsyLocal() ? "p2p" : "local";
+}
+
+function metaDe(canal: Canal): string {
+  const m = modo();
+  if (canal === "local") {
+    return m === "local-wifi"
+      ? "WiFi · modelo en este teléfono"
+      : "Sin WiFi al banco · modelo en este teléfono";
+  }
+  if (canal === "p2p") return "WiFi no disponible · par P2P";
+  return "WiFi no disponible · pueblo HTTP";
 }
 
 export default function PantallaViaMed({
@@ -176,20 +177,27 @@ export default function PantallaViaMed({
   }, []);
 
   const c = COPY[fase][canal];
-  const detalle = fase === "conectando" && extra ? extra : c.detalle;
+  const detalle = fase === "conectando" && extra && canal !== "local" ? extra : c.detalle;
   const pctClamped = Math.max(0, Math.min(100, Math.round(pct)));
-  const colorBarra = canal === "p2p" ? COLOR.rutinaria
-    : canal === "pueblo" ? COLOR.prioritaria
-      : COLOR.tinta;
+  const colorBarra = canal === "local" ? COLOR.tinta
+    : canal === "p2p" ? COLOR.rutinaria
+      : COLOR.prioritaria;
 
   return (
     <Pantalla scroll={false}>
       <Encabezado meta="Salir" onVolver={onSalir} />
       <View style={s.cuerpo}>
-        <Text style={s.meta} accessibilityLiveRegion="polite">{c.meta}</Text>
+        <Text
+          style={[s.meta, { color: colorBarra === COLOR.tinta ? COLOR.gris : colorBarra }]}
+          accessibilityLiveRegion="polite"
+        >
+          {metaDe(canal)}
+        </Text>
         <Text style={s.titulo} accessibilityLiveRegion="polite">{c.titulo}</Text>
         <Text style={s.modelo}>{MODELO_TELEFONO.id}</Text>
-        <Text style={s.linea}>{MODELO_TELEFONO.linea}</Text>
+        <Text style={s.linea}>
+          {canal === "local" ? `${MODELO_TELEFONO.linea} · en el teléfono` : `${MODELO_TELEFONO.linea} · en el nodo`}
+        </Text>
         <Text style={s.detalle}>{detalle}</Text>
 
         <View
@@ -218,7 +226,7 @@ const s = StyleSheet.create({
     paddingBottom: 28,
     gap: 8,
   },
-  meta: { ...TIPO.etiqueta, color: COLOR.gris, marginBottom: 4 },
+  meta: { ...TIPO.etiqueta, marginBottom: 4 },
   titulo: { ...DISPLAY, fontSize: 28, lineHeight: 30, letterSpacing: -1, color: COLOR.tinta },
   modelo: {
     ...DISPLAY,

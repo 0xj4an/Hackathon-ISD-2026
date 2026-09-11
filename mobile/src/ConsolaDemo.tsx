@@ -21,17 +21,20 @@ import {
   useViaMed,
 } from "./demoLog";
 import { COLOR, TIPO } from "./ui/tokens";
+import { saltarMedPsyLocal } from "./modo";
 import { useState } from "react";
 
 export function PuebloEncabezado() {
   const via = useViaMed();
   const abierta = usePanelNodo();
+  const enNodo = saltarMedPsyLocal();
   const etiqueta = via.via === "p2p" ? "P2P"
     : via.via === "pueblo" ? "HTTP"
-    : via.via === "local" ? "Tel"
-    : "Pueblo";
-  const color = via.viva || via.via
-    ? (via.via === "p2p" ? COLOR.rutinaria : via.via === "pueblo" ? COLOR.prioritaria : COLOR.tinta)
+    : via.via === "local" || !enNodo ? "Tel"
+    : "Nodo";
+  const color = via.via === "p2p" ? COLOR.rutinaria
+    : via.via === "pueblo" ? COLOR.prioritaria
+    : via.via === "local" || !enNodo ? COLOR.tinta
     : COLOR.gris;
   return (
     <Pressable

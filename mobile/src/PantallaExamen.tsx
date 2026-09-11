@@ -254,7 +254,7 @@ export default function PantallaExamen({
         <Text style={s.titular}>¿Te hiciste{"\n"}un examen?</Text>
         <Text style={s.parrafo}>
           {saltarMedPsyLocal()
-            ? "Foto o archivo: OCR aquí, inferencia delegada al nodo (nunca la imagen)."
+            ? "Foto o archivo: OCR aquí. Este teléfono no puede correr el modelo: se delega al nodo. La imagen no sale."
             : "Tráelo en foto o archivo y te decimos qué dice cada número. Se lee en este teléfono."}
         </Text>
       </View>
@@ -306,7 +306,7 @@ export default function PantallaExamen({
       <Pie>
         Solo escribe los que aparezcan en tu papel. Los que dejes vacíos no se inventan.
         {saltarMedPsyLocal()
-          ? "En este modo la imagen no carga LoRA: OCR aquí, inferencia delegada al nodo."
+          ? "OCR aquí. Sin capacidad para MedPsy: se delega al nodo."
           : `Foto o archivo usan MedPsy + LoRA (${LORA_LAB_VERSION}); escribir a mano no.`}
       </Pie>
     </Pantalla>

@@ -176,7 +176,7 @@ function Alerta({ peor, demas, lecturas, periodo, mensaje, fallo, redactando, vi
       ?? (saltarMedPsyLocal()
         ? (claveProveedor()
           ? "Buscando par P2P…"
-          : "Este teléfono no carga el modelo. Delegando al pueblo…")
+          : "Sin capacidad aquí. Delegando al nodo…")
         : "El modelo está explicando esto en el teléfono."))
     : undefined;
 
