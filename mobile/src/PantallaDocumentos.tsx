@@ -126,6 +126,7 @@ export default function PantallaDocumentos({
 }) {
   const [estados, setEstados] = useState<Record<ClaveDocumento, EstadoDoc>>(() => semilla(lecturaInicial));
   const [error, setError] = useState("");
+  const [demoAbierta, setDemoAbierta] = useState(false);
   const [mostrandoVia, setMostrandoVia] = useState(false);
   const [progreso, setProgreso] = useState("");
   const ocupado = Object.values(estados).some(e => e.fase === "leyendo");
@@ -353,16 +354,38 @@ export default function PantallaDocumentos({
         </>
       )}
 
-      <Boton
-        texto="Llenar y continuar"
-        tono="prioritaria"
-        onPress={() => {
-          if (ocupado) return;
-          setError("");
-          setEstados(semilla(DEMO_LECTURA));
-          onListo(DEMO_LECTURA);
-        }}
-      />
+      <View style={s.demo}>
+        <Pressable
+          onPress={() => setDemoAbierta(v => !v)}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: demoAbierta }}
+          accessibilityLabel="Solo para demostración"
+          style={({ pressed }) => [s.demoCabecera, pressed && s.accionPress]}
+        >
+          <View style={s.demoCabeceraTextos}>
+            <Text style={s.demoBadge}>Solo para demostración</Text>
+            <Text style={s.demoResumen}>Saltar OCR con datos de Mariela</Text>
+          </View>
+          <Text style={s.demoChevron}>{demoAbierta ? "▴" : "▾"}</Text>
+        </Pressable>
+        {demoAbierta ? (
+          <View style={s.demoCuerpo}>
+            <Text style={s.demoAyuda}>
+              Rellena cédula, ingresos y extracto con el caso de demo. No corre OCR.
+            </Text>
+            <Boton
+              texto="Llenar y continuar"
+              tono="prioritaria"
+              onPress={() => {
+                if (ocupado) return;
+                setError("");
+                setEstados(semilla(DEMO_LECTURA));
+                onListo(DEMO_LECTURA);
+              }}
+            />
+          </View>
+        ) : null}
+      </View>
 
       <Pie>
         {delega
@@ -599,4 +622,38 @@ const s = StyleSheet.create({
   privacidadTexto: { fontSize: 13.5, lineHeight: 19, color: COLOR.sobreColor },
 
   estado: { fontSize: 15, lineHeight: 21, fontWeight: "700", color: COLOR.tinta, paddingHorizontal: ESPACIO.borde },
+
+  demo: {
+    marginTop: 28,
+    marginHorizontal: ESPACIO.borde,
+    borderWidth: 1,
+    borderColor: COLOR.separador,
+    backgroundColor: COLOR.hundido,
+  },
+  demoCabecera: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    minHeight: TOQUE,
+  },
+  demoCabeceraTextos: { flex: 1, gap: 4, minWidth: 0 },
+  demoBadge: {
+    ...TIPO.etiqueta,
+    fontSize: 11,
+    letterSpacing: 1.2,
+    color: COLOR.gris,
+  },
+  demoResumen: { fontSize: 13, lineHeight: 17, color: COLOR.tinta, fontWeight: "600" },
+  demoChevron: { fontSize: 14, color: COLOR.gris },
+  demoCuerpo: {
+    borderTopWidth: 1,
+    borderTopColor: COLOR.separador,
+    paddingHorizontal: 14,
+    paddingTop: 12,
+    paddingBottom: 16,
+    gap: 8,
+  },
+  demoAyuda: { fontSize: 13, lineHeight: 18, color: COLOR.gris },
 });

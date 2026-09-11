@@ -31,7 +31,7 @@ export default function ConsolaDemo() {
     : via.via === "pueblo" ? "HTTP"
     : via.via === "local" ? "Tel"
     : "LOG";
-  const viva = via.viva ? via.texto : lineas[lineas.length - 1] ?? "Nodo del pueblo";
+  const viva = via.viva ? via.texto : lineas[lineas.length - 1] ?? "Consola lista para recibir datos";
 
   return (
     <View style={s.caja}>
@@ -55,7 +55,7 @@ export default function ConsolaDemo() {
             onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: false })}
           >
             {lineas.length === 0 ? (
-              <Text style={s.vacio}>Todavía no hay tráfico.</Text>
+              <Text style={s.vacio}>Consola lista para recibir datos</Text>
             ) : (
               lineas.map((l, i) => (
                 <Text key={`${i}-${l.slice(0, 12)}`} style={s.linea} selectable>

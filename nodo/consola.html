@@ -248,7 +248,7 @@
       });
       es.addEventListener("linea", (ev) => pintar(JSON.parse(ev.data)));
       es.addEventListener("borrar", () => {
-        mostrarVacio("Limpio. Esperando al teléfono…");
+        mostrarVacio("Consola lista para recibir datos");
       });
       es.onerror = () => {
         vivoEl.textContent = "reconectando";
@@ -260,7 +260,7 @@
       fetch("/consola/borrar", { method: "POST" }).catch(() => {});
     };
 
-    mostrarVacio("Esperando al teléfono. Misma WiFi. Cada línea llega con (teléfono · modo).");
+    mostrarVacio("Consola lista para recibir datos");
     conectar();
     salud();
     setInterval(salud, 4000);
