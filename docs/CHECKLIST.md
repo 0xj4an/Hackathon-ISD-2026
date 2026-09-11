@@ -10,7 +10,7 @@ Evals en verde. Camino pueblo medido: [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md)
 
 ## Dónde estamos
 
-Ver [`ESTADO.md`](ESTADO.md). **Abierto solo:** OCR iPhone → 3 ensayos →
+Ver [`ESTADO.md`](ESTADO.md). **OCR iPhone medido.** Abierto: 3 ensayos →
 `perf.jsonl` → video.
 
 ---
@@ -53,15 +53,11 @@ crédito vía `armarPaqueteDesdeLab`. Entrada manual sigue de respaldo. El
 historial se lee siempre; el examen es opción tras el resultado (alerta o en orden).
 Entrada ya no elige Historial|Examen como vías paralelas.
 
-- [~] `ocr()` sobre la foto, extracción a JSON con `SYSTEM_EXTRACCION_*`,
-  validación con `CedulaSchema` e `IngresosSchema`. Código listo; falta
-  verificar en el iPhone
-- [~] Examen con LoRA `lab-v3`. Código + asset en la app; falta rebuild
-  nativo y corrida en el iPhone
-- [~] Crédito tras examen si hay hallazgos (`armarPaqueteDesdeLab`). Código listo;
-  falta verificar en el iPhone
-- [~] **Borrar la foto** después de extraer. El código lo hace; falta verificar
-  en el iPhone (C6)
+- [x] `ocr()` sobre la foto → JSON (`CedulaSchema` / `IngresosSchema`).
+  **Medido en iPhone** 10 sep (ya no `invalid input`) — [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md)
+- [~] Examen con LoRA `lab-v3`. Código + asset; falta corrida iPhone anotada
+- [~] Crédito tras examen si hay hallazgos. Código listo; falta iPhone
+- [~] **Borrar la foto** tras extraer. Código sí; falta listar disco (C6)
 - [x] Persistencia y cola. `expo-sqlite` en `colaSqlite.ts`; una pendiente a la
   vez. Si falla el envío, se guarda y al reabrir la app se vuelve a `PantallaCuota`.
   Falta verificar en el iPhone (C8/C9)
@@ -154,7 +150,7 @@ Inventario largo → git history + [`ESTADO.md`](ESTADO.md) +
 | [x] C13 | README declara modelo, cuantización, hardware y base | MedPsy Q8_0, OCR_LATIN, extracción = MedPsy, iPhone 17 Pro Max, Kit declarado |
 
 **C12 y C13 descalifican.** Los demás cuestan puntos. El cuello de botella
-ahora es **1.2 en el iPhone** (OCR + envío E2E) y la cola durable (C8/C9).
+ahora es **ensayos ×3 + perf.jsonl + video**. OCR en iPhone ya medido.
 
 ---
 

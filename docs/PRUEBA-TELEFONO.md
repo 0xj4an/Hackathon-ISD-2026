@@ -81,6 +81,25 @@ Criterios que mueve: C6, C10, …
 
 ## Corridas
 
+### 2026-09-10 ~19:15 · iPhone · OCR documentos · `5165830`+
+
+Build: Metro / Release en mano.
+Quién: Juan (reporte al equipo)
+Documento: cédula / ingresos / extracto (flujo docs)
+Cómo: foto o archivo (JPEG compatible en código)
+
+| Paso | Resultado | Qué se vio |
+| --- | --- | --- |
+| Cédula → JSON | **ok** | OCR + extracción en el teléfono; ya no `invalid input` |
+| Ingresos → JSON | **ok** | idem |
+| Extracto → JSON | **ok** | idem |
+| Fotos borradas | no anotado | Código lo hace; disco no listado |
+
+Error literal: ninguno en OCR.
+
+Criterios: cierra verificación OCR de 1.2 / desbloquea ensayo+video.
+C6 (borrar foto en disco) sigue pendiente de comprobar contenedor.
+
 ### 2026-09-10 (tarde) · iPhone · pueblo LAN → Railway · ~`b5d69d6`
 
 Build: Metro / Release en mano (descubrimiento LAN activo).
@@ -150,7 +169,6 @@ iOS 26.6.1. Release `expo run:ios --device --configuration Release`.
 ## Lo que todavía no se puede afirmar
 
 Lista viva de cierre: [`ESTADO.md`](ESTADO.md) y [`CHECKLIST.md`](CHECKLIST.md).
-Aquí solo lo que **este log** aún no demostró en el aparato: OCR limpio tras
-JPEG/base64; borrado de foto en disco; cola SQLite post-kill; HTTP **directo**
-Railway (`local-wifi`); alerta MedPsy vista; `perf.jsonl` exportado; Release
-con módulo nativo `ExpoNetwork` si el binario viejo falla.
+OCR en iPhone **sí** está medido (corrida de arriba). Sigue abierto: borrado
+de foto en disco (C6), cola post-kill, HTTP directo Railway, `perf.jsonl`
+exportado, ensayos ×3, video.
