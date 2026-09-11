@@ -1,98 +1,45 @@
-# Estado del proyecto · 10 sep 2026 (tarde)
+# Estado del proyecto · 10 sep 2026 (noche)
 
-Auditoría contra código en `main` (`b5d69d6` / docs `6615ed6`+) y corridas del
-iPhone el mismo día. Ante duda: **código** y este archivo.
-Ítems abiertos: [`CHECKLIST.md`](CHECKLIST.md). Índice docs: [`README.md`](README.md).
+Ante duda: **código** + este archivo. Índice: [`README.md`](README.md).
 
-## Una frase
+## En una frase
 
-**Ina Igar** detecta riesgo de salud en el teléfono, lee documentos sin subir
-fotos, y manda el crédito al banco por HTTPS o, sin internet, al **nodo del
-pueblo** por LAN. El pueblo reenvía al banco en Railway. MedPsy es local;
-si no carga, solo texto a `/inferir`.
+Código y banco/pueblo **listos**. Falta evidencia en el iPhone y el **video**.
 
-## Qué ya está medido
+## Qué ya está (no lo vuelvas a “arreglar”)
 
-| Pieza | Estado | Evidencia |
-|---|---|---|
-| Dominio (señales, scorecard, eval) | Hecho | `eval/run.mjs`, `eval/resultados.md` |
-| Flujo móvil en código | Hecho | `App.tsx`: entrada → salud → revisión → alerta → docs → cuota → banco → firma → desembolso |
-| Banco remoto (Railway) | Vivo + persistente | `https://banco-production-3755.up.railway.app` · código usa `STATE_DIR` (Volume `/data` en Railway) |
-| Admin del banco | Hecho | Landing: `recibida` + `canal` (`directo` / `pueblo`) |
-| Pueblo LAN `:8788` | Vivo en laptop | `npm run corregimiento` · `/salud` `servicio: inaigar-pueblo` · Bonjour (nodo publica; app no consume) |
-| Teléfono → pueblo → banco | **Medido 10 sep** | Evidencia: [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md), [`PRUEBA-NODO.md`](PRUEBA-NODO.md) |
-| Descubrimiento del pueblo | Hecho | Sweep HTTP LAN / Metro (`nodoUrl.ts`); sin IP fija |
-| Cola offline SQLite | Hecho en código | `cola.ts` / `colaSqlite.ts` |
-| Firma + desembolso simulado | Hecho | `PantallaFirma`, `PantallaDesembolso` |
-| Sentry | Hecho | Fallos de envío y pantallas |
+- Dominio + eval verdes
+- Flujo app completo en código
+- Teléfono → pueblo → Railway **medido**
+- Discovery LAN sin IP fija
+- Landing/admin con canal + timestamp
+- Docs organizados
 
-## Cómo se mueve el crédito
+## Qué falta (solo esto) — hazlo en este orden
 
-```
-local-wifi:
-  teléfono ──HTTPS──► banco Railway
-  (si no hay respuesta final → pueblo → pendiente)
+| # | Qué | Quién | Cómo saber que cerró |
+|---|---|---|---|
+| **1** | OCR limpio en iPhone (cédula / ingresos / extracto) | Tú + teléfono | Una corrida nueva arriba en [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md) sin `invalid input` |
+| **2** | Ensayo completo × 3 (mejor en avión / `local-offline`) | Tú | Tres corridas anotadas; cola si no hay nodo |
+| **3** | Exportar `perf.jsonl` | Tú | Entrada → Registro → compartir archivo; guardar fuera del teléfono |
+| **4** | Grabar video ≤ 5 min | Tú | Guion [`VIDEO.md`](VIDEO.md); enlace sin login |
+| **5** | (Opcional) `local-wifi` directo a Railway | Tú | Una línea en PRUEBA-TELEFONO |
 
-local-offline / nodo-offline:
-  teléfono ──LAN :8788──► pueblo ──HTTP──► banco Railway
-                 ▲
-                 │  app: sweep :8788/salud (no Bonjour)
-```
+Si el Release falla con `ExpoNetwork`: `cd mobile && npx expo run:ios --device` (app 1.0.4).
 
-El banco **no** usa LLM: scorecard (`decidir()` en `mobile/src/core/credito/`).
-Guarda `{id}.json`, `{id}.respuesta.json`, `{id}.meta.json`.
-
-## Cómo arrancar la demo (día a día)
+## Arranque demo hoy
 
 ```bash
-cd nodo && npm install && npm run corregimiento
-cd mobile && npx expo start
-# Misma WiFi. Entrada → Solo para demostración → Buscar WiFi.
+cd nodo && npm run corregimiento          # misma WiFi que el iPhone
+cd mobile && npx expo start               # o Release instalado
+# Entrada → Buscar WiFi → flujo
+# Perf: Entrada → Registro → compartir perf.jsonl
 ```
 
-- API banco: https://banco-production-3755.up.railway.app  
+- Banco: https://banco-production-3755.up.railway.app  
 - Admin: https://isd-hackathon-landing-production.up.railway.app/admin  
-  (login `banco@gmail.com`)
-
-## Qué falta para el cierre
-
-1. **Video ≤ 5 min** ([`VIDEO.md`](VIDEO.md)).
-2. **OCR / documentos en iPhone** (corrida limpia en [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md)).
-3. **`perf/perf.jsonl` exportado** del iPhone.
-4. Build nativo con `expo-network` si el Release viejo falla (`ExpoNetwork`).
-5. Ensayo **tres veces** en avión / cola ([`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md)).
-
-## Archivos clave
-
-| Ruta | Rol |
-|---|---|
-| `mobile/App.tsx` | Navegación demo |
-| `mobile/src/envio.ts` / `nodoUrl.ts` | Banco, pueblo, discovery |
-| `nodo/index.mjs` | Pueblo / banco HTTP |
-| `landing/admin.html` | Back office |
-| `docs/PRUEBA-*` | Evidencia |
-| `docs/CHECKLIST.md` | Ítems |
 
 ## Honestidad
 
-Demo = HTTP (banco o pueblo). **No** Hyperswarm ni QVAC `delegate`
-(P2P solo con `ENABLE_P2P=1`; ver [`PRUEBA-NODO.md`](PRUEBA-NODO.md)).
-Firma = trazo; desembolso = simulado; datos sintéticos.
-Frases a evitar en cámara: [`VIDEO.md`](VIDEO.md).
-
-## Contraste docs ↔ código (10 sep)
-
-| Afirmación | Veredicto | Nota |
-|---|---|---|
-| URLs banco / admin | true | `bancoUrl.ts`, `nodo/package.json`, `landing/server.js` |
-| Sweep LAN sin IP fija | true | `nodoUrl.ts` |
-| Bonjour descubre en la app | **parcial** | Nodo publica; app solo HTTP |
-| Modos `local-wifi` / … | true | `modo.ts` |
-| Offline = “sin Railway” | **falso** (corregido) | Teléfono no llama Railway; pueblo sí reenvía |
-| Hyperswarm en `corregimiento` | **falso** (corregido) | Hace falta `ENABLE_P2P=1` |
-| `SolicitudSchema.strict()` | true | `schemas.ts` + eval |
-| Política en `nodo/credito.mjs` | **stale** (corregido en baseline) | Motor en `mobile/src/core/credito/` |
-| Volume `STATE_DIR=/data` | **parcial** | Código sí; env Railway no está en git |
-| Flujo BRIEF = App | **parcial** (corregido) | Incluye Salud + Revisión |
-| LoRA en app | true en código | Medición iPhone abierta |
-| SDK 0.18.2 | true | `mobile/package.json` |
+Demo = HTTP. No Hyperswarm / `delegate`. Firma = trazo. Desembolso = simulado.
+Datos sintéticos. Detalle: [`PRUEBA-NODO.md`](PRUEBA-NODO.md), [`VIDEO.md`](VIDEO.md).

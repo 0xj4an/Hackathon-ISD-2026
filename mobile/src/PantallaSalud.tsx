@@ -113,6 +113,11 @@ export default function PantallaSalud({
           texto="Leer tus mediciones no necesita red, y esta app no la usa para hacerlo."
         />
 
+        <Pie>
+          Esto es orientación automática y local, no un diagnóstico. Nadie de
+          este equipo es profesional de salud.
+        </Pie>
+
         <Boton texto="Revisar mis mediciones" onPress={onListo} />
       </Pantalla>
     );

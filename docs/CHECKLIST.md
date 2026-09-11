@@ -10,7 +10,8 @@ Evals en verde. Camino pueblo medido: [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md)
 
 ## Dónde estamos
 
-Ver [`ESTADO.md`](ESTADO.md). Abierto: video, OCR limpio, `perf.jsonl`, ensayos avión.
+Ver [`ESTADO.md`](ESTADO.md). **Abierto solo:** OCR iPhone → 3 ensayos →
+`perf.jsonl` → video.
 
 ---
 
@@ -91,8 +92,7 @@ Cerrado: HTTP (banco o pueblo). Detalle y cómo *no* decirlo en cámara:
 - [ ] Wi-Fi al banco directo (`local-wifi`): anotar corrida en teléfono
 - [ ] **Ensayarla tres veces seguidas** con el iPhone en la mano. Lo que falla,
   falla aquí y no grabando
-- [~] Disclaimers de salud visibles **en pantalla**: fuertes en Alerta y Examen;
-  faltan en Salud / Revisión
+- [x] Disclaimers de salud visibles en Alerta, Examen, Salud y Revisión
 
 ---
 

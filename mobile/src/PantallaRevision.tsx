@@ -16,7 +16,7 @@ import type { Usuario } from "./usuarios";
 import { detectarSenales } from "./core/reglas";
 import { armarPaquete } from "./core/paquete";
 import { fraseLecturas, fraseMeses, resumenHistorial, yLista } from "./historial";
-import { Pantalla, Encabezado } from "./ui/componentes";
+import { Pantalla, Encabezado, Pie } from "./ui/componentes";
 import { COLOR, TIPO, ESPACIO, DISPLAY } from "./ui/tokens";
 
 /** Lo que tarda cada paso en pantalla. No es el tiempo de cálculo, es el de lectura. */
@@ -92,6 +92,11 @@ export default function PantallaRevision({
             );
           })}
         </View>
+
+        <Pie>
+          Esto es orientación automática y local, no un diagnóstico. Nadie de
+          este equipo es profesional de salud.
+        </Pie>
       </View>
     </Pantalla>
   );
