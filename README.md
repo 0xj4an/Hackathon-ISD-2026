@@ -1,114 +1,122 @@
 # Ina Igar · Camino de la medicina
 
-> ISD Summit 2026 · 0xj4an y Artur · General · Tether QVAC Psy · Caja de Ahorros.
+**Esto es una app de teléfono** (Expo / React Native). El resto del repo —
+nodo, banco, landing — existe para que esa app pueda avisar, cotizar y pedir
+un crédito sin mandar fotos a nadie.
 
-App de **salud y crédito**. Lee lo que el teléfono ya midió —o un papel de
-laboratorio—. Cotiza el año. Pide el préstamo. Las fotos no salen. Si este
-aparato no corre el modelo, el pueblo lo corre.
+ISD Summit 2026 · 0xj4an y Artur.
 
-Dos tuberías: **inferencia** (MedPsy / LoRA / QVAC delegate) y **solicitud**
-(JSON al banco o al pueblo). Nunca un proveedor de IA remoto.
+[Ver la demo](https://youtu.be/oiW3VXyl36Q) ·
+[Pitch](https://isd-hackathon-landing-production.up.railway.app/pitch) ·
+[Sitio](https://isd-hackathon-landing-production.up.railway.app/)
 
-**Sitio:** [isd-hackathon-landing-production.up.railway.app](https://isd-hackathon-landing-production.up.railway.app/) · [pitch](https://isd-hackathon-landing-production.up.railway.app/pitch)  
-**Estado vivo:** [`docs/ESTADO.md`](docs/ESTADO.md) · **cómo venderlo:** [`docs/VENTA.md`](docs/VENTA.md) · **mapa:** [`docs/README.md`](docs/README.md)
+## Qué quisimos hacer
 
-## Qué hace
+En el interior y las comarcas la gente no se atiende porque no tiene plata y
+porque ir al médico es un viaje. Quisimos un teléfono que **mire tu salud, te
+avise, y te preste** para tratarte — sin que el banco vea qué te pasó.
 
-1. **Salud.** Apple Salud / Health Connect, o foto de un examen. Catorce
-   umbrales citados. Las reglas marcan el rango. MedPsy redacta: qué se vio,
-   qué hacer, a quién ver y cuánto cuesta. El caso sano no dispara. No es
-   diagnóstico.
-2. **Ruta y costo.** El crédito es el año de esa ruta (consulta, controles,
-   medicamento), no un mínimo de consumo ni un nombre de enfermedad.
-3. **Documentos.** OCR de cédula, ingresos y extracto en el teléfono. Las
-   fotos se borran. El banco recibe JSON: nombre, cédula, ingreso, monto,
-   motivo «salud». Nunca la foto ni el hallazgo clínico.
-4. **Laboratorio.** OCR aquí → MedPsy + LoRA `lab-v3`. JSON válido de lab:
-   **5 % → 68 %**. Clasificar el rango es código, no el adaptador.
+La app se conecta a **Apple Health** o **Google Health** y monitorea. Si hay
+una anomalía, avisa y recomienda qué hacer. El crédito se ofrece **desde esa
+alerta**. Si tienes un laboratorio, lo puedes subir (es opcional). Cotiza el
+año de tratamiento. Si no puedes pagar, pide un crédito de salud.
 
-## Tres caminos ([`ADR-006`](.ai/adr/ADR-006-tres-modos-segun-el-telefono.md))
+Las fotos de cédula, sueldo y examen se leen **en el teléfono y se borran**.
+Al banco solo llega un JSON: nombre, cédula, ingreso, monto. Motivo: «salud».
+Nunca la imagen ni el hallazgo clínico.
 
-OCR siempre en el teléfono. Inferencia y préstamo son tuberías distintas.
+No diagnostica. Las reglas marcan el rango. El modelo (MedPsy) solo redacta el
+aviso.
 
-| Camino | Inferencia | Solicitud |
-|---|---|---|
-| WiFi · modelo local | MedPsy + LoRA en el teléfono | HTTPS al banco |
-| Sin WiFi · modelo local | MedPsy + LoRA en el teléfono | Pueblo / cola |
-| Delegar al nodo | QVAC `delegate` al par; plano B `POST /inferir` | Pueblo / cola |
+## Cómo funciona (en el teléfono)
 
-El tercer camino es el producto cuando el aparato no carga 2.1 GB: el pueblo
-presta el cómputo. Delegate medido: **72** extracciones `@p2p-delegate`.
+1. Entras un caso (en la demo: datos de prueba con el mismo esquema que Apple
+   Health / Google Health).
+2. La app revisa las mediciones. Si estás bien, no molesta.
+3. Si hay una señal, te dice qué se vio, qué hacer y cuánto cuesta el año
+   (consulta, controles, medicamento).
+4. Te ofrece el crédito. El examen **no** hace falta para pedirlo.
+5. Si tienes el papel de laboratorio, lo fotografías. OCR aquí. Un LoRA
+   (`lab-v3`) saca los marcadores. Puede salir algo que Health no vio.
+6. Fotografías cédula, ingresos y extracto. OCR aquí. Las fotos se borran.
+7. La solicitud sale al banco (si hay wifi) o espera / pasa por un nodo P2P
+   (si no hay red, o si este teléfono no puede correr el modelo de 2.1 GB).
 
-La malla nodo↔nodo (Hyperswarm topic) es el siguiente tramo: un par en cada
-corregimiento. Hoy el crédito viaja por HTTP.
+Tres caminos, mismos papeles:
 
-## Modelos (nombres honestos)
-
-| Uso | Modelo | Cuantización | Tamaño |
+| Este teléfono | Red | El modelo corre | El crédito sale |
 |---|---|---|---|
-| Alerta / extracción docs | MedPsy 1.7B (`HEALTHCARE_1_7B_MEDICAL_Q8_0`) | Q8_0 | 2.1 GB |
-| OCR | `OCR_LATIN` | - | - |
-| Lab (examen) | MedPsy + LoRA `lab-v3` | Q8_0 + LoRA | +33 MB |
-
-Producto: Android de gama media + Health Connect. Demo de hoy: iPhone 17 Pro
-Max, iOS 26.6.1, CPU (TTFT 2915 ms). SDK `@qvac/sdk` **0.18.2**. Log:
-[`perf/`](perf/).
+| Puede | wifi | aquí | al banco |
+| Puede | sin wifi | aquí | cola o nodo |
+| No puede (2.1 GB) | — | un **nodo P2P** (solo viaja el texto) | cola o nodo |
 
 ## Cómo correrlo
 
-Node ≥ 22.17, iPhone físico. `npx qvac doctor`.
+Hace falta un **teléfono físico**. QVAC no corre en Expo Go. La demo de este
+hackathon se grabó en un **iPhone**. El producto es Android de gama media.
+
+Node ≥ 22. Xcode (iOS) o Android Studio. `npx qvac doctor`.
 
 ```bash
-cd mobile && npm install && npx expo start
-cd nodo && npm install && npm run corregimiento   # misma WiFi; la app descubre sola
+git clone https://github.com/0xj4an/Hackathon-ISD-2026.git
+cd Hackathon-ISD-2026/mobile
+npm install
+npx qvac doctor
+npx expo run:ios --device --configuration Release     # iPhone
+# npx expo run:android --device                       # Android
 ```
 
-URLs de banco/admin: [`docs/ESTADO.md`](docs/ESTADO.md). Primera vez: descarga
-MedPsy (~2.1 GB) con wifi.
+La primera vez descarga **MedPsy (~2.1 GB)** con wifi. Eso no se hace en
+cámara.
 
-## Evaluación
+En la app eliges el camino (wifi / sin red / delegar al nodo). Las tarjetas
+de Entrada se quedan como están.
+
+### Si quieres el nodo (camino sin red o teléfono débil)
+
+Misma WiFi que el teléfono:
 
 ```bash
-node eval/run.mjs
-node --test eval/credito/*.test.mjs
-node --test eval/salud/alerta.test.mjs eval/nodo/inferir.test.mjs
+cd nodo && npm install && npm run corregimiento
+# consola: http://127.0.0.1:8788/consola
 ```
 
-LoRA spike: [`spikes/lora-medpsy/`](spikes/lora-medpsy/).
+El banco de la demo ya está en Railway. No hace falta levantarlo para usar la
+app en `local-wifi`.
 
-## Producto y siguiente
+Detalle de URLs y qué está medido: [`docs/ESTADO.md`](docs/ESTADO.md).
 
-La app es esta. El recorte de la demo: historial sintético, un pueblo en la
-LAN, cierre de muestra (trazo en pantalla).
+## Qué hay en el repo
 
-- **Banco.** Scorecard ya compartido. Siguiente: origination y desembolso en
-  producción.
-- **LoRA.** lab-v3 en el producto. Siguiente: un adaptador por cédula,
-  ingresos, extracto y más paneles.
-- **Malla.** Delegate ya presta cómputo. Siguiente: topic entre pueblos.
-- **Campo.** El esquema ya es Health Connect / HealthKit. Siguiente: el
-  historial real en Android.
+| Carpeta | Para qué |
+|---|---|
+| **`mobile/`** | La app. Expo 54, React Native, `@qvac/sdk` 0.18.2 |
+| `nodo/` | Laptop en la red: reenvía el crédito y, si hace falta, corre MedPsy |
+| `landing/` | Sitio, pitch y admin del banco |
+| `data/` | Casos sintéticos (mismo esquema que Health) |
+| `eval/` | Pruebas de dominio (`node eval/run.mjs`) |
+| `spikes/lora-medpsy/` | Entrenamiento del LoRA del examen |
 
-## Seguridad
+## Hoy y después
 
-No es diagnóstico. Banco: solo JSON de crédito. Crédito: scorecard
-determinista ([`ADR-011`](.ai/adr/ADR-011-el-modelo-de-credito.md)).
+| | Hoy (esta demo) | Después |
+|---|---|---|
+| Salud | Dataset de prueba, mismo formato que Apple Health y Google Health | Conexión real |
+| LoRA | `lab-v3` lee el examen (5 % → 68 %) | Más trainings |
+| Banco | El motor responde. No suelta la plata | Desembolso real |
+| Nodos | Un peer en la demo | Nodos P2P en más pueblos |
 
 ## El nombre
 
-**Ina Igar** = "Camino de la medicina" en gunagaya (*Gayamar sabga*, Orán / Wagua).
+**Ina Igar** = camino de la medicina, en gunagaya (*Gayamar sabga*, Orán /
+Wagua). Se cita porque no es nuestra.
 
-## Base preexistente (obligatoria)
+## Base preexistente
 
 Plantilla [`ArturVargas/AI_Engineering_Kit`](https://github.com/ArturVargas/AI_Engineering_Kit)
-(ago 2026): `standards/`, `templates/`, `.ai/`, y el README del kit en
-[`docs/_archive/ai-engineering-kit.md`](docs/_archive/ai-engineering-kit.md).
-Septiembre en `docs/superpowers/` es nuestro.
+(ago 2026). Septiembre en este repo es nuestro.
 
-## Docs del equipo
-
-Ver [`docs/README.md`](docs/README.md): VENTA, ESTADO, CHECKLIST, BRIEF, PRUEBA-*, ADRs.
-
-## Licencia
+Docs del equipo: [`docs/README.md`](docs/README.md). Cómo se vende:
+[`docs/VENTA.md`](docs/VENTA.md).
 
 MIT. Ver [LICENSE](LICENSE).
