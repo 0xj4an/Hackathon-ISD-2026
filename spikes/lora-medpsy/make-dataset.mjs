@@ -1,10 +1,8 @@
 // Genera el dataset sintetico del spike de LoRA. Codigo propio del equipo.
 //
-// Dos tareas mezcladas, con el peso en extraccion (ADR-003):
-//   - CEDULA:   texto OCR ruidoso de una cedula panamena -> JSON de campos.
-//   - INGRESOS: carta de trabajo, talonario o declaracion jurada -> JSON.
-//   - EXTRACTO: estado de cuenta bancario -> JSON.
-//   - TRIAJE:   una lectura de laboratorio -> JSON con hallazgo y siguiente paso.
+// Eval mixto (cedula / ingresos / extracto / laboratorio). Train solo lab:
+// el adaptador en producto se carga unicamente en el examen (ADR-003 reabierto
+// por la corrida 3: extraccion ya funciona; el hueco es el informe de lab).
 //
 // Los tres documentos son los que la app pide de verdad, y sus plantillas usan
 // el mismo reparto que las imagenes de `data/documentos/`: entrenar con un
@@ -226,14 +224,72 @@ const LABORATORIOS = [
  * linea suelta. Antes se generaba un marcador por ejemplo, que no se parece a
  * lo que la persona fotografia.
  */
+/** Nombres como salen impresos. El gold guarda el alias, el codigo es el del catalogo. */
+const ALIAS = {
+  GLU: ["glicemia en ayunas", "glucosa", "glucosa en ayunas"],
+  HB: ["hemoglobina"],
+  PLQ: ["plaquetas"],
+  CREA: ["creatinina"],
+  COL: ["colesterol total", "colesterol"],
+  HTO: ["hematocrito"],
+  TSH: ["TSH"],
+};
+
+/** Panama a veces imprime 0,8. El gold sigue siendo numero. */
+const fmtNum = (v) => {
+  const s = String(v);
+  return rnd() < 0.3 && s.includes(".") ? s.replace(".", ",") : s;
+};
+
+function lecturasDe() {
+  const cuantos = int(2, 5);
+  const mezclados = [...USABLES].sort(() => rnd() - 0.5).slice(0, cuantos);
+  return mezclados.map((m) => {
+    const span = m.max - m.min || m.max || 1;
+    // COL no tiene bajo clinico (min 0): el generador viejo soltaba 0.1 mg/dL.
+    const puedeBajo = m.min > 0 && m.hallazgoBajo;
+    const estado = puedeBajo ? int(0, 2) : int(0, 1);
+    const v = estado === 0 ? m.min + rnd() * span
+            : estado === 1 ? m.max * (1.1 + rnd() * 1.2)
+            : Math.max(0.1, m.min * (0.3 + rnd() * 0.6));
+    return {
+      codigo: m.codigo,
+      nombre: pick(ALIAS[m.codigo] ?? [m.nombre]),
+      unidad: m.unidad,
+      valor: Number(v.toFixed(v < 10 ? 1 : 0)),
+      ref: `${m.min}-${m.max}`,
+    };
+  });
+}
+
 const PLANTILLAS_LAB = [
   (d) => `${d.lab.toUpperCase()}\nINFORME DE RESULTADOS\nPaciente: ${d.nombre}\nFecha: ${d.fecha}\n\n` +
-    d.lecturas.map((l) => `${l.nombre}          ${l.valor} ${l.unidad}`).join("\n"),
+    d.lecturas.map((l) => `${l.nombre}          ${fmtNum(l.valor)} ${l.unidad}`).join("\n"),
   (d) => `${d.lab}\n${d.fecha}\n` +
-    d.lecturas.map((l) => `${l.nombre}: ${l.valor}${l.unidad}`).join("\n"),
-  (d) => `RESULTADOS DE LABORATORIO   ${d.fecha}\n${d.lab}\nPaciente ${d.nombre}\n\nPRUEBA               RESULTADO\n` +
-    d.lecturas.map((l) => `${l.nombre.padEnd(20)} ${l.valor} ${l.unidad}`).join("\n"),
+    d.lecturas.map((l) => `${l.codigo} ${l.nombre}: ${fmtNum(l.valor)}${l.unidad}`).join("\n"),
+  (d) => `RESULTADOS DE LABORATORIO   ${d.fecha}\n${d.lab}\nPaciente ${d.nombre}\n\nPRUEBA               RESULTADO     REF\n` +
+    d.lecturas.map((l) => `${l.nombre.padEnd(20)} ${fmtNum(l.valor)} ${l.unidad}    ${l.ref}`).join("\n"),
+  // El intervalo de referencia es el distractor real: el modelo tiene que
+  // copiar el resultado, no el 70-100.
+  (d) => `${d.lab.toUpperCase()}\nFecha ${d.fecha}\nAnalito  Resultado  Unidad  Intervalo\n` +
+    d.lecturas.map((l) => `${l.codigo} ${l.nombre}  ${fmtNum(l.valor)}  ${l.unidad}  ${l.ref}`).join("\n"),
 ];
+
+function ejemploLab() {
+  const lecturas = lecturasDe();
+  const d = {
+    lab: pick(LABORATORIOS),
+    nombre: `${pick(NOMBRES)} ${pick(APELLIDOS)} ${pick(APELLIDOS)}`,
+    fecha: fecha(2026, 2026),
+    lecturas,
+  };
+  const { texto, confianza } = ensuciarLab(pick(PLANTILLAS_LAB)(d));
+  return linea(SYSTEM_LABORATORIO, texto, {
+    lecturas: lecturas.map(({ codigo, nombre, unidad, valor }) => ({ codigo, nombre, unidad, valor })),
+    fecha: d.fecha,
+    confianza,
+  });
+}
 
 const filas = [];
 const linea = (system, user, assistant) =>
@@ -248,6 +304,25 @@ const ensuciar = (limpio) => {
   const capas = int(0, 2);
   let texto = limpio;
   for (let k = 0; k < capas; k++) texto = pick(RUIDO)(texto);
+  return { texto, confianza: Number((0.95 - capas * 0.18 + rnd() * 0.05).toFixed(2)) };
+};
+
+/**
+ * En lab, 0→O / 1→I / 5→S deja el valor ilegible ("I5 g/dL" con gold 15) y
+ * el puntuador lo cuenta como fallo de lectura. El adaptador se usa solo en
+ * examen: el ruido de dígitos se queda para cédula/ingresos/extracto.
+ */
+const RUIDO_LAB = [
+  (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
+  (s) => s.replace(/-/g, " - "),
+  (s) => s.toUpperCase(),
+  (s) => s.replace(/ /g, "  "),
+  (s) => s,
+];
+const ensuciarLab = (limpio) => {
+  const capas = int(0, 2);
+  let texto = limpio;
+  for (let k = 0; k < capas; k++) texto = pick(RUIDO_LAB)(texto);
   return { texto, confianza: Number((0.95 - capas * 0.18 + rnd() * 0.05).toFixed(2)) };
 };
 
@@ -317,34 +392,10 @@ for (let i = 0; i < 55; i++) {
   }));
 }
 
-// ---- 110 informes de LABORATORIO
+// ---- 110 informes de LABORATORIO (entran al corte eval/train)
 // La salida NO dice si el valor esta alto o bajo: eso lo decide `clasificar()`
 // contra el catalogo (`ADR-005`). El modelo solo transcribe lo que leyo.
-for (let i = 0; i < 110; i++) {
-  const cuantos = int(2, 5);
-  const elegidos = [];
-  for (const m of [...USABLES].sort(() => rnd() - 0.5).slice(0, cuantos)) {
-    const span = m.max - m.min || m.max;
-    const estado = int(0, 2); // normal, alto, bajo: el modelo transcribe igual
-    let v = estado === 0 ? m.min + rnd() * span
-          : estado === 1 ? m.max * (1.1 + rnd() * 1.2)
-          : Math.max(0.1, m.min * (0.3 + rnd() * 0.6));
-    elegidos.push({
-      codigo: m.codigo, nombre: m.nombre, unidad: m.unidad,
-      valor: Number(v.toFixed(v < 10 ? 1 : 0)),
-    });
-  }
-  const d = {
-    lab: pick(LABORATORIOS),
-    nombre: `${pick(NOMBRES)} ${pick(APELLIDOS)} ${pick(APELLIDOS)}`,
-    fecha: fecha(2026, 2026),
-    lecturas: elegidos,
-  };
-  const { texto, confianza } = ensuciar(pick(PLANTILLAS_LAB)(d));
-  filas.push(linea(SYSTEM_LABORATORIO, texto, {
-    lecturas: elegidos, fecha: d.fecha, confianza,
-  }));
-}
+for (let i = 0; i < 110; i++) filas.push(ejemploLab());
 
 // Barajado determinista dentro de cada tarea.
 const barajar = (a) => {
@@ -373,7 +424,7 @@ for (const f of unicas) {
   const t = JSON.parse(f).messages[0].content;
   const k = t.includes("cedula de identidad") ? "cedula"
           : t.includes("documento de ingresos") ? "ingresos"
-          : t.includes("estado de cuenta") ? "extracto" : "triaje";
+          : t.includes("estado de cuenta") ? "extracto" : "laboratorio";
   (porTarea[k] ??= []).push(f);
 }
 
@@ -386,15 +437,31 @@ for (const k of Object.keys(porTarea).sort()) {
 }
 barajar(train); barajar(evalu);
 
-writeFileSync(resolve(DIR, "train.jsonl"), train.join("\n") + "\n");
+// El adaptador en la app solo se carga en examen. Entrenar cedula/ingresos/
+// extracto diluye el gradiente (corrida 3: 88/264 eran lab) y no se usa.
+// Eval se queda mixto para medir olvido. Extra lab NO entra a eval.
+const esLab = (f) => JSON.parse(f).messages[0].content.includes("informe de laboratorio");
+const extraLab = [];
+for (let i = 0; i < 140; i++) extraLab.push(ejemploLab());
+const trainLab = barajar([...train.filter(esLab), ...extraLab]);
+
+writeFileSync(resolve(DIR, "train.jsonl"), trainLab.join("\n") + "\n");
 writeFileSync(resolve(DIR, "eval.jsonl"), evalu.join("\n") + "\n");
-const filasTrain = train, filasEval = evalu;
 writeFileSync(resolve(DIR, "system-extraccion.txt"), SYSTEM_EXTRACCION);
 writeFileSync(resolve(DIR, "system-laboratorio.txt"), SYSTEM_LABORATORIO);
 writeFileSync(resolve(DIR, "system-ingresos.txt"), SYSTEM_INGRESOS);
 writeFileSync(resolve(DIR, "system-extracto.txt"), SYSTEM_EXTRACTO);
 
+const nEval = (k) => evalu.filter((f) => {
+  const t = JSON.parse(f).messages[0].content;
+  return k === "cedula" ? t.includes("cedula de identidad")
+    : k === "ingresos" ? t.includes("documento de ingresos")
+    : k === "extracto" ? t.includes("estado de cuenta")
+    : t.includes("informe de laboratorio");
+}).length;
+
 console.log(`marcadores usados: ${USABLES.length} de ${MARCADORES.length} (CD4 excluido por el brief)`);
-console.log(`train ${filasTrain.length} / eval ${filasEval.length} ejemplos (corte estratificado, 20% de cada tarea)`);
+console.log(`train ${trainLab.length} lab-only / eval ${evalu.length} mixto (corte estratificado, 20% de cada tarea)`);
 console.log(`duplicados eliminados: ${duplicados}`);
-console.log(`mezcla: 110 cedula + 55 ingresos + 55 extracto + 110 laboratorio`);
+console.log(`eval: ${nEval("cedula")} cedula + ${nEval("ingresos")} ingresos + ${nEval("extracto")} extracto + ${nEval("laboratorio")} laboratorio`);
+console.log(`train extra lab: ${extraLab.length}`);

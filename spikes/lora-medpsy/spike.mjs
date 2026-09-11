@@ -74,7 +74,7 @@ const NO_SE_PUNTUA = new Set(["confianza"]);
 const comoNumero = (v) => {
   if (typeof v === "number") return v;
   if (typeof v !== "string") return NaN;
-  const n = Number(v.replace(/[^0-9.-]/g, ""));
+  const n = Number(v.replace(",", ".").replace(/[^0-9.eE+-]/g, ""));
   return Number.isFinite(n) ? n : NaN;
 };
 
@@ -175,7 +175,7 @@ const tEntrena = Date.now();
 const handle = finetune({
   modelId: ftId,
   options: {
-    trainDatasetDir: resolve(DIR, "train.jsonl"),
+    trainDatasetDir: resolve(DIR, "train.jsonl"), // lab-only; ver make-dataset.mjs
     validation: { type: "dataset", path: resolve(DIR, "eval.jsonl") },
     outputParametersDir: OUT,
     checkpointSaveDir: resolve(OUT, "ckpt"),
