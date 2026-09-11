@@ -273,6 +273,9 @@ export default function App() {
 
   useEffect(() => {
     let vivo = true;
+    const t0 = Date.now();
+    /** Mínimo visible para el video / demo (el boot real suele ser <200ms). */
+    const MIN_ARRANQUE_MS = 1800;
     void (async () => {
       let colaPendiente = false;
       try {
@@ -288,19 +291,25 @@ export default function App() {
         if (p) {
           colaPendiente = true;
           const u = buscarPorCorreo(p.usuario_correo);
-          if (!u) return;
-          setUsuario(u);
-          setConectado(true);
-          setRevisado(true);
-          setCredito({ min: p.costo_min, max: p.costo_max, monto: p.solicitud.monto_solicitado_usd });
-          setSolicitud(p.solicitud);
-          setPendiente(true);
-          setAviso(p.detalle);
-          setPaso("cuota");
+          if (!u) {
+            /* pendiente huérfana: seguimos al arranque normal */
+          } else {
+            setUsuario(u);
+            setConectado(true);
+            setRevisado(true);
+            setCredito({ min: p.costo_min, max: p.costo_max, monto: p.solicitud.monto_solicitado_usd });
+            setSolicitud(p.solicitud);
+            setPendiente(true);
+            setAviso(p.detalle);
+            setPaso("cuota");
+          }
         }
       } finally {
         if (vivo) {
           setArranqueDetalle("Listo");
+          const falta = MIN_ARRANQUE_MS - (Date.now() - t0);
+          if (falta > 0) await sleep(falta);
+          if (!vivo) return;
           setColaLista(true);
           reportarSesionSentry({
             modo: modo(),

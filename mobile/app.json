@@ -2,7 +2,7 @@
   "expo": {
     "name": "Ina Igar",
     "slug": "hackathon-demo",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -15,6 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "xyz.j4an.isdhack",
+      "buildNumber": "2",
       "infoPlist": {
         "CFBundleDisplayName": "Ina Igar",
         "NSCameraUsageDescription": "La app usa la cámara para leer tus documentos en el teléfono. Las fotos no salen del dispositivo.",
@@ -62,6 +63,7 @@
           "project": "isd-hackathon-mobile"
         }
       ],
+      "expo-splash-screen",
       "@qvac/sdk/expo-plugin",
       "./plugins/withQvacBareLink",
       [
