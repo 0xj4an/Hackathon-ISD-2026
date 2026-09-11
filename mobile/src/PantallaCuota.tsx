@@ -14,6 +14,7 @@
  */
 import { Share } from "react-native";
 import { preCalificar, type Solicitud } from "./core/credito/motor";
+import { sinWifiDemo } from "./modo";
 import {
   Pantalla, Encabezado, BarraVeredicto, Cifra, FilaRuta, BandaTotal, Franja, Boton, Etiqueta,
   DetalleTecnico,
@@ -34,6 +35,7 @@ export default function PantallaCuota({
 }) {
   const pre = preCalificar(solicitud);
   const techo = `B/. ${pre.capacidad.cuota_max.toFixed(2)}`;
+  const offline = sinWifiDemo();
 
   const enviarDetalle = () => {
     if (!tecnico) return;
@@ -52,6 +54,20 @@ export default function PantallaCuota({
       </Pantalla>
     );
   }
+
+  const franjaIdle = offline
+    ? {
+        titulo: "Sin wifi al banco",
+        texto:
+          "Al firmar busco un nodo local en esta WiFi y mando la solicitud por el pueblo. " +
+          "Si no hay nodo, queda pendiente en el teléfono.",
+      }
+    : {
+        titulo: "Esto es un estimado",
+        texto:
+          "Lo calculó este teléfono con tus documentos. Al firmar va al banco por wifi; " +
+          "si el banco no responde, intenta el nodo del pueblo.",
+      };
 
   return (
     <Pantalla>
@@ -75,11 +91,8 @@ export default function PantallaCuota({
       <Franja
         color={COLOR.tinta}
         simbolo="sinSenal"
-        titulo={pendiente ? "Queda pendiente" : "Esto es un estimado"}
-        texto={aviso ?? (
-          "Lo calculó este teléfono con tus documentos, sin internet. Al firmar " +
-          "va al banco si hay wifi; si no, al nodo del pueblo, en esta red local."
-        )}
+        titulo={pendiente ? "Queda pendiente" : franjaIdle.titulo}
+        texto={aviso ?? franjaIdle.texto}
       />
 
       {tecnico ? (

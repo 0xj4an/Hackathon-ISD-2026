@@ -20,12 +20,12 @@ export type Envio =
   | { ok: false; envio: "pueblo"; pendiente: true; detalle: string; tecnico: string }
   | { ok: false; envio: null; pendiente: false; detalle: string; tecnico: string };
 
-function esFinal(r: { decision?: string } | null): r is Respuesta {
-  return r?.decision === "aprobada" || r?.decision === "rechazada" || r?.decision === "revision";
+export function hostDe(url: string) {
+  try { return new URL(url).host; } catch { return "bad-url"; }
 }
 
-function hostDe(url: string) {
-  try { return new URL(url).host; } catch { return "bad-url"; }
+function esFinal(r: { decision?: string } | null): r is Respuesta {
+  return r?.decision === "aprobada" || r?.decision === "rechazada" || r?.decision === "revision";
 }
 
 type Pedido = {
@@ -109,37 +109,32 @@ function armarTecnico(solId: string, lineas: string[]): string {
   ].join("\n");
 }
 
-/** Wifi al banco. Si no hay red, el pueblo lo envía. */
-export async function enviarSolicitud(sol: Solicitud): Promise<Envio> {
-  const lineas: string[] = [];
-
-  if (!sinWifiDemo()) {
-    const a = await pedir(`${urlBanco()}/solicitud`, post(sol, "telefono"), 8000);
-    lineas.push(lineaPedido("banco", a));
-    if (esFinal(a.body)) {
-      const tecnico = armarTecnico(sol.id, lineas);
-      reportarEnvioSentry({
-        ok: true, envio: "banco", tecnico, modo: modo(), nodoHost: hostDe(urlNodo()),
-      });
-      return { ok: true, envio: "banco", respuesta: a.body, tecnico };
-    }
-  } else {
-    lineas.push("banco omitido (modo offline)");
-  }
-
-  const nodo = await asegurarUrlNodo();
-  if (!nodo) {
-    lineas.push("pueblo sin URL (no hay nodo en esta WiFi)");
-    const tecnico = armarTecnico(sol.id, lineas);
-    const detalle = "Sin red y sin el nodo del pueblo (no aparece en esta WiFi).";
+/** POST al banco remoto. */
+export async function intentarBanco(sol: Solicitud): Promise<{
+  ok: true; respuesta: Respuesta; tecnico: string; linea: string;
+} | {
+  ok: false; linea: string;
+}> {
+  const a = await pedir(`${urlBanco()}/solicitud`, post(sol, "telefono"), 8000);
+  const linea = lineaPedido("banco", a);
+  if (esFinal(a.body)) {
+    const tecnico = armarTecnico(sol.id, [linea]);
     reportarEnvioSentry({
-      ok: false, envio: null, pendiente: false, detalle, tecnico, modo: modo(), nodoHost: "",
+      ok: true, envio: "banco", tecnico, modo: modo(), nodoHost: hostDe(urlNodo()),
     });
-    return { ok: false, envio: null, pendiente: false, tecnico, detalle };
+    return { ok: true, respuesta: a.body, tecnico, linea };
   }
+  return { ok: false, linea };
+}
+
+/** POST al nodo del pueblo (URL ya resuelta). */
+export async function intentarPueblo(sol: Solicitud, nodo: string): Promise<Envio> {
   const b = await pedir(`${nodo}/solicitud`, post(sol, "telefono"), 8000);
-  lineas.push(lineaPedido("pueblo", b));
-  const tecnico = armarTecnico(sol.id, lineas);
+  const linea = lineaPedido("pueblo", b);
+  const tecnico = armarTecnico(sol.id, [
+    sinWifiDemo() ? "banco omitido (modo offline)" : "banco sin decisión final",
+    linea,
+  ]);
   const nodoHost = hostDe(nodo);
 
   if (esFinal(b.body)) {
@@ -160,6 +155,31 @@ export async function enviarSolicitud(sol: Solicitud): Promise<Envio> {
     ok: false, envio: null, pendiente: false, detalle, tecnico, modo: modo(), nodoHost,
   });
   return { ok: false, envio: null, pendiente: false, tecnico, detalle };
+}
+
+/** Wifi al banco. Si no hay red, el pueblo lo envía. */
+export async function enviarSolicitud(sol: Solicitud): Promise<Envio> {
+  const lineas: string[] = [];
+
+  if (!sinWifiDemo()) {
+    const a = await intentarBanco(sol);
+    lineas.push(a.linea);
+    if (a.ok) return { ok: true, envio: "banco", respuesta: a.respuesta, tecnico: a.tecnico };
+  } else {
+    lineas.push("banco omitido (modo offline)");
+  }
+
+  const nodo = await asegurarUrlNodo();
+  if (!nodo) {
+    lineas.push("pueblo sin URL (no hay nodo en esta WiFi)");
+    const tecnico = armarTecnico(sol.id, lineas);
+    const detalle = "Sin red y sin el nodo del pueblo (no aparece en esta WiFi).";
+    reportarEnvioSentry({
+      ok: false, envio: null, pendiente: false, detalle, tecnico, modo: modo(), nodoHost: "",
+    });
+    return { ok: false, envio: null, pendiente: false, tecnico, detalle };
+  }
+  return intentarPueblo(sol, nodo);
 }
 
 /** Misma prioridad: banco remoto, luego pueblo. */

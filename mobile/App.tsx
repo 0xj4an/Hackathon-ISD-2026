@@ -14,7 +14,9 @@
 // Las fotos no salen. MedPsy en el teléfono; si no, texto al pueblo (/inferir).
 // `PantallaDatos` sigue en el repo (deudas y personas a cargo) pero el camino
 // de la demo pasa por lo leído → cuota → banco.
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import * as SplashScreen from "expo-splash-screen";
+import PantallaArranque from "./src/PantallaArranque";
 import PantallaEntrada from "./src/PantallaEntrada";
 import PantallaSalud from "./src/PantallaSalud";
 import PantallaRevision from "./src/PantallaRevision";
@@ -22,12 +24,21 @@ import PantallaAlerta from "./src/PantallaAlerta";
 import PantallaCredito from "./src/PantallaCredito";
 import PantallaLeido from "./src/PantallaLeido";
 import PantallaCuota from "./src/PantallaCuota";
+import PantallaEnvio, { type FaseEnvioVisual, type ViaEnvioVisual } from "./src/PantallaEnvio";
 import PantallaBanco from "./src/PantallaBanco";
 import PantallaExamen from "./src/PantallaExamen";
 import PantallaFirma from "./src/PantallaFirma";
 import PantallaDesembolso from "./src/PantallaDesembolso";
 import { solicitudDeLectura, type LecturaCredito } from "./src/lectura";
-import { consultarRespuesta, enviarSolicitud } from "./src/envio";
+import {
+  consultarRespuesta,
+  enviarSolicitud,
+  hostDe,
+  intentarBanco,
+  intentarPueblo,
+  type Envio,
+} from "./src/envio";
+import { animarPct, conBarraMinima, sleep } from "./src/envioVisual";
 import {
   borrarPendiente,
   guardarPendiente,
@@ -38,14 +49,23 @@ import { marcarPasoSentry, marcarUsuarioSentry, reportarSesionSentry } from "./s
 import type { Respuesta } from "./src/core/credito/motor";
 import type { Solicitud } from "./src/core/schemas";
 import { buscarPorCorreo, type Usuario } from "./src/usuarios";
-import { fijarModo, modo, resetModo } from "./src/modo";
-import { cargarUrlNodo, descubrirPuebloLan } from "./src/nodoUrl";
+import { fijarModo, modo, resetModo, sinWifiDemo } from "./src/modo";
+import { asegurarUrlNodo, cargarUrlNodo, descubrirPuebloLan } from "./src/nodoUrl";
 import { IrInicioContext } from "./src/ui/componentes";
 import { SDK_VERSION } from "./src/perf/logger";
+
+void SplashScreen.preventAutoHideAsync().catch(() => null);
 
 /** Lo que cuesta el paquete, y el monto que la persona decidió pedir. */
 type Credito = { min: number; max: number; monto?: number };
 type PasoCredito = "captura" | "leido" | "cuota" | "banco" | "firma" | "desembolso";
+
+type EnvioUI = {
+  fase: FaseEnvioVisual;
+  via: ViaEnvioVisual;
+  nodoHost?: string;
+  pct: number;
+};
 
 export default function App() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
@@ -60,18 +80,32 @@ export default function App() {
   const [respuesta, setRespuesta] = useState<Respuesta | null>(null);
   const [firmaHash, setFirmaHash] = useState<string | undefined>();
   const [enviando, setEnviando] = useState(false);
+  const [envioUI, setEnvioUI] = useState<EnvioUI | null>(null);
   const [pendiente, setPendiente] = useState(false);
   const [aviso, setAviso] = useState<string | undefined>();
   const [tecnicoEnvio, setTecnicoEnvio] = useState<string | undefined>();
   const [colaLista, setColaLista] = useState(false);
+  const [arranqueDetalle, setArranqueDetalle] = useState("Abriendo…");
+  const okNodoRef = useRef<(() => void) | null>(null);
+  const vivoEnvioRef = useRef(true);
+  const splashOcultoRef = useRef(false);
+
+  const ocultarSplashNativo = useCallback(() => {
+    if (splashOcultoRef.current) return;
+    splashOcultoRef.current = true;
+    void SplashScreen.hideAsync().catch(() => null);
+  }, []);
 
   const soltarCredito = () => {
+    vivoEnvioRef.current = false;
+    okNodoRef.current = null;
     setPaso("captura");
     setLectura(null);
     setSolicitud(null);
     setRespuesta(null);
     setFirmaHash(undefined);
     setEnviando(false);
+    setEnvioUI(null);
     setPendiente(false);
     setAviso(undefined);
     setTecnicoEnvio(undefined);
@@ -104,11 +138,20 @@ export default function App() {
     await borrarPendiente(id);
   };
 
-  const mandar = async (sol: Solicitud) => {
-    if (enviando) return;
-    setEnviando(true);
-    const r = await enviarSolicitud(sol);
-    setEnviando(false);
+  const setFase = (patch: Partial<EnvioUI> & Pick<EnvioUI, "fase" | "via">) => {
+    setEnvioUI(prev => ({
+      pct: prev?.pct ?? 0,
+      nodoHost: prev?.nodoHost,
+      ...patch,
+    }));
+  };
+
+  const esperarOkNodo = () =>
+    new Promise<void>(resolve => {
+      okNodoRef.current = resolve;
+    });
+
+  const aplicarResultadoEnvio = async (sol: Solicitud, r: Envio) => {
     setTecnicoEnvio(r.tecnico);
     if (r.ok) {
       await cerrarPendiente(sol.id);
@@ -132,13 +175,114 @@ export default function App() {
     }
   };
 
+  const flujoPuebloVisual = async (sol: Solicitud, pedirOk: boolean): Promise<void> => {
+    const vivo = () => vivoEnvioRef.current;
+
+    setFase({ fase: "buscando", via: "pueblo", pct: 6 });
+    const nodo = await conBarraMinima(
+      asegurarUrlNodo(),
+      1600,
+      6,
+      38,
+      n => setFase({ fase: "buscando", via: "pueblo", pct: n }),
+      vivo,
+    );
+    if (!nodo) {
+      await aplicarResultadoEnvio(sol, {
+        ok: false,
+        envio: null,
+        pendiente: false,
+        detalle: "Sin red y sin el nodo del pueblo (no aparece en esta WiFi).",
+        tecnico: `modo ${modo()}\nsin nodo en LAN`,
+      });
+      return;
+    }
+
+    const host = hostDe(nodo);
+    setFase({ fase: "encontrado", via: "pueblo", nodoHost: host, pct: 42 });
+    if (pedirOk) await esperarOkNodo();
+
+    setFase({ fase: "conectando", via: "pueblo", nodoHost: host, pct: 48 });
+    await animarPct(48, 58, 700, n => setFase({ fase: "conectando", via: "pueblo", nodoHost: host, pct: n }), vivo);
+
+    setFase({ fase: "subiendo", via: "pueblo", nodoHost: host, pct: 60 });
+    const envio = await conBarraMinima(
+      intentarPueblo(sol, nodo),
+      1400,
+      60,
+      82,
+      n => setFase({ fase: "subiendo", via: "pueblo", nodoHost: host, pct: n }),
+      vivo,
+    );
+
+    setFase({ fase: "recibiendo", via: "pueblo", nodoHost: host, pct: 84 });
+    await animarPct(84, 100, 1100, n => setFase({ fase: "recibiendo", via: "pueblo", nodoHost: host, pct: n }), vivo);
+    await sleep(280);
+    await aplicarResultadoEnvio(sol, envio);
+  };
+
+  const mandar = async (sol: Solicitud) => {
+    if (enviando) return;
+    vivoEnvioRef.current = true;
+    setEnviando(true);
+    setAviso(undefined);
+    try {
+      const vivo = () => vivoEnvioRef.current;
+
+      if (sinWifiDemo()) {
+        setFase({ fase: "aviso", via: "pueblo", pct: 4 });
+        await sleep(1600);
+        await flujoPuebloVisual(sol, true);
+        return;
+      }
+
+      // WiFi: subir + recibir del banco (barras aunque el HTTP sea corto).
+      setFase({ fase: "subiendo", via: "banco", pct: 8 });
+      const banco = await conBarraMinima(
+        intentarBanco(sol),
+        1500,
+        8,
+        55,
+        n => setFase({ fase: "subiendo", via: "banco", pct: n }),
+        vivo,
+      );
+
+      if (banco.ok) {
+        setFase({ fase: "recibiendo", via: "banco", pct: 60 });
+        await animarPct(60, 100, 1200, n => setFase({ fase: "recibiendo", via: "banco", pct: n }), vivo);
+        await sleep(280);
+        await aplicarResultadoEnvio(sol, {
+          ok: true,
+          envio: "banco",
+          respuesta: banco.respuesta,
+          tecnico: banco.tecnico,
+        });
+        return;
+      }
+
+      // Banco no respondió final: mismo teatro hacia el nodo (sin OK, video sigue).
+      setFase({ fase: "aviso", via: "pueblo", pct: 4 });
+      await sleep(900);
+      await flujoPuebloVisual(sol, false);
+    } finally {
+      okNodoRef.current = null;
+      setEnvioUI(null);
+      setEnviando(false);
+    }
+  };
+
   useEffect(() => {
     let vivo = true;
     void (async () => {
       let colaPendiente = false;
       try {
+        setArranqueDetalle("Cargando el pueblo…");
         await cargarUrlNodo();
+        if (!vivo) return;
+        setArranqueDetalle("Preparando la cola…");
         await iniciarColaSqlite();
+        if (!vivo) return;
+        setArranqueDetalle("Revisando pendientes…");
         const p = await leerPendiente();
         if (!vivo) return;
         if (p) {
@@ -156,6 +300,7 @@ export default function App() {
         }
       } finally {
         if (vivo) {
+          setArranqueDetalle("Listo");
           setColaLista(true);
           reportarSesionSentry({
             modo: modo(),
@@ -227,7 +372,14 @@ export default function App() {
     return () => { vivo = false; clearInterval(id); };
   }, [pendiente, solicitud, usuario, credito]);
 
-  if (!colaLista) return null;
+  if (!colaLista) {
+    return (
+      <PantallaArranque
+        detalle={arranqueDetalle}
+        onMostrada={ocultarSplashNativo}
+      />
+    );
+  }
 
   // Fuera del camino de la demo a proposito: los registros son para nosotros,
   // no para el usuario, y no aparecen en el flujo que se graba.
@@ -351,6 +503,26 @@ export default function App() {
           setRespuesta(null);
           setPaso("cuota");
         }}
+      />,
+    );
+  }
+
+  if (envioUI) {
+    return conInicio(
+      <PantallaEnvio
+        fase={envioUI.fase}
+        via={envioUI.via}
+        nodoHost={envioUI.nodoHost}
+        pct={envioUI.pct}
+        onContinuar={
+          envioUI.fase === "encontrado"
+            ? () => {
+                const r = okNodoRef.current;
+                okNodoRef.current = null;
+                r?.();
+              }
+            : undefined
+        }
       />,
     );
   }
