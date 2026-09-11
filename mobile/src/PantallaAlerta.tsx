@@ -69,12 +69,14 @@ export default function PantallaAlerta({
   const [fallo, setFallo] = useState<FalloRedaccion | null>(null);
   const [intento, setIntento] = useState(0);
   const [redactando, setRedactando] = useState(senales.length > 0);
+  const [mostrandoVia, setMostrandoVia] = useState(senales.length > 0);
   const via = useViaMed();
 
   useEffect(() => {
     if (!peor) return;
     let vivo = true;
     setRedactando(true);
+    setMostrandoVia(true);
     setMensaje(null);
     setFallo(null);
     void redactarAlerta(peor, usuario.mediciones).then(r => {
@@ -118,8 +120,14 @@ export default function PantallaAlerta({
     );
   }
 
-  if (redactando) {
-    return <PantallaViaMed onSalir={onVolver} />;
+  if (mostrandoVia) {
+    return (
+      <PantallaViaMed
+        onSalir={onVolver}
+        activo={redactando}
+        onListo={() => setMostrandoVia(false)}
+      />
+    );
   }
 
   return (

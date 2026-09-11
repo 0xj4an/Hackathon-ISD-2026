@@ -46,6 +46,7 @@ export default function PantallaExamen({
   const [valores, setValores] = useState<Record<string, string>>({});
   const [lecturas, setLecturas] = useState<LecturaLab[] | null>(null);
   const [leyendo, setLeyendo] = useState(false);
+  const [mostrandoVia, setMostrandoVia] = useState(false);
   const [progreso, setProgreso] = useState("");
   const [conLora, setConLora] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -66,6 +67,7 @@ export default function PantallaExamen({
   };
 
   const leerUri = async (uri: string) => {
+    setMostrandoVia(true);
     setLeyendo(true);
     setProgreso("Preparando…");
     try {
@@ -149,8 +151,15 @@ export default function PantallaExamen({
     setLecturas(salida.sort((a, b) => ORDEN[a.urgencia] - ORDEN[b.urgencia]));
   };
 
-  if (leyendo) {
-    return <PantallaViaMed onSalir={onVolver} extra={progreso || "Leyendo el examen"} />;
+  if (leyendo || mostrandoVia) {
+    return (
+      <PantallaViaMed
+        onSalir={onVolver}
+        extra={progreso || "Leyendo el examen"}
+        activo={leyendo}
+        onListo={() => setMostrandoVia(false)}
+      />
+    );
   }
 
   if (lecturas) {

@@ -16,6 +16,10 @@ export const ENVIO_MS = {
   recibiendoPueblo: 2600,
   cierre: 700,
   barraColaMin: 500,
+  viaConectando: 2800,
+  viaDelegando: 2600,
+  viaEsperandoMin: 3000,
+  viaRecibiendo: 2400,
 } as const;
 
 export function sleep(ms: number): Promise<void> {

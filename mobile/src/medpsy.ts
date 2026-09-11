@@ -240,8 +240,8 @@ async function completarDelegado(opts: {
     modelConfig: { ctx_size: CTX, device: "cpu", reasoning_budget: 0 },
     delegate: { providerPublicKey: pk, timeout: 90_000, fallbackToLocal: false },
   } as unknown as Parameters<Qvac["loadModel"]>[0]);
-  marcarVia({ via: "p2p", viva: true, texto: "Par conectado · MedPsy escribiendo…" });
-  opts.onProgreso?.({ detalle: "Par conectado. MedPsy está escribiendo…" });
+  marcarVia({ via: "p2p", viva: true, texto: "Par conectado · mandando el pedido…" });
+  opts.onProgreso?.({ detalle: "Par conectado. Mandando el pedido de inferencia…" });
   let first: number | null = null;
   let text = "";
   const t1 = Date.now();
@@ -255,7 +255,10 @@ async function completarDelegado(opts: {
     ],
   });
   for await (const tok of r.tokenStream) {
-    if (first === null) first = Date.now() - t1;
+    if (first === null) {
+      first = Date.now() - t1;
+      marcarVia({ via: "p2p", viva: true, texto: "Par P2P · esperando inferencia…" });
+    }
     text += tok;
   }
   try { await s.unloadModel({ modelId, clearStorage: false }); } catch { /* ignore */ }
