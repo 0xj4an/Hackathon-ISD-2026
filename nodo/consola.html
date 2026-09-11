@@ -124,12 +124,13 @@
   <header>
     <p class="marca">Ina Igar</p>
     <h1>Nodo del pueblo</h1>
-    <p class="que">Computadora del corregimiento. El teléfono le pide MedPsy por par P2P o por HTTP. Las fotos no salen. No hay nube.</p>
+    <p class="que">Computadora del corregimiento. El teléfono le pide MedPsy por par P2P o por HTTP. El examen usa LoRA lab-v3 (fine-tuning). Las fotos no salen.</p>
     <div class="fila">
       <div class="chips">
         <span id="vivo" class="chip">conectando</span>
         <span id="par" class="chip">par P2P · —</span>
         <span id="http" class="chip">HTTP · :8788</span>
+        <span class="chip ok">LoRA · lab-v3</span>
       </div>
       <button type="button" id="borrar">Borrar</button>
     </div>
@@ -162,6 +163,8 @@
       const p = parenDe(item);
       if (l.includes("sesión"))
         return { t: "El teléfono entró " + p, k: item.modo === "local-wifi" ? "tel" : "http" };
+      if (l.includes("lora") || l.includes("fine-tuning") || l.includes("lab-v3"))
+        return { t: "LoRA lab-v3 · fine-tuning de laboratorio " + p, k: item.origen === "cel" ? "tel" : "http" };
       if (l.includes("sin capacidad") || l.includes("delegando"))
         return { t: "El teléfono delega MedPsy al nodo " + p, k: "http" };
       if (l.includes("buscando par") || l.includes("par ") && l.includes("conectando"))

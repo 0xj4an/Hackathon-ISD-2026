@@ -421,7 +421,12 @@ createServer(async (req, res) => {
       const raw = await leerCuerpo(req, 200_000);
       const { inferir } = await import("./inferir.mjs");
       const pedido = JSON.parse(raw || "{}");
-      consola.feed(`llegó HTTP /inferir ${pedido.task ?? "inferencia"}`, { origen: "cel" });
+      consola.feed(
+        pedido.lora
+          ? `llegó HTTP /inferir ${pedido.task ?? "inferencia"} · LoRA ${pedido.lora}`
+          : `llegó HTTP /inferir ${pedido.task ?? "inferencia"}`,
+        { origen: "cel" },
+      );
       const out = await inferir(pedido, (msg) => consola.feed(msg, { origen: "nodo" }));
       json(res, 200, out);
     } catch (e) {

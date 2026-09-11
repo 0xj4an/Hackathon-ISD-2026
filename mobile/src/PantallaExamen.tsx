@@ -255,8 +255,8 @@ export default function PantallaExamen({
         <Text style={s.titular}>¿Te hiciste{"\n"}un examen?</Text>
         <Text style={s.parrafo}>
           {saltarMedPsyLocal()
-            ? "Foto o archivo: OCR aquí. Este teléfono no puede correr el modelo: se delega al nodo. La imagen no sale."
-            : "Tráelo en foto o archivo y te decimos qué dice cada número. Se lee en este teléfono."}
+            ? "Foto o archivo: OCR aquí. Este teléfono no puede correr MedPsy ni el LoRA: se delega al nodo. La imagen no sale."
+            : `Tráelo en foto o archivo. OCR y MedPsy + LoRA ${LORA_LAB_VERSION} en este teléfono.`}
         </Text>
       </View>
 

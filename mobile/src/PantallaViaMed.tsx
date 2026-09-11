@@ -181,10 +181,8 @@ export default function PantallaViaMed({
   const meta = metaDe(canal);
   const conLora = Boolean(lora) && canal === "local";
   const c = COPY[fase][canal];
-  const titulo = conLora
-    ? (fase === "conectando" ? "MedPsy + LoRA" : c.titulo)
-    : c.titulo;
-  const detalle = fase === "conectando" && extra && canal !== "local"
+  const titulo = conLora ? `MedPsy + LoRA ${lora}` : c.titulo;
+  const detalle = extra?.trim()
     ? extra
     : conLora
       ? (fase === "conectando"
@@ -196,7 +194,10 @@ export default function PantallaViaMed({
             : `MedPsy + LoRA ${lora} terminó en este teléfono.`)
       : c.detalle;
   const barraDe = conLora
-    ? (fase === "conectando" ? `Cargando MedPsy + LoRA ${lora}…` : c.barraDe)
+    ? (fase === "conectando" ? `Cargando MedPsy + LoRA ${lora}…`
+      : fase === "delegando" ? `Pasando el texto a MedPsy + LoRA ${lora}…`
+        : fase === "esperando" ? `Inferencia MedPsy + LoRA ${lora}…`
+          : `Respuesta MedPsy + LoRA ${lora}…`)
     : c.barraDe;
   const linea = conLora
     ? `${MODELO_TELEFONO.linea} + LoRA ${lora} · en el teléfono`
@@ -223,7 +224,9 @@ export default function PantallaViaMed({
           )}
         </Text>
         <Text style={s.titulo} accessibilityLiveRegion="polite">{titulo}</Text>
-        <Text style={s.modelo}>{MODELO_TELEFONO.id}</Text>
+        <Text style={s.modelo}>
+          {conLora ? `${MODELO_TELEFONO.id} · LoRA ${lora}` : MODELO_TELEFONO.id}
+        </Text>
         <Text style={s.linea}>{linea}</Text>
         <Text style={s.detalle}>{detalle}</Text>
 
@@ -239,7 +242,11 @@ export default function PantallaViaMed({
           <Text style={s.barraDe}>{barraDe}</Text>
         </View>
 
-        <Text style={s.pie}>{c.pie}</Text>
+        <Text style={s.pie}>
+          {conLora
+            ? "El LoRA saca los marcadores. Rangos y urgencia los decide el catálogo, no el modelo."
+            : c.pie}
+        </Text>
       </View>
     </Pantalla>
   );

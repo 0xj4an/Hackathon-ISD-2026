@@ -24,7 +24,8 @@ export function aceptarPedido(body) {
   const temp = typeof body.temp === "number" ? body.temp : 0.1;
   const predict = typeof body.predict === "number" ? body.predict : 220;
   const task = typeof body.task === "string" ? body.task : null;
-  return { system: body.system, user: body.user, temp, predict, task };
+  const lora = typeof body.lora === "string" && body.lora ? body.lora : null;
+  return { system: body.system, user: body.user, temp, predict, task, lora };
 }
 
 const require = createRequire(import.meta.url);
@@ -49,11 +50,13 @@ export async function inferir(body, onPaso) {
   };
   const p = aceptarPedido(body);
   const que = trabajo(p.task);
+  const modelo = p.lora ? `${MODELO} + LoRA ${p.lora}` : MODELO;
+  if (p.lora) paso(`LoRA ${p.lora} · fine-tuning de laboratorio`);
   paso(`pedido: ${que} · ${p.user.length} chars · sin foto`);
-  paso(`modelo: ${MODELO}`);
+  paso(`modelo: ${modelo}`);
   const qvac = await sdk();
   if (!modeloId) {
-    paso(`cargando ${MODELO} en esta laptop…`);
+    paso(`cargando ${modelo} en esta laptop…`);
     const t0 = Date.now();
     modeloId = await qvac.loadModel({
       modelSrc: qvac.HEALTHCARE_1_7B_MEDICAL_Q8_0,
@@ -64,7 +67,7 @@ export async function inferir(body, onPaso) {
   } else {
     paso(`${MODELO} ya en RAM`);
   }
-  paso(`generando ${que}…`);
+  paso(p.lora ? `generando ${que} con LoRA ${p.lora}…` : `generando ${que}…`);
   const t1 = Date.now();
   const r = qvac.completion({
     modelId: modeloId,

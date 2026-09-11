@@ -60,11 +60,12 @@ export async function leerExamenFoto(
     }
     await soltarLectores();
 
+    demoLog(`LoRA ${LORA_LAB_VERSION} · fine-tuning de laboratorio`);
     aviso({
       paso: "extraccion",
       detalle: saltarMedPsyLocal()
-        ? "Delegando al nodo para sacar marcadores"
-        : `MedPsy + LoRA sacando marcadores (${LORA_LAB_VERSION})`,
+        ? `Delegando al nodo. LoRA ${LORA_LAB_VERSION} · fine-tuning.`
+        : `MedPsy + LoRA ${LORA_LAB_VERSION} sacando marcadores`,
     });
     breadcrumbLectura("extract.start", { kind: "lab", chars: textoOcr.length });
     const bruto = await completarMedPsy({
