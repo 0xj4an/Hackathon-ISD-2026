@@ -27,6 +27,8 @@ import { detectarSenales, type Senal } from "./core/reglas";
 import { redactarAlerta } from "./redactarAlerta";
 import { fichaModo, saltarMedPsyLocal } from "./modo";
 import { claveProveedor } from "./p2p";
+import { useViaMed } from "./demoLog";
+import PantallaViaMed from "./PantallaViaMed";
 import { armarPaquete, mensajeCredito, type Paquete } from "./core/paquete";
 import { fraseLecturas, fraseMeses, resumenHistorial } from "./historial";
 import {
@@ -67,6 +69,7 @@ export default function PantallaAlerta({
   const [fallo, setFallo] = useState<FalloRedaccion | null>(null);
   const [intento, setIntento] = useState(0);
   const [redactando, setRedactando] = useState(senales.length > 0);
+  const via = useViaMed();
 
   useEffect(() => {
     if (!peor) return;
@@ -115,6 +118,10 @@ export default function PantallaAlerta({
     );
   }
 
+  if (redactando) {
+    return <PantallaViaMed onSalir={onVolver} />;
+  }
+
   return (
     <Alerta
       peor={peor}
@@ -124,6 +131,9 @@ export default function PantallaAlerta({
       mensaje={mensaje}
       fallo={fallo}
       redactando={redactando}
+      viaTexto={via.via ? via.texto : null}
+      viaP2p={via.via === "p2p"}
+      viaPueblo={via.via === "pueblo"}
       onSalir={onVolver}
       onVerRuta={() => setPaso("ruta")}
       onReintentar={() => setIntento(n => n + 1)}
@@ -142,29 +152,36 @@ export default function PantallaAlerta({
  * Lo que sí espera al siguiente paso es qué hacer con cada uno, que es una
  * pregunta distinta.
  */
-function Alerta({ peor, demas, lecturas, periodo, mensaje, fallo, redactando, onSalir, onVerRuta, onReintentar }: {
+function Alerta({ peor, demas, lecturas, periodo, mensaje, fallo, redactando, viaTexto, viaP2p, viaPueblo, onSalir, onVerRuta, onReintentar }: {
   peor: Senal; demas: Senal[]; lecturas: number; periodo: string;
   mensaje: string | null; fallo: FalloRedaccion | null; redactando: boolean;
+  viaTexto: string | null; viaP2p: boolean; viaPueblo: boolean;
   onSalir: () => void; onVerRuta: () => void; onReintentar: () => void;
 }) {
   const [detalleAbierto, setDetalleAbierto] = useState(false);
+  const modo = fichaModo();
+  const franjaTitulo = viaP2p ? "Par P2P" : viaPueblo ? "Pueblo HTTP" : modo.titulo;
+  const franjaTexto = viaTexto ?? modo.franja;
+  const franjaColor = viaP2p ? COLOR.rutinaria : viaPueblo ? COLOR.prioritaria : modo.color;
+  const detalleRedactando = redactando
+    ? (viaTexto
+      ?? (saltarMedPsyLocal()
+        ? (claveProveedor()
+          ? "Buscando par P2P…"
+          : "Este teléfono no carga el modelo. Delegando al pueblo…")
+        : "El modelo está explicando esto en el teléfono."))
+    : undefined;
 
   return (
     <Pantalla>
       <Encabezado meta="Salir" onVolver={onSalir} />
-      <Franja color={fichaModo().color} titulo={fichaModo().titulo} texto={fichaModo().franja} />
+      <Franja color={franjaColor} titulo={franjaTitulo} texto={franjaTexto} />
 
       <Veredicto
         color={COLOR_URGENCIA[peor.urgencia]}
         antetitulo={VERBO_URGENCIA[peor.urgencia]}
         palabra={peor.titulo}
-        detalle={mensaje ?? (redactando
-          ? (saltarMedPsyLocal()
-            ? (claveProveedor()
-              ? "Buscando par P2P…"
-              : "Este teléfono no carga el modelo. Delegando al nodo…")
-            : "El modelo está explicando esto en el teléfono.")
-          : undefined)}
+        detalle={mensaje ?? detalleRedactando}
         mayusculas={false}
         simbolo={peor.urgencia === "Rutinaria" ? "listo" : "alerta"}
       />

@@ -12,6 +12,7 @@ import { armarPaqueteDesdeLab, mensajeCredito } from "./core/paquete";
 import { leerExamenFoto } from "./leerExamen";
 import { LORA_LAB_VERSION } from "./lora";
 import { fichaModo, saltarMedPsyLocal } from "./modo";
+import PantallaViaMed from "./PantallaViaMed";
 import { recordError } from "./perf/logger";
 import {
   Pantalla, Encabezado, BarraVeredicto, Veredicto, Franja, Boton, Etiqueta, Pie, DetalleTecnico,
@@ -148,6 +149,10 @@ export default function PantallaExamen({
     setLecturas(salida.sort((a, b) => ORDEN[a.urgencia] - ORDEN[b.urgencia]));
   };
 
+  if (leyendo) {
+    return <PantallaViaMed onSalir={onVolver} extra={progreso || "Leyendo el examen"} />;
+  }
+
   if (lecturas) {
     const peor = lecturas[0].urgencia;
     const fuera = lecturas.filter(l => l.hallazgo !== "dentro de rango");
@@ -247,18 +252,9 @@ export default function PantallaExamen({
 
       {error ? <Franja color={COLOR.inmediata} titulo="No se pudo" texto={error} /> : null}
       {diagnostico ? <DetalleTecnico texto={diagnostico} onEnviar={enviarDetalle} /> : null}
-      {leyendo ? (
-        <Franja
-          color={COLOR.prioritaria}
-          titulo={saltarMedPsyLocal() ? "OCR aquí · delegar al nodo" : `MedPsy + LoRA · ${LORA_LAB_VERSION}`}
-          texto={progreso || "Leyendo el examen"}
-        />
-      ) : null}
 
       <Boton
-        texto={leyendo
-          ? (saltarMedPsyLocal() ? "Delegando al nodo…" : "Leyendo con LoRA…")
-          : "Tomar foto del examen"}
+        texto="Tomar foto del examen"
         onPress={() => { void tomarFoto(); }}
       />
       <Boton

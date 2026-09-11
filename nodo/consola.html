@@ -3,99 +3,170 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ina Igar · Consola demo</title>
+  <title>Nodo del pueblo · Ina Igar</title>
   <style>
     :root {
-      --fondo: #0a0a0a;
-      --linea: #c8f0d8;
-      --meta: #7dffb0;
-      --cel: #9ecbff;
-      --nodo: #c8f0d8;
-      --borde: #0b7a4b;
-      --apagado: #6b6b6b;
+      --fondo: #101010;
+      --papel: #ffffff;
+      --apagado: #b0b0b0;
+      --p2p: #0b7a4b;
+      --http: #a85f00;
+      --linea: #e8e8e8;
     }
     * { box-sizing: border-box; }
     html, body {
       margin: 0;
       height: 100%;
       background: var(--fondo);
-      color: var(--linea);
-      font-family: ui-monospace, Menlo, Consolas, monospace;
+      color: var(--papel);
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
     }
-    body {
-      display: flex;
-      flex-direction: column;
-      padding: 0;
-    }
+    body { display: flex; flex-direction: column; }
     header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px 18px;
-      border-bottom: 3px solid var(--borde);
       flex-shrink: 0;
+      padding: 12px 16px 0;
+      border-bottom: 2px solid var(--p2p);
     }
-    h1 {
+    .marca {
       margin: 0;
-      font-size: 14px;
+      font-size: 10px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       font-weight: 800;
-      color: #fff;
-    }
-    .estado {
-      font-size: 12px;
       color: var(--apagado);
     }
-    .estado.ok { color: var(--meta); }
-    .acciones { display: flex; gap: 10px; }
+    h1 {
+      margin: 3px 0 2px;
+      font-size: 16px;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+    }
+    .que {
+      margin: 0 0 10px;
+      font-size: 12px;
+      line-height: 1.35;
+      color: var(--apagado);
+      max-width: 42rem;
+    }
+    .fila {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 14px;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 5px 8px;
+      background: #1c1c1c;
+      color: var(--papel);
+    }
+    .chip.ok { background: var(--p2p); }
+    .chip.warn { background: var(--http); }
     button {
       appearance: none;
-      border: 1px solid #2a2a2a;
-      background: #151515;
-      color: var(--meta);
+      border: 2px solid var(--papel);
+      background: transparent;
+      color: var(--papel);
       font: inherit;
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 700;
-      padding: 8px 14px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 6px 10px;
       cursor: pointer;
     }
-    button:hover { border-color: var(--borde); }
+    #ahora {
+      display: none;
+      flex-shrink: 0;
+      padding: 8px 16px;
+      background: var(--p2p);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    #ahora.http { background: var(--http); }
+    #ahora.tel { background: #1c1c1c; }
     #log {
       flex: 1;
       overflow: auto;
-      padding: 16px 18px 28px;
-      line-height: 1.45;
-      font-size: clamp(13px, 1.6vw, 18px);
+      padding: 12px 16px 24px;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.4;
     }
-    .vacio { color: var(--apagado); max-width: 42rem; }
-    .row { white-space: pre-wrap; word-break: break-word; margin: 0 0 4px; }
-    .row.cel { color: var(--cel); }
-    .row.nodo { color: var(--nodo); }
+    .vacio { color: var(--apagado); max-width: 40rem; font-family: inherit; font-size: 12px; line-height: 1.4; }
+    .row { margin: 0 0 3px; white-space: pre-wrap; word-break: break-word; color: var(--linea); }
+    .row.cel { color: var(--papel); }
     .tag {
       display: inline-block;
-      min-width: 3.2em;
+      min-width: 7.2em;
+      font-size: 0.72em;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       color: var(--apagado);
-      font-size: 0.85em;
     }
+    .row.cel .tag { color: #9ecbff; }
+    .row.nodo .tag { color: #8fd4a8; }
   </style>
 </head>
 <body>
   <header>
-    <div>
-      <h1>Consola demo · Ina Igar</h1>
-      <div id="estado" class="estado">conectando…</div>
-    </div>
-    <div class="acciones">
+    <p class="marca">Ina Igar</p>
+    <h1>Nodo del pueblo</h1>
+    <p class="que">Computadora del corregimiento. El teléfono le pide MedPsy por par P2P o por HTTP. Las fotos no salen. No hay nube.</p>
+    <div class="fila">
+      <div class="chips">
+        <span id="vivo" class="chip">conectando</span>
+        <span id="par" class="chip">par P2P · —</span>
+        <span id="http" class="chip">HTTP · :8788</span>
+      </div>
       <button type="button" id="borrar">Borrar</button>
     </div>
   </header>
+  <div id="ahora"></div>
   <main id="log"></main>
   <script>
     const logEl = document.getElementById("log");
-    const estado = document.getElementById("estado");
+    const ahoraEl = document.getElementById("ahora");
+    const vivoEl = document.getElementById("vivo");
+    const parEl = document.getElementById("par");
+    const httpEl = document.getElementById("http");
     let vacio = true;
+
+    function frase(linea) {
+      const l = String(linea).toLowerCase();
+      if (l.includes("delegate") && (l.includes("→") || l.includes("buscando")))
+        return { t: "El teléfono pide MedPsy al par P2P.", k: "p2p" };
+      if (l.includes("delegate") && l.includes("←"))
+        return { t: "El par P2P contestó. El modelo no corrió en la nube.", k: "p2p" };
+      if (l.includes("delegate falló") || l.includes("par no respondió"))
+        return { t: "El par no respondió. Pasa al pueblo por HTTP.", k: "http" };
+      if (l.includes("/inferir") && l.includes("→"))
+        return { t: "Texto al pueblo por HTTP. La foto no sale.", k: "http" };
+      if (l.includes("/inferir") && l.includes("←"))
+        return { t: "El pueblo contestó la inferencia.", k: "http" };
+      if (l.includes("/solicitud"))
+        return { t: "Llegó una solicitud de crédito al pueblo.", k: "http" };
+      if (l.includes("medpsy local"))
+        return { t: "MedPsy corrió en el teléfono.", k: "tel" };
+      return null;
+    }
+
+    function ponerAhora(linea) {
+      const f = frase(linea);
+      if (!f) return;
+      ahoraEl.style.display = "block";
+      ahoraEl.textContent = f.t;
+      ahoraEl.className = f.k === "http" ? "http" : f.k === "tel" ? "tel" : "";
+    }
 
     function mostrarVacio(texto) {
       while (logEl.firstChild) logEl.removeChild(logEl.firstChild);
@@ -104,6 +175,7 @@
       p.textContent = texto;
       logEl.appendChild(p);
       vacio = true;
+      ahoraEl.style.display = "none";
     }
 
     function pintar(item) {
@@ -115,18 +187,29 @@
       p.className = "row " + (item.origen === "cel" ? "cel" : "nodo");
       const tag = document.createElement("span");
       tag.className = "tag";
-      tag.textContent = item.origen === "cel" ? "cel" : "nodo";
+      tag.textContent = item.origen === "cel" ? "teléfono" : "pueblo";
       p.appendChild(tag);
       p.appendChild(document.createTextNode(" " + String(item.linea ?? "")));
       logEl.appendChild(p);
       logEl.scrollTop = logEl.scrollHeight;
+      ponerAhora(item.linea);
+    }
+
+    function salud() {
+      fetch("/salud").then(r => r.json()).then(d => {
+        const pk = typeof d.proveedor === "string" ? d.proveedor.slice(0, 8) : "";
+        parEl.textContent = pk ? "par P2P · " + pk + "…" : "par P2P · sin anunciar";
+        parEl.className = "chip" + (pk ? " ok" : "");
+        httpEl.textContent = "HTTP · pueblo listo";
+        httpEl.className = "chip" + (d.inferir ? " ok" : "");
+      }).catch(() => {});
     }
 
     function conectar() {
       const es = new EventSource("/consola/stream");
       es.addEventListener("open", () => {
-        estado.textContent = "en vivo · listo para grabar";
-        estado.className = "estado ok";
+        vivoEl.textContent = "en vivo";
+        vivoEl.className = "chip ok";
       });
       es.addEventListener("snapshot", (ev) => {
         const arr = JSON.parse(ev.data);
@@ -137,11 +220,11 @@
       });
       es.addEventListener("linea", (ev) => pintar(JSON.parse(ev.data)));
       es.addEventListener("borrar", () => {
-        mostrarVacio("Limpio. Esperando tráfico…");
+        mostrarVacio("Limpio. Esperando al teléfono…");
       });
       es.onerror = () => {
-        estado.textContent = "reconectando…";
-        estado.className = "estado";
+        vivoEl.textContent = "reconectando";
+        vivoEl.className = "chip warn";
       };
     }
 
@@ -149,8 +232,10 @@
       fetch("/consola/borrar", { method: "POST" }).catch(() => {});
     };
 
-    mostrarVacio("Esperando tráfico del celular y del nodo. Misma WiFi · pueblo :8788.");
+    mostrarVacio("Esperando al teléfono. Misma WiFi. Si delega, aquí se lee: par P2P o HTTP.");
     conectar();
+    salud();
+    setInterval(salud, 4000);
   </script>
 </body>
 </html>

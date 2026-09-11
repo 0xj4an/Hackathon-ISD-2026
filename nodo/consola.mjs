@@ -1,6 +1,6 @@
 /**
- * Consola de demo en la laptop: SSE + HTML para grabar al lado del teléfono.
- * El celular puede espejar líneas con POST /consola/linea.
+ * Pantalla del nodo del pueblo (laptop): SSE + HTML para grabar al lado del teléfono.
+ * El celular espeja líneas con POST /consola/linea.
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";

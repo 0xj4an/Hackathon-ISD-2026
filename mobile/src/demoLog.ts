@@ -3,6 +3,7 @@
  * En el celular y, si hay pueblo en LAN, espejo a http://…:8788/consola.
  * Sin fotos ni cédula completa.
  */
+import { useEffect, useState } from "react";
 import { urlNodo } from "./nodoUrl";
 
 type Listener = (lines: string[]) => void;
@@ -10,6 +11,60 @@ type Listener = (lines: string[]) => void;
 const MAX = 80;
 const lines: string[] = [];
 const listeners = new Set<Listener>();
+
+export type ViaMed = "local" | "p2p" | "pueblo" | null;
+export type EstadoVia = {
+  via: ViaMed;
+  viva: boolean;
+  texto: string;
+};
+
+const VIA_INICIAL: EstadoVia = { via: null, viva: false, texto: "MedPsy" };
+let via = VIA_INICIAL;
+const viaListeners = new Set<(e: EstadoVia) => void>();
+
+export function viaActual(): EstadoVia {
+  return via;
+}
+
+export function marcarVia(next: EstadoVia) {
+  via = next;
+  for (const l of viaListeners) l(via);
+}
+
+export function subscribeVia(listener: (e: EstadoVia) => void): () => void {
+  viaListeners.add(listener);
+  listener(via);
+  return () => { viaListeners.delete(listener); };
+}
+
+export function useViaMed(): EstadoVia {
+  const [e, setE] = useState(via);
+  useEffect(() => subscribeVia(setE), []);
+  return e;
+}
+
+let panelNodo = false;
+const panelListeners = new Set<(v: boolean) => void>();
+
+export function setPanelNodo(v: boolean) {
+  panelNodo = v;
+  for (const l of panelListeners) l(panelNodo);
+}
+
+export function togglePanelNodo() {
+  setPanelNodo(!panelNodo);
+}
+
+export function usePanelNodo(): boolean {
+  const [v, setV] = useState(panelNodo);
+  useEffect(() => {
+    panelListeners.add(setV);
+    setV(panelNodo);
+    return () => { panelListeners.delete(setV); };
+  }, []);
+  return v;
+}
 
 function stamp(msg: string): string {
   return `${new Date().toISOString().slice(11, 19)} ${msg}`;

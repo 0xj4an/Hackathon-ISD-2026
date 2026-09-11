@@ -8,7 +8,7 @@
  * El LoRA de lab es opcional y reemplazable (`lora.ts`). Solo el examen de laboratorio lo pide.
  */
 import { getAppLogger, recordError, recordInference, type InferenceTask } from "./perf/logger";
-import { demoLog } from "./demoLog";
+import { demoLog, marcarVia } from "./demoLog";
 
 function hostDe(url: string) {
   try { return new URL(url).host; } catch { return "bad-url"; }
@@ -172,10 +172,11 @@ async function completarEnNodo(opts: {
   predict?: number;
   onProgreso?: (p: ProgresoMedPsy) => void;
 }): Promise<string> {
-  opts.onProgreso?.({ detalle: "El teléfono no pudo. Delegando al nodo…" });
+  opts.onProgreso?.({ detalle: "El teléfono no pudo. Delegando al pueblo por HTTP…" });
   breadcrumbApp("inferencia", "nodo.start", { task: opts.task });
   const nodo = await asegurarUrlNodo();
   if (!nodo) throw new Error("sin pueblo en esta WiFi");
+  marcarVia({ via: "pueblo", viva: true, texto: `Pueblo HTTP · ${hostDe(nodo)}` });
   demoLog(`→ POST ${hostDe(nodo)}/inferir task=${opts.task} chars=${opts.user.length}`);
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 180_000);
@@ -198,6 +199,7 @@ async function completarEnNodo(opts: {
       throw new Error(data?.motivo ?? "el nodo no respondió");
     }
     demoLog(`← /inferir HTTP ${r.status} ${data.text.length} chars (${Date.now() - t0}ms)`);
+    marcarVia({ via: "pueblo", viva: false, texto: `Pueblo HTTP · ${Date.now() - t0} ms` });
     await recordInference({
       task: opts.task,
       model: MEDPSY,
@@ -227,6 +229,7 @@ async function completarDelegado(opts: {
   onProgreso?: (p: ProgresoMedPsy) => void;
 }, pk: string): Promise<string> {
   opts.onProgreso?.({ detalle: "Buscando par P2P…" });
+  marcarVia({ via: "p2p", viva: true, texto: `Buscando par P2P · ${pk.slice(0, 8)}…` });
   demoLog(`→ delegate ${pk.slice(0, 8)}… task=${opts.task}`);
   const s = await sdk();
   const { HEALTHCARE_1_7B_MEDICAL_Q8_0 } = await import("@qvac/sdk/models");
@@ -237,6 +240,8 @@ async function completarDelegado(opts: {
     modelConfig: { ctx_size: CTX, device: "cpu", reasoning_budget: 0 },
     delegate: { providerPublicKey: pk, timeout: 90_000, fallbackToLocal: false },
   } as unknown as Parameters<Qvac["loadModel"]>[0]);
+  marcarVia({ via: "p2p", viva: true, texto: "Par conectado · MedPsy escribiendo…" });
+  opts.onProgreso?.({ detalle: "Par conectado. MedPsy está escribiendo…" });
   let first: number | null = null;
   let text = "";
   const t1 = Date.now();
@@ -256,6 +261,7 @@ async function completarDelegado(opts: {
   try { await s.unloadModel({ modelId, clearStorage: false }); } catch { /* ignore */ }
   if (!text.trim()) throw new Error("delegate vacío");
   demoLog(`← delegate ${text.length} chars (${Date.now() - t0}ms)`);
+  marcarVia({ via: "p2p", viva: false, texto: `Par P2P · MedPsy · ${Date.now() - t0} ms` });
   await recordInference({
     task: opts.task,
     model: MEDPSY,
@@ -290,6 +296,7 @@ export async function completarMedPsy(opts: {
           catch (err) {
             recordError("medpsy.delegate", err);
             demoLog(`delegate falló → HTTP /inferir (${err instanceof Error ? err.message.slice(0, 80) : "fail"})`);
+            marcarVia({ via: "pueblo", viva: true, texto: "Par no respondió · pueblo HTTP" });
           }
         }
         return await completarEnNodo(opts);
@@ -303,6 +310,7 @@ export async function completarMedPsy(opts: {
         task: opts.task,
         lora: opts.conLora ? LORA_LAB_VERSION : "no",
       });
+      marcarVia({ via: "local", viva: true, texto: opts.conLora ? `MedPsy + LoRA en este teléfono` : "MedPsy en este teléfono" });
       const r = s.completion({
         modelId,
         stream: true,
@@ -333,6 +341,11 @@ export async function completarMedPsy(opts: {
       demoLog(
         `MedPsy local task=${opts.task} ttft=${first ?? "—"}ms out=${text.length} lora=${llmConLora ? LORA_LAB_VERSION : "no"}`,
       );
+      marcarVia({
+        via: "local",
+        viva: false,
+        texto: `Este teléfono · ${first ?? Date.now() - t1} ms`,
+      });
       return text;
     } finally {
       inflight--;

@@ -14,6 +14,7 @@ import {
   SafeAreaView, ScrollView, View, Text, Pressable, StyleSheet,
 } from "react-native";
 import Pictograma, { type Simbolo } from "./Pictograma";
+import { PuebloEncabezado } from "../ConsolaDemo";
 import { COLOR, TIPO, ESPACIO, TOQUE } from "./tokens";
 
 /** Tocar la marca lleva al inicio. Lo pone App; en entrada no hay provider. */
@@ -49,13 +50,16 @@ export function Encabezado({ meta, onVolver }: { meta?: string; onVolver?: () =>
       ) : (
         <Text style={s.marca}>Ina Igar</Text>
       )}
-      {onVolver ? (
-        <Pressable onPress={onVolver} accessibilityRole="button" accessibilityLabel="Volver" hitSlop={12}>
-          <Text style={s.meta}>{meta ?? "Volver"}</Text>
-        </Pressable>
-      ) : meta ? (
-        <Text style={s.meta}>{meta}</Text>
-      ) : null}
+      <View style={s.encabezadoDer}>
+        <PuebloEncabezado />
+        {onVolver ? (
+          <Pressable onPress={onVolver} accessibilityRole="button" accessibilityLabel="Volver" hitSlop={12}>
+            <Text style={s.meta}>{meta ?? "Volver"}</Text>
+          </Pressable>
+        ) : meta ? (
+          <Text style={s.meta} numberOfLines={1}>{meta}</Text>
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -273,8 +277,11 @@ const s = StyleSheet.create({
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
     paddingHorizontal: ESPACIO.borde, paddingBottom: ESPACIO.entre, gap: 12,
   },
-  marca: { ...TIPO.barra, color: COLOR.tinta },
-  meta: { fontSize: 12, fontWeight: "600", color: COLOR.gris },
+  encabezadoDer: {
+    flexDirection: "row", alignItems: "center", gap: 14, flexShrink: 1, minWidth: 0,
+  },
+  marca: { ...TIPO.barra, color: COLOR.tinta, flexShrink: 0 },
+  meta: { fontSize: 12, fontWeight: "600", color: COLOR.gris, flexShrink: 1 },
 
   veredicto: { paddingHorizontal: ESPACIO.borde, paddingTop: 24, paddingBottom: 26, gap: 14 },
   veredictoTextos: { gap: 7, minWidth: 0 },
