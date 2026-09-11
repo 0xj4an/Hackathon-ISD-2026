@@ -126,22 +126,28 @@ p,h1,h2,h3,ul,figure,dl,dt,dd{margin:0}
   .hero-plane img,.brand,.tag,.hero h1,.hero .sub,.actions{animation:none!important}
 }
 .btn{
-  display:inline-flex;align-items:center;
+  display:inline-flex;align-items:center;justify-content:center;
   background:var(--ink);color:#F7F4EE;
   font-size:.9rem;font-weight:700;text-decoration:none;
   padding:13px 18px;
 }
 .btn:hover{background:#000}
 .btn:active{transform:translateY(1px)}
+.btn-lg{
+  font-size:clamp(1.15rem,2.6vw,1.45rem);
+  padding:20px 36px;
+  min-height:58px;
+  letter-spacing:-.03em;
+}
 .link{
   font-size:.9rem;font-weight:700;color:var(--mute);text-decoration:none;
   border-bottom:1px solid var(--line);padding-bottom:2px;
 }
 .link:hover{color:var(--ink);border-color:var(--ink)}
-
 @media(max-width:700px){
   .hero-plane img{width:130vw;right:-42%;top:26%;opacity:.35}
   .hero-body{padding-top:10vh}
+  .btn-lg{width:100%}
 }
 
 .strip{
@@ -317,8 +323,8 @@ footer a{text-underline-offset:3px}
     <h1>Mira tu salud. Te avisa. Te presta.</h1>
     <p class="sub">Se conecta a Apple Health o Google Health. Si hay una anomalía, te recomienda qué hacer. Si cargas un examen, te lo lee. Calcula el tratamiento y te ofrece crédito si no tienes plata. El banco no ve tu salud.</p>
     <div class="actions">
-      <a class="btn" href="#problema">Cómo funciona</a>
-      <a class="link" href="/pitch">Pitch</a>
+      <a class="btn btn-lg" href="/pitch">Ver pitch deck</a>
+      <a class="link" href="#problema">Cómo funciona</a>
     </div>
   </div>
 </section>
