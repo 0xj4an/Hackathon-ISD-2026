@@ -221,10 +221,10 @@ td b{font-family:var(--sans);font-size:14px;letter-spacing:-.02em}
     <div class="stack">
       <div class="r"><div class="k">WiFi + local</div><div>MedPsy y LoRA aquí. Crédito HTTPS al banco. Teléfono capaz, hay datos.</div></div>
       <div class="r"><div class="k">Sin WiFi + local</div><div>MedPsy aquí. Crédito al pueblo o cola. El modelo no se apaga porque cayó la red.</div></div>
-      <div class="r"><div class="k">Delegar al nodo</div><div>OCR aquí. Texto al par QVAC (delegate / dht.connect). Si no entra, POST /inferir. El iPhone de demo simula el Android que no carga 2.1 GB.</div></div>
+      <div class="r"><div class="k">Delegar al nodo</div><div>OCR aquí. Texto al par QVAC (delegate). Si hace falta, POST /inferir. Este teléfono no corre 2.1 GB: el pueblo presta el cómputo. La foto se quedó.</div></div>
     </div>
   </div>
-  <div class="foot">Topic Hyperswarm nodo↔nodo está listo y apagado. La vía del teléfono es delegate. Fotos nunca salen.</div>
+  <div class="foot">Delegate es P2P de inferencia. La malla nodo↔nodo (topic) es el siguiente tramo. El crédito sigue por HTTP. Fotos nunca salen.</div>
 </section>
 
 <section class="s">
@@ -233,11 +233,11 @@ td b{font-family:var(--sans);font-size:14px;letter-spacing:-.02em}
     <table>
       <thead><tr><th></th><th>Producto</th><th>Demo de hoy</th></tr></thead>
       <tbody>
-        <tr><td><b>Salud</b></td><td>Apple Salud / HealthKit y Google Health Connect. Cualquier señal del catálogo.</td><td>Año sintético, mismo esquema de registros.</td></tr>
+        <tr><td><b>Salud</b></td><td>Apple Salud / HealthKit y Google Health Connect. Cualquier señal del catálogo.</td><td>Año sintético. Mismo esquema de registros.</td></tr>
         <tr><td><b>LoRA</b></td><td>Un adaptador por tarea (lab, docs, paneles).</td><td>lab-v3 empaquetado. Se ve en carga y resultados.</td></tr>
-        <tr><td><b>Peers</b></td><td>Nodo en cada corregimiento. Delegate entre pueblos.</td><td>Un pueblo en la LAN. P2P extract medido.</td></tr>
-        <tr><td><b>Banco</b></td><td>Motor y desembolso reales. Scorecard ya compartido.</td><td>Motor vivo. Desembolso simulado. Trazo ≠ firma legal.</td></tr>
-        <tr><td><b>Hardware</b></td><td>Android de gama media.</td><td>iPhone 17 Pro Max. El Xiaomi aborta Bare.</td></tr>
+        <tr><td><b>Peers</b></td><td>Nodo en cada corregimiento. Delegate entre pueblos. Malla topic.</td><td>Un pueblo en la LAN. 72 extracciones @p2p-delegate.</td></tr>
+        <tr><td><b>Banco</b></td><td>Origination y desembolso en producción. Scorecard ya compartido.</td><td>Motor vivo. Cierre de muestra. Trazo en pantalla.</td></tr>
+        <tr><td><b>Hardware</b></td><td>Android de gama media + Health Connect.</td><td>iPhone 17 Pro Max. El recorte de hoy.</td></tr>
       </tbody>
     </table>
   </div>
@@ -268,10 +268,10 @@ td b{font-family:var(--sans);font-size:14px;letter-spacing:-.02em}
     <div class="statrow">
       <div><strong>9/9</strong><span>eval en verde. El sano no dispara.</span></div>
       <div><strong>2.9 s</strong><span>TTFT MedPsy Q8 en iPhone.</span></div>
-      <div><strong>P2P</strong><span>extracción @p2p-delegate (Sentry).</span></div>
+      <div><strong>72×</strong><span>extracción @p2p-delegate. El pueblo presta MedPsy.</span></div>
       <div><strong>B/. 920</strong><span>crédito LAN pueblo → banco, aprobada.</span></div>
     </div>
-    <p class="lead" style="margin-top:18px">Tres caminos en el mismo build. OCR en el teléfono. LoRA lab-v3 en pantalla. No hay GMV. Hay QVAC usado de punta a punta.</p>
+    <p class="lead" style="margin-top:18px">Tres caminos en el mismo build. OCR en el teléfono. LoRA lab-v3 en pantalla. Delegate 72 veces. El banco responde. QVAC de punta a punta.</p>
   </div>
   <div class="foot">eval/run.mjs · Sentry 11 sep 2026 · pueblo :8788.</div>
 </section>
@@ -296,8 +296,8 @@ td b{font-family:var(--sans);font-size:14px;letter-spacing:-.02em}
   <div class="top"><b>Roadmap</b><span>11</span></div>
   <div class="body">
     <div class="stack">
-      <div class="r"><div class="k">Hoy</div><div>Tres caminos. LoRA lab-v3. Delegate + /inferir. OCR. Crédito al banco o por LAN. Demo iPhone, datos sintéticos, desembolso simulado.</div></div>
-      <div class="r"><div class="k">Banco</div><div>Motor de crédito de verdad en producción: origination, desembolso, su scorecard. Dejamos de simular el cierre.</div></div>
+      <div class="r"><div class="k">Hoy</div><div>Tres caminos. LoRA lab-v3. Delegate + /inferir. OCR. Crédito al banco o por LAN. Demo: iPhone, historial sintético, cierre de muestra.</div></div>
+      <div class="r"><div class="k">Banco</div><div>Origination y desembolso en producción. El scorecard ya es el mismo en el teléfono y en el banco.</div></div>
       <div class="r"><div class="k">LoRAs</div><div>Un adaptador por tarea: cédula, ingresos, extracto, más paneles de lab. Entrenar, medir, empaquetar. El base no lo hace todo.</div></div>
       <div class="r"><div class="k">Peers</div><div>Nodo en cada pueblo. Delegate P2P entre corregimientos. Topic nodo↔nodo encendido. El teléfono flaco siempre tiene un par cerca.</div></div>
       <div class="r"><div class="k">Campo</div><div>Health Connect + HealthKit en vivo. Android gama media. Cola durable. Capacidad sin elegir a mano.</div></div>
@@ -336,7 +336,7 @@ slides.forEach((_,i)=>{
 let cur=0;
 function go(i){
   cur=Math.max(0,Math.min(slides.length-1,i));
-  deck.scrollTo({top:slides[cur].offsetTop,behavior:"auto"});
+  slides[cur].scrollIntoView({behavior:"auto",block:"start"});
   paint();
 }
 function paint(){
