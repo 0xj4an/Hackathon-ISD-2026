@@ -38,7 +38,7 @@ import {
   intentarPueblo,
   type Envio,
 } from "./src/envio";
-import { animarPct, conBarraMinima, sleep } from "./src/envioVisual";
+import { animarPct, conBarraMinima, sleep, ENVIO_MS } from "./src/envioVisual";
 import {
   borrarPendiente,
   guardarPendiente,
@@ -181,7 +181,7 @@ export default function App() {
     setFase({ fase: "buscando", via: "pueblo", pct: 6 });
     const nodo = await conBarraMinima(
       asegurarUrlNodo(),
-      1600,
+      ENVIO_MS.buscandoNodo,
       6,
       38,
       n => setFase({ fase: "buscando", via: "pueblo", pct: n }),
@@ -203,12 +203,18 @@ export default function App() {
     if (pedirOk) await esperarOkNodo();
 
     setFase({ fase: "conectando", via: "pueblo", nodoHost: host, pct: 48 });
-    await animarPct(48, 58, 700, n => setFase({ fase: "conectando", via: "pueblo", nodoHost: host, pct: n }), vivo);
+    await animarPct(
+      48,
+      58,
+      ENVIO_MS.conectando,
+      n => setFase({ fase: "conectando", via: "pueblo", nodoHost: host, pct: n }),
+      vivo,
+    );
 
     setFase({ fase: "subiendo", via: "pueblo", nodoHost: host, pct: 60 });
     const envio = await conBarraMinima(
       intentarPueblo(sol, nodo),
-      1400,
+      ENVIO_MS.subiendoPueblo,
       60,
       82,
       n => setFase({ fase: "subiendo", via: "pueblo", nodoHost: host, pct: n }),
@@ -216,8 +222,14 @@ export default function App() {
     );
 
     setFase({ fase: "recibiendo", via: "pueblo", nodoHost: host, pct: 84 });
-    await animarPct(84, 100, 1100, n => setFase({ fase: "recibiendo", via: "pueblo", nodoHost: host, pct: n }), vivo);
-    await sleep(280);
+    await animarPct(
+      84,
+      100,
+      ENVIO_MS.recibiendoPueblo,
+      n => setFase({ fase: "recibiendo", via: "pueblo", nodoHost: host, pct: n }),
+      vivo,
+    );
+    await sleep(ENVIO_MS.cierre);
     await aplicarResultadoEnvio(sol, envio);
   };
 
@@ -231,7 +243,7 @@ export default function App() {
 
       if (sinWifiDemo()) {
         setFase({ fase: "aviso", via: "pueblo", pct: 4 });
-        await sleep(1600);
+        await sleep(ENVIO_MS.avisoOffline);
         await flujoPuebloVisual(sol, true);
         return;
       }
@@ -240,7 +252,7 @@ export default function App() {
       setFase({ fase: "subiendo", via: "banco", pct: 8 });
       const banco = await conBarraMinima(
         intentarBanco(sol),
-        1500,
+        ENVIO_MS.subiendoBanco,
         8,
         55,
         n => setFase({ fase: "subiendo", via: "banco", pct: n }),
@@ -249,8 +261,14 @@ export default function App() {
 
       if (banco.ok) {
         setFase({ fase: "recibiendo", via: "banco", pct: 60 });
-        await animarPct(60, 100, 1200, n => setFase({ fase: "recibiendo", via: "banco", pct: n }), vivo);
-        await sleep(280);
+        await animarPct(
+          60,
+          100,
+          ENVIO_MS.recibiendoBanco,
+          n => setFase({ fase: "recibiendo", via: "banco", pct: n }),
+          vivo,
+        );
+        await sleep(ENVIO_MS.cierre);
         await aplicarResultadoEnvio(sol, {
           ok: true,
           envio: "banco",
@@ -262,7 +280,7 @@ export default function App() {
 
       // Banco no respondió final: mismo teatro hacia el nodo (sin OK, video sigue).
       setFase({ fase: "aviso", via: "pueblo", pct: 4 });
-      await sleep(900);
+      await sleep(ENVIO_MS.avisoFallback);
       await flujoPuebloVisual(sol, false);
     } finally {
       okNodoRef.current = null;

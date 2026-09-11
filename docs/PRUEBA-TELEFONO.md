@@ -81,6 +81,31 @@ Criterios que mueve: C6, C10, …
 
 ## Corridas
 
+### 2026-09-10 ~20:47–20:53 · iPhone 17 Pro Max · Sentry `1.0.5+2`
+
+Build: Release en mano · release Sentry `isd-hackathon-mobile@1.0.5+2` (dist `2`).
+Nativo reportó aún `app_version 1.0.4` / `HackathonISD` (JS alineado; IPA a medias).
+Quién: equipo (evidencia Sentry; sin `perf.jsonl` en el Mac)
+Documento: al menos ingresos (`kind=work` en breadcrumbs)
+Modo: `local-wifi`
+Detalle ops: [`SENTRY.md`](SENTRY.md) § Corrida medida
+
+| Paso | Resultado | Qué se vio |
+| --- | --- | --- |
+| Arranque / loading | **ok** | ~1.8 s hasta `sesion: start local-wifi` |
+| Entrada | ok | breadcrumb `navegacion: entrada` |
+| Alerta (MedPsy) | **mixto** | `alerta: fail` ×2 en la ventana; no bloqueó el resto |
+| Lectura docs | **ok** (1/1) | `lectura: ok 1/1`; extract `work` ~950 chars, borrada |
+| OCR | **mixto** | ok en el lote que cerró; también `galloc` / foto grande en la misma ventana |
+| Cuota → Firmar y enviar | **ok** | POST Railway `/solicitud` HTTP 200 |
+| Banco | **ok** | `credito: ok via banco` |
+| Nodo LAN al boot | warning | `nodo: no hallado` (esperado sin pueblo; wifi usó banco) |
+
+Error literal (OCR, no en el lote ok): `StepDetectionInference: ggml_gallocr_alloc_graph failed` / mensaje UI de foto demasiado grande.
+
+Criterios: cierra anotación de envío directo Railway (antes `[~]`). Telemetría
+usable. C6 disco y ensayos ×3 / video siguen abiertos.
+
 ### 2026-09-10 ~19:15 · iPhone · OCR documentos · `5165830`+
 
 Build: Metro / Release en mano.
@@ -169,6 +194,7 @@ iOS 26.6.1. Release `expo run:ios --device --configuration Release`.
 ## Lo que todavía no se puede afirmar
 
 Lista viva de cierre: [`ESTADO.md`](ESTADO.md) y [`CHECKLIST.md`](CHECKLIST.md).
-OCR en iPhone **sí** está medido (corrida de arriba). Sigue abierto: borrado
-de foto en disco (C6), cola post-kill, HTTP directo Railway, `perf.jsonl`
-exportado, ensayos ×3, video.
+OCR en iPhone **sí** está medido; siguen fallos intermitentes `galloc` en
+algunas fotos (Sentry). Banco wifi **sí** anotado vía Sentry. Sigue abierto:
+borrado de foto en disco (C6), cola post-kill, `perf.jsonl` exportado, ensayos
+×3, video. Cómo leer Sentry: [`SENTRY.md`](SENTRY.md).

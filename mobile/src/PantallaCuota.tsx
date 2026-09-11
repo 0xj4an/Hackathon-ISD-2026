@@ -57,27 +57,29 @@ export default function PantallaCuota({
 
   const franjaIdle = offline
     ? {
-        titulo: "Sin wifi al banco",
+        titulo: "Cálculo inicial en el teléfono",
         texto:
-          "Al firmar busco un nodo local en esta WiFi y mando la solicitud por el pueblo. " +
-          "Si no hay nodo, queda pendiente en el teléfono.",
+          "Esta cuota la estimó este teléfono con tus documentos (reglas del crédito, " +
+          "no el modelo QVAC). Al firmar se envía al banco por el nodo del pueblo para " +
+          "estudio; el banco puede aprobar distinto. Si no hay nodo, queda pendiente aquí.",
       }
     : {
-        titulo: "Esto es un estimado",
+        titulo: "Cálculo inicial en el teléfono",
         texto:
-          "Lo calculó este teléfono con tus documentos. Al firmar va al banco por wifi; " +
-          "si el banco no responde, intenta el nodo del pueblo.",
+          "Esta cuota la estimó este teléfono con tus documentos (reglas del crédito, " +
+          "no el modelo QVAC). Al firmar se envía al banco para estudio; él confirma o " +
+          "cambia la decisión. Si el banco no responde, se intenta el nodo del pueblo.",
       };
 
   return (
     <Pantalla>
       <Encabezado meta="Volver" onVolver={onVolver} />
-      <BarraVeredicto color={COLOR.tinta} texto="Tu cuota" derecha={`B/. ${pre.monto}`} />
+      <BarraVeredicto color={COLOR.tinta} texto="Preaprobado" derecha={`B/. ${pre.monto}`} />
 
       <Cifra
         valor={`B/. ${pre.cuota.toFixed(2)}`}
-        unidad="al mes"
-        nota={`durante ${pre.meses} meses`}
+        unidad="al mes · estimado"
+        nota={`durante ${pre.meses} meses · pendiente de estudio en el banco`}
       />
 
       <Etiqueta>Las condiciones</Etiqueta>
@@ -86,7 +88,7 @@ export default function PantallaCuota({
       <FilaRuta simbolo="porcentaje" etiqueta="Tasa anual" valor={`${pre.tasa_anual_pct}%`} />
       <FilaRuta simbolo="moneda" etiqueta="Puedes pagar hasta" valor={`${techo} al mes`} ultima />
 
-      <BandaTotal etiqueta="Pagas en total" valor={`B/. ${(pre.cuota * pre.meses).toFixed(2)}`} />
+      <BandaTotal etiqueta="Pagas en total (estimado)" valor={`B/. ${(pre.cuota * pre.meses).toFixed(2)}`} />
 
       <Franja
         color={COLOR.tinta}
@@ -100,9 +102,9 @@ export default function PantallaCuota({
       ) : null}
 
       <Boton
-        texto={enviando ? "Enviando…" : pendiente ? "Reintentar" : "Firmar y enviar"}
+        texto={enviando ? "Enviando…" : pendiente ? "Reintentar" : "Firmar y enviar al banco"}
         onPress={enviando ? () => {} : onFirmar}
-        etiqueta={`Firmar y enviar la solicitud por ${pre.monto} balboas`}
+        etiqueta={`Firmar y enviar la solicitud por ${pre.monto} balboas para estudio del banco`}
       />
     </Pantalla>
   );

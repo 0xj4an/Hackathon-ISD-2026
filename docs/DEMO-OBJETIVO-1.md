@@ -3,7 +3,8 @@
 Estado vivo del proyecto: [`ESTADO.md`](ESTADO.md).
 
 Qué tocar en el **iPhone 17 Pro Max** con el Release de `main` ahora
-(el SHA de `git rev-parse --short HEAD` al instalar; hoy ~`b5d69d6` o posterior).
+(el SHA de `git rev-parse --short HEAD` al instalar). Telemetría:
+[`SENTRY.md`](SENTRY.md).
 
 Esto no es el guion del jurado ([`VIDEO.md`](VIDEO.md)). Es la corrida que
 tiene que salir **antes** de grabar. Lo que no se vea aquí no se dice en el
@@ -34,11 +35,15 @@ de este objetivo.
 En el Mac, en `mobile/`:
 
 ```bash
+git pull origin main
 git rev-parse --short HEAD
+# Borrar la app del iPhone si el icono/splash deben renovarse
 npx expo run:ios --device --configuration Release
 ```
 
-Anota el SHA. Sin SHA la corrida no cuenta.
+Anota el SHA. Sin SHA la corrida no cuenta. Tras el cold start, en Sentry
+debe aparecer `sesion:` con el `release` de ese build (hoy `…@1.0.5+2` o el
+de `main`).
 
 **Modelos en caché.** MedPsy Q8_0 y OCR_LATIN tienen que estar ya en el
 iPhone (bloque 0). Si al abrir la alerta se queda en “Bajando MedPsy”, el avión

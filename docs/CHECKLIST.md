@@ -10,8 +10,9 @@ Evals en verde. Camino pueblo medido: [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md)
 
 ## Dónde estamos
 
-Ver [`ESTADO.md`](ESTADO.md). **OCR iPhone medido.** Abierto: 3 ensayos →
-`perf.jsonl` → video.
+Ver [`ESTADO.md`](ESTADO.md). **OCR iPhone medido.** Banco directo wifi medido
+en Sentry (`1.0.5+2`). Abierto: 3 ensayos → `perf.jsonl` → video. Ops Sentry:
+[`SENTRY.md`](SENTRY.md).
 
 ---
 
@@ -63,8 +64,9 @@ Entrada ya no elige Historial|Examen como vías paralelas.
   Falta verificar en el iPhone (C8/C9)
 - [x] Envío al pueblo desde iPhone (LAN): **medido** — ver
   [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md) / [`PRUEBA-NODO.md`](PRUEBA-NODO.md)
-- [~] Envío directo al banco (Railway) en modo `local-wifi` desde iPhone:
-  código listo; anotar corrida en `PRUEBA-TELEFONO.md`
+- [x] Envío directo al banco (Railway) en modo `local-wifi` desde iPhone:
+  **medido en Sentry** 10 sep noche (`credito: ok via banco`, release `1.0.5+2`)
+  — [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md) / [`SENTRY.md`](SENTRY.md)
 - [x] Firma con trazo + disclaimer legal (`PantallaFirma`) y desembolso
   simulado (`PantallaDesembolso`) tras aprobación. Falta verlo en el iPhone
   en la misma corrida de demo grabada

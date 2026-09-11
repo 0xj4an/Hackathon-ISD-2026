@@ -13,6 +13,7 @@ heredado; no es ops del hackathon.
 | Narrativa y flujo de producto | [`BRIEF.md`](BRIEF.md) |
 | Decisiones irreversibles | [`.ai/adr/`](../.ai/adr/) (`ADR-001` reemplazada por `013`) |
 | Evidencia iPhone | [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md) |
+| Sentry · releases y prefijos | [`SENTRY.md`](SENTRY.md) |
 | Evidencia HTTP LAN / banco | [`PRUEBA-NODO.md`](PRUEBA-NODO.md) |
 | Ensayo previo al video (avión) | [`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md) |
 | Guion del video | [`VIDEO.md`](VIDEO.md) |
