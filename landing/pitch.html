@@ -128,11 +128,11 @@ td b{font-family:var(--sans);font-size:14px;letter-spacing:-.02em}
     <div class="split" style="flex:1;margin-top:4px">
       <div>
         <p style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px">Salud</p>
-        <p class="lead">Lee lo que ya midió el celu o un papel de laboratorio. Te avisa si hay que ir y cuánto cuesta.</p>
+        <p class="lead">Lee lo que ya midió el teléfono o un papel de laboratorio. Te avisa si hay que ir al médico y cuánto cuesta.</p>
       </div>
       <div>
         <p style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px">Crédito</p>
-        <p class="lead">Si no hay plata, le pides a la Caja. El modelo corre aquí o en el pueblo. El banco no ve la foto.</p>
+        <p class="lead">Si no hay plata, pides el préstamo a la Caja. El modelo corre en el teléfono o en el pueblo. El banco no ve la foto.</p>
       </div>
     </div>
   </div>
@@ -146,7 +146,7 @@ td b{font-family:var(--sans);font-size:14px;letter-spacing:-.02em}
     <div class="statrow" style="margin-top:0">
       <div><strong>1.1 M</strong><span>adultos con hipertensión (ENSPA). La mitad no se enteró por un médico.</span></div>
       <div><strong>37%</strong><span>del gasto en salud sale del bolsillo (OPS).</span></div>
-      <div><strong>10%</strong><span>pide crédito formal (Findex). En el último pueblo no hay Caja.</span></div>
+      <div><strong>10%</strong><span>pide préstamo al banco (Findex). En el último pueblo no hay sucursal.</span></div>
       <div><strong>14</strong><span>señales que ya mide el teléfono: glucosa, presión, pulso, O₂, fiebre…</span></div>
     </div>
   </div>
@@ -159,7 +159,7 @@ td b{font-family:var(--sans);font-size:14px;letter-spacing:-.02em}
     <h2>Una app que te avisa y te presta. Nada más.</h2>
     <div class="split">
       <div>
-        <p class="lead">Lee Apple Salud, Health Connect o un papel de laboratorio. Si algo está fuera de rango, te dice qué hacer y cuánto cuesta el año. Si no te alcanza, pides el crédito por esa plata —no por un mínimo inventado.</p>
+        <p class="lead">Lee Apple Salud, Health Connect o un papel de laboratorio. Si algo está mal, te dice qué hacer y cuánto cuesta el año. Si no te alcanza, pides el préstamo por esa plata —no por un mínimo inventado.</p>
         <p>No diagnostica. Si estás bien, calla. El banco solo ve que es “salud”.</p>
       </div>
       <div>
@@ -176,89 +176,89 @@ td b{font-family:var(--sans);font-size:14px;letter-spacing:-.02em}
 </section>
 
 <section class="s">
-  <div class="top"><b>Qué usamos</b><span>04 · y cómo</span></div>
+  <div class="top"><b>Qué usamos</b><span>04</span></div>
   <div class="body">
     <div class="stack">
-      <div class="r"><div class="k">OCR</div><div>QVAC OCR_LATIN lee la cédula, el ingreso y el papel del lab en el teléfono. La foto se queda. Nunca viaja.</div></div>
-      <div class="r"><div class="k">MedPsy</div><div>El modelo de 1.7B escribe el aviso. Corre en el celular con QVAC. No hay nube de IA.</div></div>
-      <div class="r"><div class="k">LoRA</div><div>Afinamos MedPsy pa’ leer exámenes (lab-v3). El modelo solo no servía. Cada tarea pide el suyo.</div></div>
-      <div class="r"><div class="k">Pueblo</div><div>Si el teléfono no carga 2.1 GB, mandamos el texto al nodo del pueblo (QVAC delegate). El pueblo presta el cómputo.</div></div>
-      <div class="r"><div class="k">Caja</div><div>Al banco le llega un JSON: nombre, cédula, ingreso, monto. Nunca el examen ni la foto.</div></div>
+      <div class="r"><div class="k">OCR</div><div>Lee la cédula, el sueldo y el papel del laboratorio en el teléfono. La foto no sale. Nunca viaja.</div></div>
+      <div class="r"><div class="k">MedPsy</div><div>El modelo que escribe el aviso. Corre en el celular. No usa internet para la IA.</div></div>
+      <div class="r"><div class="k">LoRA</div><div>Entrenamos MedPsy para leer exámenes. Sin eso, casi no entendía el laboratorio. Cada tarea se entrena aparte.</div></div>
+      <div class="r"><div class="k">Pueblo</div><div>Si el teléfono es débil, mandamos el texto a una computadora del pueblo. El pueblo corre el modelo. La foto se quedó.</div></div>
+      <div class="r"><div class="k">Caja</div><div>Al banco le llegan nombre, cédula, sueldo y el monto. Nunca el examen ni la foto.</div></div>
     </div>
   </div>
-  <div class="foot">Dos tuberías: el modelo es una, el crédito es otra. Si se cae el wifi, el aviso no se apaga.</div>
+  <div class="foot">El aviso y el préstamo son cosas distintas. Si se cae el wifi, el aviso sigue.</div>
 </section>
 
 <section class="s hot">
-  <div class="top"><b>LoRA</b><span>05 · pa’ que el lab salga bien</span></div>
+  <div class="top"><b>LoRA</b><span>05 · para leer el examen</span></div>
   <div class="body">
     <p class="mega">5% → 68%</p>
-    <p class="lead">MedPsy pelado acertaba el JSON del laboratorio 1 de cada 22 veces. Con lab-v3, 15 de 22. Por eso el examen lleva LoRA y la cédula no: cada cosa se entrena aparte.</p>
+    <p class="lead">El modelo solo acertaba el laboratorio 1 de cada 22 veces. Lo entrenamos y acertó 15 de 22. Por eso el examen lleva LoRA y la cédula no: cada cosa se entrena aparte.</p>
     <div class="statrow">
-      <div><strong>lab-v3</strong><span>Hoy en la app. 33 MB. Se ve cuando carga y cuando da el resultado.</span></div>
-      <div><strong>Cédula</strong><span>Siguiente LoRA: documentos. El base no lo hace todo.</span></div>
-      <div><strong>Labs</strong><span>Después: más tipos de examen, no un modelo genérico.</span></div>
-      <div><strong>En el celu</strong><span>El adaptador viaja con la app. El pueblo corre MedPsy; la pantalla nombra el LoRA.</span></div>
+      <div><strong>lab-v3</strong><span>El de hoy. 33 MB. Se ve cuando carga y cuando da el resultado.</span></div>
+      <div><strong>Cédula</strong><span>Siguiente: entrenar para leer documentos.</span></div>
+      <div><strong>Labs</strong><span>Después: más tipos de examen.</span></div>
+      <div><strong>En el teléfono</strong><span>Viaja con la app. Si corre en el pueblo, la pantalla igual dice que es LoRA.</span></div>
     </div>
   </div>
   <div class="foot">Entrenado aquí. Medido aquí. No un modelo de afuera que “entiende medicina”.</div>
 </section>
 
 <section class="s ink">
-  <div class="top"><b>El pueblo</b><span>06 · si el celu no da</span></div>
+  <div class="top"><b>El pueblo</b><span>06 · si el teléfono no da</span></div>
   <div class="body">
     <h2>Hay wifi o no. El teléfono aguanta o no. Son tres caminos.</h2>
     <div class="stack">
-      <div class="r"><div class="k">Con señal</div><div>MedPsy y LoRA aquí. El crédito se va HTTPS a la Caja.</div></div>
-      <div class="r"><div class="k">Sin señal</div><div>MedPsy sigue aquí. El crédito se queda en cola o se manda al pueblo por LAN.</div></div>
-      <div class="r"><div class="k">Celu flaco</div><div>OCR aquí. El texto se delega P2P al nodo (delegate). Si no entra, POST /inferir. La foto nunca salió.</div></div>
+      <div class="r"><div class="k">Con señal</div><div>El modelo corre en el teléfono. El préstamo se manda a la Caja.</div></div>
+      <div class="r"><div class="k">Sin señal</div><div>El modelo sigue en el teléfono. El préstamo espera o se manda al pueblo.</div></div>
+      <div class="r"><div class="k">Teléfono débil</div><div>Lee la foto aquí. Manda el texto al pueblo para que corra el modelo. La foto no sale.</div></div>
     </div>
   </div>
-  <div class="foot">Queremos un nodo por corregimiento. Hoy hay uno en la LAN. El iPhone de la demo hace de celu que no carga el modelo.</div>
+  <div class="foot">Queremos una computadora en cada pueblo. Hoy hay una en la demo. El iPhone hace de teléfono que no carga el modelo.</div>
 </section>
 
 <section class="s">
-  <div class="top"><b>Hoy vs después</b><span>07 · lo que es de verdad</span></div>
+  <div class="top"><b>Hoy vs después</b><span>07</span></div>
   <div class="body">
     <table>
-      <thead><tr><th></th><th>Pa’l campo</th><th>Lo de hoy</th></tr></thead>
+      <thead><tr><th></th><th>En el producto</th><th>En la demo de hoy</th></tr></thead>
       <tbody>
-        <tr><td><b>Salud</b></td><td>Apple Salud y Health Connect en vivo.</td><td>Un año sintético. Mismo formato.</td></tr>
-        <tr><td><b>LoRA</b></td><td>Uno por tarea: lab, cédula, ingresos.</td><td>lab-v3 en la app. Se ve en pantalla.</td></tr>
-        <tr><td><b>Pueblos</b></td><td>Un nodo en cada corregimiento.</td><td>Un pueblo en la red. 72 veces delegate.</td></tr>
-        <tr><td><b>Caja</b></td><td>La Caja suelta la plata.</td><td>El motor vive. El desembolso es de muestra.</td></tr>
-        <tr><td><b>Celu</b></td><td>Android de pueblo.</td><td>iPhone 17 Pro Max. El recorte de la demo.</td></tr>
+        <tr><td><b>Salud</b></td><td>Apple Salud y Health Connect de verdad.</td><td>Datos de prueba. Mismo formato.</td></tr>
+        <tr><td><b>LoRA</b></td><td>Uno por tarea: examen, cédula, sueldo.</td><td>lab-v3 en la app. Se ve en pantalla.</td></tr>
+        <tr><td><b>Pueblos</b></td><td>Una computadora en cada pueblo.</td><td>Una en la red. 72 veces corrió el modelo.</td></tr>
+        <tr><td><b>Caja</b></td><td>La Caja suelta la plata.</td><td>El banco de la demo responde. No suelta la plata todavía.</td></tr>
+        <tr><td><b>Teléfono</b></td><td>Android de pueblo.</td><td>iPhone 17 Pro Max. El de la demo.</td></tr>
       </tbody>
     </table>
   </div>
-  <div class="foot">No fingimos Health Connect en cámara. El esquema ya es el de Health Connect.</div>
+  <div class="foot">No fingimos Apple Salud en cámara. Los datos de prueba ya vienen en ese formato.</div>
 </section>
 
 <section class="s ink">
   <div class="top"><b>Ya corre</b><span>08</span></div>
   <div class="body">
     <div class="statrow">
-      <div><strong>9/9</strong><span>pruebas en verde. El sano no dispara.</span></div>
-      <div><strong>2.9 s</strong><span>MedPsy arranca en el iPhone.</span></div>
-      <div><strong>72×</strong><span>el pueblo corrió el modelo por P2P.</span></div>
-      <div><strong>B/. 920</strong><span>crédito aprobado por LAN, pueblo → banco.</span></div>
+      <div><strong>9/9</strong><span>pruebas en verde. Si estás bien, no avisa.</span></div>
+      <div><strong>2.9 s</strong><span>el modelo arranca en el iPhone.</span></div>
+      <div><strong>72×</strong><span>el pueblo corrió el modelo por nosotros.</span></div>
+      <div><strong>B/. 920</strong><span>préstamo aprobado desde el pueblo hasta el banco.</span></div>
     </div>
-    <p class="lead" style="margin-top:18px">Tres caminos en el mismo build. OCR en el teléfono. LoRA en el examen. Delegate al pueblo. La Caja responde.</p>
+    <p class="lead" style="margin-top:18px">Tres caminos en la misma app. Lee en el teléfono. LoRA en el examen. El pueblo corre el modelo si hace falta. La Caja responde.</p>
   </div>
-  <div class="foot">Medido el 11 sep 2026. Pueblo en :8788.</div>
+  <div class="foot">Medido el 11 sep 2026.</div>
 </section>
 
 <section class="s">
-  <div class="top"><b>Pa’lante</b><span>09</span></div>
+  <div class="top"><b>Qué sigue</b><span>09</span></div>
   <div class="body">
     <div class="stack">
-      <div class="r"><div class="k">Caja</div><div>Que el banco desembolse de verdad. La ficha de crédito ya es la misma en el celu y en la Caja.</div></div>
-      <div class="r"><div class="k">Más LoRA</div><div>Uno pa’ cédula, uno pa’ ingresos, más tipos de lab. Entrenar, medir, meterlo en la app.</div></div>
-      <div class="r"><div class="k">Pueblos</div><div>Una laptop por corregimiento. El celu flaco siempre tiene un par cerca. Delegate entre pueblos.</div></div>
-      <div class="r"><div class="k">Campo</div><div>Health Connect y Apple Salud de verdad. Android de gama media. Sin elegir el modo a mano.</div></div>
+      <div class="r"><div class="k">Caja</div><div>Que el banco suelte la plata de verdad. La solicitud ya es la misma en el teléfono y en la Caja.</div></div>
+      <div class="r"><div class="k">Más LoRA</div><div>Uno para cédula, uno para sueldo, más tipos de examen. Entrenar, medir, meterlo en la app.</div></div>
+      <div class="r"><div class="k">Pueblos</div><div>Una laptop por pueblo. El teléfono débil siempre tiene una computadora cerca.</div></div>
+      <div class="r"><div class="k">Campo</div><div>Apple Salud y Health Connect de verdad. Android de pueblo. La app elige sola si corre aquí o allá.</div></div>
     </div>
   </div>
-  <div class="foot">Pedimos: la Caja que suelte, GPU pa’ más LoRA, laptops de pueblo.</div>
+  <div class="foot">Pedimos: que la Caja suelte, máquinas para entrenar más LoRA, laptops de pueblo.</div>
 </section>
 
 <section class="s ink">
@@ -266,11 +266,11 @@ td b{font-family:var(--sans);font-size:14px;letter-spacing:-.02em}
   <div class="top"><b>Ina · medicina · Igar · camino</b><span>10</span></div>
   <div class="body">
     <h2>Camino de la medicina.</h2>
-    <p class="lead">Gunagaya. Se cita porque no es nuestra. Las comarcas son pa’ quienes se armó. Te enteras en casa. Le pides a la Caja. El pueblo presta el modelo. Nadie se lleva la foto.</p>
+    <p class="lead">Gunagaya. Se cita porque no es nuestra. Las comarcas son para quienes se armó. Te enteras en casa. Le pides a la Caja. El pueblo corre el modelo. Nadie se lleva la foto.</p>
     <p><a href="https://github.com/0xj4an/Hackathon-ISD-2026" style="font-family:var(--sans);text-transform:uppercase;text-decoration:none;border-bottom:1px solid currentColor">Repo</a>
     &nbsp;&nbsp;<a href="/" style="font-family:var(--sans);text-transform:uppercase;text-decoration:none;border-bottom:1px solid currentColor">Sitio</a></p>
   </div>
-  <div class="foot">MedPsy 1.7B · OCR_LATIN · LoRA lab-v3 · QVAC delegate · MIT · 0xj4an + Artur</div>
+  <div class="foot">MedPsy · OCR · LoRA lab-v3 · el pueblo corre el modelo · MIT · 0xj4an + Artur</div>
 </section>
 
 </div>
