@@ -9,6 +9,7 @@ export const ENVIO_MS = {
   avisoFallback: 2000,
   buscandoNodo: 3400,
   conectando: 1800,
+  estudiandoBanco: 3200,
   subiendoBanco: 3200,
   subiendoPueblo: 3000,
   recibiendoBanco: 2800,

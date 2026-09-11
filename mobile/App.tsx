@@ -205,25 +205,34 @@ export default function App() {
     setFase({ fase: "conectando", via: "pueblo", nodoHost: host, pct: 48 });
     await animarPct(
       48,
-      58,
+      56,
       ENVIO_MS.conectando,
       n => setFase({ fase: "conectando", via: "pueblo", nodoHost: host, pct: n }),
       vivo,
     );
 
-    setFase({ fase: "subiendo", via: "pueblo", nodoHost: host, pct: 60 });
+    setFase({ fase: "estudiando", via: "pueblo", nodoHost: host, pct: 58 });
+    await animarPct(
+      58,
+      68,
+      ENVIO_MS.estudiandoBanco,
+      n => setFase({ fase: "estudiando", via: "pueblo", nodoHost: host, pct: n }),
+      vivo,
+    );
+
+    setFase({ fase: "subiendo", via: "pueblo", nodoHost: host, pct: 70 });
     const envio = await conBarraMinima(
       intentarPueblo(sol, nodo),
       ENVIO_MS.subiendoPueblo,
-      60,
-      82,
+      70,
+      88,
       n => setFase({ fase: "subiendo", via: "pueblo", nodoHost: host, pct: n }),
       vivo,
     );
 
-    setFase({ fase: "recibiendo", via: "pueblo", nodoHost: host, pct: 84 });
+    setFase({ fase: "recibiendo", via: "pueblo", nodoHost: host, pct: 90 });
     await animarPct(
-      84,
+      90,
       100,
       ENVIO_MS.recibiendoPueblo,
       n => setFase({ fase: "recibiendo", via: "pueblo", nodoHost: host, pct: n }),
@@ -248,21 +257,30 @@ export default function App() {
         return;
       }
 
-      // WiFi: subir + recibir del banco (barras aunque el HTTP sea corto).
-      setFase({ fase: "subiendo", via: "banco", pct: 8 });
+      // WiFi: teatro ISTMO-RISK → subir + recibir del banco.
+      setFase({ fase: "estudiando", via: "banco", pct: 6 });
+      await animarPct(
+        6,
+        28,
+        ENVIO_MS.estudiandoBanco,
+        n => setFase({ fase: "estudiando", via: "banco", pct: n }),
+        vivo,
+      );
+
+      setFase({ fase: "subiendo", via: "banco", pct: 30 });
       const banco = await conBarraMinima(
         intentarBanco(sol),
         ENVIO_MS.subiendoBanco,
-        8,
-        55,
+        30,
+        62,
         n => setFase({ fase: "subiendo", via: "banco", pct: n }),
         vivo,
       );
 
       if (banco.ok) {
-        setFase({ fase: "recibiendo", via: "banco", pct: 60 });
+        setFase({ fase: "recibiendo", via: "banco", pct: 64 });
         await animarPct(
-          60,
+          64,
           100,
           ENVIO_MS.recibiendoBanco,
           n => setFase({ fase: "recibiendo", via: "banco", pct: n }),

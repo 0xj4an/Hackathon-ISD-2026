@@ -3,7 +3,7 @@
  * El OCR no sale del teléfono. MedPsy extrae campos aquí; si no carga, el
  * texto va al pueblo. Las fotos se borran.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
@@ -16,6 +16,8 @@ import type { Problema } from "./core/validaciones";
 import { CedulaSchema, IngresosSchema, ExtractoSchema } from "./core/schemas";
 import type { LecturaCredito } from "./lectura";
 import { recordError } from "./perf/logger";
+import PantallaAnalizando from "./PantallaAnalizando";
+import { MODELO_TELEFONO } from "./modelosMarca";
 
 type Documento = {
   clave: ClaveDocumento;
@@ -125,7 +127,8 @@ export default function PantallaDocumentos({
   const [estados, setEstados] = useState<Record<ClaveDocumento, EstadoDoc>>(() => semilla(lecturaInicial));
   const [error, setError] = useState("");
   const [demoAbierta, setDemoAbierta] = useState(false);
-  const ocupado = Object.values(estados).some(e => e.fase === "leyendo");
+  const [analizando, setAnalizando] = useState(false);
+  const ocupado = Object.values(estados).some(e => e.fase === "leyendo") || analizando;
   const hayCola = DOCUMENTOS.some(d => estados[d.clave].fase === "enCola");
   const cedulaOk = estados.cedula.fase === "enCola" || estados.cedula.fase === "listo";
   const ingresosOk = estados.ingresos.fase === "enCola" || estados.ingresos.fase === "listo";
@@ -151,6 +154,8 @@ export default function PantallaDocumentos({
     setEstado(clave, { fase: "enCola", uri });
   };
 
+  const cerrarAnalizando = useCallback(() => setAnalizando(false), []);
+
   const leerLote = async () => {
     if (ocupado || !puedenLeer) return;
     const entradas = DOCUMENTOS.flatMap(d => {
@@ -164,6 +169,7 @@ export default function PantallaDocumentos({
     }
     try {
       const r = await leerDocumentos(entradas, marcarProgreso);
+      let algunOk = false;
       for (const e of entradas) {
         const x = r[e.clave];
         if (!x) {
@@ -171,6 +177,7 @@ export default function PantallaDocumentos({
           continue;
         }
         if (x.ok) {
+          algunOk = true;
           setEstado(e.clave, {
             fase: "listo",
             datos: x.datos as Record<string, unknown>,
@@ -186,6 +193,7 @@ export default function PantallaDocumentos({
           });
         }
       }
+      if (algunOk) setAnalizando(true);
     } catch (err) {
       recordError("PantallaDocumentos", err);
       const mensaje = mensajeLectura(err);
@@ -260,6 +268,21 @@ export default function PantallaDocumentos({
       setError("Los datos leídos no cuadran. Repite una foto.");
     }
   };
+
+  if (analizando) {
+    return (
+      <PantallaAnalizando
+        titulo="Analizando lo leído"
+        modeloId={MODELO_TELEFONO.id}
+        modeloLinea={MODELO_TELEFONO.linea}
+        chip={MODELO_TELEFONO.chip}
+        detalle="El texto ya salió del papel. INA-PULSE estructura campos en este teléfono: sin nube, sin foto."
+        pie="QVAC · MedPsy Healthcare 1.7B. Después verás el JSON y las fotos borradas."
+        ms={4000}
+        onListo={cerrarAnalizando}
+      />
+    );
+  }
 
   return (
     <Pantalla>

@@ -1,18 +1,20 @@
 /**
  * Pantalla de transporte del crédito: barras y fases para el video.
  *
- * Offline: sin wifi → buscar nodo → OK → subir → recibir.
- * WiFi: subir al banco → recibir respuesta (mismo lenguaje visual).
+ * Offline: sin wifi → buscar nodo → OK → estudio ISTMO-RISK → subir → recibir.
+ * WiFi: estudio ISTMO-RISK → subir al banco → recibir.
  */
 import { StyleSheet, Text, View } from "react-native";
 import { Pantalla, Encabezado, Boton } from "./ui/componentes";
 import { COLOR, DISPLAY, ESPACIO, TIPO } from "./ui/tokens";
+import { MODELO_BANCO } from "./modelosMarca";
 
 export type FaseEnvioVisual =
   | "aviso"
   | "buscando"
   | "encontrado"
   | "conectando"
+  | "estudiando"
   | "subiendo"
   | "recibiendo";
 
@@ -20,7 +22,7 @@ export type ViaEnvioVisual = "banco" | "pueblo";
 
 const COPY: Record<
   FaseEnvioVisual,
-  (via: ViaEnvioVisual, host?: string) => { titulo: string; detalle: string; pie: string }
+  (via: ViaEnvioVisual, host?: string) => { titulo: string; detalle: string; pie: string; meta?: string }
 > = {
   aviso: () => ({
     titulo: "Sin wifi al banco",
@@ -45,25 +47,33 @@ const COPY: Record<
     detalle: host ? `Abriendo canal con ${host}.` : "Abriendo canal con el nodo del pueblo.",
     pie: "Un momento.",
   }),
+  estudiando: () => ({
+    titulo: "Estudio en el banco",
+    detalle: `${MODELO_BANCO.frase} va a puntuar tu solicitud: capacidad de pago, política y bureau simulado. No es MedPsy: es el motor de riesgo del banco.`,
+    pie: "El preaprobado del teléfono fue un cálculo inicial. Aquí se decide de verdad.",
+    meta: MODELO_BANCO.chip,
+  }),
   subiendo: (via, host) => ({
-    titulo: via === "banco" ? "Enviando al banco…" : "Enviando por el nodo…",
+    titulo: via === "banco" ? "Enviando a ISTMO-RISK…" : "Enviando por el nodo…",
     detalle:
       via === "banco"
-        ? "Subiendo tu solicitud al banco por wifi."
+        ? `Subiendo la solicitud para que ${MODELO_BANCO.id} la estudie en el banco.`
         : host
-          ? `Subiendo la solicitud a través de ${host}.`
-          : "Subiendo la solicitud a través del nodo del pueblo.",
-    pie: via === "banco" ? "Camino directo al banco." : "El nodo la guarda y la lleva al banco.",
+          ? `Subiendo vía ${host}. En el banco correrá ${MODELO_BANCO.frase}.`
+          : `Subiendo vía el pueblo. En el banco correrá ${MODELO_BANCO.frase}.`,
+    pie: via === "banco"
+      ? `${MODELO_BANCO.linea} · decisión remota.`
+      : "El nodo la guarda y la lleva al motor del banco.",
   }),
   recibiendo: (via, host) => ({
-    titulo: via === "banco" ? "Recibiendo del banco…" : "Recibiendo del nodo…",
+    titulo: via === "banco" ? "Respuesta de ISTMO-RISK…" : "Recibiendo del nodo…",
     detalle:
       via === "banco"
-        ? "Esperando la decisión del banco."
+        ? `${MODELO_BANCO.id} ya estudió el expediente. Bajando la decisión.`
         : host
-          ? `Esperando respuesta a través de ${host}.`
-          : "Esperando respuesta a través del nodo.",
-    pie: "Cuando llegue la decisión, pasamos a verla.",
+          ? `Esperando la decisión del banco a través de ${host}.`
+          : "Esperando la decisión del banco a través del nodo.",
+    pie: "Cuando llegue, pasamos a verla.",
   }),
 };
 
@@ -78,21 +88,23 @@ export default function PantallaEnvio({
   via: ViaEnvioVisual;
   nodoHost?: string;
   pct: number;
-  /** Solo en fase `encontrado`. */
   onContinuar?: () => void;
 }) {
   const c = COPY[fase](via, nodoHost);
   const muestraBarra = fase !== "encontrado" && fase !== "aviso";
   const pctClamped = Math.max(0, Math.min(100, Math.round(pct)));
+  const meta =
+    c.meta
+    ?? (via === "banco" ? "Camino wifi · banco" : "Camino nodo local");
+  const muestraModelo = fase === "estudiando" || fase === "subiendo" || fase === "recibiendo";
 
   return (
     <Pantalla scroll={false}>
       <Encabezado />
       <View style={s.cuerpo}>
-        <Text style={s.meta} accessibilityLiveRegion="polite">
-          {via === "banco" ? "Camino wifi" : "Camino nodo local"}
-        </Text>
+        <Text style={s.meta} accessibilityLiveRegion="polite">{meta}</Text>
         <Text style={s.titulo} accessibilityLiveRegion="polite">{c.titulo}</Text>
+        {muestraModelo ? <Text style={s.modeloTag}>{MODELO_BANCO.id}</Text> : null}
         <Text style={s.detalle}>{c.detalle}</Text>
 
         {muestraBarra ? (
@@ -111,9 +123,11 @@ export default function PantallaEnvio({
                   ? "Escaneando la red…"
                   : fase === "conectando"
                     ? "Handshake…"
-                    : fase === "subiendo"
-                      ? "Subiendo solicitud…"
-                      : "Bajando respuesta…"}
+                    : fase === "estudiando"
+                      ? `${MODELO_BANCO.id} preparando estudio…`
+                      : fase === "subiendo"
+                        ? "Subiendo expediente…"
+                        : "Bajando decisión…"}
               </Text>
             </View>
           </>
@@ -145,6 +159,13 @@ const s = StyleSheet.create({
   },
   meta: { ...TIPO.etiqueta, color: COLOR.gris, marginBottom: 4 },
   titulo: { ...DISPLAY, fontSize: 28, lineHeight: 30, letterSpacing: -1, color: COLOR.tinta },
+  modeloTag: {
+    ...DISPLAY,
+    fontSize: 18,
+    letterSpacing: 1.4,
+    color: COLOR.rutinaria,
+    marginTop: 2,
+  },
   detalle: { fontSize: 15, lineHeight: 21, color: COLOR.gris },
   barra: { height: 14, backgroundColor: COLOR.hundido, marginTop: 18 },
   barraLlena: { height: 14, backgroundColor: COLOR.rutinaria },
