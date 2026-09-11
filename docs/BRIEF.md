@@ -56,15 +56,6 @@ Modelos: MedPsy 1.7B Q8_0, `OCR_LATIN`, LoRA `lab-v3` (examen). SDK **0.18.2**
 - 0xj4an: mobile (Expo + QVAC), cola, transporte, perf log, video.
 - Artur: prompts y validaciones (core), datos sintéticos, banco, eval, README y guion.
 
-## Plan por bloques (resumen)
-
-Detalle abierto: [`CHECKLIST.md`](CHECKLIST.md). Foto: [`ESTADO.md`](ESTADO.md).
-
-0. Desbloqueo iPhone (MedPsy medido). OCR en aparato: **por verificar**.
-1. Core + nodo HTTP (hecho).
-2. Flujo en código (hecho). Corrida iPhone completa: [`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md).
-3. Eval verde; falta `perf.jsonl` del teléfono.
-4. LoRA `lab-v3` **en la app**; falta verlo en iPhone.
-5. Transporte: HTTP — [`ESTADO.md`](ESTADO.md) § Honestidad.
-6. Video ([`VIDEO.md`](VIDEO.md)).
-7. Colchón (Metal/GPU, etc.) solo si sobra tiempo.
+Abierto / foto viva: [`CHECKLIST.md`](CHECKLIST.md), [`ESTADO.md`](ESTADO.md).
+Ensayo previo al video: [`DEMO-OBJETIVO-1.md`](DEMO-OBJETIVO-1.md).
+Guion: [`VIDEO.md`](VIDEO.md).

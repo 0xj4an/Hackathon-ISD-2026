@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "bundleId": "596b8ca75674025c7d16239d1272cf81de5b92b823c91e2274ea9f6cb48d73e6",
+  "bundleId": "451f71c6c04f95f24467fed528a83782f94dc1e4486abd66567c0a7485248ac6",
   "addons": [
     "@qvac/llm-llamacpp",
     "@qvac/ocr-ggml",

@@ -31,9 +31,8 @@ aparato.
   `soltarMedPsy` tras alerta/documentos. `ADR-007` dice que la descarga no
   bloquea el onboarding
 - [x] `perf/logger.ts` conectado al flujo de producto (`medpsy.ts`,
-  `leerDocumento.ts`, `redactarAlerta.ts`, envíos/errores). SmokeTest ya no es
-  el único consumidor. Falta exportar `perf/perf.jsonl` de una corrida real en
-  el iPhone (entregable Tether Psy)
+  `leerDocumento.ts`, `redactarAlerta.ts`, envíos/errores). Falta exportar
+  `perf/perf.jsonl` de una corrida real en el iPhone (entregable Tether Psy)
 
 ### 1.2 La rama de documentos ya lee; falta cola durable y prueba en iPhone
 
@@ -111,60 +110,25 @@ Cerrado: HTTP (banco o pueblo). Detalle y cómo *no* decirlo en cámara:
 
 ---
 
-## 4. LoRA (en producto para examen; falta iPhone)
+## 4. LoRA (examen; falta iPhone)
 
-Tres corridas en `spikes/lora-medpsy/RESULTADOS.md`. Corrida 3: laboratorio
-JSON válido **5% → 68%**. Adaptador en la app como
-`mobile/assets/models/lora-lab-v3.gguf` (solo foto de examen; no cédula/ingresos/alerta).
+Evidencia: [`spikes/lora-medpsy/RESULTADOS.md`](../spikes/lora-medpsy/RESULTADOS.md)
+(corrida 3 → `lora-lab-v3.gguf` en la app).
 
-- [x] Entrenar con evidencia (corridas 1–3)
-- [x] Tabla base contra LoRA en el spike (C11 a nivel spike)
-- [x] Cargar el adaptador en la app (`lora.ts` / `leerExamen.ts` / UI MedPsy+LoRA)
-- [ ] Re-medir / ver franja LoRA en el iPhone (rebuild nativo + foto de lab)
-
+- [x] Entrenar + tabla base (C11 spike)
+- [x] Adaptador en app (`lora.ts` / `leerExamen.ts`)
+- [ ] Re-medir en el iPhone
 ---
 
-## 5. Lo que ya está
+## 5. Lo que ya está (resumen)
 
-### Dominio
+Inventario largo → git history + [`ESTADO.md`](ESTADO.md) +
+[`eval/resultados.md`](../eval/resultados.md). Abierto residual:
 
-- [x] 14 señales sobre 9 variables, cada una con su `fuente`. Ver [`ADR-008`](../.ai/adr/ADR-008-que-variables-vigilamos.md) y [`salud.md`](../.ai/references/salud.md)
-- [x] Costos con fuente en rangos publicados; donde no hay precio citable, el campo va ausente y la pantalla no muestra número
-- [x] El especialista entró en el tipo `Ruta`, con qué hacer ahora, qué examen, dónde y qué síntomas obligan a ir de inmediato
-- [x] CD4 fuera, con filtro de respaldo en el generador del spike
-- [x] Nueve casos clínicos en `data/usuarios/` con historial de ~un año. Cubren las 14 señales del historial. El sano da cero señales. **8 de 9** ofrecen crédito
-- [x] Modelo de crédito real ([`ADR-011`](../.ai/adr/ADR-011-el-modelo-de-credito.md)): capacidad de pago con piso de subsistencia, scorecard logístico sobre cartera sintética (AUC 0.723, KS 0.379 en holdout), tasa descompuesta y plazo despejado de la cuota
-- [x] Paquete por condición a un año en vez de un monto suelto ([`ADR-010`](../.ai/adr/ADR-010-el-paquete-y-cuando-ofrecer-credito.md))
-- [x] 15 lienzos en `docs/design/` y dirección visual decidida ([`ADR-012`](../.ai/adr/ADR-012-senaletica-y-el-modo-denso.md))
-- [x] `data/documentos/`: ocho imágenes sintéticas (nítida y difícil de cédula, ingresos, extracto y examen) más `esperado.json`
-- [~] Los tres documentos y sus campos están decididos, y `PantallaDatos.tsx` ya captura `deudas_mensuales_usd` y `personas_a_cargo`. Falta **qué pasa si falta uno** y meter Datos en el camino de la demo si se quiere
-
-### Implementación
-
-- [x] Las dos vías de detección en `mobile/src/core/`, evaluadas por `eval/run.mjs`
-- [x] `eval/run.mjs` cubre historial, laboratorio e integridad de rutas. Determinista, sin teléfono, exit 1 si algo falla
-- [x] `eval/credito/*.test.mjs` (58 tests) llama al motor real y valida contrato/schemas; `eval/salud/alerta.test.mjs` y `eval/nodo/inferir.test.mjs` en verde
-- [x] El nodo importa el motor de crédito en vez de tener su propia política
-- [x] Quince `Pantalla*.tsx` en `mobile/src/`; camino demo en `App.tsx`
-  (Entrada → Salud → Revisión → Alerta → … → Firma → Desembolso). Fuera del
-  camino: p. ej. `PantallaUsuarios`, `PantallaDatos`, `PantallaRegistro`
-- [x] La cuota se calcula **en el teléfono y sin señal**: `PantallaLeido` muestra lo extraído, `PantallaCuota` corre `preCalificar()` y `PantallaBanco` muestra `decidir()`; si aprueba, firma y desembolso simulado
-- [x] `data/generar-usuarios.mjs` produce el formato normalizado; casos embebidos en `mobile/src/datos/`
-- [x] `core/` unificado en `mobile/src/core/`, sin duplicado en la raíz
-- [x] Sentry cableado (init compartido, breadcrumbs, hooks EAS)
-- [x] Landing + admin del banco (`landing/`): lista con `recibida` + `canal`
-  (`directo` / `pueblo`). Banco Railway con Volume `/data`
-
-### Bloque 0, cerrado en iPhone
-
-Cerrado en iPhone 17 Pro Max (iOS 26.6.1), no en el Xiaomi 14T Pro. El 14T
-(HyperOS 3 / Android 16) aborta en `libbare-kit.so` al `worklet.start`. Android
-queda aparcado.
-
-- [x] Dispositivo emparejado, modo desarrollador y certificado confiados
-- [x] Los 2.1 GB de MedPsy en caché QVAC del iPhone
-- [x] `expo run:ios --device --configuration Release`: Bare arranca, `loadModel` en CPU, primer token. `load_ms` 93722, **TTFT 2915 ms**, 56 tokens
-- [x] HTTP del nodo OK (desde laptop; ver PRUEBA-NODO)
+- [~] Qué pasa si falta un documento; `PantallaDatos` (deudas/personas) fuera
+  del camino demo
+- [x] Dominio, motor crédito, eval, pantallas camino demo, landing/admin,
+  bloque 0 iPhone (C1) — ver ESTADO / PRUEBA-TELEFONO
 
 ---
 

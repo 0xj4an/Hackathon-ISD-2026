@@ -4,7 +4,7 @@
 - Propósito: ranking general + retos Tether Psy / Caja de Ahorros.
 - Usuarios: rural Panamá, Android gama media (brief). Demo: **iPhone 17 Pro Max**.
 - Equipo: @0xj4an y Artur (@ArturVargas).
-- Repo: https://github.com/0xj4an/Hackathon-ISD-2026. Node ≥ 22.17, `@qvac/sdk` **0.18.2**. Producto: `mobile/` (+ `mobile/src/core/`), `nodo/`, `landing/`, `eval/`, `data/`. Spikes: `spikes/lora-medpsy/` (delegate stubs ≠ demo).
+- Repo: https://github.com/0xj4an/Hackathon-ISD-2026. Node ≥ 22.17, `@qvac/sdk` **0.18.2**. Producto: `mobile/` (+ `mobile/src/core/`), `nodo/`, `landing/`, `eval/`, `data/`. Spikes: `spikes/lora-medpsy/` (≠ demo path: Hyperswarm/`delegate`).
 - Demo: iPhone físico. Xiaomi 14T aborta Bare.
 - Datos: solo sintéticos. Modelos QVAC en `~/.qvac/models`.
 - Cierre: `references/hackathon.md`.
@@ -27,10 +27,19 @@ Technical 35% · Innovation 25% · Impact 20% · Design 10% · Completion 10%.
 **Orden ops:** `docs/README.md` → `docs/ESTADO.md` → `docs/BRIEF.md` →
 `docs/CHECKLIST.md` → ADRs. Evidencia: `docs/PRUEBA-*`.
 
-Referencias: `hackathon.md`, `retos.md`, `qvac.md` (contrastar con
-docs.qvac.tether.io; marcas **NO VERIFICADO**), `baseline.md` (**HISTÓRICO**).
-
-Histórico (no ops): `runs/mvp-hackathon/02-stack-y-plan.md`,
-`03-specification.md`. Decisiones abiertas vivas: solo `docs/CHECKLIST.md`.
+Referencias: `hackathon.md`, `retos.md`, `qvac.md` (contrastar docs oficiales;
+**NO VERIFICADO**), `salud.md` (umbrales → ADR-008).
 
 Ante discrepancia: **código** + `docs/ESTADO.md` + ADR vigente.
+Decisiones abiertas vivas: solo `docs/CHECKLIST.md`.
+
+## No leer por defecto
+
+- `.ai/runs/mvp-hackathon/02-*`, `03-*`, `01-*` (salvo origen de idea)
+- `.ai/references/baseline.md`
+- `docs/_archive/**`
+- `docs/superpowers/plans/*` (stubs), `docs/superpowers/*2026-08*`
+- `docs/design/ina-igar-diseno-app.html`, `comparar-direcciones.html`
+- `docs/intro.html`, `JOURNAL.md`
+- `standards/`, `templates/` (salvo nueva iniciativa kit)
+- ADR-001 (solo si debate SDK 0.19)

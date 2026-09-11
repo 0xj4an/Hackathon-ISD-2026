@@ -66,8 +66,9 @@ LoRA spike: [`spikes/lora-medpsy/`](spikes/lora-medpsy/).
 ## Base preexistente (obligatoria)
 
 Plantilla [`ArturVargas/AI_Engineering_Kit`](https://github.com/ArturVargas/AI_Engineering_Kit)
-(ago 2026): `standards/`, `templates/`, superpowers de agosto, `.ai/`,
-`docs/ai-engineering-kit.md`. Septiembre en `docs/superpowers/` es nuestro.
+(ago 2026): `standards/`, `templates/`, `.ai/`, y el README del kit en
+[`docs/_archive/ai-engineering-kit.md`](docs/_archive/ai-engineering-kit.md).
+Septiembre en `docs/superpowers/` es nuestro.
 
 ## Docs del equipo
 

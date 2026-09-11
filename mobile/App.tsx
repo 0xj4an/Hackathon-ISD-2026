@@ -12,12 +12,8 @@
 // Si tampoco hay nodo, la solicitud queda en SQLite (`cola`).
 // Tras aprobación: trazo → desembolso simulado → Listo.
 // Las fotos no salen. MedPsy en el teléfono; si no, texto al pueblo (/inferir).
-// `PantallaDatos` sigue en el repo (deudas y personas a cargo, pantalla 11 del
-// mapa) pero el camino de la demo pasa por lo leído → cuota → banco.
-//
-// Para depurar el bloque 0 en un teléfono nuevo, cambiar el import por
-// `./src/SmokeTest` y montarlo directo: aísla si el problema es el teléfono,
-// Expo o el SDK, en vez de nuestro código.
+// `PantallaDatos` sigue en el repo (deudas y personas a cargo) pero el camino
+// de la demo pasa por lo leído → cuota → banco.
 import { useEffect, useState, type ReactNode } from "react";
 import PantallaEntrada from "./src/PantallaEntrada";
 import PantallaSalud from "./src/PantallaSalud";

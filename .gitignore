@@ -24,3 +24,5 @@ docs/design/comparar-direcciones.html
 # Capturas del arnes de render: se regeneran, no se versionan
 docs/design/renders/
 .superpowers/
+JOURNAL.md
+nodo/logs/

@@ -39,9 +39,8 @@ Marcado con banner al inicio. No actualizar como verdad viva:
 
 - [`.ai/runs/mvp-hackathon/`](../.ai/runs/mvp-hackathon/) — idea, stack y spec iniciales.
 - [`.ai/references/baseline.md`](../.ai/references/baseline.md) — línea base temprana; ver ESTADO.
+- `docs/_archive/` — kit + superpowers agosto (no ops).
 - `superpowers/plans/` de septiembre — **stubs** (plan ejecutado; detalle en git / specs).
-- `superpowers/` de agosto — scaffolding del kit.
 - [`intro.html`](intro.html) — stub; guion = [`VIDEO.md`](VIDEO.md).
-- `design/*.dc.html` — exports; dirección = `ADR-012` + código.
-- `flujo.html` / `demo-vias.html` — un mapa visual basta; narrativa = BRIEF.
-- [`design/`](design/) — lienzos; no SoT de producto.
+- `design/*.dc.html` — exports; dirección = `ADR-012` + código. Ver [`design/README.md`](design/README.md).
+- [`demo-vias.html`](demo-vias.html) — mapa visual único; narrativa = BRIEF.

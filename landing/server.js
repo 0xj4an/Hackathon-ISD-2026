@@ -11,6 +11,8 @@ const ESTATICO = {
   "/icon.png": ["icon.png", "image/png"],
   "/og.png": ["og.png", "image/png"],
   "/splash.png": ["splash.png", "image/png"],
+  "/huellas-blanco.png": ["huellas-blanco.png", "image/png"],
+  "/huellas-negro.png": ["huellas-negro.png", "image/png"],
 };
 const PUERTO = Number(process.env.PORT || 3000);
 const BANCO_URL = (process.env.BANCO_URL || "http://127.0.0.1:8787").replace(/\/$/, "");

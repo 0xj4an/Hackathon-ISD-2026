@@ -94,6 +94,5 @@ Frases a evitar en cámara: [`VIDEO.md`](VIDEO.md).
 | Política en `nodo/credito.mjs` | **stale** (corregido en baseline) | Motor en `mobile/src/core/credito/` |
 | Volume `STATE_DIR=/data` | **parcial** | Código sí; env Railway no está en git |
 | Flujo BRIEF = App | **parcial** (corregido) | Incluye Salud + Revisión |
-| 13 pantallas | **stale** (corregido) | 15 `Pantalla*.tsx` |
 | LoRA en app | true en código | Medición iPhone abierta |
 | SDK 0.18.2 | true | `mobile/package.json` |

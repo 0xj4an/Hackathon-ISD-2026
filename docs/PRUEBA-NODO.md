@@ -66,39 +66,11 @@ en la demo el banco es Railway.
 
 ---
 
-## Hyperswarm entre dos procesos del mismo Mac: NO conecta
+## Hyperswarm / P2P
 
-P2P está **apagado por defecto**. Solo arranca si pones `ENABLE_P2P=1`
-(`nodo/index.mjs`). `npm run corregimiento` **no** intenta Hyperswarm.
-Railway / `RAILWAY_ENVIRONMENT` / Dockerfile también dejan P2P off.
-El teléfono no usa ese camino; la demo es HTTP.
-
-Cuando se forzó P2P en pruebas tempranas: cero conexiones tras dos minutos,
-con el código de `nodo/` y también con una prueba mínima de dos peers.
-
-**La causa, medida:** `hyperdht` arranca y llega a la red (61 nodos conocidos),
-pero reporta **`firewalled: true`**. El nodo está detrás de NAT y no acepta
-entrantes. Dos peers detrás del mismo NAT necesitan *hairpinning*, y muchos
-routers no lo hacen. El firewall de macOS estaba apagado.
-
-**Síntoma adicional, visto el 10 de septiembre:** al arrancar con P2P forzado,
-la línea `esperando peers` **no aparece en los primeros 2 segundos** (el
-`flushed()` del join se queda esperando). El HTTP ya está escuchando.
-
-Esto **no es el camino de la demo**. HTTP (banco Railway o pueblo LAN) es el que vale.
-
-### Si alguien insiste en probar Hyperswarm
-
-```bash
-cd nodo && ENABLE_P2P=1 npm run banco
-```
-
-Esperar 3 minutos. ¿Salió `peer conectado`? Si no, parar. `hyperswarm` 4.17.1
-no trae descubrimiento en LAN: dos aparatos en el mismo wifi igual salen por
-la DHT pública.
-
-Queda `swarmRelays` con relay propio. Los docs de QVAC lo mencionan y **no
-documentan cómo desplegarlo**. No es un plan.
+**No es la demo.** Off salvo `ENABLE_P2P=1`. Medido: no conecta detrás de NAT.
+Detalle y cómo no nombrarlo: [`ESTADO.md`](ESTADO.md) § Honestidad,
+[`VIDEO.md`](VIDEO.md).
 
 ---
 
