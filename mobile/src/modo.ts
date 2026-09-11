@@ -69,7 +69,7 @@ export function fijarModo(id: ModoId) {
   }
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { marcarVia } = require("./demoLog") as typeof import("./demoLog");
+    const { marcarVia, demoLog } = require("./demoLog") as typeof import("./demoLog");
     marcarVia({
       via: id === "nodo-offline" ? "p2p" : "local",
       viva: false,
@@ -77,6 +77,7 @@ export function fijarModo(id: ModoId) {
         ? "Sin capacidad aquí · delegando al nodo"
         : "MedPsy en este teléfono",
     });
+    demoLog(`sesión ${etiquetaModoCorta(id)}`);
   } catch {
     /* demoLog opcional en tests */
   }
@@ -107,4 +108,11 @@ export function sinWifiDemo(): boolean {
 export function fichaModo(): Modo & { titulo: string } {
   const m = MODOS.find(e => e.id === activo) ?? MODOS[0];
   return { ...m, titulo: etiquetaModo(m) };
+}
+
+/** Corta, para consola de grabación. */
+export function etiquetaModoCorta(id: ModoId = activo): string {
+  if (id === "local-wifi") return "WiFi · modelo local";
+  if (id === "local-offline") return "sin WiFi · modelo local";
+  return "sin WiFi · sin capacidad";
 }

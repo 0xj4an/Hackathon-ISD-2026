@@ -29,7 +29,17 @@ const STATE_ROOT = process.env.STATE_DIR
   || join(fileURLToPath(new URL(".", import.meta.url)), "state");
 const STATE = join(STATE_ROOT, ROL) + "/";
 mkdirSync(STATE, { recursive: true });
-const log = (...a) => console.log(new Date().toISOString().slice(11, 19), `[${ROL}]`, ...a);
+const log = (...a) => console.log(
+  new Intl.DateTimeFormat("en-GB", {
+    timeZone: "America/Panama",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).format(new Date()),
+  `[${ROL}]`,
+  ...a,
+);
 
 const LIMITE = 32_000;
 const peers = new Set();
@@ -340,9 +350,10 @@ createServer(async (req, res) => {
         return;
       }
       const origen = body.origen === "cel" ? "cel" : "nodo";
+      const modo = typeof body.modo === "string" ? body.modo.slice(0, 32) : null;
       // Si ya trae hora HH:MM:SS, no sellar otra vez.
       const conHora = !/^\d{2}:\d{2}:\d{2}\s/.test(msg);
-      consola.feed(msg.slice(0, 500), { origen, conHora });
+      consola.feed(msg.slice(0, 500), { origen, conHora, modo });
       json(res, 200, { ok: true });
     } catch (e) {
       json(res, e instanceof SyntaxError ? 400 : 500, { ok: false });
@@ -384,9 +395,9 @@ createServer(async (req, res) => {
       };
       const { sol, respuesta } = ROL === "banco" ? comoBanco(raw, meta) : await comoCartero(raw);
       consola.feed(
-        `← /solicitud ${respuesta.decision} id=${String(sol?.id ?? "").slice(0, 8)} `
-          + `monto=${respuesta.monto_aprobado_usd ?? "—"} canal=${meta.canal}`,
-        { origen: "nodo" },
+        `llegó /solicitud ${respuesta.decision} id=${String(sol?.id ?? "").slice(0, 8)} `
+          + `monto=${respuesta.monto_aprobado_usd ?? "—"}`,
+        { origen: "cel" },
       );
       json(res, 200, respuesta);
     } catch (e) {
@@ -411,12 +422,12 @@ createServer(async (req, res) => {
       const { inferir } = await import("./inferir.mjs");
       const pedido = JSON.parse(raw || "{}");
       consola.feed(
-        `→ /inferir task=${pedido.task ?? "?"} chars=${String(pedido.user ?? "").length}`,
-        { origen: "nodo" },
+        `llegó /inferir task=${pedido.task ?? "?"} chars=${String(pedido.user ?? "").length}`,
+        { origen: "cel" },
       );
       const out = await inferir(pedido);
       consola.feed(
-        `← /inferir ${String(out.text ?? "").length} chars`,
+        `pueblo infirió ${String(out.text ?? "").length} chars`,
         { origen: "nodo" },
       );
       json(res, 200, out);

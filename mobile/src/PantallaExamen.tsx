@@ -158,6 +158,7 @@ export default function PantallaExamen({
         extra={progreso || "Leyendo el examen"}
         activo={leyendo}
         onListo={() => setMostrandoVia(false)}
+        lora={saltarMedPsyLocal() ? null : LORA_LAB_VERSION}
       />
     );
   }

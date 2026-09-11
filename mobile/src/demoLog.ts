@@ -5,6 +5,7 @@
  */
 import { useEffect, useState } from "react";
 import { urlNodo } from "./nodoUrl";
+import { modo } from "./modo";
 
 type Listener = (lines: string[]) => void;
 
@@ -67,7 +68,14 @@ export function usePanelNodo(): boolean {
 }
 
 function stamp(msg: string): string {
-  return `${new Date().toISOString().slice(11, 19)} ${msg}`;
+  const hora = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "America/Panama",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).format(new Date());
+  return `${hora} ${msg}`;
 }
 
 function notify() {
@@ -82,7 +90,7 @@ function espejo(linea: string) {
   void fetch(`${base}/consola/linea`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ linea, origen: "cel" }),
+    body: JSON.stringify({ linea, origen: "cel", modo: modo() }),
   }).catch(() => {});
 }
 

@@ -109,15 +109,14 @@ function canalDe(via: ViaMed): Canal {
   return saltarMedPsyLocal() ? "p2p" : "local";
 }
 
-function metaDe(canal: Canal): string {
+function metaDe(canal: Canal): { aviso: string | null; resto: string } {
   const m = modo();
   if (canal === "local") {
-    return m === "local-wifi"
-      ? "WiFi · modelo en este teléfono"
-      : "Sin WiFi al banco · modelo en este teléfono";
+    if (m === "local-wifi") return { aviso: null, resto: "WiFi · modelo en este teléfono" };
+    return { aviso: "WiFi no disponible", resto: "modelo en este teléfono" };
   }
-  if (canal === "p2p") return "WiFi no disponible · par P2P";
-  return "WiFi no disponible · pueblo HTTP";
+  if (canal === "p2p") return { aviso: "WiFi no disponible", resto: "par P2P" };
+  return { aviso: "WiFi no disponible", resto: "pueblo HTTP" };
 }
 
 export default function PantallaViaMed({
@@ -125,11 +124,14 @@ export default function PantallaViaMed({
   extra,
   activo = true,
   onListo,
+  lora,
 }: {
   onSalir?: () => void;
   extra?: string;
   activo?: boolean;
   onListo?: () => void;
+  /** Examen: versión LoRA en el teléfono. Vacío si se delega al nodo. */
+  lora?: string | null;
 }) {
   const via = useViaMed();
   const canal = canalDe(via.via);
@@ -176,8 +178,31 @@ export default function PantallaViaMed({
     return () => { vivo = false; };
   }, []);
 
+  const meta = metaDe(canal);
+  const conLora = Boolean(lora) && canal === "local";
   const c = COPY[fase][canal];
-  const detalle = fase === "conectando" && extra && canal !== "local" ? extra : c.detalle;
+  const titulo = conLora
+    ? (fase === "conectando" ? "MedPsy + LoRA" : c.titulo)
+    : c.titulo;
+  const detalle = fase === "conectando" && extra && canal !== "local"
+    ? extra
+    : conLora
+      ? (fase === "conectando"
+        ? `Cargando MedPsy + LoRA ${lora} en este teléfono.`
+        : fase === "delegando"
+          ? `MedPsy + LoRA ${lora} recibe el texto. La foto no se mueve.`
+          : fase === "esperando"
+            ? `MedPsy + LoRA ${lora} está corriendo en este teléfono.`
+            : `MedPsy + LoRA ${lora} terminó en este teléfono.`)
+      : c.detalle;
+  const barraDe = conLora
+    ? (fase === "conectando" ? `Cargando MedPsy + LoRA ${lora}…` : c.barraDe)
+    : c.barraDe;
+  const linea = conLora
+    ? `${MODELO_TELEFONO.linea} + LoRA ${lora} · en el teléfono`
+    : canal === "local"
+      ? `${MODELO_TELEFONO.linea} · en el teléfono`
+      : `${MODELO_TELEFONO.linea} · en el nodo`;
   const pctClamped = Math.max(0, Math.min(100, Math.round(pct)));
   const colorBarra = canal === "local" ? COLOR.tinta
     : canal === "p2p" ? COLOR.rutinaria
@@ -187,17 +212,19 @@ export default function PantallaViaMed({
     <Pantalla scroll={false}>
       <Encabezado meta="Salir" onVolver={onSalir} />
       <View style={s.cuerpo}>
-        <Text
-          style={[s.meta, { color: colorBarra === COLOR.tinta ? COLOR.gris : colorBarra }]}
-          accessibilityLiveRegion="polite"
-        >
-          {metaDe(canal)}
+        <Text style={s.meta} accessibilityLiveRegion="polite">
+          {meta.aviso ? (
+            <>
+              <Text style={{ color: COLOR.prioritaria }}>{meta.aviso}</Text>
+              <Text style={{ color: COLOR.gris }}> · {meta.resto}</Text>
+            </>
+          ) : (
+            meta.resto
+          )}
         </Text>
-        <Text style={s.titulo} accessibilityLiveRegion="polite">{c.titulo}</Text>
+        <Text style={s.titulo} accessibilityLiveRegion="polite">{titulo}</Text>
         <Text style={s.modelo}>{MODELO_TELEFONO.id}</Text>
-        <Text style={s.linea}>
-          {canal === "local" ? `${MODELO_TELEFONO.linea} · en el teléfono` : `${MODELO_TELEFONO.linea} · en el nodo`}
-        </Text>
+        <Text style={s.linea}>{linea}</Text>
         <Text style={s.detalle}>{detalle}</Text>
 
         <View
@@ -209,7 +236,7 @@ export default function PantallaViaMed({
         </View>
         <View style={s.barraTextos}>
           <Text style={s.barraPct}>{pctClamped}%</Text>
-          <Text style={s.barraDe}>{c.barraDe}</Text>
+          <Text style={s.barraDe}>{barraDe}</Text>
         </View>
 
         <Text style={s.pie}>{c.pie}</Text>
@@ -226,7 +253,7 @@ const s = StyleSheet.create({
     paddingBottom: 28,
     gap: 8,
   },
-  meta: { ...TIPO.etiqueta, marginBottom: 4 },
+  meta: { ...TIPO.etiqueta, color: COLOR.gris, marginBottom: 4 },
   titulo: { ...DISPLAY, fontSize: 28, lineHeight: 30, letterSpacing: -1, color: COLOR.tinta },
   modelo: {
     ...DISPLAY,

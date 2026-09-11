@@ -55,8 +55,11 @@ export default function PantallaEntrada({
   const [puebloInfo, setPuebloInfo] = useState(() => resolverNodo());
   const [puebloPrueba, setPuebloPrueba] = useState("");
   const [probando, setProbando] = useState(false);
+  const [buscando, setBuscando] = useState(false);
   const [p2pEdit, setP2pEdit] = useState("");
   const [p2pInfo, setP2pInfo] = useState("");
+  const [puebloOk, setPuebloOk] = useState(false);
+  const [casoAbierto, setCasoAbierto] = useState(false);
 
   const refrescarPueblo = () => {
     const r = resolverNodo();
@@ -86,32 +89,38 @@ export default function PantallaEntrada({
 
   const guardarPueblo = async () => {
     const n = await fijarUrlNodo(puebloEdit);
-    setPuebloPrueba(n ? "Guardado." : "URL inválida.");
+    setPuebloOk(false);
+    setPuebloPrueba(n ? "IP lista. Ahora pulsa Probar." : "URL inválida.");
     refrescarPueblo();
   };
 
   const usarAuto = async () => {
+    setBuscando(true);
+    setPuebloOk(false);
     await limpiarUrlNodo();
-    setPuebloPrueba("Buscando en la WiFi…");
+    setPuebloPrueba("Buscando en esta WiFi…");
     refrescarPueblo();
     const d = await descubrirPuebloLan();
-    setPuebloPrueba(d ? `Hallado · ${d.url}` : "Auto: no hay pueblo en esta WiFi.");
+    setPuebloPrueba(d ? `Hallado · ${d.url}. Ahora pulsa Probar.` : "No hay pueblo en esta WiFi. Pega la IP abajo.");
     refrescarPueblo();
+    setBuscando(false);
   };
 
   const probar = async () => {
     setProbando(true);
     setPuebloPrueba("Probando…");
     if (puebloEdit.trim()) await fijarUrlNodo(puebloEdit);
-    else await limpiarUrlNodo();
     const r = await probarNodo(puebloEdit.trim() || undefined);
-    setPuebloPrueba(r.ok ? `Conecta · ${r.detalle}` : `No llega · ${r.detalle}`);
+    setPuebloOk(r.ok);
+    setPuebloPrueba(r.ok ? `Listo · ${r.detalle}` : `No llega · ${r.detalle}`);
     refrescarPueblo();
     setProbando(false);
   };
 
   const casoActivo = USUARIOS.find(u => u.correo === correo.trim().toLowerCase());
   const modoActivo = MODOS.find(e => e.id === modoSel) ?? MODOS[0];
+  const nodoHaceFalta = modoSel !== "local-wifi";
+  const hayNodo = Boolean(puebloInfo.url || puebloEdit.trim());
   const demoResumen = [
     etiquetaModo(modoActivo),
     casoActivo ? (CASO_CORTO[casoActivo.id] ?? casoActivo.id) : "correo libre",
@@ -167,10 +176,10 @@ export default function PantallaEntrada({
         {demoAbierta ? (
           <View style={s.demoCuerpo}>
             <Text style={s.demoAyuda}>
-              WiFi, modelo y nodo del pueblo. En la misma red la app busca sola el nodo (:8788).
+              1 camino · 2 nodo, si hace falta · 3 caso. El correo de arriba ya entra.
             </Text>
 
-            <Text style={s.demoEtiqueta}>Modo · el teléfono</Text>
+            <Text style={s.demoEtiqueta}>1 · Camino</Text>
             <View style={s.modos}>
               {MODOS.map(e => {
                 const puesto = modoSel === e.id;
@@ -201,60 +210,86 @@ export default function PantallaEntrada({
               })}
             </View>
 
-            <Text style={s.demoEtiqueta}>Pueblo · LAN :8788</Text>
+            <Text style={s.demoEtiqueta}>2 · Nodo del pueblo</Text>
+            {nodoHaceFalta ? (
             <View style={s.puebloCaja}>
               <Text style={s.puebloOrigen}>
-                Ahora: {puebloInfo.url || "—"} · {etiquetaOrigen(puebloInfo.origen)}
+                Laptop en esta WiFi, puerto 8788. Primero búscalo; luego comprueba.
               </Text>
+              <Text style={s.puebloAhora}>
+                Ahora: {puebloInfo.url || "ninguno"} · {etiquetaOrigen(puebloInfo.origen)}
+                {puebloOk ? " · ok" : ""}
+              </Text>
+
+              <Pressable
+                onPress={() => { if (!buscando) void usarAuto(); }}
+                accessibilityRole="button"
+                accessibilityLabel="1, buscar el nodo en esta WiFi"
+                style={({ pressed }) => [s.pasoBtn, s.pasoBtnFuerte, pressed && s.press]}
+              >
+                <Text style={[s.pasoN, s.pasoNFuerte]}>1</Text>
+                <Text style={[s.pasoBtnTexto, s.pasoBtnTextoFuerte]}>
+                  {buscando ? "Buscando…" : "Buscar en esta WiFi"}
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => { if (hayNodo && !probando) void probar(); }}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: !hayNodo }}
+                accessibilityLabel="2, probar que el nodo responde"
+                style={({ pressed }) => [
+                  s.pasoBtn,
+                  hayNodo ? s.pasoBtnFuerte : s.pasoBtnMudo,
+                  pressed && hayNodo && s.press,
+                ]}
+              >
+                <Text style={[s.pasoN, hayNodo && s.pasoNFuerte]}>2</Text>
+                <Text style={[s.pasoBtnTexto, hayNodo ? s.pasoBtnTextoFuerte : s.pasoBtnTextoMudo]}>
+                  {probando ? "Probando…" : hayNodo ? "Probar que responde" : "Probar (busca primero)"}
+                </Text>
+              </Pressable>
+
+              <Text style={s.puebloManual}>Si no apareció, pega la IP de la laptop y úsala. Eso activa el paso 2.</Text>
               <TextInput
                 value={puebloEdit}
-                onChangeText={setPuebloEdit}
+                onChangeText={t => { setPuebloEdit(t); setPuebloOk(false); }}
                 placeholder="192.168.x.x o host:8788"
                 placeholderTextColor={COLOR.apagado}
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="url"
-                accessibilityLabel="URL o IP del nodo del pueblo"
+                accessibilityLabel="IP del nodo del pueblo, solo si la búsqueda falló"
                 style={s.puebloCampo}
               />
-              <View style={s.puebloAcciones}>
-                <Pressable
-                  onPress={() => { void guardarPueblo(); }}
-                  accessibilityRole="button"
-                  style={({ pressed }) => [s.puebloBtn, pressed && s.press]}
-                >
-                  <Text style={s.puebloBtnTexto}>Guardar</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => { void usarAuto(); }}
-                  accessibilityRole="button"
-                  style={({ pressed }) => [s.puebloBtn, pressed && s.press]}
-                >
-                  <Text style={s.puebloBtnTexto}>Buscar WiFi</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => { void probar(); }}
-                  disabled={probando}
-                  accessibilityRole="button"
-                  style={({ pressed }) => [s.puebloBtn, s.puebloBtnFuerte, pressed && s.press]}
-                >
-                  <Text style={[s.puebloBtnTexto, s.puebloBtnTextoFuerte]}>
-                    {probando ? "…" : "Probar"}
-                  </Text>
-                </Pressable>
-              </View>
+              <Pressable
+                onPress={() => { if (puebloEdit.trim()) void guardarPueblo(); }}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: !puebloEdit.trim() }}
+                style={({ pressed }) => [s.puebloBtn, pressed && s.press]}
+              >
+                <Text style={s.puebloBtnTexto}>Usar esta IP</Text>
+              </Pressable>
               {puebloPrueba ? <Text style={s.puebloPrueba}>{puebloPrueba}</Text> : null}
             </View>
+            ) : (
+            <Text style={s.demoAyuda}>
+              Este camino manda el crédito al banco. El nodo no hace falta.
+            </Text>
+            )}
 
             {modoSel === "nodo-offline" ? (
               <>
-                <Text style={s.demoEtiqueta}>Par P2P · llave de la laptop</Text>
+                <Text style={s.demoEtiqueta}>3 · Par P2P · opcional</Text>
                 <View style={s.puebloCaja}>
-                  <Text style={s.puebloOrigen}>Ahora: {p2pInfo || "sin par"}</Text>
+                  <Text style={s.puebloOrigen}>
+                    Para delegar MedPsy. Pega la llave de 64 hex que imprime la laptop (npm run proveedor). Sin par, queda HTTP al nodo.
+                  </Text>
+                  <Text style={s.puebloAhora}>Ahora: {p2pInfo || "sin par"}</Text>
                   <TextInput
                     value={p2pEdit}
                     onChangeText={setP2pEdit}
-                    placeholder="64 hex (la imprime npm run proveedor)"
+                    placeholder="64 hex"
                     placeholderTextColor={COLOR.apagado}
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -271,44 +306,60 @@ export default function PantallaEntrada({
                         });
                       }}
                       accessibilityRole="button"
-                      style={({ pressed }) => [s.puebloBtn, pressed && s.press]}
+                      style={({ pressed }) => [s.puebloBtn, s.puebloBtnFuerte, pressed && s.press]}
                     >
-                      <Text style={s.puebloBtnTexto}>Guardar</Text>
+                      <Text style={[s.puebloBtnTexto, s.puebloBtnTextoFuerte]}>Usar esta llave</Text>
                     </Pressable>
                     <Pressable
                       onPress={() => {
                         void limpiarClaveP2p().then(() => {
-                          setPuebloPrueba("Sin par: queda HTTP /inferir.");
+                          setPuebloPrueba("Sin par: la inferencia va por HTTP.");
                           refrescarPueblo();
                         });
                       }}
                       accessibilityRole="button"
                       style={({ pressed }) => [s.puebloBtn, pressed && s.press]}
                     >
-                      <Text style={s.puebloBtnTexto}>Quitar</Text>
+                      <Text style={s.puebloBtnTexto}>Sin par</Text>
                     </Pressable>
                   </View>
                 </View>
               </>
             ) : null}
 
-            <Text style={s.demoEtiqueta}>Caso</Text>
-            <View style={s.lista}>
-              {USUARIOS.map(u => {
-                const puesto = correo.trim().toLowerCase() === u.correo;
-                return (
-                  <Pressable
-                    key={u.id}
-                    onPress={() => escribir(u.correo)}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: puesto }}
-                    accessibilityLabel={`${CASO_CORTO[u.id] ?? u.id}: ${u.caso}`}
-                    style={({ pressed }) => [s.correo, puesto && s.puesto, pressed && s.press]}
-                  >
-                    <Text style={s.correoTexto}>{CASO_CORTO[u.id] ?? u.id}</Text>
-                  </Pressable>
-                );
-              })}
+            <Text style={s.demoEtiqueta}>{modoSel === "nodo-offline" ? "4 · Caso" : "3 · Caso"}</Text>
+            <View style={s.puebloCaja}>
+              <Pressable
+                onPress={() => setCasoAbierto(v => !v)}
+                accessibilityRole="button"
+                accessibilityState={{ expanded: casoAbierto }}
+                accessibilityLabel={`Caso: ${casoActivo ? (CASO_CORTO[casoActivo.id] ?? casoActivo.id) : "correo libre"}`}
+                style={({ pressed }) => [s.select, pressed && s.press]}
+              >
+                <Text style={s.selectTexto}>
+                  {casoActivo ? (CASO_CORTO[casoActivo.id] ?? casoActivo.id) : "Correo libre"}
+                </Text>
+                <Text style={s.selectChevron}>{casoAbierto ? "▴" : "▾"}</Text>
+              </Pressable>
+              {casoAbierto ? (
+                <View style={s.selectLista}>
+                  {USUARIOS.map(u => {
+                    const puesto = correo.trim().toLowerCase() === u.correo;
+                    return (
+                      <Pressable
+                        key={u.id}
+                        onPress={() => { escribir(u.correo); setCasoAbierto(false); }}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: puesto }}
+                        accessibilityLabel={`${CASO_CORTO[u.id] ?? u.id}: ${u.caso}`}
+                        style={({ pressed }) => [s.selectOpcion, puesto && s.puesto, pressed && s.press]}
+                      >
+                        <Text style={s.selectOpcionTexto}>{CASO_CORTO[u.id] ?? u.id}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              ) : null}
             </View>
           </View>
         ) : null}
@@ -400,6 +451,8 @@ const s = StyleSheet.create({
 
   puebloCaja: { paddingHorizontal: 14, gap: 8, marginBottom: 8 },
   puebloOrigen: { fontSize: 12, lineHeight: 16, color: COLOR.gris },
+  puebloAhora: { fontSize: 12.5, lineHeight: 17, fontWeight: "700", color: COLOR.tinta },
+  puebloManual: { fontSize: 12, lineHeight: 16, color: COLOR.gris, marginTop: 6 },
   puebloCampo: {
     borderWidth: 1, borderColor: COLOR.separador, backgroundColor: COLOR.fondo,
     paddingHorizontal: 12, minHeight: 44,
@@ -408,20 +461,51 @@ const s = StyleSheet.create({
   puebloAcciones: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
   puebloBtn: {
     borderWidth: 1, borderColor: COLOR.separador, backgroundColor: COLOR.fondo,
-    paddingHorizontal: 12, minHeight: 40, justifyContent: "center",
+    paddingHorizontal: 12, minHeight: TOQUE, justifyContent: "center",
   },
   puebloBtnFuerte: { backgroundColor: COLOR.tinta, borderColor: COLOR.tinta },
   puebloBtnTexto: { fontSize: 12.5, fontWeight: "700", color: COLOR.tinta },
   puebloBtnTextoFuerte: { color: COLOR.fondo },
   puebloPrueba: { fontSize: 12, lineHeight: 16, color: COLOR.gris },
 
+  pasoBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderWidth: 1,
+    borderColor: COLOR.separador,
+    backgroundColor: COLOR.fondo,
+    paddingHorizontal: 12,
+    minHeight: TOQUE,
+  },
+  pasoBtnFuerte: { backgroundColor: COLOR.tinta, borderColor: COLOR.tinta },
+  pasoBtnMudo: { backgroundColor: COLOR.hundido, borderColor: COLOR.separador },
+  pasoN: {
+    ...TIPO.etiqueta, fontSize: 11, color: COLOR.apagado, width: 14,
+  },
+  pasoNFuerte: { color: COLOR.sobreTinta },
+  pasoBtnTexto: { flex: 1, fontSize: 14, fontWeight: "800", color: COLOR.tinta },
+  pasoBtnTextoFuerte: { color: COLOR.fondo },
+  pasoBtnTextoMudo: { color: COLOR.gris },
+
   puesto: { backgroundColor: COLOR.hundido, borderColor: COLOR.tinta },
   press: { opacity: 0.85 },
 
-  lista: { flexDirection: "row", flexWrap: "wrap", gap: 6, paddingHorizontal: 14 },
-  correo: {
-    borderWidth: 1, borderColor: COLOR.separador, backgroundColor: COLOR.fondo,
-    paddingHorizontal: 10, minHeight: 40, justifyContent: "center",
+  select: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: COLOR.tinta,
+    backgroundColor: COLOR.fondo,
+    paddingHorizontal: 12,
+    minHeight: TOQUE,
   },
-  correoTexto: { fontSize: 12.5, fontWeight: "700", color: COLOR.tinta },
+  selectTexto: { flex: 1, fontSize: 15, fontWeight: "800", color: COLOR.tinta },
+  selectChevron: { fontSize: 14, color: COLOR.gris },
+  selectLista: { borderWidth: 1, borderColor: COLOR.separador, backgroundColor: COLOR.fondo },
+  selectOpcion: {
+    paddingHorizontal: 12, minHeight: TOQUE, justifyContent: "center",
+    borderBottomWidth: 1, borderBottomColor: COLOR.separador,
+  },
+  selectOpcionTexto: { fontSize: 14, fontWeight: "700", color: COLOR.tinta },
 });

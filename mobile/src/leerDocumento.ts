@@ -18,6 +18,8 @@ import {
 } from "./core/prompts";
 import { parsearExtraccion, type ClaveDocumento, type ExtraccionFallo, type ExtraccionOk } from "./core/extraccion";
 import { asegurarMedPsy, bajar, completarMedPsy, sdk, soltarMedPsy } from "./medpsy";
+import { saltarMedPsyLocal } from "./modo";
+import { demoLog } from "./demoLog";
 import { getAppLogger, recordError, recordInference } from "./perf/logger";
 import {
   breadcrumbLectura,
@@ -432,15 +434,32 @@ export async function leerDocumentos(
     const conTexto = trabajos.filter(t => t.ocr && !t.error);
     if (conTexto.length > 0) {
       breadcrumbLectura("extract.start", { n: conTexto.length });
-      await asegurarMedPsy(
-        p => aviso({ paso: "extraccion", pct: p.pct, detalle: p.detalle }),
-        { conLora: false },
-      );
+      const delega = saltarMedPsyLocal();
+      demoLog(delega
+        ? `docs OCR ok · delegando extracción n=${conTexto.length}`
+        : `docs OCR ok · MedPsy local n=${conTexto.length}`);
+      aviso({
+        paso: "extraccion",
+        detalle: delega
+          ? "Sin capacidad aquí. Delegando la extracción al nodo…"
+          : "MedPsy sacando campos en este teléfono",
+      });
+      if (!delega) {
+        await asegurarMedPsy(
+          p => aviso({ paso: "extraccion", pct: p.pct, detalle: p.detalle }),
+          { conLora: false },
+        );
+      }
       for (const t of conTexto) {
         const ocr = t.ocr;
         if (!ocr) continue;
         const kind = docKindSentry(t.clave);
-        onProgreso?.(t.clave, { paso: "extraccion", detalle: `Sacando datos de ${NOMBRE[t.clave]}` });
+        onProgreso?.(t.clave, {
+          paso: "extraccion",
+          detalle: delega
+            ? `Delegando ${NOMBRE[t.clave]} al nodo`
+            : `Sacando datos de ${NOMBRE[t.clave]}`,
+        });
         const tEx = Date.now();
         try {
           const bruto = await extraerConLlm(t.clave, ocr.texto, ocr.confianza);

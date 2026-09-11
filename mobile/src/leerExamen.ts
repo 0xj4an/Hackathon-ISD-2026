@@ -76,9 +76,11 @@ export async function leerExamenFoto(
       onProgreso: p => aviso({
         paso: "extraccion",
         pct: p.pct,
-        detalle: p.detalle.includes("MedPsy") || p.detalle.includes("LoRA")
+        detalle: saltarMedPsyLocal()
           ? p.detalle
-          : `MedPsy + LoRA · ${p.detalle}`,
+          : (p.detalle.includes("MedPsy") || p.detalle.includes("LoRA")
+            ? p.detalle
+            : `MedPsy + LoRA · ${p.detalle}`),
       }),
     });
     const parsed = parsearLaboratorio(bruto, textoOcr);

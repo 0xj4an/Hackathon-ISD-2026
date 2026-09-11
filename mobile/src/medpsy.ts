@@ -172,7 +172,7 @@ async function completarEnNodo(opts: {
   predict?: number;
   onProgreso?: (p: ProgresoMedPsy) => void;
 }): Promise<string> {
-  opts.onProgreso?.({ detalle: "El teléfono no pudo. Delegando al pueblo por HTTP…" });
+  opts.onProgreso?.({ detalle: "Sin capacidad aquí. Delegando al nodo por HTTP…" });
   breadcrumbApp("inferencia", "nodo.start", { task: opts.task });
   const nodo = await asegurarUrlNodo();
   if (!nodo) throw new Error("sin pueblo en esta WiFi");

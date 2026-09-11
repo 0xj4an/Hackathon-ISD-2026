@@ -4,10 +4,9 @@
 > Retos: General · Tether QVAC Psy · Caja de Ahorros.
 
 App Expo para zonas rurales de Panamá: alerta de salud en el teléfono, crédito
-con documentos leídos **sin que las fotos salgan del dispositivo**. El JSON va
-al banco (HTTPS) o al nodo del pueblo (LAN). Inferencia: MedPsy local
-(`@qvac/sdk` **0.18.2**); si no carga, texto a `/inferir`. Demo en
-**iPhone 17 Pro Max**. Hyperswarm / QVAC `delegate` no son el camino de la demo.
+con documentos leídos **sin que las fotos salgan del dispositivo**. Dos
+tuberías: **inferencia** (MedPsy / LoRA) y **solicitud** (JSON). Demo en
+**iPhone 17 Pro Max**, `@qvac/sdk` **0.18.2**. Nunca un proveedor de IA remoto.
 
 **Estado vivo (medido, URLs, qué falta):** [`docs/ESTADO.md`](docs/ESTADO.md).  
 **Mapa de docs:** [`docs/README.md`](docs/README.md).
@@ -51,13 +50,19 @@ LoRA spike: [`spikes/lora-medpsy/`](spikes/lora-medpsy/).
 - Crédito: scorecard determinista ([`ADR-011`](.ai/adr/ADR-011-el-modelo-de-credito.md)).
 - Firma = trazo; desembolso simulado. Datos 100% sintéticos.
 
-## Modos de demo ([`ADR-006`](.ai/adr/ADR-006-tres-modos-segun-el-telefono.md))
+## Tres caminos ([`ADR-006`](.ai/adr/ADR-006-tres-modos-segun-el-telefono.md))
 
-| Modo | Modelo | Crédito |
+Dos ejes: **WiFi al banco** × **capacidad del teléfono**. OCR siempre aquí.
+
+| Modo | Inferencia | Solicitud |
 |---|---|---|
-| `local-wifi` | MedPsy en el teléfono | Banco remoto primero (luego pueblo si hace falta) |
-| `local-offline` | MedPsy en el teléfono | Pueblo / cola (el pueblo puede reenviar a Railway) |
-| `nodo-offline` | Texto a `/inferir` | Pueblo / cola |
+| `local-wifi` | MedPsy + LoRA en el teléfono | HTTPS al banco (luego pueblo si hace falta) |
+| `local-offline` | MedPsy + LoRA en el teléfono | Pueblo / cola |
+| `nodo-offline` | Este teléfono no puede correr el modelo: se **delega al nodo** (`delegate`, si no `POST /inferir`) | Pueblo / cola |
+
+`nodo-offline` **simula** un teléfono sin capacidad. El iPhone de demo sí puede
+cargar MedPsy; la UI no dice que se fuerza. Hyperswarm por topic (nodo↔nodo)
+sigue apagado salvo `ENABLE_P2P=1`.
 
 ## El nombre
 

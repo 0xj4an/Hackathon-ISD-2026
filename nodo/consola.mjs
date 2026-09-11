@@ -13,8 +13,18 @@ const clientes = new Set();
 
 const HTML = join(dirname(fileURLToPath(import.meta.url)), "consola.html");
 
+function horaPanama(d = new Date()) {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "America/Panama",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).format(d);
+}
+
 function stamp(msg) {
-  return `${new Date().toISOString().slice(11, 19)} ${msg}`;
+  return `${horaPanama()} ${msg}`;
 }
 
 function emitir(evento, dato) {
@@ -29,9 +39,9 @@ function emitir(evento, dato) {
 }
 
 /** Añade una línea (ya con hora o cruda). */
-export function feed(msg, { origen = "nodo", conHora = true } = {}) {
+export function feed(msg, { origen = "nodo", conHora = true, modo = null } = {}) {
   const linea = conHora ? stamp(msg) : String(msg);
-  const item = { linea, origen };
+  const item = { linea, origen, modo: typeof modo === "string" && modo ? modo : null };
   lineas.push(item);
   if (lineas.length > MAX) lineas.splice(0, lineas.length - MAX);
   emitir("linea", item);

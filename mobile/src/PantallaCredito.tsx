@@ -71,8 +71,7 @@ export default function PantallaCredito({
       <View style={s.privacidad}>
         <Text style={s.privacidadTitulo}>Qué ve el banco</Text>
         <Text style={s.privacidadTexto}>
-          Las fotos o archivos se leen en este teléfono y se borra la copia. Al banco solo le
-          llegan los datos escritos y que el préstamo es de salud. No le llega qué se te detectó.
+          Las fotos se leen en este teléfono (OCR). Si no hay capacidad para MedPsy, el texto va al nodo. La imagen no sale. Al banco solo llegan los datos escritos y que el préstamo es de salud.
         </Text>
       </View>
 

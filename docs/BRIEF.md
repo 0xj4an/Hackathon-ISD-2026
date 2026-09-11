@@ -3,10 +3,10 @@
 Nombre: **Ina Igar** ("Camino de la medicina" en gunagaya). Equipo: 0xj4an y Artur.
 
 ## Una frase
-Una app para personas en zonas rurales de Panamá con señal intermitente, que detecta en el teléfono una señal de riesgo de salud, muestra en español qué examen conviene y cuánto cuesta (MedPsy redacta el mensaje en inglés, `ADR-009`), y permite solicitar un crédito de salud fotografiando los documentos **sin que ninguna imagen salga del dispositivo**: la solicitud queda en cola y viaja al banco con wifi (directo) o, sin internet, por el nodo del pueblo.
+Una app para personas en zonas rurales de Panamá con señal intermitente, que detecta en el teléfono una señal de riesgo de salud, muestra en español qué examen conviene y cuánto cuesta (MedPsy redacta el mensaje en inglés, `ADR-009`), y permite solicitar un crédito de salud fotografiando los documentos **sin que ninguna imagen salga del dispositivo**. Inferencia: en el teléfono si hay capacidad; si no, se delega al nodo. Solicitud: al banco con WiFi, o por el nodo si no hay.
 
 ## Retos a los que aplica
-- **General** (podio 6,000): conectividad intermitente, datos sensibles, trabajo en campo. Transporte: HTTP (ver [`ESTADO.md`](ESTADO.md) § Honestidad).
+- **General** (podio 6,000): conectividad intermitente, datos sensibles, trabajo en campo. Tres caminos: [`ADR-006`](../.ai/adr/ADR-006-tres-modos-segun-el-telefono.md).
 - **Tether · QVAC Psy** (1,500): MedPsy redacta la alerta y `OCR_LATIN` lee documentos; ambos con función central. Hardware de demo: iPhone (Android gama media es el usuario del brief; el Xiaomi de prueba aborta Bare). Licencia MIT, log de rendimiento, nombres honestos de modelo.
 - **Caja de Ahorros** (1,500): inclusión financiera con conectividad intermitente; documentos y trámites leídos en el dispositivo; la ejecución local como ventaja (el asesor nunca ve la cédula ni el extracto).
 
@@ -20,14 +20,15 @@ Camino en app: Entrada → **Salud** → **Revisión** → Alerta (si hay señal
 2. **Resultado.** Desde ahí: crédito si hay paquete, y/o examen de lab. Si el
    lab sale fuera de rango, también crédito. El banco **nunca** recibe el motivo
    de salud.
-3. **Documentos.** Foto cédula / ingresos / extracto. OCR → MedPsy → JSON →
-   **fotos se borran**.
-4. **Examen de laboratorio.** Opción tras el resultado: OCR → **MedPsy + LoRA
-   `lab-v3`** → `clasificar()`. Adaptador solo aquí.
+3. **Documentos.** Foto cédula / ingresos / extracto. OCR aquí. MedPsy extrae
+   en el teléfono o, sin capacidad, se delega al nodo. **Fotos se borran**.
+4. **Examen de laboratorio.** Opción tras el resultado: OCR aquí → **MedPsy +
+   LoRA `lab-v3`** si hay modelo local; sin capacidad, MedPsy base en el nodo
+   (sin LoRA) → `clasificar()`.
 5. **Cola offline.** SQLite si no hay salida; al reabrir se retoma en cuota.
 6. **Envío.** Mismo JSON, nunca fotos. `local-wifi`: banco Railway (luego
-   pueblo si hace falta). Offline: LAN al pueblo (que puede reenviar a Railway).
-   Discovery: sweep HTTP, sin IP fija.
+   pueblo si hace falta). `local-offline` y `nodo-offline`: LAN al pueblo.
+   Discovery: sweep HTTP, sin IP fija. Inferencia: [`ADR-006`](../.ai/adr/ADR-006-tres-modos-segun-el-telefono.md).
 7. **Respuesta del banco.** Mismo motor que `preCalificar()` / `decidir()`.
    Persistencia vía `STATE_DIR`. Admin: hora + canal. URLs: [`ESTADO.md`](ESTADO.md).
 8. **Firma y cierre.** Trazo (no firma electrónica legal) → desembolso
@@ -46,7 +47,7 @@ Modelos: MedPsy 1.7B Q8_0, `OCR_LATIN`, LoRA `lab-v3` (examen). SDK **0.18.2**
 ([`ADR-013`](../.ai/adr/ADR-013-quedarnos-en-sdk-0.18.2.md)).
 
 ## Reglas duras
-- Inferencia: MedPsy en el teléfono primero; si no puede, POST de texto al nodo. Nunca imágenes ni proveedores de IA remotos. Banco: solo JSON de crédito. Transporte: [`ESTADO.md`](ESTADO.md) § Honestidad.
+- Inferencia y solicitud son tuberías distintas ([`ADR-006`](../.ai/adr/ADR-006-tres-modos-segun-el-telefono.md)). Nunca imágenes ni proveedores de IA remotos. Banco: solo JSON de crédito.
 - `README` declara la base preexistente: la plantilla AI Engineering Kit.
 - Log de rendimiento (`perf/perf.jsonl`): cada inferencia real registra modelo, cuantización, hardware, tokens, TTFT, tok/s.
 - Disclaimers de salud visibles. Validación de entradas antes del modelo. Sin VIH en el demo público.

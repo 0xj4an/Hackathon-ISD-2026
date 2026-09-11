@@ -113,8 +113,11 @@
       text-transform: uppercase;
       color: var(--apagado);
     }
-    .row.cel .tag { color: #9ecbff; }
-    .row.nodo .tag { color: #8fd4a8; }
+    .row .modo {
+      color: var(--apagado);
+      font-weight: 600;
+    }
+    .row.cel .modo { color: #9ecbff; }
   </style>
 </head>
 <body>
@@ -141,28 +144,43 @@
     const httpEl = document.getElementById("http");
     let vacio = true;
 
-    function frase(linea) {
-      const l = String(linea).toLowerCase();
-      if (l.includes("delegate") && (l.includes("→") || l.includes("buscando")))
-        return { t: "El teléfono pide MedPsy al par P2P.", k: "p2p" };
-      if (l.includes("delegate") && l.includes("←"))
-        return { t: "El par P2P contestó. El modelo no corrió en la nube.", k: "p2p" };
-      if (l.includes("delegate falló") || l.includes("par no respondió"))
-        return { t: "El par no respondió. Pasa al pueblo por HTTP.", k: "http" };
-      if (l.includes("/inferir") && l.includes("→"))
-        return { t: "Texto al pueblo por HTTP. La foto no sale.", k: "http" };
-      if (l.includes("/inferir") && l.includes("←"))
-        return { t: "El pueblo contestó la inferencia.", k: "http" };
-      if (l.includes("/solicitud"))
-        return { t: "Llegó una solicitud de crédito al pueblo.", k: "http" };
-      if (l.includes("medpsy local"))
-        return { t: "MedPsy corrió en el teléfono.", k: "tel" };
-      return null;
+    function modoCorto(id) {
+      if (id === "local-wifi") return "WiFi · modelo local";
+      if (id === "local-offline") return "sin WiFi · modelo local";
+      if (id === "nodo-offline") return "sin WiFi · sin capacidad";
+      return "";
     }
 
-    function ponerAhora(linea) {
-      const f = frase(linea);
-      if (!f) return;
+    function parenDe(item) {
+      const quien = item.origen === "cel" ? "teléfono" : "pueblo";
+      const m = modoCorto(item.modo);
+      return m ? `(${quien} · ${m})` : `(${quien})`;
+    }
+
+    function frase(item) {
+      const l = String(item.linea ?? "").toLowerCase();
+      const p = parenDe(item);
+      if (l.includes("sesión"))
+        return { t: "El teléfono entró " + p, k: item.modo === "local-wifi" ? "tel" : "http" };
+      if (l.includes("delegate") && (l.includes("→") || l.includes("buscando")))
+        return { t: "El teléfono pide MedPsy al par P2P " + p, k: "p2p" };
+      if (l.includes("delegate") && l.includes("←"))
+        return { t: "El par P2P contestó " + p, k: "p2p" };
+      if (l.includes("delegate falló") || l.includes("par no respondió"))
+        return { t: "El par no respondió. Pasa al pueblo por HTTP " + p, k: "http" };
+      if (l.includes("/inferir") || l.includes("llegó /inferir"))
+        return { t: "Llegó un pedido de inferencia " + p, k: "http" };
+      if (l.includes("pueblo infirió"))
+        return { t: "El pueblo terminó MedPsy " + p, k: "http" };
+      if (l.includes("/solicitud") || l.includes("llegó /solicitud"))
+        return { t: "Llegó una solicitud de crédito " + p, k: "http" };
+      if (l.includes("medpsy local"))
+        return { t: "MedPsy corrió en el teléfono " + p, k: "tel" };
+      return { t: String(item.linea ?? "").replace(/^\d{2}:\d{2}:\d{2}\s/, "") + " " + p, k: item.origen === "cel" ? "tel" : "http" };
+    }
+
+    function ponerAhora(item) {
+      const f = frase(item);
       ahoraEl.style.display = "block";
       ahoraEl.textContent = f.t;
       ahoraEl.className = f.k === "http" ? "http" : f.k === "tel" ? "tel" : "";
@@ -185,14 +203,14 @@
       }
       const p = document.createElement("p");
       p.className = "row " + (item.origen === "cel" ? "cel" : "nodo");
-      const tag = document.createElement("span");
-      tag.className = "tag";
-      tag.textContent = item.origen === "cel" ? "teléfono" : "pueblo";
-      p.appendChild(tag);
-      p.appendChild(document.createTextNode(" " + String(item.linea ?? "")));
+      p.appendChild(document.createTextNode(String(item.linea ?? "")));
+      const modo = document.createElement("span");
+      modo.className = "modo";
+      modo.textContent = " " + parenDe(item);
+      p.appendChild(modo);
       logEl.appendChild(p);
       logEl.scrollTop = logEl.scrollHeight;
-      ponerAhora(item.linea);
+      ponerAhora(item);
     }
 
     function salud() {
@@ -232,7 +250,7 @@
       fetch("/consola/borrar", { method: "POST" }).catch(() => {});
     };
 
-    mostrarVacio("Esperando al teléfono. Misma WiFi. Si delega, aquí se lee: par P2P o HTTP.");
+    mostrarVacio("Esperando al teléfono. Misma WiFi. Cada línea llega con (teléfono · modo).");
     conectar();
     salud();
     setInterval(salud, 4000);

@@ -253,7 +253,9 @@ function Alerta({ peor, demas, lecturas, periodo, mensaje, fallo, redactando, vi
       <Boton texto="Ver qué conviene hacer" onPress={onVerRuta} />
 
       <Pie>{peor.fuente}</Pie>
-      {mensaje ? <Pie>Redactado en el teléfono por MedPsy. El umbral lo deciden las reglas.</Pie> : null}
+      {mensaje ? <Pie>{saltarMedPsyLocal()
+        ? "Redactado en el nodo. Este teléfono no tenía capacidad. El umbral lo deciden las reglas."
+        : "Redactado en el teléfono por MedPsy. El umbral lo deciden las reglas."}</Pie> : null}
       {fallo && !mensaje ? <Pie>Sin explicación del modelo. Lo que ves sale solo de las reglas.</Pie> : null}
       <Pie>{DISCLAIMER}</Pie>
     </Pantalla>

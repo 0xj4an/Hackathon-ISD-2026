@@ -1,9 +1,9 @@
 /**
- * Carga de documentos: primero las fotos, luego se achican y se leen juntas.
- * El OCR no sale del teléfono. MedPsy extrae campos aquí; si no carga, el
- * texto va al pueblo. Las fotos se borran.
+ * Carga de documentos: fotos → OCR en el teléfono → MedPsy extrae JSON
+ * (aquí, o delegado al nodo si no hay capacidad) → se borra la copia.
+ * Las fotos no salen.
  */
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
@@ -16,8 +16,8 @@ import type { Problema } from "./core/validaciones";
 import { CedulaSchema, IngresosSchema, ExtractoSchema } from "./core/schemas";
 import type { LecturaCredito } from "./lectura";
 import { recordError } from "./perf/logger";
-import PantallaAnalizando from "./PantallaAnalizando";
-import { MODELO_TELEFONO } from "./modelosMarca";
+import PantallaViaMed from "./PantallaViaMed";
+import { saltarMedPsyLocal } from "./modo";
 
 type Documento = {
   clave: ClaveDocumento;
@@ -126,8 +126,9 @@ export default function PantallaDocumentos({
 }) {
   const [estados, setEstados] = useState<Record<ClaveDocumento, EstadoDoc>>(() => semilla(lecturaInicial));
   const [error, setError] = useState("");
-  const [analizando, setAnalizando] = useState(false);
-  const ocupado = Object.values(estados).some(e => e.fase === "leyendo") || analizando;
+  const [mostrandoVia, setMostrandoVia] = useState(false);
+  const [progreso, setProgreso] = useState("");
+  const ocupado = Object.values(estados).some(e => e.fase === "leyendo");
   const hayCola = DOCUMENTOS.some(d => estados[d.clave].fase === "enCola");
   const cedulaOk = estados.cedula.fase === "enCola" || estados.cedula.fase === "listo";
   const ingresosOk = estados.ingresos.fase === "enCola" || estados.ingresos.fase === "listo";
@@ -145,6 +146,7 @@ export default function PantallaDocumentos({
   };
 
   const marcarProgreso = (clave: ClaveDocumento, p: ProgresoLectura) => {
+    setProgreso(p.detalle + (p.pct != null ? ` · ${p.pct}%` : ""));
     setEstado(clave, { fase: "leyendo", detalle: p.detalle, pct: p.pct });
   };
 
@@ -153,8 +155,6 @@ export default function PantallaDocumentos({
     setEstado(clave, { fase: "enCola", uri });
   };
 
-  const cerrarAnalizando = useCallback(() => setAnalizando(false), []);
-
   const leerLote = async () => {
     if (ocupado || !puedenLeer) return;
     const entradas = DOCUMENTOS.flatMap(d => {
@@ -162,13 +162,13 @@ export default function PantallaDocumentos({
       return e.fase === "enCola" ? [{ clave: d.clave, uri: e.uri }] : [];
     });
     if (entradas.length === 0) return;
+    setMostrandoVia(true);
     setError("");
     for (const e of entradas) {
       setEstado(e.clave, { fase: "leyendo", detalle: "Preparando la lectura" });
     }
     try {
       const r = await leerDocumentos(entradas, marcarProgreso);
-      let algunOk = false;
       for (const e of entradas) {
         const x = r[e.clave];
         if (!x) {
@@ -176,7 +176,6 @@ export default function PantallaDocumentos({
           continue;
         }
         if (x.ok) {
-          algunOk = true;
           setEstado(e.clave, {
             fase: "listo",
             datos: x.datos as Record<string, unknown>,
@@ -192,7 +191,6 @@ export default function PantallaDocumentos({
           });
         }
       }
-      if (algunOk) setAnalizando(true);
     } catch (err) {
       recordError("PantallaDocumentos", err);
       const mensaje = mensajeLectura(err);
@@ -268,20 +266,21 @@ export default function PantallaDocumentos({
     }
   };
 
-  if (analizando) {
+  if (mostrandoVia) {
+    const delega = saltarMedPsyLocal();
     return (
-      <PantallaAnalizando
-        titulo="Analizando lo leído"
-        modeloId={MODELO_TELEFONO.id}
-        modeloLinea={MODELO_TELEFONO.linea}
-        chip={MODELO_TELEFONO.chip}
-        detalle="El texto ya salió del papel. INA-PULSE estructura campos en este teléfono: sin nube, sin foto."
-        pie="QVAC · MedPsy Healthcare 1.7B. Después verás el JSON y las fotos borradas."
-        ms={4000}
-        onListo={cerrarAnalizando}
+      <PantallaViaMed
+        onSalir={onVolver}
+        extra={progreso || (delega
+          ? "OCR aquí. Luego MedPsy se delega al nodo."
+          : "OCR y MedPsy en este teléfono.")}
+        activo={ocupado}
+        onListo={() => setMostrandoVia(false)}
       />
     );
   }
+
+  const delega = saltarMedPsyLocal();
 
   return (
     <Pantalla>
@@ -290,10 +289,13 @@ export default function PantallaDocumentos({
       <BarraVeredicto color={COLOR.prioritaria} texto="Tus documentos" derecha={`B/. ${monto}`} />
 
       <View style={s.arriba}>
-        <Text style={s.titular}>Se leen{"\n"}aquí dentro</Text>
+        <Text style={s.titular}>
+          {delega ? "El OCR es{"\n"}aquí" : "Se leen{"\n"}aquí dentro"}
+        </Text>
         <Text style={s.parrafo}>
-          Primero junta las fotos. Después se achican y se leen juntas, aquí
-          dentro. No viajan a ningún lado.
+          {delega
+            ? "Las fotos se achican y el texto se lee en este teléfono. Este teléfono no puede correr MedPsy: se delega al nodo. La imagen no sale."
+            : "Primero junta las fotos. OCR y MedPsy en este teléfono. Las fotos no viajan."}
         </Text>
       </View>
 
@@ -316,8 +318,9 @@ export default function PantallaDocumentos({
       <View style={s.privacidad}>
         <Text style={s.privacidadTitulo}>Qué pasa con las fotos</Text>
         <Text style={s.privacidadTexto}>
-          Se achican, se leen en este teléfono y se borra la copia. Ninguna
-          imagen viaja al banco. Lo que queda es el JSON.
+          {delega
+            ? "OCR en este teléfono. Solo el texto va al nodo para MedPsy. Se borra la copia. Ninguna imagen viaja."
+            : "Se achican, OCR y MedPsy en este teléfono, y se borra la copia. Ninguna imagen viaja al banco. Lo que queda es el JSON."}
         </Text>
       </View>
 
@@ -362,7 +365,9 @@ export default function PantallaDocumentos({
       />
 
       <Pie>
-        Si un dato no cuadra, toma otra foto. Las imágenes no salen de este teléfono.
+        {delega
+          ? "OCR aquí. Inferencia en el nodo. Las imágenes no salen de este teléfono."
+          : "Si un dato no cuadra, toma otra foto. Las imágenes no salen de este teléfono."}
       </Pie>
     </Pantalla>
   );
