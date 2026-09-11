@@ -16,8 +16,16 @@ import {
   probarNodo,
   resolverNodo,
 } from "./nodoUrl";
-import { Pantalla, Encabezado, Boton, Pie } from "./ui/componentes";
+import {
+  claveCorta,
+  claveProveedor,
+  etiquetaOrigenP2p,
+  fijarClaveP2p,
+  limpiarClaveP2p,
+  origenClave,
+} from "./p2p";
 import { COLOR, TIPO, ESPACIO, DISPLAY, TOQUE } from "./ui/tokens";
+import { Pantalla, Encabezado, Boton, Pie } from "./ui/componentes";
 
 const NO_EXISTE = "No hay ningún historial con ese correo. Revisa cómo lo escribiste.";
 
@@ -47,17 +55,21 @@ export default function PantallaEntrada({
   const [puebloInfo, setPuebloInfo] = useState(() => resolverNodo());
   const [puebloPrueba, setPuebloPrueba] = useState("");
   const [probando, setProbando] = useState(false);
+  const [p2pEdit, setP2pEdit] = useState("");
+  const [p2pInfo, setP2pInfo] = useState("");
 
   const refrescarPueblo = () => {
     const r = resolverNodo();
     setPuebloInfo(r);
     setPuebloEdit(r.url.replace(/^https?:\/\//, ""));
+    setP2pEdit(claveProveedor());
+    setP2pInfo(`${claveCorta()} · ${etiquetaOrigenP2p(origenClave())}`);
     return r;
   };
 
   useEffect(() => {
     if (demoAbierta) refrescarPueblo();
-  }, [demoAbierta]);
+  }, [demoAbierta, modoSel]);
 
   const entrar = () => {
     const usuario = buscarPorCorreo(correo) ?? (correo.trim() === "" ? usuarioDelModo() : undefined);
@@ -104,7 +116,8 @@ export default function PantallaEntrada({
     etiquetaModo(modoActivo),
     casoActivo ? (CASO_CORTO[casoActivo.id] ?? casoActivo.id) : "correo libre",
     puebloInfo.url ? etiquetaOrigen(puebloInfo.origen) : "sin pueblo",
-  ].join(" · ");
+    modoSel === "nodo-offline" ? `p2p ${claveCorta()}` : null,
+  ].filter(Boolean).join(" · ");
 
   return (
     <Pantalla>
@@ -232,6 +245,52 @@ export default function PantallaEntrada({
               </View>
               {puebloPrueba ? <Text style={s.puebloPrueba}>{puebloPrueba}</Text> : null}
             </View>
+
+            {modoSel === "nodo-offline" ? (
+              <>
+                <Text style={s.demoEtiqueta}>Par P2P · llave de la laptop</Text>
+                <View style={s.puebloCaja}>
+                  <Text style={s.puebloOrigen}>Ahora: {p2pInfo || "sin par"}</Text>
+                  <TextInput
+                    value={p2pEdit}
+                    onChangeText={setP2pEdit}
+                    placeholder="64 hex (la imprime npm run proveedor)"
+                    placeholderTextColor={COLOR.apagado}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    autoComplete="off"
+                    accessibilityLabel="Llave pública del proveedor P2P"
+                    style={s.puebloCampo}
+                  />
+                  <View style={s.puebloAcciones}>
+                    <Pressable
+                      onPress={() => {
+                        void fijarClaveP2p(p2pEdit).then((n) => {
+                          setPuebloPrueba(n ? `Par ${n.slice(0, 8)}…` : "Clave inválida (64 hex).");
+                          refrescarPueblo();
+                        });
+                      }}
+                      accessibilityRole="button"
+                      style={({ pressed }) => [s.puebloBtn, pressed && s.press]}
+                    >
+                      <Text style={s.puebloBtnTexto}>Guardar</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => {
+                        void limpiarClaveP2p().then(() => {
+                          setPuebloPrueba("Sin par: queda HTTP /inferir.");
+                          refrescarPueblo();
+                        });
+                      }}
+                      accessibilityRole="button"
+                      style={({ pressed }) => [s.puebloBtn, pressed && s.press]}
+                    >
+                      <Text style={s.puebloBtnTexto}>Quitar</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              </>
+            ) : null}
 
             <Text style={s.demoEtiqueta}>Caso</Text>
             <View style={s.lista}>

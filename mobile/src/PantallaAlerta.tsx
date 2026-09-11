@@ -26,6 +26,7 @@ import type { Usuario } from "./usuarios";
 import { detectarSenales, type Senal } from "./core/reglas";
 import { redactarAlerta } from "./redactarAlerta";
 import { fichaModo, saltarMedPsyLocal } from "./modo";
+import { claveProveedor } from "./p2p";
 import { armarPaquete, mensajeCredito, type Paquete } from "./core/paquete";
 import { fraseLecturas, fraseMeses, resumenHistorial } from "./historial";
 import {
@@ -159,7 +160,9 @@ function Alerta({ peor, demas, lecturas, periodo, mensaje, fallo, redactando, on
         palabra={peor.titulo}
         detalle={mensaje ?? (redactando
           ? (saltarMedPsyLocal()
-            ? "Este teléfono no carga el modelo. Delegando al nodo…"
+            ? (claveProveedor()
+              ? "Buscando par P2P…"
+              : "Este teléfono no carga el modelo. Delegando al nodo…")
             : "El modelo está explicando esto en el teléfono.")
           : undefined)}
         mayusculas={false}

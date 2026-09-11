@@ -14,6 +14,7 @@ import {
   writeAsStringAsync,
 } from "expo-file-system/legacy";
 import { breadcrumbApp, reportarNodoSentry } from "./sentry";
+import { tomarClavePueblo } from "./p2p";
 
 const PUERTO = 8788;
 const ARCHIVO = "pueblo-url.txt";
@@ -113,8 +114,10 @@ async function esPueblo(url: string): Promise<boolean> {
   try {
     const r = await fetch(`${url}/salud`, { method: "GET", signal: ctrl.signal });
     if (!r.ok) return false;
-    const data = await r.json() as { servicio?: string; rol?: string };
-    return data?.servicio === SERVICIO || data?.rol === "corregimiento";
+    const data = await r.json() as { servicio?: string; rol?: string; proveedor?: string };
+    const ok = data?.servicio === SERVICIO || data?.rol === "corregimiento";
+    if (ok) tomarClavePueblo(data?.proveedor);
+    return ok;
   } catch {
     return false;
   } finally {
@@ -259,12 +262,14 @@ export async function probarNodo(
     const r = await fetch(`${destino}/salud`, { method: "GET" });
     const ms = Date.now() - t0;
     if (!r.ok) return { ok: false, detalle: `HTTP ${r.status} · ${ms}ms` };
-    const data = await r.json() as { servicio?: string; rol?: string };
+    const data = await r.json() as { servicio?: string; rol?: string; proveedor?: string };
     if (data?.servicio !== SERVICIO && data?.rol !== "corregimiento") {
       return { ok: false, detalle: `responde pero no es el pueblo · ${ms}ms` };
     }
     hallado = destino;
-    return { ok: true, detalle: `ok · ${ms}ms · ${destino}` };
+    tomarClavePueblo(data?.proveedor);
+    const extra = data?.proveedor ? " · par P2P" : "";
+    return { ok: true, detalle: `ok · ${ms}ms · ${destino}${extra}` };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "falló";
     return { ok: false, detalle: msg };

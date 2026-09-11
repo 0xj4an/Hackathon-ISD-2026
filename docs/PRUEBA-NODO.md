@@ -79,9 +79,37 @@ cd nodo && npm run p2p:probar
 Dos laptops: `npm run p2p:bootstrap -- --host <IP-LAN>` y
 `ENABLE_P2P=1 P2P_BOOTSTRAP=<IP>:49737` en cada nodo.
 
-El teléfono no usa topic. Si hay `EXPO_PUBLIC_P2P_PROVEEDOR` (clave de
-`cd spikes && npm run proveedor`) y el modo es **nodo-offline**, MedPsy intenta
-QVAC `delegate` (`dht.connect(llave)`). Si no entra en 90 s, POST `/inferir`.
+El teléfono no usa topic. En modo **nodo-offline** intenta QVAC `delegate`
+si hay llave (`dht.connect`). Si no entra en 90 s, POST `/inferir`.
+
+### Ensayo (laptop + iPhone)
+
+Misma WiFi. Tres terminales:
+
+```bash
+# 1. pueblo (sigue siendo el plano B HTTP)
+cd nodo && npm run corregimiento
+
+# 2. par QVAC — deja esta terminal abierta; imprime `clave:`
+cd spikes && npm run proveedor
+
+# 3. (opcional, sin teléfono) ¿delegate vive?
+cd spikes && npm run consumidor -- --proveedor <la-clave>
+```
+
+En el iPhone (Metro recargado):
+
+1. Entrada → *Solo para demostración* → modo **Delegar al nodo**.
+2. **Buscar WiFi**. Si el proveedor ya anunció, `/salud` trae la llave
+   (`par P2P` en “Probar”). Si no, pégala a mano (64 hex).
+3. Caso diabetes → Entrar → revisión → alerta.
+4. Primera vez: espera **15–45 s** (“Buscando par P2P…”). Luego sub-segundo.
+5. Consola del pueblo (`:8788/consola`) o LOG de la app: `→ delegate …`.
+   Si dice `delegate falló → HTTP /inferir`, el plano B cubrió.
+
+El proveedor tiene que tener MedPsy en caché (`~/.qvac`). La primera carga
+en frío del modelo en la laptop no es instantánea.
+
 No nombrarlo en el video si no corrió en cámara: [`VIDEO.md`](VIDEO.md).
 
 ---

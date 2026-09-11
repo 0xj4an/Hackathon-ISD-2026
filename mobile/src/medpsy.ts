@@ -16,14 +16,11 @@ function hostDe(url: string) {
 import { LORA_LAB_VERSION, rutaLoraLab } from "./lora";
 import { asegurarUrlNodo } from "./nodoUrl";
 import { saltarMedPsyLocal } from "./modo";
+import { claveProveedor } from "./p2p";
 import { breadcrumbApp, marcarRuntimeSentry, reportarModeloSentry } from "./sentry";
 
 const CTX = 2048;
 const MEDPSY = "HEALTHCARE_1_7B_MEDICAL_Q8_0";
-/** Llave del startQVACProvider (laptop). Vacío = no hay Hyperswarm; queda HTTP /inferir. */
-function claveProveedor(): string {
-  return (process.env.EXPO_PUBLIC_P2P_PROVEEDOR ?? "").trim();
-}
 
 type Qvac = typeof import("@qvac/sdk");
 type OrigenAsset = Parameters<NonNullable<Qvac["downloadAsset"]>>[0]["assetSrc"];

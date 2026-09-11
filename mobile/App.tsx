@@ -55,6 +55,7 @@ import type { Solicitud } from "./src/core/schemas";
 import { buscarPorCorreo, type Usuario } from "./src/usuarios";
 import { fijarModo, modo, resetModo, sinWifiDemo } from "./src/modo";
 import { asegurarUrlNodo, cargarUrlNodo, descubrirPuebloLan } from "./src/nodoUrl";
+import { cargarClaveP2p } from "./src/p2p";
 import { IrInicioContext } from "./src/ui/componentes";
 import { SDK_VERSION } from "./src/perf/logger";
 
@@ -326,6 +327,7 @@ export default function App() {
       try {
         setArranqueDetalle("Cargando el pueblo…");
         await cargarUrlNodo();
+        await cargarClaveP2p();
         if (!vivo) return;
         setArranqueDetalle("Preparando la cola…");
         await iniciarColaSqlite();

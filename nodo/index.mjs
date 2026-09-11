@@ -22,6 +22,8 @@ const SKIP_P2P = process.env.ENABLE_P2P !== "1"
   || Boolean(process.env.RAILWAY_ENVIRONMENT);
 const NODO_TOKEN = process.env.NODO_TOKEN || "";
 const TOPIC_NAME = process.env.TOPIC || "isd-hackathon-credito-salud-v1";
+let claveProveedor = (process.env.P2P_PROVEEDOR || "").trim().toLowerCase();
+if (claveProveedor && !/^[0-9a-f]{64}$/.test(claveProveedor)) claveProveedor = "";
 // En Railway: Volume montado en /data + STATE_DIR=/data para no perder solicitudes al redeploy.
 const STATE_ROOT = process.env.STATE_DIR
   || join(fileURLToPath(new URL(".", import.meta.url)), "state");
@@ -291,6 +293,7 @@ createServer(async (req, res) => {
       peers: peers.size,
       inferir: ROL === "corregimiento",
       p2p: !SKIP_P2P,
+      proveedor: claveProveedor || undefined,
       auth: Boolean(NODO_TOKEN),
       consola: "/consola",
     });
@@ -307,6 +310,21 @@ createServer(async (req, res) => {
 
   if (req.method === "GET" && req.url === "/consola/stream") {
     consola.suscribir(res);
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/p2p") {
+    if (ROL !== "corregimiento") { json(res, 404, { motivo: "solo el pueblo anuncia el par" }); return; }
+    try {
+      const body = JSON.parse(await leerCuerpo(req, 4_000) || "{}");
+      const k = String(body.clave ?? body.proveedor ?? "").trim().toLowerCase().replace(/^0x/, "");
+      if (!/^[0-9a-f]{64}$/.test(k)) { json(res, 400, { motivo: "clave de 64 hex" }); return; }
+      claveProveedor = k;
+      log(`par P2P ${k.slice(0, 8)}…`);
+      json(res, 200, { ok: true, proveedor: k });
+    } catch {
+      json(res, 400, { motivo: "json" });
+    }
     return;
   }
 

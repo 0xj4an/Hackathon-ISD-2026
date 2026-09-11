@@ -4,7 +4,7 @@
  *
  *   local-wifi     MedPsy local + envío al banco
  *   local-offline  MedPsy local + pueblo/pendiente
- *   nodo-offline   delegar al nodo (/inferir) + pueblo/pendiente
+ *   nodo-offline   par P2P (delegate) o pueblo /inferir + pendiente
  */
 import { USUARIOS, type Usuario } from "./usuarios";
 import { COLOR } from "./ui/tokens";
@@ -41,8 +41,8 @@ export const MODOS: Modo[] = [
     id: "nodo-offline",
     wifi: "WiFi no disponible",
     modelo: "Delegar al nodo",
-    detalle: "MedPsy no corre aquí. La inferencia se delega al nodo si hay LAN.",
-    franja: "WiFi no disponible · delegar al nodo.",
+    detalle: "MedPsy no corre aquí. Primero el par P2P; si no entra, el pueblo por HTTP.",
+    franja: "WiFi no disponible · par P2P o pueblo.",
     color: COLOR.inmediata,
   },
 ];

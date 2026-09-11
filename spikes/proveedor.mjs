@@ -34,8 +34,22 @@ if (!r?.publicKey) {
 }
 console.log(`proveedor listo (${Date.now() - t0} ms)`);
 console.log(`clave: ${r.publicKey}`);
-console.log("en el teléfono: EXPO_PUBLIC_P2P_PROVEEDOR=<clave>  (modo nodo-offline)");
-console.log("primera conexión DHT: 15–45 s; luego sub-segundo. Ctrl+C para parar.");
+const rutaClave = join(dir, "datos", "p2p-clave.txt");
+mkdirSync(dirname(rutaClave), { recursive: true });
+writeFileSync(rutaClave, r.publicKey + "\n", { mode: 0o600 });
+const pueblo = (process.env.PUEBLO_URL || "http://127.0.0.1:8788").replace(/\/$/, "");
+try {
+  const pub = await fetch(`${pueblo}/p2p`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ clave: r.publicKey }),
+  });
+  if (pub.ok) console.log(`anunciado en ${pueblo}/salud`);
+  else console.log(`pueblo no tomó la clave (HTTP ${pub.status}). Arranca el pueblo y pégala en la app.`);
+} catch {
+  console.log("pueblo no está. Arráncalo o pega la clave en la app (modo nodo-offline).");
+}
+console.log("teléfono: modo nodo-offline → Buscar WiFi. Primera DHT: 15–45 s. Ctrl+C para parar.");
 
 const parar = async () => {
   await stopQVACProvider().catch(() => {});
