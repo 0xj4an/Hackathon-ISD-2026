@@ -15,6 +15,7 @@
 // `PantallaDatos` sigue en el repo (deudas y personas a cargo) pero el camino
 // de la demo pasa por lo leído → cuota → banco.
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { View, StyleSheet } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import PantallaArranque from "./src/PantallaArranque";
 import PantallaEntrada from "./src/PantallaEntrada";
@@ -29,6 +30,8 @@ import PantallaBanco from "./src/PantallaBanco";
 import PantallaExamen from "./src/PantallaExamen";
 import PantallaFirma from "./src/PantallaFirma";
 import PantallaDesembolso from "./src/PantallaDesembolso";
+import ConsolaDemo from "./src/ConsolaDemo";
+import { demoLog } from "./src/demoLog";
 import { solicitudDeLectura, type LecturaCredito } from "./src/lectura";
 import {
   consultarRespuesta,
@@ -128,7 +131,12 @@ export default function App() {
   };
 
   const conInicio = (nodo: ReactNode) => (
-    <IrInicioContext.Provider value={irInicio}>{nodo}</IrInicioContext.Provider>
+    <IrInicioContext.Provider value={irInicio}>
+      <View style={shell.flex}>
+        {nodo}
+        <ConsolaDemo />
+      </View>
+    </IrInicioContext.Provider>
   );
 
   const cerrarPendiente = async (id: string) => {
@@ -419,10 +427,12 @@ export default function App() {
 
   if (!colaLista) {
     return (
-      <PantallaArranque
-        detalle={arranqueDetalle}
-        onMostrada={ocultarSplashNativo}
-      />
+      <View style={shell.flex}>
+        <PantallaArranque
+          detalle={arranqueDetalle}
+          onMostrada={ocultarSplashNativo}
+        />
+      </View>
     );
   }
 
@@ -437,14 +447,15 @@ export default function App() {
   }
 
   if (!usuario) {
-    return (
+    return conInicio(
       <PantallaEntrada
         onEntrar={(u, m) => {
           fijarModo(m);
+          demoLog(`sesión modo=${m} caso=${u.id}`);
           setUsuario(u);
         }}
         onRegistro={() => setEnRegistro(true)}
-      />
+      />,
     );
   }
 
@@ -617,3 +628,7 @@ export default function App() {
     />,
   );
 }
+
+const shell = StyleSheet.create({
+  flex: { flex: 1 },
+});

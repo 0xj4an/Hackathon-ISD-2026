@@ -8,6 +8,11 @@
  * El LoRA de lab es opcional y reemplazable (`lora.ts`). Solo el examen de laboratorio lo pide.
  */
 import { getAppLogger, recordError, recordInference, type InferenceTask } from "./perf/logger";
+import { demoLog } from "./demoLog";
+
+function hostDe(url: string) {
+  try { return new URL(url).host; } catch { return "bad-url"; }
+}
 import { LORA_LAB_VERSION, rutaLoraLab } from "./lora";
 import { asegurarUrlNodo } from "./nodoUrl";
 import { saltarMedPsyLocal } from "./modo";
@@ -155,6 +160,7 @@ async function completarEnNodo(opts: {
   breadcrumbApp("inferencia", "nodo.start", { task: opts.task });
   const nodo = await asegurarUrlNodo();
   if (!nodo) throw new Error("sin pueblo en esta WiFi");
+  demoLog(`→ POST ${hostDe(nodo)}/inferir task=${opts.task} chars=${opts.user.length}`);
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 180_000);
   const t0 = Date.now();
@@ -172,8 +178,10 @@ async function completarEnNodo(opts: {
     });
     const data = await r.json() as { text?: string; motivo?: string };
     if (!r.ok || typeof data?.text !== "string" || !data.text.trim()) {
+      demoLog(`← /inferir HTTP ${r.status} fallo (${Date.now() - t0}ms)`);
       throw new Error(data?.motivo ?? "el nodo no respondió");
     }
+    demoLog(`← /inferir HTTP ${r.status} ${data.text.length} chars (${Date.now() - t0}ms)`);
     await recordInference({
       task: opts.task,
       model: MEDPSY,
@@ -242,6 +250,9 @@ export async function completarMedPsy(opts: {
         out_chars: text.length,
       });
       getAppLogger().info(`${opts.task} ${text.length} chars lora=${llmConLora ? LORA_LAB_VERSION : "no"}`);
+      demoLog(
+        `MedPsy local task=${opts.task} ttft=${first ?? "—"}ms out=${text.length} lora=${llmConLora ? LORA_LAB_VERSION : "no"}`,
+      );
       return text;
     } finally {
       inflight--;

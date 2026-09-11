@@ -13,8 +13,8 @@ test("banco remoto por https", () => {
 test("local-wifi intenta el banco antes que el pueblo", () => {
   const src = readFileSync(new URL("../../mobile/src/envio.ts", import.meta.url), "utf8");
   const fn = src.slice(src.indexOf("export async function enviarSolicitud"));
-  const banco = fn.indexOf("urlBanco()");
-  const pueblo = fn.indexOf("urlNodo()");
+  const banco = fn.indexOf("intentarBanco");
+  const pueblo = fn.indexOf("intentarPueblo");
   assert.ok(banco >= 0 && pueblo > banco);
 });
 

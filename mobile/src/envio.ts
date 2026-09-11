@@ -9,6 +9,7 @@ import { urlBanco } from "./bancoUrl";
 import { asegurarUrlNodo, urlNodo } from "./nodoUrl";
 import { reportarEnvioSentry, Sentry } from "./sentry";
 import { modo, sinWifiDemo } from "./modo";
+import { demoLog, idCorto } from "./demoLog";
 import type { Respuesta } from "./core/credito/motor";
 import type { Solicitud } from "./core/schemas";
 
@@ -36,8 +37,16 @@ type Pedido = {
   error?: string;
 };
 
-async function pedir(url: string, init: RequestInit, ms: number): Promise<Pedido> {
+async function pedir(
+  url: string,
+  init: RequestInit,
+  ms: number,
+  opts?: { silencioso?: boolean },
+): Promise<Pedido> {
   const t0 = Date.now();
+  const metodo = (init.method ?? "GET").toUpperCase();
+  const quiet = opts?.silencioso === true;
+  if (!quiet) demoLog(`→ ${metodo} ${hostDe(url)}${pathDe(url)}`);
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
   try {
@@ -54,16 +63,21 @@ async function pedir(url: string, init: RequestInit, ms: number): Promise<Pedido
     try {
       body = await r.json() as Pedido["body"];
     } catch (err) {
+      if (!quiet) demoLog(`← HTTP ${r.status} JSON inválido (${Date.now() - t0}ms)`);
       return {
         url, ms: Date.now() - t0, http: r.status, body: null,
         error: err instanceof Error ? `JSON: ${err.message}` : "JSON inválido",
       };
+    }
+    if (!quiet || esFinal(body)) {
+      demoLog(`← HTTP ${r.status} ${resumenBody(body)} (${Date.now() - t0}ms)`);
     }
     return { url, ms: Date.now() - t0, http: r.status, body };
   } catch (err) {
     const msg = err instanceof Error
       ? (err.name === "AbortError" ? `timeout ${ms}ms` : err.message)
       : String(err);
+    if (!quiet) demoLog(`← fallo ${msg} (${Date.now() - t0}ms)`);
     if (err instanceof Error && err.name !== "AbortError") {
       Sentry.addBreadcrumb({
         category: "envio",
@@ -76,6 +90,28 @@ async function pedir(url: string, init: RequestInit, ms: number): Promise<Pedido
   } finally {
     clearTimeout(t);
   }
+}
+
+function pathDe(url: string): string {
+  try {
+    const u = new URL(url);
+    return u.pathname + (u.search || "");
+  } catch {
+    return "";
+  }
+}
+
+function resumenBody(body: Pedido["body"]): string {
+  if (!body) return "sin cuerpo";
+  const d = "decision" in body ? body.decision : undefined;
+  if (!d) return "ok";
+  const partes = [`decision=${d}`];
+  const r = body as Respuesta & { motivo?: string };
+  if (r.grado) partes.push(`grado=${r.grado}`);
+  if (r.monto_aprobado_usd != null) partes.push(`monto=${r.monto_aprobado_usd}`);
+  if (r.cuota_mensual_usd != null) partes.push(`cuota=${r.cuota_mensual_usd}`);
+  if (r.motivo) partes.push(`motivo=${String(r.motivo).slice(0, 48)}`);
+  return partes.join(" ");
 }
 
 function post(sol: Solicitud, via: "telefono" | "pueblo") {
@@ -160,6 +196,9 @@ export async function intentarPueblo(sol: Solicitud, nodo: string): Promise<Envi
 /** Wifi al banco. Si no hay red, el pueblo lo envía. */
 export async function enviarSolicitud(sol: Solicitud): Promise<Envio> {
   const lineas: string[] = [];
+  demoLog(
+    `envío modo=${modo()} id=${idCorto(sol.id)} monto=${sol.monto_solicitado_usd}`,
+  );
 
   if (!sinWifiDemo()) {
     const a = await intentarBanco(sol);
@@ -167,6 +206,7 @@ export async function enviarSolicitud(sol: Solicitud): Promise<Envio> {
     if (a.ok) return { ok: true, envio: "banco", respuesta: a.respuesta, tecnico: a.tecnico };
   } else {
     lineas.push("banco omitido (modo offline)");
+    demoLog("banco omitido (modo offline)");
   }
 
   const nodo = await asegurarUrlNodo();
@@ -185,11 +225,11 @@ export async function enviarSolicitud(sol: Solicitud): Promise<Envio> {
 /** Misma prioridad: banco remoto, luego pueblo. */
 export async function consultarRespuesta(id: string): Promise<Respuesta | null> {
   if (!sinWifiDemo()) {
-    const a = await pedir(`${urlBanco()}/respuesta/${id}`, {}, 4000);
+    const a = await pedir(`${urlBanco()}/respuesta/${id}`, {}, 4000, { silencioso: true });
     if (esFinal(a.body)) return a.body;
   }
   const nodo = await asegurarUrlNodo();
   if (!nodo) return null;
-  const b = await pedir(`${nodo}/respuesta/${id}`, {}, 4000);
+  const b = await pedir(`${nodo}/respuesta/${id}`, {}, 4000, { silencioso: true });
   return esFinal(b.body) ? b.body : null;
 }
