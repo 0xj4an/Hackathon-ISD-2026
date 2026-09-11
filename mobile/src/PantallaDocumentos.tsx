@@ -291,7 +291,7 @@ export default function PantallaDocumentos({
 
       <View style={s.arriba}>
         <Text style={s.titular}>
-          {delega ? "El OCR es{"\n"}aquí" : "Se leen{"\n"}aquí dentro"}
+          {delega ? "El OCR es\naquí" : "Se leen\naquí dentro"}
         </Text>
         <Text style={s.parrafo}>
           {delega
