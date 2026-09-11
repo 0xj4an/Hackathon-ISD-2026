@@ -81,6 +81,25 @@ Criterios que mueve: C6, C10, …
 
 ## Corridas
 
+### 2026-09-11 ~00:02–00:06 · iPhone 17 Pro Max · Sentry `1.0.5+2`
+
+Build: Release / Metro en mano · `isd-hackathon-mobile@1.0.5+2`.
+Quién: equipo (Sentry + logs pueblo `:8788`).
+Modo: LAN al pueblo (`192.168.0.17` → `192.168.0.19`).
+Detalle ops: [`SENTRY.md`](SENTRY.md) § 11 sep · [`PRUEBA-NODO.md`](PRUEBA-NODO.md).
+
+| Paso | Resultado | Qué se vio |
+| --- | --- | --- |
+| Discovery | **ok** | `GET /salud` desde `192.168.0.17` |
+| Consola | **ok** | `POST /consola/linea` + cinta de modo |
+| Alerta | **ok** | `alerta: ok` 00:03 |
+| Lectura / extract | **ok** | `lectura: ok 1/1`; `inferencia: extraccion @p2p-delegate` 00:04 |
+| Pueblo → banco | **ok** | `POST /solicitud` `e72785e4…` monto 920 → **aprobada** 00:05:21 |
+| Watchdog / OCR galloc | no en esta ventana | última Watchdog 23:43 (10 sep) |
+
+Criterios: cierra anotación de **crédito LAN + delegate de extracción** en la
+misma noche. Siguen abiertos: ensayos ×3, `perf.jsonl`, video.
+
 ### 2026-09-10 ~21:03–21:36 · iPhone 17 Pro Max · Sentry `1.0.5+2`
 
 Build: Release en mano · `isd-hackathon-mobile@1.0.5+2` (dist `2`).

@@ -17,7 +17,7 @@ El `release` lo arma JS desde `app.json` + `ios.buildNumber`:
 
 | Release | Notas |
 |---|---|
-| `…@1.0.5+2` | Arranque ≥1.8 s, pantallas de envío, telemetría completa. **Medido 10 sep noche** |
+| `…@1.0.5+2` | Arranque ≥1.8 s, envío, telemetría. **Medido 10 y 11 sep** (pueblo + `delegate`) |
 | `…@1.0.4` | JS nuevo sobre binario viejo (icono/splash no) |
 | `…@1.0.2` / anteriores | Builds previos / debug |
 
@@ -78,6 +78,38 @@ cd Hackathon-ISD-2026 && git pull origin main && cd mobile && npm install
 `ios/` está en `.gitignore`: el bump de versión vive en `mobile/app.json`
 (`version` + `ios.buildNumber`). El prebuild/`run:ios` lo materializa en el
 binario.
+
+---
+
+## Corrida medida · 11 sep 2026 ~00:02–00:06 (hora Panamá)
+
+Release **`isd-hackathon-mobile@1.0.5+2`**. Pueblo `:8788` en `192.168.0.19`.
+Teléfono `192.168.0.17`. Evidencia: Sentry Issues + logs del corregimiento.
+
+### Qué salió bien
+
+| Evento | Detalle |
+|---|---|
+| `GET /salud` | Discovery LAN desde el iPhone |
+| `POST /consola/linea` | Espejo de la consola negra |
+| `alerta: ok` | Redacción MedPsy (25 lifetime; última 00:03) |
+| `lectura: ok 1/1` | Docs (13 lifetime; última 00:04) |
+| `inferencia: extraccion @p2p-delegate` | 72 eventos; última 00:04 |
+| `credito: ok via pueblo` | `POST /solicitud` `e72785e4…` monto 920 → **aprobada** 00:05:21 |
+
+### Qué no es crash
+
+Los Issues `credito:`, `alerta: ok`, `lectura: ok`, `inferencia: … @p2p-delegate`
+son **info** con prefijo de telemetría. No resolverlos como bugs.
+
+### Riesgo (no nuevos a las 00:06)
+
+| Issue | Nivel | Count | Última |
+|---|---|---|---|
+| `WatchdogTermination` (MOBILE-7) | fatal | 10 | 23:43 (10 sep) |
+| `ggml_gallocr_alloc_graph` (MOBILE-3) | error | 28 | 20:50 (10 sep) |
+| `MODEL_UNLOAD_FAILED` (MOBILE-N) | error | 1 | 23:20 (10 sep) |
+| `INFERENCE_CANCELLED` | error | 17 | ~21:22 (10 sep) |
 
 ---
 

@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Ina Igar — pitch. Salud y crédito donde no llega la señal. Decentralized AI Hackathon, ISD Summit 2026.">
+<meta name="description" content="Ina Igar — pitch. Salud y crédito donde no llega la señal. Tres caminos según WiFi y el teléfono.">
 <meta name="color-scheme" content="light">
 <meta property="og:title" content="Ina Igar · Pitch">
-<meta property="og:description" content="Salud y crédito donde no llega la señal. MedPsy en el teléfono. El banco nunca ve la cédula.">
+<meta property="og:description" content="La persona se entera y pide el crédito en el teléfono. Las fotos no salen. El banco recibe un JSON.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="/og.png">
 <title>Ina Igar · Pitch</title>
@@ -48,7 +48,7 @@ a{color:inherit}
   background:linear-gradient(transparent,rgba(17,17,17,.55));
 }
 .bar .n{font-size:.7rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#F7F4EE;min-width:3.4ch}
-.dots{display:flex;gap:5px;flex:1;justify-content:center}
+.dots{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap}
 .dots button{width:7px;height:7px;background:#F7F4EE;opacity:.28}
 .dots button[aria-current="true"]{opacity:1;width:18px}
 .nav{display:flex;gap:8px}
@@ -77,10 +77,6 @@ a{color:inherit}
 .split>div{background:var(--paper);padding:22px 18px}
 .split h3{margin:0 0 8px;font-size:1.05rem;font-weight:800;letter-spacing:-.02em}
 .split p{font-size:.92rem}
-.flow{display:grid;gap:0;margin-top:22px;max-width:560px}
-.flow li{list-style:none;display:grid;grid-template-columns:2.4rem 1fr;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
-.flow{padding:0;margin-left:0}
-.flow .n{font-size:.68rem;font-weight:800;letter-spacing:.12em;color:var(--mute);padding-top:4px}
 .bill{margin-top:20px;border:1px solid var(--line);background:#fff;max-width:520px}
 .row{display:flex;justify-content:space-between;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line);font-size:.95rem}
 .row:last-of-type{border:0}
@@ -91,10 +87,6 @@ a{color:inherit}
 .grid3>div{background:var(--paper);padding:18px 16px}
 .grid3 strong{display:block;font-size:clamp(1.5rem,3vw,2rem);letter-spacing:-.04em;line-height:1;margin-bottom:8px}
 .grid3 span{color:var(--mute);font-size:.88rem}
-.tracks{display:grid;gap:10px;margin-top:22px;max-width:640px}
-.tracks article{border-top:2px solid var(--ink);padding-top:10px}
-.tracks h3{margin:0 0 4px;font-size:1rem;font-weight:800}
-.tracks p{font-size:.9rem;max-width:none}
 .facts{margin-top:18px}
 .fact{display:grid;grid-template-columns:7.5rem 1fr;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:.92rem}
 .fact dt{font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);padding-top:3px}
@@ -105,11 +97,56 @@ a{color:inherit}
 .ink .links a{border-color:rgba(247,244,238,.28)}
 .foot{margin-top:18px;font-size:.78rem;color:var(--mute);max-width:46ch}
 .ink .foot{color:rgba(247,244,238,.45)}
+
+/* Flechas · diapositiva */
+.pipe{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;margin-top:22px;max-width:760px}
+.pipe .nodo{
+  background:#fff;border:1px solid var(--line);
+  padding:12px 14px;min-width:7.2rem;flex:1 1 7.2rem;
+}
+.ink .pipe .nodo,.hot .pipe .nodo{background:rgba(247,244,238,.08);border-color:rgba(247,244,238,.22);color:#F7F4EE}
+.keep .pipe .nodo{background:rgba(255,255,255,.55)}
+.pipe .nodo small{display:block;font-size:.62rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:4px}
+.ink .pipe .nodo small,.hot .pipe .nodo small{color:rgba(247,244,238,.5)}
+.pipe .nodo b{display:block;font-size:.92rem;letter-spacing:-.02em;line-height:1.25}
+.pipe .flecha{
+  display:flex;align-items:center;justify-content:center;
+  width:28px;flex:0 0 28px;color:var(--ink);font-size:1.15rem;font-weight:800;line-height:1;
+}
+.ink .pipe .flecha,.hot .pipe .flecha{color:#F7F4EE}
+.fork{display:grid;gap:10px;margin-top:22px;max-width:720px}
+.fork article{
+  display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1.4fr);
+  gap:10px;align-items:center;
+}
+.fork .de,.fork .a{
+  border:1px solid var(--line);background:#fff;padding:12px 14px;
+}
+.fork .de{font-weight:800;font-size:.92rem}
+.fork .a{font-size:.92rem;color:var(--mute)}
+.fork .a b{color:var(--ink)}
+.fork .flecha{text-align:center;font-weight:800;font-size:1.2rem;color:var(--ink)}
+.meta3{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);margin-top:20px;border:1px solid var(--line);max-width:720px}
+.meta3>div{background:var(--paper);padding:16px 14px}
+.meta3 h3{margin:0 0 6px;font-size:.68rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.meta3 p{font-size:.9rem;max-width:none}
+.road{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:8px;align-items:stretch;margin-top:22px;max-width:760px}
+.road .nodo{background:#fff;border:1px solid var(--line);padding:16px 14px}
+.road h3{margin:0 0 8px;font-size:1rem;font-weight:800}
+.road p{font-size:.88rem;max-width:none}
+.road .flecha{display:flex;align-items:center;font-weight:800;font-size:1.3rem}
+
 @media(max-width:700px){
-  .split,.grid3{grid-template-columns:1fr}
+  .split,.grid3,.meta3{grid-template-columns:1fr}
   .fact{grid-template-columns:1fr;gap:2px}
   .mark{width:120vw;right:-48%;top:18%;opacity:.28}
   .s{justify-content:flex-end}
+  .pipe{flex-direction:column}
+  .pipe .flecha{width:auto;flex-basis:auto;height:22px;transform:rotate(90deg)}
+  .fork article{grid-template-columns:1fr}
+  .fork .flecha{transform:rotate(90deg);padding:2px 0}
+  .road{grid-template-columns:1fr}
+  .road .flecha{transform:rotate(90deg);height:22px;justify-content:center}
 }
 @media(prefers-reduced-motion:reduce){html,.deck{scroll-behavior:auto}}
 @media print{
@@ -123,7 +160,7 @@ a{color:inherit}
 </head>
 <body>
 <nav class="bar" aria-label="Diapositivas">
-  <span class="n" id="n">01 / 10</span>
+  <span class="n" id="n">01 / 12</span>
   <div class="dots" id="dots"></div>
   <div class="nav">
     <button type="button" id="prev" aria-label="Anterior">‹</button>
@@ -133,108 +170,177 @@ a{color:inherit}
 
 <div class="deck" id="deck">
 
-<section class="s ink" data-i="1">
+<section class="s ink">
   <img class="mark" src="/huellas-mark-blanco.png" width="1024" height="1024" alt="">
-  <p class="kicker">Decentralized AI Hackathon · ISD Summit 2026</p>
+  <p class="kicker">Panamá · interior y comarcas</p>
   <p class="stat">42%</p>
-  <h2>de los adultos en Panamá viven con presión alta.</h2>
-  <p>En el interior, enterarse es bajar al pueblo. Pagar de una vez. Volver. Mucha gente no baja: no sabe si vale la pena, ni cuánto va a costar.</p>
+  <h2>de los adultos viven con presión alta.</h2>
+  <p>Enterarse es bajar al pueblo. Pagar de una vez. Volver. Mucha gente no baja: no sabe si vale la pena, ni cuánto va a costar.</p>
 </section>
 
-<section class="s paper" data-i="2">
-  <p class="kicker">Ina Igar · Camino de la medicina</p>
-  <h2>Dos preguntas. En el teléfono. Sin internet.</h2>
+<section class="s paper">
+  <p class="kicker">La tesis</p>
+  <h2>Dos preguntas. En el teléfono. Sin depender de la nube.</h2>
   <div class="split">
     <div>
       <h3>01 · Qué tengo</h3>
-      <p>Lee el historial o un examen en papel. Las reglas marcan el rango. MedPsy solo redacta: qué se vio, qué hacer, a quién ver.</p>
+      <p>Lee el historial o un examen en papel. Las reglas marcan el rango. El modelo solo redacta. No diagnostica.</p>
     </div>
     <div>
       <h3>02 · Cómo lo pago</h3>
-      <p>Cotiza el año. Fotografía cédula e ingresos. El teléfono las lee y las borra. Al banco viaja un JSON. Nunca la foto, nunca el diagnóstico.</p>
+      <p>Cotiza el año. Fotografía cédula e ingresos. Las lee y las borra. Al banco viaja un JSON. Nunca la foto, nunca el motivo clínico.</p>
     </div>
   </div>
 </section>
 
-<section class="s keep" data-i="3">
+<section class="s paper">
+  <p class="kicker">Producto</p>
+  <h2>De abrir la app a la cuota.</h2>
+  <p>Un camino. La persona no elige “salud o banco”: sale con una ruta y, si hace falta, con el crédito de esa ruta.</p>
+  <div class="pipe" aria-label="Camino del producto">
+    <div class="nodo"><small>01</small><b>Historial o papel</b></div>
+    <div class="flecha" aria-hidden="true">→</div>
+    <div class="nodo"><small>02</small><b>Reglas + alerta</b></div>
+    <div class="flecha" aria-hidden="true">→</div>
+    <div class="nodo"><small>03</small><b>Costo del año</b></div>
+    <div class="flecha" aria-hidden="true">→</div>
+    <div class="nodo"><small>04</small><b>Docs → JSON → banco</b></div>
+  </div>
+</section>
+
+<section class="s keep">
   <p class="kicker">Por qué local</p>
   <h2>La cédula no sale. El motivo de salud tampoco.</h2>
-  <p>El colaborador de Philips captura equipos. El de Caja admite expedientes. Nosotros estamos del otro lado del mostrador: la persona en Comarca o interior, con señal intermitente y un Android de gama media.</p>
-  <p style="margin-top:14px"><b>Nunca sale:</b> fotos, historial, laboratorio, el texto de MedPsy, el modelo entero (2.1 GB).</p>
-  <p style="margin-top:8px"><b>Lo único que ve el banco:</b> nombre, cédula, ingreso, monto, motivo «salud».</p>
+  <p>Estamos del lado de la persona: Comarca o interior, señal intermitente, un Android de gama media. El banco no ve el expediente. El pueblo no ve la foto.</p>
+  <div class="pipe">
+    <div class="nodo"><small>Se queda</small><b>Foto, historial, lab, texto del modelo, 2.1 GB</b></div>
+    <div class="flecha" aria-hidden="true">→</div>
+    <div class="nodo"><small>Viaja</small><b>Nombre, cédula, ingreso, monto, motivo «salud»</b></div>
+  </div>
 </section>
 
-<section class="s paper" data-i="4">
-  <p class="kicker">El flujo</p>
-  <h2>De abrir la app a la cuota. Un camino.</h2>
-  <ol class="flow">
-    <li><span class="n">01</span><span>Historial sintético o foto del examen. Reglas OMS / ADA. MedPsy redacta en inglés; la UI está en español. No es diagnóstico.</span></li>
-    <li><span class="n">02</span><span>Paquete del año: consultas, labs, medicamento. El monto del crédito es ese total, no un mínimo inventado.</span></li>
-    <li><span class="n">03</span><span>OCR + MedPsy en el teléfono. Fotos se borran. JSON a banco por wifi, o al nodo del pueblo por LAN. Cola SQLite si no hay salida.</span></li>
-    <li><span class="n">04</span><span>El banco corre el mismo motor que el teléfono. Trazo con el dedo. Desembolso de la demo: simulado.</span></li>
-  </ol>
+<section class="s ink">
+  <p class="kicker">Arquitectura</p>
+  <h2>Tres caminos. WiFi × el teléfono.</h2>
+  <p>OCR siempre aquí. Inferencia y crédito son tuberías distintas. La persona elige el camino al entrar.</p>
+  <div class="fork">
+    <article>
+      <div class="de">WiFi disponible + Modelo local</div>
+      <div class="flecha" aria-hidden="true">→</div>
+      <div class="a"><b>MedPsy en el teléfono</b> · JSON directo al banco</div>
+    </article>
+    <article>
+      <div class="de">WiFi no disponible + Modelo local</div>
+      <div class="flecha" aria-hidden="true">→</div>
+      <div class="a"><b>MedPsy en el teléfono</b> · JSON al pueblo o cola</div>
+    </article>
+    <article>
+      <div class="de">WiFi no disponible + Delegar al nodo</div>
+      <div class="flecha" aria-hidden="true">→</div>
+      <div class="a"><b>MedPsy en el pueblo</b> · OCR aquí · JSON al pueblo</div>
+    </article>
+  </div>
 </section>
 
-<section class="s paper" data-i="5">
-  <p class="kicker">Lo que nadie cotiza</p>
+<section class="s paper">
+  <p class="kicker">Camino 01</p>
+  <h2>WiFi disponible + Modelo local</h2>
+  <div class="pipe">
+    <div class="nodo"><small>OCR</small><b>En el teléfono</b></div>
+    <div class="flecha" aria-hidden="true">→</div>
+    <div class="nodo"><small>MedPsy + LoRA</small><b>En el teléfono</b></div>
+    <div class="flecha" aria-hidden="true">→</div>
+    <div class="nodo"><small>Crédito</small><b>HTTPS al banco</b></div>
+  </div>
+  <div class="meta3">
+    <div><h3>A quién</h3><p>Cabecera de distrito. Hay datos. El teléfono aguanta el modelo de 2.1 GB.</p></div>
+    <div><h3>Qué resuelve</h3><p>Trámite sin llevar papeles a la sucursal. La IA no sale a la nube.</p></div>
+    <div><h3>Cómo se usa</h3><p>Se abre la app, se elige este camino, se lee y se envía. Si el banco no responde, cae al pueblo.</p></div>
+  </div>
+</section>
+
+<section class="s paper">
+  <p class="kicker">Camino 02</p>
+  <h2>WiFi no disponible + Modelo local</h2>
+  <div class="pipe">
+    <div class="nodo"><small>OCR</small><b>En el teléfono</b></div>
+    <div class="flecha" aria-hidden="true">→</div>
+    <div class="nodo"><small>MedPsy + LoRA</small><b>En el teléfono</b></div>
+    <div class="flecha" aria-hidden="true">→</div>
+    <div class="nodo"><small>Crédito</small><b>Pueblo o cola</b></div>
+  </div>
+  <div class="meta3">
+    <div><h3>A quién</h3><p>El mismo teléfono capaz, en el interior, en modo avión, o sin saldo de datos.</p></div>
+    <div><h3>Qué resuelve</h3><p>La alerta y la lectura no se apagan porque cayó la red. El crédito espera en el pueblo.</p></div>
+    <div><h3>Cómo se usa</h3><p>Se trabaja offline. Al hallar el nodo del corregimiento, el JSON sale por LAN. Si no hay nodo, queda pendiente.</p></div>
+  </div>
+</section>
+
+<section class="s paper">
+  <p class="kicker">Camino 03</p>
+  <h2>WiFi no disponible + Delegar al nodo</h2>
+  <div class="pipe">
+    <div class="nodo"><small>OCR</small><b>En el teléfono</b></div>
+    <div class="flecha" aria-hidden="true">→</div>
+    <div class="nodo"><small>MedPsy</small><b>En el nodo del pueblo</b></div>
+    <div class="flecha" aria-hidden="true">→</div>
+    <div class="nodo"><small>Crédito</small><b>Pueblo o cola</b></div>
+  </div>
+  <div class="meta3">
+    <div><h3>A quién</h3><p>Android de gama media que no carga el modelo. El usuario real del interior, no el iPhone de la demo.</p></div>
+    <div><h3>Qué resuelve</h3><p>Nadie queda fuera porque el teléfono es viejo. El pueblo presta el cómputo. La foto no viaja.</p></div>
+    <div><h3>Cómo se usa</h3><p>La persona elige delegar. El teléfono manda texto al nodo (P2P; si no, HTTP). El banco sigue viendo solo JSON.</p></div>
+  </div>
+</section>
+
+<section class="s paper">
+  <p class="kicker">Unidad económica</p>
   <h2>El examen cuesta B/. 15. Tratarse, B/. 920.</h2>
   <div class="bill">
     <div class="row"><span>Consulta y laboratorios del año</span><span>261–540</span></div>
     <div class="row hi"><span>Metformina 850 mg · 730 tabletas</span><span>380</span></div>
     <div class="tot"><span>Diabetes tipo 2 · un año</span><b>B/. 641–920</b></div>
   </div>
-  <p style="margin-top:16px">La pastilla es el <b>41%</b> del total. Precio tope del Decreto Ejecutivo 36. Por eso el crédito no pide monto mínimo: pide exactamente lo que cuesta atenderse.</p>
+  <p style="margin-top:16px">La pastilla es el <b>41%</b> del total. Precio tope del Decreto Ejecutivo 36. El crédito no pide un mínimo inventado: pide exactamente lo que cuesta atenderse.</p>
 </section>
 
-<section class="s ink" data-i="6">
-  <p class="kicker">Technical · 35%</p>
+<section class="s paper">
+  <p class="kicker">Por qué aguanta</p>
   <h2>Quién decide no es el modelo. Son reglas.</h2>
-  <p>MedPsy 1.7B Q8_0 corre en el iPhone. Primer token <b>2.9 s</b> en CPU. Si el teléfono no carga el modelo, el texto va al nodo. Nunca a un proveedor de IA remoto.</p>
-  <p style="margin-top:12px">OCR_LATIN lee documentos. LoRA <b>lab-v3</b> subió JSON válido de laboratorio de 5% a 68%. El scorecard de crédito es determinista: misma función en teléfono y banco. SDK <b>0.18.2</b>.</p>
-</section>
-
-<section class="s paper" data-i="7">
-  <p class="kicker">Tres premios, un producto</p>
-  <h2>General. Tether Psy. Caja de Ahorros.</h2>
-  <div class="tracks">
-    <article>
-      <h3>Sovereign Intelligence at the Edge · 6,000</h3>
-      <p>Conectividad intermitente, datos que no pueden salir, trabajo en campo. Demo: modo avión mientras MedPsy y el OCR corren.</p>
-    </article>
-    <article>
-      <h3>QVAC Psy · 1,500</h3>
-      <p>MedPsy con función central: redacta la alerta y extrae documentos. Licencia MIT, log de rendimiento, nombres honestos, disclaimer en pantalla.</p>
-    </article>
-    <article>
-      <h3>Caja de Ahorros · 1,500</h3>
-      <p>Inclusión financiera donde la sucursal queda lejos. Documentos leídos en el dispositivo. El asesor nunca ve la cédula ni el extracto.</p>
-    </article>
-  </div>
-</section>
-
-<section class="s paper" data-i="8">
-  <p class="kicker">Medido, no prometido</p>
-  <h2>El caso sano no dispara nada.</h2>
   <div class="grid3">
     <div><strong>14</strong><span>señales con umbral citado</span></div>
     <div><strong>9/9</strong><span>casos de eval en verde</span></div>
-    <div><strong>2.9 s</strong><span>TTFT MedPsy Q8 en iPhone</span></div>
+    <div><strong>2.9 s</strong><span>primer token MedPsy en iPhone</span></div>
   </div>
   <dl class="facts">
-    <div class="fact"><dt>Hardware</dt><dd>Demo en <b>iPhone 17 Pro Max</b>. El usuario del brief es rural con Android. El Xiaomi de prueba aborta Bare; está en el repo.</dd></div>
-    <div class="fact"><dt>Transporte</dt><dd>HTTP al banco o al pueblo. Hyperswarm no es el camino de la demo. Firma = trazo, no firma electrónica legal.</dd></div>
-    <div class="fact"><dt>Datos</dt><dd>100% sintéticos. Sin VIH en el demo público. Sin PII real.</dd></div>
+    <div class="fact"><dt>Lab</dt><dd>LoRA <b>lab-v3</b> subió JSON válido de laboratorio de <b>5% a 68%</b>. Rangos: catálogo, no el modelo.</dd></div>
+    <div class="fact"><dt>Banco</dt><dd>El mismo scorecard corre en el teléfono y en el banco. Firma = trazo. Desembolso de la demo: simulado.</dd></div>
+    <div class="fact"><dt>Nube</dt><dd>Nunca un proveedor de IA remoto. Inferencia en el dispositivo o en el nodo del pueblo.</dd></div>
   </dl>
 </section>
 
-<section class="s hot" data-i="9">
-  <p class="kicker">Qué no hacemos</p>
-  <h2>No diagnosticamos. No inventamos impuestos. No subimos fotos.</h2>
-  <p>Philips está saturado de inventario hospitalario. Ovnicom, de DNS. Nosotros no copiamos el brief corporativo: resolvemos a la persona que esos briefs no nombran.</p>
-  <p style="margin-top:12px">Si el modelo duda, el campo queda desconocido. Si el documento no se lee, va a revisión, no a rechazo. Confianza baja no es un mal cliente.</p>
+<section class="s ink">
+  <p class="kicker">Roadmap</p>
+  <h2>Hoy el camino. Después el país.</h2>
+  <div class="road">
+    <div class="nodo">
+      <h3>Hoy</h3>
+      <p>Tres caminos vivos. OCR aquí. MedPsy en el teléfono o en el pueblo. Crédito al banco o por LAN. LoRA de laboratorio.</p>
+    </div>
+    <div class="flecha" aria-hidden="true">→</div>
+    <div class="nodo">
+      <h3>Campo</h3>
+      <p>Android de gama media. Cola durable probada. Más nodos de corregimiento. Detección de capacidad sin elegir a mano.</p>
+    </div>
+    <div class="flecha" aria-hidden="true">→</div>
+    <div class="nodo">
+      <h3>País</h3>
+      <p>Desembolso real. Red de pueblos. El banco opera inclusión sin ver la cédula. La persona no viaja para enterarse.</p>
+    </div>
+  </div>
 </section>
 
-<section class="s ink" data-i="10">
+<section class="s ink">
   <img class="mark" src="/huellas-mark-blanco.png" width="1024" height="1024" alt="">
   <p class="kicker">Ina · medicina · Igar · camino</p>
   <h2>Camino de la medicina.</h2>
@@ -242,9 +348,8 @@ a{color:inherit}
   <div class="links">
     <a href="https://github.com/0xj4an/Hackathon-ISD-2026">Repo</a>
     <a href="/">Sitio</a>
-    <a href="https://github.com/0xj4an/Hackathon-ISD-2026">0xj4an + Artur</a>
   </div>
-  <p class="foot">@qvac/sdk 0.18.2 · MedPsy 1.7B Q8_0 · OCR_LATIN · MIT · Inferencia en el dispositivo o en el nodo. Nunca en la nube.</p>
+  <p class="foot">MedPsy 1.7B · OCR en el teléfono · inferencia en el dispositivo o en el nodo. Nunca en la nube.</p>
 </section>
 
 </div>

@@ -10,9 +10,9 @@ jurado del reto General, el del podio de 6,000.
 en la grabación, no se menciona. Un jurado técnico revisa el repo después.
 
 **Camino de la grabación (prioridad):** Caso diabetes → alerta MedPsy → crédito
-con **modo avión** → documentos → cuota. **Plano corto de examen** (foto de
-examen + franja `MedPsy + LoRA`) si el rebuild con el `.gguf` ya está en el
-iPhone; si no, se omite y el LoRA se deja en el repo / `RESULTADOS.md`.
+con **modo avión** (`local-offline`) → documentos → cuota. **Plano corto de
+examen** (carga “MedPsy + LoRA lab-v3 está corriendo…” + franja en resultados).
+Si cabe: 15 s de `nodo-offline` (OCR aquí, MedPsy en el pueblo / `delegate`).
 
 ---
 
@@ -24,7 +24,7 @@ El reglamento pide cosas concretas, y cada una necesita su plano:
 | --- | --- |
 | Un modelo Psy con función central | MedPsy redacta la alerta; MedPsy (+ LoRA en examen) lee documentos / lab |
 | Flujo de usuario completo, no una llamada al SDK | De abrir la app a la respuesta del banco (o pendiente sin nodo) |
-| Toda la inferencia en el dispositivo | Modo avión encendido durante alerta y lectura |
+| Inferencia local (o delegada) | Avión + `local-offline`: MedPsy aquí. `nodo-offline`: OCR aquí, LLM en el pueblo |
 | Comunicar limitaciones (proyectos médicos) | El aviso en pantalla, leído en voz alta |
 | Registro de rendimiento estructurado | Pantalla de registros / `perf.jsonl` con TTFT real |
 | Hardware honesto | Se nombra el iPhone y se dice que el usuario es rural con Android |
@@ -201,7 +201,7 @@ es un problema.
 
 ## Las cifras, y de dónde salen
 
-Verificadas contra el repo el **10 de septiembre de 2026**. Si alguna cambia, se
+Verificadas contra el repo el **11 de septiembre de 2026**. Si alguna cambia, se
 vuelve a verificar antes de grabar.
 
 | Cifra | Verificación |
@@ -229,17 +229,18 @@ vuelve a verificar antes de grabar.
 - [ ] Nadie dice "CD4" ni nombra una enfermedad como diagnóstico.
 - [ ] Consola laptop abierta: pueblo corriendo →
       [http://127.0.0.1:8788/consola](http://127.0.0.1:8788/consola)
-      (el celular espeja el LOG). En el teléfono también hay chip LOG.
+      (el celular espeja). En el teléfono la consola negra está **siempre
+      visible**, no un chip. Vacía: “Consola lista para recibir datos”.
 
 ## Lo que NO se dice
 
-- **"Hyperswarm P2P"** si la demo salió por HTTP. Con wifi: "el teléfono habla
-  con el banco". Sin internet: "el pueblo se lo lleva". Tampoco digas
-  **delegate** si el respaldo fue HTTP `/inferir`.
-- **"A" o "B" frente al jurado** para salud o transporte: di "historial", "examen",
-  "banco", "pueblo".
-  Inferencia: "el teléfono intenta el modelo; si no puede, le pide el texto al
-  nodo". Ver [`PRUEBA-NODO.md`](PRUEBA-NODO.md).
+- **"Hyperswarm" / topic** (nodo↔nodo). Eso no es la demo. Crédito: con wifi
+  "el teléfono habla con el banco"; sin internet "el pueblo se lo lleva".
+- **`delegate`** solo si se vio en cámara (cinta `Delegar al nodo` / consola
+  P2P). Si el respaldo fue HTTP `/inferir`, di "el pueblo corre MedPsy".
+- **"A" o "B" frente al jurado** para salud o transporte: di "historial",
+  "examen", "banco", "pueblo". Tres caminos: WiFi + modelo local / sin WiFi +
+  modelo local / sin WiFi + delegar al nodo. Ver [`ADR-006`](../.ai/adr/ADR-006-tres-modos-segun-el-telefono.md).
 - **"Diagnostica"**, "detecta enfermedades", "sabe qué tienes". Detecta valores
   fuera de rango y sugiere una ruta.
 - Cualquier cifra que no se vea en pantalla (o en la tabla del Mac) en ese momento.

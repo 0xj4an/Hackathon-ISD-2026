@@ -62,7 +62,9 @@ Dos ejes: **WiFi al banco** × **capacidad del teléfono**. OCR siempre aquí.
 
 `nodo-offline` **simula** un teléfono sin capacidad. El iPhone de demo sí puede
 cargar MedPsy; la UI no dice que se fuerza. Hyperswarm por topic (nodo↔nodo)
-sigue apagado salvo `ENABLE_P2P=1`.
+sigue apagado salvo `ENABLE_P2P=1`. Cada pantalla lleva la cinta de modo
+(los mismos letreros de Entrada) y una consola negra; la laptop espeja en
+[http://127.0.0.1:8788/consola](http://127.0.0.1:8788/consola).
 
 ## El nombre
 

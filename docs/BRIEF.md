@@ -22,9 +22,10 @@ Camino en app: Entrada → **Salud** → **Revisión** → Alerta (si hay señal
    de salud.
 3. **Documentos.** Foto cédula / ingresos / extracto. OCR aquí. MedPsy extrae
    en el teléfono o, sin capacidad, se delega al nodo. **Fotos se borran**.
-4. **Examen de laboratorio.** Opción tras el resultado: OCR aquí → **MedPsy +
-   LoRA `lab-v3`** si hay modelo local; sin capacidad, MedPsy base en el nodo
-   (sin LoRA) → `clasificar()`.
+4. **Examen de laboratorio.** OCR aquí → **MedPsy + LoRA `lab-v3`** en el
+   teléfono (carga y resultados lo nombran). En `nodo-offline` el nodo corre
+   MedPsy; la UI sigue nombrando LoRA lab-v3. Rangos: `clasificar()`, no el
+   modelo.
 5. **Cola offline.** SQLite si no hay salida; al reabrir se retoma en cuota.
 6. **Envío.** Mismo JSON, nunca fotos. `local-wifi`: banco Railway (luego
    pueblo si hace falta). `local-offline` y `nodo-offline`: LAN al pueblo.
@@ -37,8 +38,8 @@ Camino en app: Entrada → **Salud** → **Revisión** → Alerta (si hay señal
 ## Arquitectura
 ```
 mobile/   Expo + @qvac/sdk 0.18.2 · UI, cámara, OCR, MedPsy, LoRA lab-v3, cola, HTTP
-          descubrimiento LAN (nodoUrl.ts) · core: schemas, prompts, reglas, crédito
-nodo/     pueblo LAN :8788 + /inferir; banco remoto (Railway)
+          cinta de modo + consola negra · descubrimiento LAN · core/
+nodo/     pueblo LAN :8788 + /inferir + /consola; banco remoto (Railway)
 landing/  sitio + admin
 data/ eval/ perf/ docs/ spikes/
 ```

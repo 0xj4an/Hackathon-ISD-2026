@@ -6,13 +6,14 @@ Ordenado por lo que decide el resultado, no por horario. El detalle de cada
 punto está en [`02-stack-y-plan.md`](../.ai/runs/mvp-hackathon/02-stack-y-plan.md).
 
 Foto viva: [`ESTADO.md`](ESTADO.md). Índice: [`README.md`](README.md).
-Evals en verde. Camino pueblo medido: [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
+Evals en verde. Camino pueblo + P2P extract: [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
 
 ## Dónde estamos
 
 Ver [`ESTADO.md`](ESTADO.md). **OCR iPhone medido** (incl. lote 3/3). Banco
-directo y pueblo LAN medidos en Sentry (`1.0.5+2`). Abierto: Watchdog/OCR
-intermitente, ensayos ×3 → `perf.jsonl` → video. Ops Sentry: [`SENTRY.md`](SENTRY.md).
+directo, pueblo LAN y `delegate` de extracción medidos en Sentry (`1.0.5+2`,
+11 sep). Abierto: Watchdog/OCR intermitente, ensayos ×3 → `perf.jsonl` → video.
+Ops Sentry: [`SENTRY.md`](SENTRY.md). Tres caminos: [`ADR-006`](../.ai/adr/ADR-006-tres-modos-segun-el-telefono.md).
 
 ---
 
@@ -56,7 +57,8 @@ Entrada ya no elige Historial|Examen como vías paralelas.
 
 - [x] `ocr()` sobre la foto → JSON (`CedulaSchema` / `IngresosSchema`).
   **Medido en iPhone** 10 sep (ya no `invalid input`) — [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md)
-- [~] Examen con LoRA `lab-v3`. Código + asset; falta corrida iPhone anotada
+- [x] Examen con LoRA `lab-v3`. Código + asset + UI (carga y resultados).
+  Sentry `lora: lab-v3 cache/copy`. Falta plano de video anotado
 - [~] Crédito tras examen si hay hallazgos. Código listo; falta iPhone
 - [~] **Borrar la foto** tras extraer. Código sí; falta listar disco (C6)
 - [x] Persistencia y cola. `expo-sqlite` en `colaSqlite.ts`; una pendiente a la
@@ -75,13 +77,14 @@ Material listo: `data/documentos/` tiene ocho ficticios (nítido y difícil de
 cédula, ingresos, extracto y examen) más `esperado.json`. Cada corrida en el
 iPhone se anota en [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
 
-### 1.3 P2P no es la demo
+### 1.3 Dos tuberías
 
-Cerrado: HTTP (banco o pueblo). Detalle y cómo *no* decirlo en cámara:
-[`ESTADO.md`](ESTADO.md) § Honestidad, [`PRUEBA-NODO.md`](PRUEBA-NODO.md),
-[`VIDEO.md`](VIDEO.md).
+**Crédito** = HTTP (banco o pueblo). **Inferencia** `nodo-offline` = QVAC
+`delegate` (`dht.connect`), plano B `POST /inferir`. Hyperswarm **topic**
+(nodo↔nodo) no es la demo. Cómo decirlo: [`VIDEO.md`](VIDEO.md), [`ADR-006`](../.ai/adr/ADR-006-tres-modos-segun-el-telefono.md).
 
-- [x] Guion/README no prometen Hyperswarm ni QVAC `delegate`
+- [x] README / BRIEF / pitch nombran los tres caminos y `delegate` solo en el peor caso
+- [x] Sentry 11 sep: `inferencia: extraccion @p2p-delegate`
 ---
 
 ## 2. La demo tiene que correr entera
@@ -108,14 +111,16 @@ Cerrado: HTTP (banco o pueblo). Detalle y cómo *no* decirlo en cámara:
 
 ---
 
-## 4. LoRA (examen; falta iPhone)
+## 4. LoRA (examen)
 
 Evidencia: [`spikes/lora-medpsy/RESULTADOS.md`](../spikes/lora-medpsy/RESULTADOS.md)
 (corrida 3 → `lora-lab-v3.gguf` en la app).
 
 - [x] Entrenar + tabla base (C11 spike)
 - [x] Adaptador en app (`lora.ts` / `leerExamen.ts`)
-- [ ] Re-medir en el iPhone
+- [x] UI: carga “corriendo MedPsy + LoRA” y franja en resultados
+- [x] Consola pueblo: chip `LoRA · lab-v3` + líneas de fine-tuning
+- [ ] Plano de video con la franja en cámara
 ---
 
 ## 5. Lo que ya está (resumen)
@@ -165,5 +170,7 @@ Lista viva (no usar el snapshot de `03-specification.md`).
 - [ ] D2 ¿`gpu` o `cpu`? Solo CPU medido. Falta Metal en el iPhone
 - [ ] D5 ¿`finetune()` corre en el dispositivo? Solo si todo lo demás está entregable
 - [ ] D7 ¿Un adaptador entrenado sobre Q8_0 carga sobre Q4_0?
-- [x] D10 ¿`delegate` atraviesa NAT? **No es plan de demo.** Bonus solo si se mide a propósito.
-- [x] D11 ¿Se recupera el transporte P2P? **No.** Demo = HTTP. No prometer Hyperswarm ni `delegate`.
+- [x] D10 ¿`delegate` atraviesa NAT? **No hace falta en LAN.** En la misma WiFi
+  Sentry ya vio `extraccion @p2p-delegate`. Fuera de LAN no es el plan.
+- [x] D11 ¿Topic Hyperswarm? **No.** Crédito = HTTP. Inferencia peor caso =
+  QVAC `delegate`, luego `/inferir`. No prometer topic nodo↔nodo.

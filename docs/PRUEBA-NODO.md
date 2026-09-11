@@ -13,9 +13,9 @@ Sin internet (local-offline / nodo-offline):
   teléfono --LAN :8788--> pueblo --HTTP--> el mismo banco
 ```
 
-No confundir con el **examen de laboratorio** ni con la **inferencia**
-(MedPsy local; si falla, POST texto a `/inferir`). Demo de crédito = HTTP.
-P2P / Hyperswarm: § más abajo (off salvo `ENABLE_P2P=1`).
+Dos tuberías. **Crédito** = HTTP (banco o pueblo). **Inferencia** `nodo-offline`
+= QVAC `delegate`; si el par no entra, POST texto a `/inferir`. Hyperswarm
+**topic** (nodo↔nodo) off salvo `ENABLE_P2P=1`.
 
 URLs de producción: [`ESTADO.md`](ESTADO.md).
 
@@ -36,8 +36,9 @@ Camino **pueblo**: medido abajo.
 
 ## Al pueblo: HTTP en la LAN, medido
 
-Probado el 9 de septiembre y **vuelto a probar el 10** (laptop y **iPhone**).
-Hoy el pueblo no decide: recibe y reenvía. Arranque:
+Probado el 9, el 10 y **el 11 sep 00:05** (iPhone `192.168.0.17` → laptop
+`192.168.0.19:8788` → Railway). `POST /solicitud` `e72785e4…` monto 920 →
+**aprobada**. El pueblo no decide: recibe y reenvía. Arranque:
 
 ```bash
 cd nodo && npm run corregimiento
@@ -66,10 +67,12 @@ en la demo el banco es Railway.
 
 ---
 
-## Hyperswarm / P2P
+## Hyperswarm topic vs QVAC `delegate`
 
-**No es la demo.** Off salvo `ENABLE_P2P=1`. El fallo medido (DHT pública,
-`firewalled: true`, topic que no casa) se arregla con un bootstrap local:
+**Topic** (nodo↔nodo) no es la demo. Off salvo `ENABLE_P2P=1`. El fallo medido
+(DHT pública, `firewalled: true`, topic que no casa) se arregla con bootstrap
+local. **`delegate`** sí es la inferencia de `nodo-offline` (Sentry 11 sep:
+`extraccion @p2p-delegate`).
 
 ```bash
 cd nodo && npm run p2p:probar

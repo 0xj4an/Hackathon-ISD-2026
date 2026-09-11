@@ -1,12 +1,15 @@
-# Estado del proyecto · 10 sep 2026 (noche tarde)
+# Estado del proyecto · 11 sep 2026 (00:10)
 
 Ante duda: **código** + este archivo. Índice: [`README.md`](README.md).
+Tres caminos: [`ADR-006`](../.ai/adr/ADR-006-tres-modos-segun-el-telefono.md).
 
 ## En una frase
 
-Release **`1.0.5+2`**: wifi → banco **y** pueblo OK, lectura docs **3/3**, LoRA
-lab visto. Sentry también marcó **Watchdog RAM**, OCR `galloc` y `alerta: fail`
-(parse). Mitigaciones en código listo para reload; falta ensayos limpios + video.
+Release **`1.0.5+2`**. Esta noche: iPhone `192.168.0.17` → pueblo `:8788` →
+**crédito aprobado** (`POST /solicitud` monto 920). Sentry: `credito: ok via
+pueblo`, `alerta: ok`, `lectura: ok`, `inferencia: extraccion @p2p-delegate`.
+LoRA `lab-v3` se nombra en carga, resultados y consola. Falta ensayos ×3 +
+`perf.jsonl` + video.
 
 ## Qué ya está medido
 
@@ -14,40 +17,52 @@ lab visto. Sentry también marcó **Watchdog RAM**, OCR `galloc` y `alerta: fail
 |---|---|
 | Dominio + eval | Hecho |
 | Flujo app en código | Hecho |
-| Teléfono → pueblo → Railway | Medido |
-| Discovery LAN | Hecho |
-| **OCR documentos en iPhone** | **Medido** — 3/3 ok en una corrida; `galloc` sigue intermitente |
-| **Banco directo (`local-wifi`)** | **Medido** — `credito: ok via banco` |
-| **Pueblo LAN (`credito: ok via pueblo`)** | **Medido** misma noche |
-| Sentry · telemetría | Viva en `1.0.5+2`. SoT: [`SENTRY.md`](SENTRY.md) |
-| Pantallas envío (wifi/offline) | Código + breadcrumbs Sentry |
-| Arranque loading ≥1.8 s | Medido |
-| Consola demo app + laptop `/consola` | Código (espejo cel → pueblo) |
+| Teléfono → pueblo → Railway | Medido (9–11 sep). Esta noche: `e72785e4…` aprobada |
+| Discovery LAN | Hecho (`/salud` desde `192.168.0.17`) |
+| OCR documentos en iPhone | Medido 3/3; `galloc` intermitente (última 01:50) |
+| Banco directo (`local-wifi`) | Medido 10 sep (`credito: ok via banco`) |
+| Pueblo LAN (`credito: ok via pueblo`) | Medido 10 y **11 sep 00:05** |
+| Inferencia `nodo-offline` | Sentry: `extraccion @p2p-delegate` (72 eventos) |
+| LoRA `lab-v3` | Asset + UI (carga y resultados). Sentry `lora: lab-v3 cache/copy` |
+| Consola teléfono + laptop `/consola` | Código: cinta de modo, consola negra, LoRA chip |
+| Sentry | Viva. SoT: [`SENTRY.md`](SENTRY.md) |
+
+## Sentry · últimas 24 h (11 sep 00:10)
+
+Info (corridas): `alerta: ok` · `lectura: ok` · `credito: ok via pueblo` ·
+`inferencia: extraccion @p2p-delegate` · `sesion: start` · `modelo: medpsy load` ·
+`lora: lab-v3`.
+
+Riesgo (no nuevos esta hora): **Watchdog RAM** (10, última 04:43) · OCR
+`galloc` (28, 01:50) · `INFERENCE_CANCELLED` · `MODEL_UNLOAD_FAILED` (1).
 
 ## Qué falta — este orden
 
 | # | Qué | Cierre |
 |---|---|---|
-| **1** | Reload/rebuild con mitigaciones (alerta/OCR/mutex/background) | Ver `alerta: ok` y menos Watchdog en Sentry |
-| **2** | Ensayo completo × 3 (avión / offline si puedes) | Tres corridas en PRUEBA-TELEFONO |
-| **3** | Exportar `perf.jsonl` | Entrada → Registro → compartir |
-| **4** | Grabar video ≤ 5 min | [`VIDEO.md`](VIDEO.md) + consola laptop |
-| **5** | (Opcional) Reinstall nativo limpio si el icono sigue viejo | [`SENTRY.md`](SENTRY.md) § Rebuild |
+| **1** | Ensayo completo × 3 (avión / los tres caminos) | [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md) |
+| **2** | Exportar `perf.jsonl` | Entrada → Registro → compartir |
+| **3** | Grabar video ≤ 5 min | [`VIDEO.md`](VIDEO.md) + [consola](http://127.0.0.1:8788/consola) |
+| **4** | Rebuild nativo si el IPA no trae LoRA/cinta | [`SENTRY.md`](SENTRY.md) § Rebuild |
 
 ```bash
 cd nodo && npm run corregimiento
-# Consola grabación: http://127.0.0.1:8788/consola
-cd mobile && npx expo run:ios --device --configuration Release
+# Consola: http://127.0.0.1:8788/consola
+cd spikes && npm run proveedor    # par P2P; POST /p2p si reinicias el pueblo
+cd mobile && npx expo start       # o run:ios Release si el binario está viejo
 ```
 
-- Banco: https://banco-production-3755.up.railway.app  
-- Admin: https://isd-hackathon-landing-production.up.railway.app/admin  
+- Pueblo LAN: `192.168.0.19:8788` (esta laptop). Teléfono visto: `192.168.0.17`
+- Banco: https://banco-production-3755.up.railway.app
+- Admin: https://isd-hackathon-landing-production.up.railway.app/admin
 - Sentry: https://0xj4an.sentry.io/projects/isd-hackathon-mobile/
 
-Demo = HTTP. No Hyperswarm/`delegate`. Firma = trazo. Datos sintéticos.
+**Crédito** = HTTP (banco o pueblo). **Inferencia** `nodo-offline` = QVAC
+`delegate`, plano B `POST /inferir`. Hyperswarm **topic** (nodo↔nodo) off
+salvo `ENABLE_P2P=1`. Firma = trazo. Datos sintéticos.
 
 ## Honestidad de build
 
 Si Sentry dice `release 1.0.5+2` pero `app_version` nativo es `1.0.4` /
-`HackathonISD`, el **JS es nuevo** y el **IPA no**. Icono/splash solo con
-borrar app + `expo run:ios --configuration Release`. Detalle: [`SENTRY.md`](SENTRY.md).
+`HackathonISD`, el **JS es nuevo** y el **IPA no**. Icono/splash/LoRA empaquetado
+solo con borrar app + `expo run:ios --configuration Release`. Detalle: [`SENTRY.md`](SENTRY.md).

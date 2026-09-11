@@ -4,14 +4,14 @@
 - Propósito: ranking general + retos Tether Psy / Caja de Ahorros.
 - Usuarios: rural Panamá, Android gama media (brief). Demo: **iPhone 17 Pro Max**.
 - Equipo: @0xj4an y Artur (@ArturVargas).
-- Repo: https://github.com/0xj4an/Hackathon-ISD-2026. Node ≥ 22.17, `@qvac/sdk` **0.18.2**. Producto: `mobile/` (+ `mobile/src/core/`), `nodo/`, `landing/`, `eval/`, `data/`. Spikes: `spikes/lora-medpsy/` (≠ demo path: Hyperswarm/`delegate`).
+- Repo: https://github.com/0xj4an/Hackathon-ISD-2026. Node ≥ 22.17, `@qvac/sdk` **0.18.2**. Producto: `mobile/` (+ `mobile/src/core/`), `nodo/`, `landing/`, `eval/`, `data/`. Spike LoRA: `spikes/lora-medpsy/` (el adaptador **sí** es demo). Hyperswarm **topic** (nodo↔nodo) ≠ demo. QVAC `delegate` = inferencia `nodo-offline`.
 - Demo: iPhone físico. Xiaomi 14T aborta Bare.
 - Datos: solo sintéticos. Modelos QVAC en `~/.qvac/models`.
 - Cierre: `references/hackathon.md`.
 
 ## Restricciones no negociables
 
-1. Inferencia solo en dispositivo o nodo local (`/inferir`). Sin proveedores de IA remotos. Hyperswarm / `delegate` ≠ demo.
+1. Inferencia solo en dispositivo o nodo local. Sin proveedores de IA remotos. Topic Hyperswarm (nodo↔nodo) ≠ demo. QVAC `delegate` es el peor caso (`nodo-offline`); plano B `POST /inferir`. Crédito = HTTP.
 2. Nube solo no-IA; app útil sin ella.
 3. README declara base preexistente (solo plantilla AI Engineering Kit). No expandir sin acuerdo.
 4. Entregables: repo + video ≤ 5 min español, sin login.

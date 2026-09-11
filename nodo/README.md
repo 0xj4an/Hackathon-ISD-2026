@@ -1,7 +1,8 @@
 # Nodo · pueblo y banco HTTP
 
-Transporte de la demo: **HTTP**. El motor de crédito vive en
-`mobile/src/core/credito/`; este paquete solo lo importa.
+**Crédito** viaja por HTTP. **Inferencia** `nodo-offline`: QVAC `delegate`,
+plano B `POST /inferir`. El motor de crédito vive en `mobile/src/core/credito/`;
+este paquete solo lo importa.
 
 Estado vivo y URLs: [`docs/ESTADO.md`](../docs/ESTADO.md).
 Procedimiento de prueba: [`docs/PRUEBA-NODO.md`](../docs/PRUEBA-NODO.md).
