@@ -19,6 +19,23 @@ import {
 import { parsearExtraccion, type ClaveDocumento, type ExtraccionFallo, type ExtraccionOk } from "./core/extraccion";
 import { asegurarMedPsy, bajar, completarMedPsy, sdk, soltarMedPsy } from "./medpsy";
 import { getAppLogger, recordError, recordInference } from "./perf/logger";
+import {
+  breadcrumbLectura,
+  docKindSentry,
+  reportarLoteLecturaSentry,
+  type DocKindSentry,
+} from "./sentry";
+
+/** Código corto para Sentry — sin mensaje de usuario ni OCR. */
+function codigoErrorLectura(err: unknown): string {
+  const t = (err instanceof Error ? err.message : String(err)).toLowerCase();
+  if (t.includes("galloc") || t.includes("alloc_graph") || t.includes("stepdetection")) return "graph";
+  if (t.includes("heic") || t.includes("formato que el lector no abre")) return "heic";
+  if (t.includes("invalid") || t.includes("unrecognized") || t.includes("expected string")) return "invalid_image";
+  if (t.includes("not found") || t.includes("not accessible")) return "missing_file";
+  if (t.includes("ya se está leyendo")) return "busy";
+  return "other";
+}
 
 const OCR_NOMBRE = "OCR_LATIN";
 /** Lado largo máximo antes del detector. Un 17 Pro Max dispara 4000 px; CRAFT no cabe. */
@@ -330,16 +347,30 @@ export async function leerDocumentos(
   if (entradas.length === 0) return {};
   ocupado = true;
   const appLog = getAppLogger();
+  const tLote = Date.now();
   const aviso = (p: ProgresoLectura) => {
     for (const e of entradas) onProgreso?.(e.clave, p);
   };
   const trabajos: Trabajo[] = [];
   const out: Partial<Record<ClaveDocumento, LecturaDocumento>> = {};
+  /** Telemetría por kind — sin texto OCR. */
+  const tele: Array<{
+    kind: DocKindSentry;
+    ok: boolean;
+    chars?: number;
+    ms?: number;
+    borrada?: boolean;
+    errorCode?: string;
+  }> = [];
+
+  breadcrumbLectura("lote.start", { n: entradas.length });
 
   try {
     aviso({ paso: "ocr", detalle: "Achicando las fotos" });
     for (const e of entradas) {
       onProgreso?.(e.clave, { paso: "ocr", detalle: `Achicando ${NOMBRE[e.clave]}` });
+      const kind = docKindSentry(e.clave);
+      breadcrumbLectura("resize", { kind });
       const chica = await achicar(e.uri);
       if (chica !== e.uri) borrarCopia(e.uri);
       trabajos.push({ clave: e.clave, original: e.uri, chica });
@@ -348,10 +379,13 @@ export async function leerDocumentos(
     await soltarMedPsy(true);
     await cederRam();
     for (const t of trabajos) {
+      const kind = docKindSentry(t.clave);
       onProgreso?.(t.clave, { paso: "ocr", detalle: `Leyendo ${NOMBRE[t.clave]}` });
+      breadcrumbLectura("ocr.start", { kind });
       const tOcr = Date.now();
       try {
         const ocr = await ocrPagina(t.chica, aviso);
+        const ms = Date.now() - tOcr;
         await recordInference({
           task: "ocr",
           model: OCR_NOMBRE,
@@ -360,17 +394,30 @@ export async function leerDocumentos(
           ctx_size: 0,
           device_cfg: "cpu",
           ttft_ms: null,
-          load_ms: Date.now() - tOcr,
+          load_ms: ms,
           stats: ocr.stats ?? {},
+          out_chars: ocr.texto.length,
         });
         if (!ocr.texto) {
           t.error = "No se leyó texto. Prueba con más luz o sube otra imagen.";
+          breadcrumbLectura("ocr.empty", { kind, ms }, "warning");
         } else {
           t.ocr = ocr;
+          breadcrumbLectura("ocr.ok", {
+            kind,
+            ms,
+            chars: ocr.texto.length,
+            conf: typeof ocr.confianza === "number" ? Math.round(ocr.confianza * 100) / 100 : -1,
+          });
         }
       } catch (err) {
         recordError(`ocr.${t.clave}`, err);
         t.error = mensajeLectura(err);
+        breadcrumbLectura("ocr.fail", {
+          kind,
+          ms: Date.now() - tOcr,
+          err: codigoErrorLectura(err),
+        }, "error");
       }
     }
 
@@ -378,6 +425,7 @@ export async function leerDocumentos(
 
     const conTexto = trabajos.filter(t => t.ocr && !t.error);
     if (conTexto.length > 0) {
+      breadcrumbLectura("extract.start", { n: conTexto.length });
       await asegurarMedPsy(
         p => aviso({ paso: "extraccion", pct: p.pct, detalle: p.detalle }),
         { conLora: false },
@@ -385,7 +433,9 @@ export async function leerDocumentos(
       for (const t of conTexto) {
         const ocr = t.ocr;
         if (!ocr) continue;
+        const kind = docKindSentry(t.clave);
         onProgreso?.(t.clave, { paso: "extraccion", detalle: `Sacando datos de ${NOMBRE[t.clave]}` });
+        const tEx = Date.now();
         try {
           const bruto = await extraerConLlm(t.clave, ocr.texto, ocr.confianza);
           const parsed = parsearExtraccion(t.clave, bruto, ocr.texto);
@@ -393,9 +443,28 @@ export async function leerDocumentos(
           const borrada = borrar.every(borrarCopia);
           if (!borrada) appLog.info(`no se pudo borrar ${t.clave}`);
           out[t.clave] = { ...parsed, textoOcr: ocr.texto, borrada };
+          breadcrumbLectura(parsed.ok ? "extract.ok" : "extract.parse_fail", {
+            kind,
+            ms: Date.now() - tEx,
+            chars: ocr.texto.length,
+            borrada,
+          }, parsed.ok ? "info" : "warning");
+          tele.push({
+            kind,
+            ok: parsed.ok,
+            chars: ocr.texto.length,
+            ms: Date.now() - tEx,
+            borrada,
+            errorCode: parsed.ok ? undefined : "parse",
+          });
         } catch (err) {
           recordError(`extraccion.${t.clave}`, err);
           t.error = mensajeLectura(err);
+          breadcrumbLectura("extract.fail", {
+            kind,
+            ms: Date.now() - tEx,
+            err: codigoErrorLectura(err),
+          }, "error");
         }
       }
       await soltarMedPsy(true);
@@ -405,8 +474,19 @@ export async function leerDocumentos(
       if (out[t.clave]) continue;
       const borrada = [t.chica, t.original].every(borrarCopia);
       out[t.clave] = fallo(t.clave, t.error ?? "No se pudo leer el documento.", t.ocr?.texto ?? "", borrada);
+      tele.push({
+        kind: docKindSentry(t.clave),
+        ok: false,
+        chars: t.ocr?.texto?.length ?? 0,
+        borrada,
+        errorCode: t.error ? (t.ocr ? "extract_or_empty" : "ocr") : "unknown",
+      });
     }
+    reportarLoteLecturaSentry({ resultados: tele, msTotal: Date.now() - tLote });
     return out;
+  } catch (err) {
+    breadcrumbLectura("lote.crash", { err: codigoErrorLectura(err) }, "error");
+    throw err;
   } finally {
     for (const t of trabajos) {
       borrarCopia(t.chica);
@@ -439,11 +519,13 @@ export async function leerOcrDeUri(
   await soltarMedPsy(true);
   await cederRam();
   onProgreso?.({ paso: "ocr", detalle: "Achicando la foto" });
+  breadcrumbLectura("ocr.single.start");
   const chica = await achicar(uri);
   onProgreso?.({ paso: "ocr", detalle: "Leyendo el texto del papel" });
   const tOcr = Date.now();
   try {
     const ocr = await ocrPagina(chica, onProgreso);
+    const ms = Date.now() - tOcr;
     await recordInference({
       task: "ocr",
       model: OCR_NOMBRE,
@@ -452,10 +534,21 @@ export async function leerOcrDeUri(
       ctx_size: 0,
       device_cfg: "cpu",
       ttft_ms: null,
-      load_ms: Date.now() - tOcr,
+      load_ms: ms,
       stats: ocr.stats ?? {},
+      out_chars: ocr.texto.length,
     });
+    breadcrumbLectura(ocr.texto ? "ocr.single.ok" : "ocr.single.empty", {
+      ms,
+      chars: ocr.texto.length,
+    }, ocr.texto ? "info" : "warning");
     return ocr;
+  } catch (err) {
+    breadcrumbLectura("ocr.single.fail", {
+      ms: Date.now() - tOcr,
+      err: codigoErrorLectura(err),
+    }, "error");
+    throw err;
   } finally {
     if (chica !== uri) borrarCopia(chica);
   }

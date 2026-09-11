@@ -11,6 +11,7 @@ import { getAppLogger, recordError, recordInference, type InferenceTask } from "
 import { LORA_LAB_VERSION, rutaLoraLab } from "./lora";
 import { asegurarUrlNodo } from "./nodoUrl";
 import { saltarMedPsyLocal } from "./modo";
+import { breadcrumbApp, marcarRuntimeSentry, reportarModeloSentry } from "./sentry";
 
 const CTX = 2048;
 const MEDPSY = "HEALTHCARE_1_7B_MEDICAL_Q8_0";
@@ -63,6 +64,7 @@ export async function soltarMedPsy(force = false): Promise<void> {
   if (!force && inflight > 0) return;
   const s = qvac;
   const id = llmId;
+  const teniaLora = llmConLora;
   llmId = null;
   llmLoadMs = null;
   llmConLora = null;
@@ -70,6 +72,11 @@ export async function soltarMedPsy(force = false): Promise<void> {
   if (!s || !id) return;
   try {
     await s.unloadModel({ modelId: id, clearStorage: false });
+    reportarModeloSentry({
+      paso: "unload",
+      conLora: !!teniaLora,
+      loraVersion: teniaLora ? LORA_LAB_VERSION : null,
+    });
   } catch (err) {
     recordError("unloadModel", err);
   }
@@ -86,35 +93,54 @@ export async function asegurarMedPsy(
   const s = await sdk();
   const { HEALTHCARE_1_7B_MEDICAL_Q8_0 } = await import("@qvac/sdk/models");
   onProgreso?.({ detalle: "Preparando MedPsy" });
+  breadcrumbApp("modelo", "medpsy.prepare", { want_lora: quiereLora });
   const t0 = Date.now();
-  await bajar(HEALTHCARE_1_7B_MEDICAL_Q8_0, (p) => {
-    onProgreso?.({ ...p, detalle: `Bajando MedPsy ${p.pct ?? 0}%` });
-  });
+  try {
+    await bajar(HEALTHCARE_1_7B_MEDICAL_Q8_0, (p) => {
+      onProgreso?.({ ...p, detalle: `Bajando MedPsy ${p.pct ?? 0}%` });
+    });
 
-  let loraPath: string | null = null;
-  if (quiereLora) {
-    onProgreso?.({ detalle: `Preparando LoRA ${LORA_LAB_VERSION}` });
-    loraPath = await rutaLoraLab();
-    if (!loraPath) {
-      onProgreso?.({ detalle: "Sin LoRA en disco; MedPsy base" });
+    let loraPath: string | null = null;
+    if (quiereLora) {
+      onProgreso?.({ detalle: `Preparando LoRA ${LORA_LAB_VERSION}` });
+      loraPath = await rutaLoraLab();
+      if (!loraPath) {
+        onProgreso?.({ detalle: "Sin LoRA en disco; MedPsy base" });
+      }
     }
-  }
 
-  onProgreso?.({ detalle: loraPath ? `Cargando MedPsy + ${LORA_LAB_VERSION}` : "Cargando MedPsy" });
-  llmId = await s.loadModel({
-    modelSrc: HEALTHCARE_1_7B_MEDICAL_Q8_0,
-    modelType: "llm",
-    modelConfig: {
-      ctx_size: CTX,
-      device: "cpu",
-      reasoning_budget: 0,
-      ...(loraPath ? { lora: loraPath } : {}),
-    },
-  });
-  llmLoadMs = Date.now() - t0;
-  llmConLora = !!loraPath;
-  loraRutaActiva = loraPath;
-  return llmId;
+    onProgreso?.({ detalle: loraPath ? `Cargando MedPsy + ${LORA_LAB_VERSION}` : "Cargando MedPsy" });
+    llmId = await s.loadModel({
+      modelSrc: HEALTHCARE_1_7B_MEDICAL_Q8_0,
+      modelType: "llm",
+      modelConfig: {
+        ctx_size: CTX,
+        device: "cpu",
+        reasoning_budget: 0,
+        ...(loraPath ? { lora: loraPath } : {}),
+      },
+    });
+    llmLoadMs = Date.now() - t0;
+    llmConLora = !!loraPath;
+    loraRutaActiva = loraPath;
+    marcarRuntimeSentry({ lora: llmConLora ? LORA_LAB_VERSION : null });
+    reportarModeloSentry({
+      paso: "load",
+      conLora: !!loraPath,
+      loraVersion: loraPath ? LORA_LAB_VERSION : null,
+      ms: llmLoadMs,
+    });
+    return llmId;
+  } catch (err) {
+    reportarModeloSentry({
+      paso: "load_fail",
+      conLora: quiereLora,
+      loraVersion: quiereLora ? LORA_LAB_VERSION : null,
+      ms: Date.now() - t0,
+      err: err instanceof Error ? err.message.slice(0, 120) : "load_fail",
+    });
+    throw err;
+  }
 }
 
 async function completarEnNodo(opts: {
@@ -126,10 +152,12 @@ async function completarEnNodo(opts: {
   onProgreso?: (p: ProgresoMedPsy) => void;
 }): Promise<string> {
   opts.onProgreso?.({ detalle: "El teléfono no pudo. Delegando al nodo…" });
+  breadcrumbApp("inferencia", "nodo.start", { task: opts.task });
   const nodo = await asegurarUrlNodo();
   if (!nodo) throw new Error("sin pueblo en esta WiFi");
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 180_000);
+  const t0 = Date.now();
   try {
     const r = await fetch(`${nodo}/inferir`, {
       method: "POST",
@@ -154,8 +182,9 @@ async function completarEnNodo(opts: {
       ctx_size: CTX,
       device_cfg: "nodo-lan",
       ttft_ms: null,
-      load_ms: null,
+      load_ms: Date.now() - t0,
       stats: { origen: "nodo" },
+      out_chars: data.text.length,
     });
     getAppLogger().info(`${opts.task} nodo ${data.text.length} chars`);
     return data.text;
@@ -182,6 +211,10 @@ export async function completarMedPsy(opts: {
       const t1 = Date.now();
       let first: number | null = null;
       let text = "";
+      breadcrumbApp("inferencia", "local.start", {
+        task: opts.task,
+        lora: opts.conLora ? LORA_LAB_VERSION : "no",
+      });
       const r = s.completion({
         modelId,
         stream: true,
@@ -205,7 +238,8 @@ export async function completarMedPsy(opts: {
         device_cfg: "cpu",
         ttft_ms: first,
         load_ms: llmLoadMs,
-        stats: { ...(f?.stats ?? {}), lora_path: loraRutaActiva },
+        stats: { ...(f?.stats ?? {}), lora_attached: !!loraRutaActiva },
+        out_chars: text.length,
       });
       getAppLogger().info(`${opts.task} ${text.length} chars lora=${llmConLora ? LORA_LAB_VERSION : "no"}`);
       return text;
@@ -214,6 +248,10 @@ export async function completarMedPsy(opts: {
     }
   } catch (err) {
     recordError("medpsy.local", err);
+    breadcrumbApp("inferencia", "local.fail_fallback_nodo", {
+      task: opts.task,
+      err: err instanceof Error ? err.message.slice(0, 80) : "fail",
+    }, "warning");
     return completarEnNodo(opts);
   }
 }

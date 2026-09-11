@@ -13,6 +13,7 @@ import {
   readAsStringAsync,
   writeAsStringAsync,
 } from "expo-file-system/legacy";
+import { breadcrumbApp, reportarNodoSentry } from "./sentry";
 
 const PUERTO = 8788;
 const ARCHIVO = "pueblo-url.txt";
@@ -149,6 +150,7 @@ function ordenarHosts(pref: string, propios: string[]): string[] {
  */
 export async function descubrirPuebloLan(): Promise<{ url: string; detalle: string } | null> {
   if (barrido) return barrido;
+  const t0 = Date.now();
   barrido = (async () => {
     const candidatos: string[] = [];
     const metro = hostDelMetro();
@@ -190,7 +192,12 @@ export async function descubrirPuebloLan(): Promise<{ url: string; detalle: stri
       }
     }
 
-    if (!candidatos.length) return null;
+    if (!candidatos.length) {
+      reportarNodoSentry({ ok: false, origen: "ninguno", ms: Date.now() - t0 });
+      return null;
+    }
+
+    breadcrumbApp("nodo", "scan.start", { n: candidatos.length });
 
     let idx = 0;
     let encontrado: string | null = null;
@@ -210,8 +217,12 @@ export async function descubrirPuebloLan(): Promise<{ url: string; detalle: stri
       Array.from({ length: Math.min(CONCURRENCIA, candidatos.length) }, () => worker()),
     );
 
-    if (!encontrado) return null;
+    if (!encontrado) {
+      reportarNodoSentry({ ok: false, origen: "lan", ms: Date.now() - t0 });
+      return null;
+    }
     hallado = encontrado;
+    breadcrumbApp("nodo", "hallado", { ms: Date.now() - t0, origen: "lan" });
     return { url: encontrado, detalle: "hallado en la WiFi" };
   })();
 

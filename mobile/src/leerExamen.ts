@@ -17,6 +17,7 @@ import {
   type ProgresoLectura,
 } from "./leerDocumento";
 import { getAppLogger, recordError } from "./perf/logger";
+import { breadcrumbLectura, reportarLoteLecturaSentry } from "./sentry";
 
 export type ResultadoExamen =
   | { ok: true; lecturas: LecturaLab[]; textoOcr: string; lora: string | null }
@@ -41,11 +42,17 @@ export async function leerExamenFoto(
   onProgreso?: (p: ProgresoLectura) => void,
 ): Promise<ResultadoExamen> {
   const aviso = (p: ProgresoLectura) => onProgreso?.(p);
+  const t0 = Date.now();
   let textoOcr = "";
+  breadcrumbLectura("lote.start", { n: 1, kind: "lab" });
   try {
     const ocr = await leerOcrDeUri(uri, aviso);
     textoOcr = ocr.texto;
     if (!textoOcr.trim()) {
+      reportarLoteLecturaSentry({
+        resultados: [{ kind: "lab", ok: false, chars: 0, ms: Date.now() - t0, errorCode: "empty" }],
+        msTotal: Date.now() - t0,
+      });
       return fallo("No se leyó texto. Más luz o más de frente.", textoOcr, "");
     }
     await soltarLectores();
@@ -56,6 +63,7 @@ export async function leerExamenFoto(
         ? "Delegando al nodo para sacar marcadores"
         : `MedPsy + LoRA sacando marcadores (${LORA_LAB_VERSION})`,
     });
+    breadcrumbLectura("extract.start", { kind: "lab", chars: textoOcr.length });
     const bruto = await completarMedPsy({
       system: SYSTEM_EXTRACCION_LABORATORIO,
       user: textoOcr + (typeof ocr.confianza === "number"
@@ -74,7 +82,13 @@ export async function leerExamenFoto(
       }),
     });
     const parsed = parsearLaboratorio(bruto, textoOcr);
-    if (!parsed.ok) return fallo(parsed.error, textoOcr, bruto);
+    if (!parsed.ok) {
+      reportarLoteLecturaSentry({
+        resultados: [{ kind: "lab", ok: false, chars: textoOcr.length, ms: Date.now() - t0, errorCode: "parse" }],
+        msTotal: Date.now() - t0,
+      });
+      return fallo(parsed.error, textoOcr, bruto);
+    }
 
     const lecturas: LecturaLab[] = [];
     for (const l of parsed.datos.lecturas) {
@@ -83,10 +97,25 @@ export async function leerExamenFoto(
       lecturas.push(clasificar(m, l.valor, sexo));
     }
     if (lecturas.length === 0) {
+      reportarLoteLecturaSentry({
+        resultados: [{ kind: "lab", ok: false, chars: textoOcr.length, ms: Date.now() - t0, errorCode: "no_markers" }],
+        msTotal: Date.now() - t0,
+      });
       return fallo("Leí el papel, pero no reconocí ningún marcador del catálogo.", textoOcr, bruto);
     }
 
     getAppLogger().info(`examen ${lecturas.length} marcadores lora=${saltarMedPsyLocal() ? "nodo" : LORA_LAB_VERSION}`);
+    breadcrumbLectura("extract.ok", { kind: "lab", n: lecturas.length, chars: textoOcr.length });
+    reportarLoteLecturaSentry({
+      resultados: [{
+        kind: "lab",
+        ok: true,
+        chars: textoOcr.length,
+        ms: Date.now() - t0,
+        borrada: true,
+      }],
+      msTotal: Date.now() - t0,
+    });
     return {
       ok: true,
       lecturas: lecturas.sort((a, b) => ORDEN[a.urgencia] - ORDEN[b.urgencia]),
@@ -95,6 +124,16 @@ export async function leerExamenFoto(
     };
   } catch (err) {
     recordError("examen.foto", err);
+    reportarLoteLecturaSentry({
+      resultados: [{
+        kind: "lab",
+        ok: false,
+        chars: textoOcr.length,
+        ms: Date.now() - t0,
+        errorCode: "crash",
+      }],
+      msTotal: Date.now() - t0,
+    });
     return fallo(
       mensajeLectura(err),
       textoOcr,

@@ -8,6 +8,7 @@ import { pedirMensaje, type AlertaParse } from "./core/alerta";
 import type { Medicion, Senal } from "./core/reglas";
 import { completarMedPsy, soltarMedPsy } from "./medpsy";
 import { recordError } from "./perf/logger";
+import { reportarAlertaSentry } from "./sentry";
 
 function motivoDe(err: unknown): string {
   const raw = err instanceof Error ? err.message : String(err);
@@ -32,8 +33,9 @@ export async function redactarAlerta(
   mediciones: Medicion[],
   onProgreso?: (detalle: string) => void,
 ): Promise<AlertaParse> {
+  const t0 = Date.now();
   try {
-    return await pedirMensaje(
+    const r = await pedirMensaje(
       ({ system, user, temp }) => completarMedPsy({
         system,
         user,
@@ -45,10 +47,13 @@ export async function redactarAlerta(
       senal,
       mediciones,
     );
+    reportarAlertaSentry({ ok: r.ok, ms: Date.now() - t0, motivoCode: r.ok ? undefined : "parse" });
+    return r;
   } catch (err) {
     recordError("alerta", err);
     const stack = err instanceof Error ? err.stack : undefined;
     const msg = err instanceof Error ? err.message : String(err);
+    reportarAlertaSentry({ ok: false, ms: Date.now() - t0, motivoCode: "crash" });
     return {
       ok: false,
       motivo: motivoDe(err),

@@ -16,6 +16,7 @@ y el **video**.
 | Teléfono → pueblo → Railway | Medido |
 | Discovery LAN | Hecho |
 | **OCR documentos en iPhone** | **Medido 10 sep** — [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md) |
+| Sentry · telemetría runtime | Por corrida: `sesion:`, `modelo:`, `lora:`, `inferencia:`, `lectura:`, `alerta:`, `credito:`, `nodo:`. Tags: `modo`, `lora`, `task`, `device`. Sin texto/fotos. |
 
 ## Qué falta — este orden
 

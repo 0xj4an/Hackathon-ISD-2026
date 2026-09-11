@@ -20,6 +20,8 @@ export type InferenceRecord = {
   load_ms: number | null;
   stats: unknown;
   system: unknown;
+  /** Solo longitud — nunca el texto. */
+  out_chars?: number;
 };
 
 type UiListener = (line: string) => void;
@@ -140,7 +142,7 @@ export function recordError(where: string, err: unknown) {
 }
 
 export async function recordInference(
-  rec: Omit<InferenceRecord, "ts" | "sdk" | "system"> & { system?: unknown },
+  rec: Omit<InferenceRecord, "ts" | "sdk" | "system"> & { system?: unknown; out_chars?: number },
 ): Promise<void> {
   const line: InferenceRecord = {
     ts: new Date().toISOString(),
@@ -152,6 +154,21 @@ export async function recordInference(
   emitUi(
     `perf ${rec.task} ttft=${rec.ttft_ms ?? "—"}ms load=${rec.load_ms ?? "—"}ms device=${rec.device_cfg}`,
   );
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { reportarInferenciaSentry } = require("../sentry") as typeof import("../sentry");
+    reportarInferenciaSentry({
+      task: rec.task,
+      model: rec.model,
+      lora: rec.lora,
+      device: rec.device_cfg,
+      ttft_ms: rec.ttft_ms,
+      load_ms: rec.load_ms,
+      out_chars: rec.out_chars,
+    });
+  } catch {
+    // Sentry aún no cargó.
+  }
 }
 
 function emitUi(line: string) {

@@ -60,6 +60,14 @@ export function modo(): ModoId {
 
 export function fijarModo(id: ModoId) {
   activo = id;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { marcarRuntimeSentry, breadcrumbApp } = require("./sentry") as typeof import("./sentry");
+    marcarRuntimeSentry({ modo: id });
+    breadcrumbApp("sesion", "modo", { modo: id });
+  } catch {
+    /* Sentry opcional en tests */
+  }
 }
 
 export function resetModo() {

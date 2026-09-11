@@ -7,12 +7,14 @@
 import { Asset } from "expo-asset";
 import { File, Paths } from "expo-file-system";
 import { recordError } from "./perf/logger";
+import { reportarLoraSentry } from "./sentry";
 
 /** Subir esto al cambiar el `.gguf` (y el nombre del asset). */
 export const LORA_LAB_VERSION = "lab-v3";
 export const LORA_LAB_NOMBRE = `lora-${LORA_LAB_VERSION}.gguf`;
 
 let rutaCache: string | null = null;
+let reportadoCache = false;
 
 function pathLocal(uri: string): string {
   return uri.startsWith("file://") ? decodeURIComponent(uri.slice("file://".length)) : uri;
@@ -23,11 +25,24 @@ function pathLocal(uri: string): string {
  * QVAC quiere un path de filesystem, no un require() de Metro.
  */
 export async function rutaLoraLab(): Promise<string | null> {
-  if (rutaCache) return rutaCache;
+  if (rutaCache) {
+    if (!reportadoCache) {
+      reportadoCache = true;
+      reportarLoraSentry({ ok: true, version: LORA_LAB_VERSION, via: "cache" });
+    }
+    return rutaCache;
+  }
   const dest = new File(Paths.document, LORA_LAB_NOMBRE);
   try {
     if (dest.exists && dest.size > 1_000_000) {
       rutaCache = pathLocal(dest.uri);
+      reportadoCache = true;
+      reportarLoraSentry({
+        ok: true,
+        version: LORA_LAB_VERSION,
+        via: "cache",
+        bytes: dest.size,
+      });
       return rutaCache;
     }
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -43,9 +58,22 @@ export async function rutaLoraLab(): Promise<string | null> {
       throw new Error("copia LoRA incompleta");
     }
     rutaCache = pathLocal(dest.uri);
+    reportadoCache = true;
+    reportarLoraSentry({
+      ok: true,
+      version: LORA_LAB_VERSION,
+      via: "copy",
+      bytes: dest.size,
+    });
     return rutaCache;
   } catch (err) {
     recordError("lora.lab", err);
+    reportarLoraSentry({
+      ok: false,
+      version: LORA_LAB_VERSION,
+      via: "miss",
+      err: err instanceof Error ? err.message.slice(0, 120) : "miss",
+    });
     return null;
   }
 }

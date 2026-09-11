@@ -34,13 +34,14 @@ import {
   leerPendiente,
 } from "./src/cola";
 import { iniciarColaSqlite } from "./src/colaSqlite";
-import { marcarPasoSentry, marcarUsuarioSentry } from "./src/sentry";
+import { marcarPasoSentry, marcarUsuarioSentry, reportarSesionSentry } from "./src/sentry";
 import type { Respuesta } from "./src/core/credito/motor";
 import type { Solicitud } from "./src/core/schemas";
 import { buscarPorCorreo, type Usuario } from "./src/usuarios";
-import { fijarModo, resetModo } from "./src/modo";
+import { fijarModo, modo, resetModo } from "./src/modo";
 import { cargarUrlNodo, descubrirPuebloLan } from "./src/nodoUrl";
 import { IrInicioContext } from "./src/ui/componentes";
+import { SDK_VERSION } from "./src/perf/logger";
 
 /** Lo que cuesta el paquete, y el monto que la persona decidió pedir. */
 type Credito = { min: number; max: number; monto?: number };
@@ -134,23 +135,34 @@ export default function App() {
   useEffect(() => {
     let vivo = true;
     void (async () => {
+      let colaPendiente = false;
       try {
         await cargarUrlNodo();
         await iniciarColaSqlite();
         const p = await leerPendiente();
-        if (!vivo || !p) return;
-        const u = buscarPorCorreo(p.usuario_correo);
-        if (!u) return;
-        setUsuario(u);
-        setConectado(true);
-        setRevisado(true);
-        setCredito({ min: p.costo_min, max: p.costo_max, monto: p.solicitud.monto_solicitado_usd });
-        setSolicitud(p.solicitud);
-        setPendiente(true);
-        setAviso(p.detalle);
-        setPaso("cuota");
+        if (!vivo) return;
+        if (p) {
+          colaPendiente = true;
+          const u = buscarPorCorreo(p.usuario_correo);
+          if (!u) return;
+          setUsuario(u);
+          setConectado(true);
+          setRevisado(true);
+          setCredito({ min: p.costo_min, max: p.costo_max, monto: p.solicitud.monto_solicitado_usd });
+          setSolicitud(p.solicitud);
+          setPendiente(true);
+          setAviso(p.detalle);
+          setPaso("cuota");
+        }
       } finally {
-        if (vivo) setColaLista(true);
+        if (vivo) {
+          setColaLista(true);
+          reportarSesionSentry({
+            modo: modo(),
+            sdk: SDK_VERSION,
+            colaPendiente,
+          });
+        }
         // No bloquea la UI: el envío también llama asegurarUrlNodo.
         void descubrirPuebloLan().catch(() => null);
       }
