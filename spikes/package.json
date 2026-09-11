@@ -6,7 +6,8 @@
   "description": "Experimentos de validacion. Codigo propio del equipo.",
   "scripts": {
     "dataset": "node lora-medpsy/make-dataset.mjs",
-    "spike": "node lora-medpsy/spike.mjs"
+    "spike": "node lora-medpsy/spike.mjs",
+    "proveedor": "node proveedor.mjs"
   },
   "dependencies": { "@qvac/sdk": "0.18.2" }
 }

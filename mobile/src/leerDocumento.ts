@@ -38,8 +38,9 @@ function codigoErrorLectura(err: unknown): string {
 }
 
 const OCR_NOMBRE = "OCR_LATIN";
-/** Lado largo máximo antes del detector. Un 17 Pro Max dispara 4000 px; CRAFT no cabe. */
-const MAX_LADO = 1280;
+/** Lado largo máximo. 1280 aún estalla CRAFT en 17 Pro Max (Sentry galloc ×28). */
+const MAX_LADO = 1024;
+const MAX_LADO_REINTENTO = 800;
 
 const SYSTEM: Record<ClaveDocumento, string> = {
   cedula: SYSTEM_EXTRACCION_CEDULA,
@@ -145,7 +146,7 @@ function esFalloGrafo(err: unknown): boolean {
 
 /** El unload nativo no libera Metal en el mismo tick. Sin esta pausa, la página 2 hereda el grafo roto. */
 function cederRam(): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, 160));
+  return new Promise(resolve => setTimeout(resolve, 350));
 }
 
 export function mensajeLectura(err: unknown): string {
@@ -175,25 +176,25 @@ function medidaDe(uri: string): Promise<{ width: number; height: number }> {
   });
 }
 
-/** JPEG chico, lado largo <= 1280. El detector no traga la foto nativa del 17 Pro Max. */
-async function achicar(uri: string): Promise<string> {
+/** JPEG chico, lado largo <= MAX_LADO. El detector no traga la foto nativa del 17 Pro Max. */
+async function achicar(uri: string, lado = MAX_LADO): Promise<string> {
   type Accion = { resize: { width?: number; height?: number } };
   const acciones: Accion[] = [];
   try {
     const { width, height } = await medidaDe(uri);
     const largo = Math.max(width, height);
-    if (largo > MAX_LADO) {
-      acciones.push(width >= height ? { resize: { width: MAX_LADO } } : { resize: { height: MAX_LADO } });
+    if (largo > lado) {
+      acciones.push(width >= height ? { resize: { width: lado } } : { resize: { height: lado } });
     }
   } catch (err) {
     recordError("medidaImagen", err);
-    acciones.push({ resize: { width: MAX_LADO } });
+    acciones.push({ resize: { width: lado } });
   }
   try {
     // El nativo no entra al arranque: si no está linkeado, Release se queda en blanco.
     const ImageManipulator = await import("expo-image-manipulator");
     const out = await ImageManipulator.manipulateAsync(uri, acciones, {
-      compress: 0.7,
+      compress: lado <= MAX_LADO_REINTENTO ? 0.5 : 0.55,
       format: ImageManipulator.SaveFormat.JPEG,
     });
     return out.uri;
@@ -257,18 +258,23 @@ async function ocrPagina(
   uri: string,
   onProgreso?: (p: ProgresoLectura) => void,
 ): Promise<{ texto: string; confianza?: number; stats: unknown }> {
-  const intentar = async () => {
+  const intentar = async (imagenUri: string) => {
     await asegurarOcr(onProgreso);
-    return ocrImagen(uri);
+    return ocrImagen(imagenUri);
   };
   try {
-    return await intentar();
+    return await intentar(uri);
   } catch (err) {
     if (!esFalloGrafo(err)) throw err;
     recordError("ocr.grafo", err);
     await soltarOcr();
     await cederRam();
-    return await intentar();
+    const masChica = await achicar(uri, MAX_LADO_REINTENTO);
+    try {
+      return await intentar(masChica);
+    } finally {
+      if (masChica !== uri) borrarCopia(masChica);
+    }
   } finally {
     await soltarOcr();
     await cederRam();

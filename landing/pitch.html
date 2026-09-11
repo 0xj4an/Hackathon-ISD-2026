@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Ina Igar — pitch. Salud y crédito donde no llega la señal. Decentralized AI Hackathon, ISD Summit 2026.">
+<meta name="color-scheme" content="light">
+<meta property="og:title" content="Ina Igar · Pitch">
+<meta property="og:description" content="Salud y crédito donde no llega la señal. MedPsy en el teléfono. El banco nunca ve la cédula.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="/og.png">
+<title>Ina Igar · Pitch</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,500;9..40,600;9..40,700;9..40,800&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+:root{
+  --ink:#111;--paper:#F7F4EE;--mute:#6A675F;--line:#DDD8CE;
+  --keep:#E4EDE2;--keep-ink:#2A5A32;--hot:#C42B18;
+  --sans:"DM Sans",system-ui,sans-serif;
+  --display:"Instrument Serif",Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--ink);color:var(--ink);font:500 16px/1.4 var(--sans);-webkit-font-smoothing:antialiased}
+body{overflow:hidden}
+img{display:block;max-width:100%}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+a{color:inherit}
+.deck{height:100dvh;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none}
+.deck::-webkit-scrollbar{display:none}
+.s{
+  min-height:100dvh;min-height:100svh;scroll-snap-align:start;scroll-snap-stop:always;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:max(28px,env(safe-area-inset-top)) clamp(20px,4.5vw,56px) max(88px,calc(28px + env(safe-area-inset-bottom)));
+  position:relative;overflow:hidden;
+}
+.s h1,.s h2{font-family:var(--display);font-weight:400;letter-spacing:-.03em;line-height:.95;margin:0 0 14px}
+.s h1{font-size:clamp(3.2rem,11vw,7.4rem)}
+.s h2{font-size:clamp(2.1rem,6.2vw,4.4rem);max-width:16ch}
+.s p{margin:0;max-width:38ch;color:var(--mute);font-size:clamp(.98rem,1.6vw,1.15rem);line-height:1.5}
+.s p b{color:var(--ink);font-weight:700}
+.kicker{font-size:.72rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin-bottom:12px}
+.s p.stat{font-family:var(--display);font-size:clamp(5.2rem,18vw,10rem);line-height:.8;letter-spacing:-.05em;margin:0 0 18px;max-width:none;color:inherit;font-weight:400}
+.bar{
+  position:fixed;z-index:4;left:0;right:0;bottom:0;
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+  background:linear-gradient(transparent,rgba(17,17,17,.55));
+}
+.bar .n{font-size:.7rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#F7F4EE;min-width:3.4ch}
+.dots{display:flex;gap:5px;flex:1;justify-content:center}
+.dots button{width:7px;height:7px;background:#F7F4EE;opacity:.28}
+.dots button[aria-current="true"]{opacity:1;width:18px}
+.nav{display:flex;gap:8px}
+.nav button{
+  width:40px;height:40px;background:#F7F4EE;color:var(--ink);
+  font-weight:800;font-size:1.1rem;line-height:1;
+}
+.nav button:disabled{opacity:.35}
+.ink{background:var(--ink);color:#F7F4EE}
+.ink p,.ink .kicker{color:rgba(247,244,238,.62)}
+.ink p b,.ink h1,.ink h2{color:#F7F4EE}
+.paper{background:var(--paper)}
+.hot{background:var(--hot);color:#fff}
+.hot p,.hot .kicker{color:rgba(255,255,255,.78)}
+.hot p b,.hot h1,.hot h2{color:#fff}
+.keep{background:var(--keep);color:var(--keep-ink)}
+.keep p,.keep .kicker{color:rgba(42,90,50,.7)}
+.keep p b,.keep h2{color:var(--keep-ink)}
+.mark{
+  position:absolute;right:-8%;top:42%;width:min(70vw,520px);
+  transform:translateY(-50%) rotate(-8deg);opacity:.88;pointer-events:none;
+}
+.ink .mark,.hot .mark{filter:brightness(0) invert(1);opacity:.18;top:28%;right:-12%}
+.ink p.stat,.hot p.stat{color:#F7F4EE}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);margin-top:28px;border:1px solid var(--line)}
+.split>div{background:var(--paper);padding:22px 18px}
+.split h3{margin:0 0 8px;font-size:1.05rem;font-weight:800;letter-spacing:-.02em}
+.split p{font-size:.92rem}
+.flow{display:grid;gap:0;margin-top:22px;max-width:560px}
+.flow li{list-style:none;display:grid;grid-template-columns:2.4rem 1fr;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+.flow{padding:0;margin-left:0}
+.flow .n{font-size:.68rem;font-weight:800;letter-spacing:.12em;color:var(--mute);padding-top:4px}
+.bill{margin-top:20px;border:1px solid var(--line);background:#fff;max-width:520px}
+.row{display:flex;justify-content:space-between;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line);font-size:.95rem}
+.row:last-of-type{border:0}
+.row.hi{background:var(--keep)}
+.tot{display:flex;justify-content:space-between;align-items:baseline;background:var(--ink);color:#F7F4EE;padding:14px}
+.tot b{font-size:clamp(1.4rem,3vw,1.9rem);letter-spacing:-.03em}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);margin-top:24px;border:1px solid var(--line)}
+.grid3>div{background:var(--paper);padding:18px 16px}
+.grid3 strong{display:block;font-size:clamp(1.5rem,3vw,2rem);letter-spacing:-.04em;line-height:1;margin-bottom:8px}
+.grid3 span{color:var(--mute);font-size:.88rem}
+.tracks{display:grid;gap:10px;margin-top:22px;max-width:640px}
+.tracks article{border-top:2px solid var(--ink);padding-top:10px}
+.tracks h3{margin:0 0 4px;font-size:1rem;font-weight:800}
+.tracks p{font-size:.9rem;max-width:none}
+.facts{margin-top:18px}
+.fact{display:grid;grid-template-columns:7.5rem 1fr;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:.92rem}
+.fact dt{font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);padding-top:3px}
+.fact dd{margin:0;color:var(--mute)}
+.fact dd b{color:var(--ink)}
+.links{display:flex;flex-wrap:wrap;gap:14px;margin-top:22px}
+.links a{font-weight:800;font-size:.9rem;text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:2px}
+.ink .links a{border-color:rgba(247,244,238,.28)}
+.foot{margin-top:18px;font-size:.78rem;color:var(--mute);max-width:46ch}
+.ink .foot{color:rgba(247,244,238,.45)}
+@media(max-width:700px){
+  .split,.grid3{grid-template-columns:1fr}
+  .fact{grid-template-columns:1fr;gap:2px}
+  .mark{width:120vw;right:-48%;top:18%;opacity:.28}
+  .s{justify-content:flex-end}
+}
+@media(prefers-reduced-motion:reduce){html,.deck{scroll-behavior:auto}}
+@media print{
+  body{overflow:visible;background:#fff}
+  .deck{height:auto;overflow:visible}
+  .s{min-height:100vh;page-break-after:always;break-after:page}
+  .bar{display:none}
+  .mark{opacity:.2}
+}
+</style>
+</head>
+<body>
+<nav class="bar" aria-label="Diapositivas">
+  <span class="n" id="n">01 / 10</span>
+  <div class="dots" id="dots"></div>
+  <div class="nav">
+    <button type="button" id="prev" aria-label="Anterior">‹</button>
+    <button type="button" id="next" aria-label="Siguiente">›</button>
+  </div>
+</nav>
+
+<div class="deck" id="deck">
+
+<section class="s ink" data-i="1">
+  <img class="mark" src="/huellas-mark-blanco.png" width="1024" height="1024" alt="">
+  <p class="kicker">Decentralized AI Hackathon · ISD Summit 2026</p>
+  <p class="stat">42%</p>
+  <h2>de los adultos en Panamá viven con presión alta.</h2>
+  <p>En el interior, enterarse es bajar al pueblo. Pagar de una vez. Volver. Mucha gente no baja: no sabe si vale la pena, ni cuánto va a costar.</p>
+</section>
+
+<section class="s paper" data-i="2">
+  <p class="kicker">Ina Igar · Camino de la medicina</p>
+  <h2>Dos preguntas. En el teléfono. Sin internet.</h2>
+  <div class="split">
+    <div>
+      <h3>01 · Qué tengo</h3>
+      <p>Lee el historial o un examen en papel. Las reglas marcan el rango. MedPsy solo redacta: qué se vio, qué hacer, a quién ver.</p>
+    </div>
+    <div>
+      <h3>02 · Cómo lo pago</h3>
+      <p>Cotiza el año. Fotografía cédula e ingresos. El teléfono las lee y las borra. Al banco viaja un JSON. Nunca la foto, nunca el diagnóstico.</p>
+    </div>
+  </div>
+</section>
+
+<section class="s keep" data-i="3">
+  <p class="kicker">Por qué local</p>
+  <h2>La cédula no sale. El motivo de salud tampoco.</h2>
+  <p>El colaborador de Philips captura equipos. El de Caja admite expedientes. Nosotros estamos del otro lado del mostrador: la persona en Comarca o interior, con señal intermitente y un Android de gama media.</p>
+  <p style="margin-top:14px"><b>Nunca sale:</b> fotos, historial, laboratorio, el texto de MedPsy, el modelo entero (2.1 GB).</p>
+  <p style="margin-top:8px"><b>Lo único que ve el banco:</b> nombre, cédula, ingreso, monto, motivo «salud».</p>
+</section>
+
+<section class="s paper" data-i="4">
+  <p class="kicker">El flujo</p>
+  <h2>De abrir la app a la cuota. Un camino.</h2>
+  <ol class="flow">
+    <li><span class="n">01</span><span>Historial sintético o foto del examen. Reglas OMS / ADA. MedPsy redacta en inglés; la UI está en español. No es diagnóstico.</span></li>
+    <li><span class="n">02</span><span>Paquete del año: consultas, labs, medicamento. El monto del crédito es ese total, no un mínimo inventado.</span></li>
+    <li><span class="n">03</span><span>OCR + MedPsy en el teléfono. Fotos se borran. JSON a banco por wifi, o al nodo del pueblo por LAN. Cola SQLite si no hay salida.</span></li>
+    <li><span class="n">04</span><span>El banco corre el mismo motor que el teléfono. Trazo con el dedo. Desembolso de la demo: simulado.</span></li>
+  </ol>
+</section>
+
+<section class="s paper" data-i="5">
+  <p class="kicker">Lo que nadie cotiza</p>
+  <h2>El examen cuesta B/. 15. Tratarse, B/. 920.</h2>
+  <div class="bill">
+    <div class="row"><span>Consulta y laboratorios del año</span><span>261–540</span></div>
+    <div class="row hi"><span>Metformina 850 mg · 730 tabletas</span><span>380</span></div>
+    <div class="tot"><span>Diabetes tipo 2 · un año</span><b>B/. 641–920</b></div>
+  </div>
+  <p style="margin-top:16px">La pastilla es el <b>41%</b> del total. Precio tope del Decreto Ejecutivo 36. Por eso el crédito no pide monto mínimo: pide exactamente lo que cuesta atenderse.</p>
+</section>
+
+<section class="s ink" data-i="6">
+  <p class="kicker">Technical · 35%</p>
+  <h2>Quién decide no es el modelo. Son reglas.</h2>
+  <p>MedPsy 1.7B Q8_0 corre en el iPhone. Primer token <b>2.9 s</b> en CPU. Si el teléfono no carga el modelo, el texto va al nodo. Nunca a un proveedor de IA remoto.</p>
+  <p style="margin-top:12px">OCR_LATIN lee documentos. LoRA <b>lab-v3</b> subió JSON válido de laboratorio de 5% a 68%. El scorecard de crédito es determinista: misma función en teléfono y banco. SDK <b>0.18.2</b>.</p>
+</section>
+
+<section class="s paper" data-i="7">
+  <p class="kicker">Tres premios, un producto</p>
+  <h2>General. Tether Psy. Caja de Ahorros.</h2>
+  <div class="tracks">
+    <article>
+      <h3>Sovereign Intelligence at the Edge · 6,000</h3>
+      <p>Conectividad intermitente, datos que no pueden salir, trabajo en campo. Demo: modo avión mientras MedPsy y el OCR corren.</p>
+    </article>
+    <article>
+      <h3>QVAC Psy · 1,500</h3>
+      <p>MedPsy con función central: redacta la alerta y extrae documentos. Licencia MIT, log de rendimiento, nombres honestos, disclaimer en pantalla.</p>
+    </article>
+    <article>
+      <h3>Caja de Ahorros · 1,500</h3>
+      <p>Inclusión financiera donde la sucursal queda lejos. Documentos leídos en el dispositivo. El asesor nunca ve la cédula ni el extracto.</p>
+    </article>
+  </div>
+</section>
+
+<section class="s paper" data-i="8">
+  <p class="kicker">Medido, no prometido</p>
+  <h2>El caso sano no dispara nada.</h2>
+  <div class="grid3">
+    <div><strong>14</strong><span>señales con umbral citado</span></div>
+    <div><strong>9/9</strong><span>casos de eval en verde</span></div>
+    <div><strong>2.9 s</strong><span>TTFT MedPsy Q8 en iPhone</span></div>
+  </div>
+  <dl class="facts">
+    <div class="fact"><dt>Hardware</dt><dd>Demo en <b>iPhone 17 Pro Max</b>. El usuario del brief es rural con Android. El Xiaomi de prueba aborta Bare; está en el repo.</dd></div>
+    <div class="fact"><dt>Transporte</dt><dd>HTTP al banco o al pueblo. Hyperswarm no es el camino de la demo. Firma = trazo, no firma electrónica legal.</dd></div>
+    <div class="fact"><dt>Datos</dt><dd>100% sintéticos. Sin VIH en el demo público. Sin PII real.</dd></div>
+  </dl>
+</section>
+
+<section class="s hot" data-i="9">
+  <p class="kicker">Qué no hacemos</p>
+  <h2>No diagnosticamos. No inventamos impuestos. No subimos fotos.</h2>
+  <p>Philips está saturado de inventario hospitalario. Ovnicom, de DNS. Nosotros no copiamos el brief corporativo: resolvemos a la persona que esos briefs no nombran.</p>
+  <p style="margin-top:12px">Si el modelo duda, el campo queda desconocido. Si el documento no se lee, va a revisión, no a rechazo. Confianza baja no es un mal cliente.</p>
+</section>
+
+<section class="s ink" data-i="10">
+  <img class="mark" src="/huellas-mark-blanco.png" width="1024" height="1024" alt="">
+  <p class="kicker">Ina · medicina · Igar · camino</p>
+  <h2>Camino de la medicina.</h2>
+  <p>Gunagaya. Se cita porque no es nuestra. Las comarcas son para quienes se construyó.</p>
+  <div class="links">
+    <a href="https://github.com/0xj4an/Hackathon-ISD-2026">Repo</a>
+    <a href="/">Sitio</a>
+    <a href="https://github.com/0xj4an/Hackathon-ISD-2026">0xj4an + Artur</a>
+  </div>
+  <p class="foot">@qvac/sdk 0.18.2 · MedPsy 1.7B Q8_0 · OCR_LATIN · MIT · Inferencia en el dispositivo o en el nodo. Nunca en la nube.</p>
+</section>
+
+</div>
+<script>
+const deck=document.getElementById("deck");
+const slides=[...document.querySelectorAll(".s")];
+const dots=document.getElementById("dots");
+const nEl=document.getElementById("n");
+const prev=document.getElementById("prev");
+const next=document.getElementById("next");
+slides.forEach((_,i)=>{
+  const b=document.createElement("button");
+  b.type="button";
+  b.setAttribute("aria-label","Ir a "+(i+1));
+  b.onclick=()=>go(i);
+  dots.appendChild(b);
+});
+let cur=0;
+function go(i){
+  cur=Math.max(0,Math.min(slides.length-1,i));
+  deck.scrollTo({top:slides[cur].offsetTop,behavior:"auto"});
+  paint();
+}
+function paint(){
+  nEl.textContent=String(cur+1).padStart(2,"0")+" / "+String(slides.length).padStart(2,"0");
+  [...dots.children].forEach((d,i)=>d.setAttribute("aria-current",i===cur?"true":"false"));
+  prev.disabled=cur===0;
+  next.disabled=cur===slides.length-1;
+}
+const io=new IntersectionObserver((ents)=>{
+  ents.forEach(e=>{if(e.isIntersecting){cur=slides.indexOf(e.target);paint();}});
+},{root:deck,threshold:.55});
+slides.forEach(s=>io.observe(s));
+prev.onclick=()=>go(cur-1);
+next.onclick=()=>go(cur+1);
+addEventListener("keydown",e=>{
+  if(e.key==="ArrowDown"||e.key==="ArrowRight"||e.key==="PageDown"||e.key===" "){e.preventDefault();go(cur+1);}
+  if(e.key==="ArrowUp"||e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();go(cur-1);}
+  if(e.key==="Home"){e.preventDefault();go(0);}
+  if(e.key==="End"){e.preventDefault();go(slides.length-1);}
+});
+let y0=null;
+deck.addEventListener("touchstart",e=>{y0=e.touches[0].clientY;},{passive:true});
+deck.addEventListener("touchend",e=>{
+  if(y0==null)return;
+  const dy=e.changedTouches[0].clientY-y0;y0=null;
+  if(Math.abs(dy)>48)go(cur+(dy<0?1:-1));
+},{passive:true});
+paint();
+</script>
+</body>
+</html>

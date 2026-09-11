@@ -1,7 +1,10 @@
 /**
  * Buffer de logs para la consola de demo (video).
- * Sin fotos ni cédula completa: solo lo que el jurado debe ver en cámara.
+ * En el celular y, si hay pueblo en LAN, espejo a http://…:8788/consola.
+ * Sin fotos ni cédula completa.
  */
+import { urlNodo } from "./nodoUrl";
+
 type Listener = (lines: string[]) => void;
 
 const MAX = 80;
@@ -17,6 +20,17 @@ function notify() {
   for (const l of listeners) l(snap);
 }
 
+/** Espejo best-effort a la consola de la laptop (no bloquea la UI). */
+function espejo(linea: string) {
+  const base = urlNodo();
+  if (!base) return;
+  void fetch(`${base}/consola/linea`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ linea, origen: "cel" }),
+  }).catch(() => {});
+}
+
 export function subscribeDemoLog(listener: Listener): () => void {
   listeners.add(listener);
   listener(lines.slice());
@@ -28,12 +42,18 @@ export function subscribeDemoLog(listener: Listener): () => void {
 export function clearDemoLog() {
   lines.length = 0;
   notify();
+  const base = urlNodo();
+  if (base) {
+    void fetch(`${base}/consola/borrar`, { method: "POST" }).catch(() => {});
+  }
 }
 
 export function demoLog(msg: string) {
-  lines.push(stamp(msg));
+  const linea = stamp(msg);
+  lines.push(linea);
   if (lines.length > MAX) lines.splice(0, lines.length - MAX);
   notify();
+  espejo(linea);
   if (__DEV__) console.log(`[demo] ${msg}`);
 }
 

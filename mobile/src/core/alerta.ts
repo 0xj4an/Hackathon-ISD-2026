@@ -101,7 +101,11 @@ export function parsearAlerta(bruto: string, senal: Senal): AlertaParse {
   }
 
   const crudo = json as Record<string, unknown>;
-  const mensaje = typeof crudo.mensaje === "string" ? crudo.mensaje.trim() : "";
+  const rawMsg =
+    (typeof crudo.mensaje === "string" && crudo.mensaje)
+    || (typeof crudo.message === "string" && crudo.message)
+    || "";
+  const mensaje = String(rawMsg).trim();
   if (!mensaje) {
     return fallo(
       "MedPsy no escribió el campo mensaje.",

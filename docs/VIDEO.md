@@ -229,6 +229,9 @@ vuelve a verificar antes de grabar.
 - [ ] `perf.jsonl` con líneas de verdad (alerta, ocr, extracción).
 - [ ] Batería arriba del 50%.
 - [ ] Nadie dice "CD4" ni nombra una enfermedad como diagnóstico.
+- [ ] Consola laptop abierta: pueblo corriendo →
+      [http://127.0.0.1:8788/consola](http://127.0.0.1:8788/consola)
+      (el celular espeja el LOG). En el teléfono también hay chip LOG.
 
 ## Lo que NO se dice
 

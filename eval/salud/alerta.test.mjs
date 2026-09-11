@@ -103,6 +103,20 @@ test("sin mensaje, no hay alerta", () => {
   assert.match(r.tecnico, /claves:/);
 });
 
+test("acepta message como alias de mensaje", () => {
+  const bruto = JSON.stringify({ message: MENSAJE });
+  const r = parsearAlerta(bruto, SENAL);
+  assert.equal(r.ok, true);
+  assert.equal(r.alerta.mensaje, MENSAJE);
+});
+
+test("JSON mínimo solo con mensaje", () => {
+  const r = parsearAlerta(JSON.stringify({ mensaje: MENSAJE }), SENAL);
+  assert.equal(r.ok, true);
+  assert.equal(r.alerta.mensaje, MENSAJE);
+  assert.equal(r.alerta.urgencia, "Prioritaria");
+});
+
 test("si el primer completion falla, reintenta a temp 0", async () => {
   const temps = [];
   const r = await pedirMensaje(

@@ -68,9 +68,21 @@ en la demo el banco es Railway.
 
 ## Hyperswarm / P2P
 
-**No es la demo.** Off salvo `ENABLE_P2P=1`. Medido: no conecta detrás de NAT.
-Detalle y cómo no nombrarlo: [`ESTADO.md`](ESTADO.md) § Honestidad,
-[`VIDEO.md`](VIDEO.md).
+**No es la demo.** Off salvo `ENABLE_P2P=1`. El fallo medido (DHT pública,
+`firewalled: true`, topic que no casa) se arregla con un bootstrap local:
+
+```bash
+cd nodo && npm run p2p:probar
+# Medido 10 sep: OK en ~1.2 s. bootstrap 192.168.0.19:49737, firewalled=false.
+```
+
+Dos laptops: `npm run p2p:bootstrap -- --host <IP-LAN>` y
+`ENABLE_P2P=1 P2P_BOOTSTRAP=<IP>:49737` en cada nodo.
+
+El teléfono no usa topic. Si hay `EXPO_PUBLIC_P2P_PROVEEDOR` (clave de
+`cd spikes && npm run proveedor`) y el modo es **nodo-offline**, MedPsy intenta
+QVAC `delegate` (`dht.connect(llave)`). Si no entra en 90 s, POST `/inferir`.
+No nombrarlo en el video si no corrió en cámara: [`VIDEO.md`](VIDEO.md).
 
 ---
 

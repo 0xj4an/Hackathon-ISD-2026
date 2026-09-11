@@ -26,3 +26,5 @@ docs/design/renders/
 .superpowers/
 JOURNAL.md
 nodo/logs/
+.tmp-hs/
+spikes/datos/

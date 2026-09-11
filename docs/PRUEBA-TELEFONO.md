@@ -81,6 +81,35 @@ Criterios que mueve: C6, C10, …
 
 ## Corridas
 
+### 2026-09-10 ~21:03–21:36 · iPhone 17 Pro Max · Sentry `1.0.5+2`
+
+Build: Release en mano · `isd-hackathon-mobile@1.0.5+2` (dist `2`).
+Nativo aún `app_version 1.0.4` / `HackathonISD` (JS nuevo, IPA a medias).
+Quién: equipo (evidencia Sentry Discover + Issues; sin `perf.jsonl` en el Mac)
+Documento: lote docs → `lectura: ok 3/3` (kinds en breadcrumbs)
+Modo: `local-wifi` (también `local-offline` en un tramo)
+Detalle ops: [`SENTRY.md`](SENTRY.md) § Corrida noche
+
+| Paso | Resultado | Qué se vio |
+| --- | --- | --- |
+| Arranque | **ok** | varios `sesion: start local-wifi` |
+| Lectura docs | **ok** | `lectura: ok 3/3` (~02:27 UTC) |
+| Banco Railway | **ok** | `credito: ok via banco` (02:08, 02:27) |
+| Pueblo LAN | **ok** | `credito: ok via pueblo` (02:09, 02:35) |
+| LoRA lab | **visto** | `lora: lab-v3 copy` / `cache`; `modelo: medpsy load+lab-v3` |
+| Alerta MedPsy | **mixto** | `alerta: fail` + `err=parse` tras 691 chars (JSON cortado / basura) |
+| OCR | **mixto** | lote 3/3 ok; issue `galloc` sigue vivo en la release |
+| Watchdog | **fallo** | `WatchdogTermination` RAM ×6 lifetime; último ~02:33 UTC |
+
+Error literal (alerta): parse tras completion local (~120 s, ttft ~36 s, 691 chars).
+Error literal (OCR): `ggml_gallocr_alloc_graph failed` / foto demasiado grande.
+Error literal (fatal): OS watchdog — overused RAM.
+
+Criterios: cierra anotación pueblo+banco en la misma noche. Abierto: Watchdog,
+OCR intermitente, `alerta: fail` (mitigado en código post-corrida: prompt solo
+`mensaje`, mutex load, OCR 1024/reintento 800), ensayos ×3 limpios, video,
+`perf.jsonl`.
+
 ### 2026-09-10 ~20:47–20:53 · iPhone 17 Pro Max · Sentry `1.0.5+2`
 
 Build: Release en mano · release Sentry `isd-hackathon-mobile@1.0.5+2` (dist `2`).

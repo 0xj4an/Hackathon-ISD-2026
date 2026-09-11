@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ina Igar · Consola demo</title>
+  <style>
+    :root {
+      --fondo: #0a0a0a;
+      --linea: #c8f0d8;
+      --meta: #7dffb0;
+      --cel: #9ecbff;
+      --nodo: #c8f0d8;
+      --borde: #0b7a4b;
+      --apagado: #6b6b6b;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--fondo);
+      color: var(--linea);
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 18px;
+      border-bottom: 3px solid var(--borde);
+      flex-shrink: 0;
+    }
+    h1 {
+      margin: 0;
+      font-size: 14px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #fff;
+    }
+    .estado {
+      font-size: 12px;
+      color: var(--apagado);
+    }
+    .estado.ok { color: var(--meta); }
+    .acciones { display: flex; gap: 10px; }
+    button {
+      appearance: none;
+      border: 1px solid #2a2a2a;
+      background: #151515;
+      color: var(--meta);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--borde); }
+    #log {
+      flex: 1;
+      overflow: auto;
+      padding: 16px 18px 28px;
+      line-height: 1.45;
+      font-size: clamp(13px, 1.6vw, 18px);
+    }
+    .vacio { color: var(--apagado); max-width: 42rem; }
+    .row { white-space: pre-wrap; word-break: break-word; margin: 0 0 4px; }
+    .row.cel { color: var(--cel); }
+    .row.nodo { color: var(--nodo); }
+    .tag {
+      display: inline-block;
+      min-width: 3.2em;
+      color: var(--apagado);
+      font-size: 0.85em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Consola demo · Ina Igar</h1>
+      <div id="estado" class="estado">conectando…</div>
+    </div>
+    <div class="acciones">
+      <button type="button" id="borrar">Borrar</button>
+    </div>
+  </header>
+  <main id="log"></main>
+  <script>
+    const logEl = document.getElementById("log");
+    const estado = document.getElementById("estado");
+    let vacio = true;
+
+    function mostrarVacio(texto) {
+      while (logEl.firstChild) logEl.removeChild(logEl.firstChild);
+      const p = document.createElement("p");
+      p.className = "vacio";
+      p.textContent = texto;
+      logEl.appendChild(p);
+      vacio = true;
+    }
+
+    function pintar(item) {
+      if (vacio) {
+        while (logEl.firstChild) logEl.removeChild(logEl.firstChild);
+        vacio = false;
+      }
+      const p = document.createElement("p");
+      p.className = "row " + (item.origen === "cel" ? "cel" : "nodo");
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = item.origen === "cel" ? "cel" : "nodo";
+      p.appendChild(tag);
+      p.appendChild(document.createTextNode(" " + String(item.linea ?? "")));
+      logEl.appendChild(p);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function conectar() {
+      const es = new EventSource("/consola/stream");
+      es.addEventListener("open", () => {
+        estado.textContent = "en vivo · listo para grabar";
+        estado.className = "estado ok";
+      });
+      es.addEventListener("snapshot", (ev) => {
+        const arr = JSON.parse(ev.data);
+        if (!arr.length) return;
+        while (logEl.firstChild) logEl.removeChild(logEl.firstChild);
+        vacio = false;
+        for (const item of arr) pintar(item);
+      });
+      es.addEventListener("linea", (ev) => pintar(JSON.parse(ev.data)));
+      es.addEventListener("borrar", () => {
+        mostrarVacio("Limpio. Esperando tráfico…");
+      });
+      es.onerror = () => {
+        estado.textContent = "reconectando…";
+        estado.className = "estado";
+      };
+    }
+
+    document.getElementById("borrar").onclick = () => {
+      fetch("/consola/borrar", { method: "POST" }).catch(() => {});
+    };
+
+    mostrarVacio("Esperando tráfico del celular y del nodo. Misma WiFi · pueblo :8788.");
+    conectar();
+  </script>
+</body>
+</html>

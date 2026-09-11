@@ -206,6 +206,14 @@ createServer(async (req, res) => {
     return res.end(readFileSync(resolve(DIR, "index.html")));
   }
 
+  if (req.method === "GET" && (url === "/pitch" || url === "/pitch.html" || url === "/deck")) {
+    res.writeHead(200, {
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "no-store",
+    });
+    return res.end(readFileSync(resolve(DIR, "pitch.html")));
+  }
+
   res.writeHead(404, { "content-type": "text/plain" });
   res.end("no");
 }).listen(PUERTO, "0.0.0.0", () => console.log(`landing en :${PUERTO}`));

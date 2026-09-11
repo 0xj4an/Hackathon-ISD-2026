@@ -7,7 +7,10 @@
   "scripts": {
     "start": "ROL=banco PORT=8787 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON index.mjs",
     "banco": "ROL=banco PORT=8787 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON index.mjs",
-    "corregimiento": "ROL=corregimiento PORT=8788 BANCO_URL=https://banco-production-3755.up.railway.app node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON index.mjs"
+    "corregimiento": "ROL=corregimiento PORT=8788 BANCO_URL=https://banco-production-3755.up.railway.app node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON index.mjs",
+    "p2p:bootstrap": "node bootstrap-dht.mjs",
+    "p2p:probe": "node probe-p2p.mjs",
+    "p2p:probar": "node probar-p2p.mjs"
   },
   "engines": {
     "node": ">=22"

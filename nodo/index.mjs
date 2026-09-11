@@ -11,6 +11,7 @@ import { mkdirSync, writeFileSync, readdirSync, readFileSync, existsSync } from 
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { aceptar, recibir } from "./credito.mjs";
+import * as consola from "./consola.mjs";
 
 const ROL = process.env.ROL || "banco";
 const PORT = Number(process.env.PORT || (ROL === "corregimiento" ? 8788 : 8787));
@@ -234,12 +235,15 @@ async function arrancarP2P() {
     log("p2p omitido (banco remoto por HTTP)");
     return;
   }
-  const [{ default: Hyperswarm }, crypto, { default: b4a }] = await Promise.all([
+  const [{ default: Hyperswarm }, crypto, { default: b4a }, { crearDht, parseBootstrap, refrescarTopic }] = await Promise.all([
     import("hyperswarm"),
     import("hypercore-crypto"),
     import("b4a"),
+    import("./dht.mjs"),
   ]);
-  const swarm = new Hyperswarm();
+  const bootstrap = parseBootstrap();
+  const dht = await crearDht({ bootstrap });
+  const swarm = new Hyperswarm({ dht });
   const topic = crypto.hash(b4a.from(TOPIC_NAME));
   swarm.on("connection", (sock, info) => {
     const id = b4a.toString(info.publicKey, "hex").slice(0, 8);
@@ -259,8 +263,17 @@ async function arrancarP2P() {
     sock.on("error", (e) => log("error peer", e.message));
     if (ROL === "corregimiento") void reenviarPendientes(sock);
   });
-  await swarm.join(topic, { server: true, client: true }).flushed();
-  log(`p2p topic=${TOPIC_NAME} key=${b4a.toString(swarm.keyPair.publicKey, "hex").slice(0, 16)}…`);
+  const disc = swarm.join(topic, { server: true, client: true });
+  const flushed = await Promise.race([
+    disc.flushed().then(() => true),
+    new Promise((r) => setTimeout(() => r(false), 20_000)),
+  ]);
+  refrescarTopic(disc);
+  log(
+    `p2p topic=${TOPIC_NAME} flushed=${flushed} firewalled=${dht.firewalled}`
+    + ` bootstrap=${bootstrap ? JSON.stringify(bootstrap) : "publico"}`
+    + ` key=${b4a.toString(swarm.keyPair.publicKey, "hex").slice(0, 16)}…`,
+  );
 }
 
 createServer(async (req, res) => {
@@ -279,7 +292,49 @@ createServer(async (req, res) => {
       inferir: ROL === "corregimiento",
       p2p: !SKIP_P2P,
       auth: Boolean(NODO_TOKEN),
+      consola: "/consola",
     });
+    return;
+  }
+
+  if (req.method === "GET" && (req.url === "/consola" || req.url === "/consola/")) {
+    cors(res);
+    res.statusCode = 200;
+    res.setHeader("content-type", "text/html; charset=utf-8");
+    res.end(consola.paginaHtml());
+    return;
+  }
+
+  if (req.method === "GET" && req.url === "/consola/stream") {
+    consola.suscribir(res);
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/consola/linea") {
+    try {
+      const raw = await leerCuerpo(req, 8_000);
+      const body = JSON.parse(raw || "{}");
+      const msg = typeof body.msg === "string" ? body.msg.trim()
+        : typeof body.linea === "string" ? body.linea.trim()
+        : "";
+      if (!msg) {
+        json(res, 400, { ok: false, motivo: "msg requerido" });
+        return;
+      }
+      const origen = body.origen === "cel" ? "cel" : "nodo";
+      // Si ya trae hora HH:MM:SS, no sellar otra vez.
+      const conHora = !/^\d{2}:\d{2}:\d{2}\s/.test(msg);
+      consola.feed(msg.slice(0, 500), { origen, conHora });
+      json(res, 200, { ok: true });
+    } catch (e) {
+      json(res, e instanceof SyntaxError ? 400 : 500, { ok: false });
+    }
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/consola/borrar") {
+    consola.borrar();
+    json(res, 200, { ok: true });
     return;
   }
 
@@ -309,7 +364,12 @@ createServer(async (req, res) => {
         canal: canalDesdeReq(req),
         desde: req.socket?.remoteAddress,
       };
-      const { respuesta } = ROL === "banco" ? comoBanco(raw, meta) : await comoCartero(raw);
+      const { sol, respuesta } = ROL === "banco" ? comoBanco(raw, meta) : await comoCartero(raw);
+      consola.feed(
+        `← /solicitud ${respuesta.decision} id=${String(sol?.id ?? "").slice(0, 8)} `
+          + `monto=${respuesta.monto_aprobado_usd ?? "—"} canal=${meta.canal}`,
+        { origen: "nodo" },
+      );
       json(res, 200, respuesta);
     } catch (e) {
       const code = e.code === 413 ? 413 : e?.name === "ZodError" || e instanceof SyntaxError ? 400 : 500;
@@ -331,7 +391,16 @@ createServer(async (req, res) => {
     try {
       const raw = await leerCuerpo(req, 200_000);
       const { inferir } = await import("./inferir.mjs");
-      const out = await inferir(JSON.parse(raw || "{}"));
+      const pedido = JSON.parse(raw || "{}");
+      consola.feed(
+        `→ /inferir task=${pedido.task ?? "?"} chars=${String(pedido.user ?? "").length}`,
+        { origen: "nodo" },
+      );
+      const out = await inferir(pedido);
+      consola.feed(
+        `← /inferir ${String(out.text ?? "").length} chars`,
+        { origen: "nodo" },
+      );
       json(res, 200, out);
     } catch (e) {
       const code = e.code === 413 ? 413 : e instanceof SyntaxError || /foto|imagen|system|user|pedido/i.test(e.message ?? "") ? 400 : 503;

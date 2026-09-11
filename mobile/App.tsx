@@ -15,7 +15,7 @@
 // `PantallaDatos` sigue en el repo (deudas y personas a cargo) pero el camino
 // de la demo pasa por lo leído → cuota → banco.
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { View, StyleSheet } from "react-native";
+import { AppState, View, StyleSheet } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import PantallaArranque from "./src/PantallaArranque";
 import PantallaEntrada from "./src/PantallaEntrada";
@@ -49,6 +49,7 @@ import {
 } from "./src/cola";
 import { iniciarColaSqlite } from "./src/colaSqlite";
 import { marcarPasoSentry, marcarUsuarioSentry, reportarSesionSentry } from "./src/sentry";
+import { soltarMedPsy } from "./src/medpsy";
 import type { Respuesta } from "./src/core/credito/motor";
 import type { Solicitud } from "./src/core/schemas";
 import { buscarPorCorreo, type Usuario } from "./src/usuarios";
@@ -371,6 +372,16 @@ export default function App() {
   useEffect(() => {
     marcarUsuarioSentry(usuario?.correo);
   }, [usuario]);
+
+  /** Suelta MedPsy al ir a background: WatchdogTermination por RAM (Sentry ×6). */
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", estado => {
+      if (estado === "background" || estado === "inactive") {
+        void soltarMedPsy(true);
+      }
+    });
+    return () => sub.remove();
+  }, []);
 
   useEffect(() => {
     if (enRegistro) return marcarPasoSentry("registro");

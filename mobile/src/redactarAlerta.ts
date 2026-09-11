@@ -41,7 +41,8 @@ export async function redactarAlerta(
         user,
         temp,
         task: "alerta",
-        predict: 220,
+        // Solo {"mensaje":"…"} — 220 tokens invitaba a basura y JSON cortado (Sentry parse).
+        predict: 120,
         onProgreso: p => onProgreso?.(p.detalle),
       }),
       senal,

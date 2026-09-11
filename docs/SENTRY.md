@@ -81,6 +81,43 @@ binario.
 
 ---
 
+## Corrida medida · 10 sep 2026 ~21:03–21:36 (hora Panamá)
+
+Release **`isd-hackathon-mobile@1.0.5+2`**. Evidencia Sentry Issues + Discover
+(sin `perf.jsonl`). Producto: [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md).
+
+### Qué salió bien
+
+| Evento | Detalle |
+|---|---|
+| `sesion: start local-wifi` | Varios cold starts |
+| `lectura: ok 3/3` | Lote completo de documentos |
+| `credito: ok via banco` | Railway `/solicitud` OK |
+| `credito: ok via pueblo` | Pueblo LAN `:8788` OK |
+| `lora: lab-v3 copy/cache` | Adapter de lab visto en dispositivo |
+
+### Qué falló / ruido
+
+| Issue | Nivel | Count (issue) | Nota |
+|---|---|---|---|
+| `WatchdogTermination` (MOBILE-7) | fatal | 6 | iOS mató la app por RAM |
+| `ggml_gallocr_alloc_graph` (MOBILE-3) | error | 28 | OCR / foto grande |
+| `alerta: fail` (MOBILE-J) | warning | 7 | `err=parse` tras ~691 chars |
+| `INFERENCE_CANCELLED` | error | 12+ | Ruido al salir/reintentar |
+| `MODEL_LOAD_FAILED already registered` | error | 1 | Carrera `loadModel` |
+| `nodo: no hallado en LAN` | warning | 2 | Boot sin pueblo |
+
+### Mitigaciones en código (post-corrida, pendiente rebuild/reload)
+
+- Alerta: system solo `{"mensaje"}` + `predict: 120` + alias `message`
+- MedPsy: mutex de carga (anti `already registered`)
+- OCR: lado máx. 1024, reintento a 800, `cederRam` 350 ms
+- App: `soltarMedPsy(true)` al pasar a background (anti Watchdog)
+
+Consola laptop: `http://127.0.0.1:8788/consola` (pueblo) espeja LOG del celular.
+
+---
+
 ## Corrida medida · 10 sep 2026 ~20:47–20:53 (hora Panamá)
 
 Release **`isd-hackathon-mobile@1.0.5+2`**, iPhone 17 Pro Max, modo

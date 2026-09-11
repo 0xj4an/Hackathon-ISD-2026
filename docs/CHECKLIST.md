@@ -10,9 +10,9 @@ Evals en verde. Camino pueblo medido: [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md)
 
 ## Dónde estamos
 
-Ver [`ESTADO.md`](ESTADO.md). **OCR iPhone medido.** Banco directo wifi medido
-en Sentry (`1.0.5+2`). Abierto: 3 ensayos → `perf.jsonl` → video. Ops Sentry:
-[`SENTRY.md`](SENTRY.md).
+Ver [`ESTADO.md`](ESTADO.md). **OCR iPhone medido** (incl. lote 3/3). Banco
+directo y pueblo LAN medidos en Sentry (`1.0.5+2`). Abierto: Watchdog/OCR
+intermitente, ensayos ×3 → `perf.jsonl` → video. Ops Sentry: [`SENTRY.md`](SENTRY.md).
 
 ---
 
@@ -87,7 +87,7 @@ Cerrado: HTTP (banco o pueblo). Detalle y cómo *no* decirlo en cámara:
 ## 2. La demo tiene que correr entera
 
 - [x] Wi-Fi / LAN al pueblo: medido — [`PRUEBA-TELEFONO.md`](PRUEBA-TELEFONO.md)
-- [ ] Wi-Fi al banco directo (`local-wifi`): anotar corrida en teléfono
+- [x] Wi-Fi al banco directo (`local-wifi`): medido en Sentry (`credito: ok via banco`)
 - [ ] **Ensayarla tres veces seguidas** con el iPhone en la mano. Lo que falla,
   falla aquí y no grabando
 - [x] Disclaimers de salud visibles en Alerta, Examen, Salud y Revisión
