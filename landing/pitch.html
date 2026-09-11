@@ -59,10 +59,9 @@ p{margin:0 0 12px;max-width:62ch}
 .stack .r{display:grid;grid-template-columns:9.5rem 1fr;gap:14px;padding:12px 16px;border-bottom:1px solid currentColor;flex:1;align-items:center}
 .stack .r:last-child{border-bottom:0}
 .stack .r .k{font-family:var(--sans);font-size:13px;letter-spacing:-.02em;text-transform:uppercase}
-.mega{
-  font-family:var(--sans);font-size:clamp(3.4rem,11vw,7.5rem);line-height:.82;letter-spacing:-.06em;
-  margin:0 0 12px;text-transform:uppercase;
-}
+.mini{flex:0 0 auto;margin-top:auto}
+.mini .r{flex:0;padding:8px 14px}
+.mini .r .k{font-size:12px}
 .mark{position:absolute;right:-6%;bottom:8%;width:min(42vw,380px);opacity:.07;pointer-events:none;transform:rotate(-12deg)}
 .ink .mark{filter:invert(1);opacity:.08}
 .hot .mark{filter:brightness(0) invert(1);opacity:.1}
@@ -162,12 +161,17 @@ p{margin:0 0 12px;max-width:62ch}
 </section>
 
 <section class="s hot">
-  <div class="top"><b>LoRA</b><span>05 · fine-tuning</span></div>
+  <div class="top"><b>El examen</b><span>05</span></div>
   <div class="body">
     <p class="mega">5% → 68%</p>
-    <p class="lead">LoRA es un entrenamiento chico encima de MedPsy, para una sola tarea. Lo usamos para leer exámenes de laboratorio. El modelo solo acertaba 1 de cada 22 veces. Con el training, 15 de 22. Por eso existe: sin fine-tuning el papel no se entendía.</p>
+    <p class="lead">Eso es lo que corrige: leer el laboratorio. El modelo solo no servía. LoRA v3 sí.</p>
+    <div class="stack mini">
+      <div class="r"><div class="k">v1</div><div>2e-4, 2 épocas. Rompió el modelo: extracción 100% a 0%. Triaje 91% a 0%.</div></div>
+      <div class="r"><div class="k">v2</div><div>2e-5, 1 época. No rompió, no sirvió: 71% a 66%. Ingresos 89% a 70%.</div></div>
+      <div class="r"><div class="k">v3</div><div>2e-5, 1 época. Lab JSON 5% a 68% (1/22 a 15/22). 33 MB. Ese es el de la app.</div></div>
+    </div>
   </div>
-  <div class="foot">Hoy: lab-v3, 33 MB, en la app. Siguiente: trainings más finos para cédula, sueldo y más tipos de examen.</div>
+  <div class="foot">Tres trainings corridos, no estimados. v1 y v2 se quedan fuera. v3 es lab-v3.</div>
 </section>
 
 <section class="s ink">
