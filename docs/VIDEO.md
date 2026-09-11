@@ -27,7 +27,7 @@ El reglamento pide cosas concretas, y cada una necesita su plano:
 | Inferencia local (o delegada) | Avión + `local-offline`: MedPsy aquí. `nodo-offline`: OCR aquí, LLM en el pueblo |
 | Comunicar limitaciones (proyectos médicos) | El aviso en pantalla, leído en voz alta |
 | Registro de rendimiento estructurado | Pantalla de registros / `perf.jsonl` con TTFT real |
-| Hardware honesto | Se nombra el iPhone y se dice que el usuario es rural con Android |
+| Hardware honesto | Producto: Android + Health Connect. Esta demo: iPhone. No se disculpa el recorte. |
 | Calidad de dominio medible | `eval/run.mjs` en verde; LoRA lab 5%→68% si se muestra la tabla o el examen |
 
 ---
@@ -182,20 +182,19 @@ reproducible".
 
 **Se dice:**
 
-> Ina Igar corre entero en el teléfono. Los datos de salud no salen. Las fotos
-> se borran. Y al banco solo le llega lo que necesita para decidir.
+> Ina Igar corre entero en el teléfono. Si este aparato no carga el modelo, el
+> pueblo lo corre. Los datos de salud no salen. Las fotos se borran. Al banco
+> solo le llega lo que necesita para decidir.
 >
-> Está hecha para alguien que vive lejos, con señal intermitente y un teléfono
-> Android de gama media. **Lo grabamos en un iPhone porque es donde el SDK
-> arrancó**; el Xiaomi que teníamos aborta al cargar el runtime, y eso está
-> documentado en el repo.
+> El producto es Android de gama media y Health Connect. Esta demo vive en
+> iPhone: mismo esquema de registros, MedPsy, LoRA y los tres caminos.
 >
 > Camino de la medicina. Eso es lo que la app devuelve: no un diagnóstico, una
-> ruta.
+> ruta. Y el crédito para pagarla.
 
-**Por qué decir lo del iPhone:** porque es verdad y porque el jurado lo va a
-ver en el repo. Decirlo nosotros primero es honestidad; que lo descubran ellos
-es un problema.
+**Por qué el iPhone:** es el recorte de la demo, no una disculpa. El producto
+es el teléfono que ya tiene la gente. No se nombra hardware que no está en
+cámara.
 
 ---
 
@@ -234,8 +233,9 @@ vuelve a verificar antes de grabar.
 
 ## Lo que NO se dice
 
-- **"Hyperswarm" / topic** (nodo↔nodo). Eso no es la demo. Crédito: con wifi
-  "el teléfono habla con el banco"; sin internet "el pueblo se lo lleva".
+- **"Hyperswarm" / topic** (nodo↔nodo) como si corriera en cámara. Crédito:
+  con wifi "el teléfono habla con el banco"; sin internet "el pueblo se lo
+  lleva". La malla entre pueblos es el siguiente tramo, no un fallo.
 - **`delegate`** solo si se vio en cámara (cinta `Delegar al nodo` / consola
   P2P). Si el respaldo fue HTTP `/inferir`, di "el pueblo corre MedPsy".
 - **"A" o "B" frente al jurado** para salud o transporte: di "historial",

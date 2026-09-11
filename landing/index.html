@@ -35,6 +35,7 @@ body{
   font:400 16px/1.55 var(--sans);
   -webkit-font-smoothing:antialiased;
 }
+code{font-family:ui-monospace,Menlo,monospace;font-size:.86em}
 img{display:block;max-width:100%;height:auto}
 a{color:inherit}
 p,h1,h2,h3,ul,figure,dl,dt,dd{margin:0}
@@ -177,7 +178,6 @@ p,h1,h2,h3,ul,figure,dl,dt,dd{margin:0}
   letter-spacing:-.04em;line-height:1;
 }
 .stats span{display:block;margin-top:8px;color:var(--mute);font-size:.95rem;max-width:16ch}
-@media(max-width:640px){.stats,.paths,.stackq,.road{grid-template-columns:1fr}}
 
 .flow{
   display:flex;flex-wrap:wrap;align-items:stretch;gap:0;
@@ -208,9 +208,10 @@ p,h1,h2,h3,ul,figure,dl,dt,dd{margin:0}
   display:grid;grid-template-columns:1fr 1fr;gap:1px;
   background:var(--line);margin-top:28px;border:1px solid var(--line);
 }
-.stackq > div{background:#FBFAF7;padding:22px 20px}
-.stackq strong{display:block;font-size:1.05rem;letter-spacing:-.02em;margin-bottom:6px}
-.stackq span{color:var(--mute);font-size:.92rem}
+.stackq article{background:#FBFAF7;padding:22px 20px}
+.stackq .n{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
+.stackq h3{font-size:1.12rem;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
+.stackq p{color:var(--mute);font-size:.95rem}
 
 .road{
   display:grid;grid-template-columns:1fr 1fr;gap:1px;
@@ -220,6 +221,8 @@ p,h1,h2,h3,ul,figure,dl,dt,dd{margin:0}
 .road .when{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
 .road h3{font-size:1.12rem;font-weight:700;margin-bottom:6px}
 .road p{color:var(--mute);font-size:.95rem}
+@media(max-width:820px){.paths{grid-template-columns:1fr}}
+@media(max-width:640px){.stats,.stackq,.road{grid-template-columns:1fr}}
 
 .split{
   display:grid;grid-template-columns:1fr 1fr;
@@ -363,6 +366,61 @@ footer a{text-underline-offset:3px}
     </div>
   </section>
 
+  <section class="sec" id="caminos">
+    <div class="wrap">
+      <span class="eyebrow">Tres caminos</span>
+      <h2>El modelo corre donde hay capacidad. El crédito, donde hay salida.</h2>
+      <p class="lead">OCR siempre en el teléfono. Inferencia y préstamo son tuberías distintas. Las fotos no salen en ninguno.</p>
+      <div class="paths">
+        <article>
+          <div class="n">WiFi · modelo local</div>
+          <h3>MedPsy aquí. Banco directo.</h3>
+          <p>El teléfono carga MedPsy y el LoRA de laboratorio. El JSON del crédito sale por HTTPS al banco.</p>
+        </article>
+        <article>
+          <div class="n">Sin WiFi · modelo local</div>
+          <h3>La alerta no se apaga.</h3>
+          <p>Misma inferencia en el aparato. El crédito va al pueblo o queda en cola hasta que haya salida.</p>
+        </article>
+        <article>
+          <div class="n">Delegar al nodo</div>
+          <h3>QVAC delegate. El pueblo presta el cómputo.</h3>
+          <p>Este teléfono no corre 2.1 GB. El texto va al par P2P. Si hace falta, HTTP al pueblo. La foto se quedó.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="stack">
+    <div class="wrap">
+      <span class="eyebrow">QVAC · lo que corre</span>
+      <h2>MedPsy no decide. El LoRA no diagnostica. El crédito no es P2P.</h2>
+      <p class="lead">Cada pieza tiene un trabajo. El resto es código y reglas citadas.</p>
+      <div class="stackq">
+        <article>
+          <div class="n">MedPsy 1.7B Q8</div>
+          <h3>Solo redacta</h3>
+          <p>El rango lo marcan 14 umbrales. El modelo escribe qué se vio, qué hacer y a quién ver. El caso sano no dispara.</p>
+        </article>
+        <article>
+          <div class="n">OCR · ML Kit</div>
+          <h3>La foto no sale</h3>
+          <p>Cédula, ingresos, extracto y laboratorio se leen en el aparato. JSON al banco. Archivo borrado.</p>
+        </article>
+        <article>
+          <div class="n">LoRA lab-v3 · 33 MB</div>
+          <h3>Parsea, no entiende</h3>
+          <p>Laboratorio en JSON válido: 5 % → 68 %. Cédula e ingresos van en el modelo base. Clasificar el rango es código, no el adaptador.</p>
+        </article>
+        <article>
+          <div class="n">QVAC delegate</div>
+          <h3>P2P de inferencia</h3>
+          <p>El teléfono manda el texto al par que ya tiene MedPsy. El crédito sigue por HTTP. La malla nodo a nodo es el siguiente tramo.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <section class="sec">
     <div class="wrap">
       <span class="eyebrow">Lo que nadie cotiza</span>
@@ -398,13 +456,13 @@ footer a{text-underline-offset:3px}
         <div class="keep">
           <h3>Nunca sale del teléfono</h3>
           <ul>
-            <li>Fotos de cédula y comprobante</li>
-            <li>Historial de salud</li>
-            <li>Resultados de laboratorio</li>
-            <li>Hallazgo y explicación</li>
-            <li>La IA entera · 2.1 GB</li>
+            <li>Fotos de cédula, ingresos y extracto</li>
+            <li>Apple Salud / Health Connect</li>
+            <li>Papel de laboratorio</li>
+            <li>Hallazgo, ruta y explicación</li>
+            <li>MedPsy · 2.1 GB · LoRA 33 MB</li>
           </ul>
-          <p class="foot">Ninguna imagen viaja al banco</p>
+          <p class="foot">Ninguna imagen viaja. Ni al banco ni al pueblo.</p>
         </div>
         <div class="out">
           <h3>Lo único que ve el banco</h3>
@@ -412,10 +470,10 @@ footer a{text-underline-offset:3px}
             <li>Nombre</li>
             <li>Cédula</li>
             <li>Ingreso mensual</li>
-            <li>Monto pedido</li>
+            <li>Monto de la ruta</li>
             <li>Motivo: «salud»</li>
           </ul>
-          <p class="foot">Nunca sabe qué examen necesitas</p>
+          <p class="foot">Nunca sabe qué examen ni qué hallazgo</p>
         </div>
       </div>
     </div>
@@ -424,13 +482,43 @@ footer a{text-underline-offset:3px}
   <section class="sec">
     <div class="wrap">
       <span class="eyebrow">Medido</span>
-      <h2>Corre de verdad en un teléfono de verdad</h2>
+      <h2>Corre. Se delega. El banco responde.</h2>
       <dl class="facts">
-        <div class="fact"><dt>Aparato</dt><dd>MedPsy con <b>@qvac/sdk</b>. Si no carga, el texto va al nodo. Sin proveedor remoto de IA.</dd></div>
-        <div class="fact"><dt>Latencia</dt><dd><b>MedPsy 1.7B Q8_0</b> · 2.1 GB · iPhone 17 Pro Max · primer token <b>2915 ms</b> en CPU.</dd></div>
-        <div class="fact"><dt>Decisión</dt><dd>Las reglas en código, no el modelo. Umbrales con cita. El banco usa el <b>mismo motor</b> que el teléfono.</dd></div>
-        <div class="fact"><dt>Límites</dt><dd>No es diagnóstico ni receta. Datos sintéticos. LoRA entrenado, aún no integrado. Borrado de foto sin verificar en iPhone.</dd></div>
+        <div class="fact"><dt>QVAC</dt><dd><b>MedPsy 1.7B Q8</b> · OCR_LATIN · LoRA lab-v3. Si este aparato no carga 2.1 GB, el texto va al par. Nunca un proveedor remoto de IA.</dd></div>
+        <div class="fact"><dt>Teléfono</dt><dd>iPhone 17 Pro Max · primer token <b>2.9 s</b> en CPU. El producto es Android de gama media + Health Connect. La demo vive en iPhone.</dd></div>
+        <div class="fact"><dt>Delegate</dt><dd><b>72</b> extracciones <code>@p2p-delegate</code>. Crédito LAN pueblo → banco, <b>B/. 920</b> aprobada. Eval salud <b>9/9</b>.</dd></div>
+        <div class="fact"><dt>LoRA</dt><dd>Lab JSON válido <b>5 % → 68 %</b>. El rango lo marca el código. No es diagnóstico ni receta.</dd></div>
       </dl>
+    </div>
+  </section>
+
+  <section class="sec" id="camino">
+    <div class="wrap">
+      <span class="eyebrow">Siguiente</span>
+      <h2>Lo que ya está en el producto. Lo que sigue el camino.</h2>
+      <p class="lead">La app es esta. El recorte de hoy es la demo: historial sintético, desembolso de muestra, un pueblo en la LAN.</p>
+      <div class="road">
+        <div>
+          <div class="when">Banco</div>
+          <h3>Origination y desembolso reales</h3>
+          <p>El scorecard ya es el mismo en el teléfono y en el banco. Siguiente: su motor en producción y el dinero en cuenta.</p>
+        </div>
+        <div>
+          <div class="when">LoRA</div>
+          <h3>Un adaptador por tarea</h3>
+          <p>lab-v3 ya parsea el examen. Siguen cédula, ingresos, extracto y más paneles. El base no lo inventa todo.</p>
+        </div>
+        <div>
+          <div class="when">Malla</div>
+          <h3>Un nodo en cada pueblo</h3>
+          <p>Delegate ya presta cómputo. Siguiente: topic entre corregimientos. El teléfono flaco siempre tiene un par cerca.</p>
+        </div>
+        <div>
+          <div class="when">Campo</div>
+          <h3>Health Connect en vivo</h3>
+          <p>El esquema ya es el de Apple Salud y Google Health Connect. Siguiente: el historial real en Android de gama media.</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -446,7 +534,7 @@ footer a{text-underline-offset:3px}
 <footer>
   <div class="wrap">
     <p><b>Ina Igar</b> · ISD Summit 2026 · 0xj4an y Artur · MIT · <a href="/pitch">Pitch</a> · <a href="/admin">Admin</a></p>
-    <p>QVAC · Tether. Inferencia en el teléfono; si no alcanza, en el nodo.</p>
+    <p>MedPsy · OCR · LoRA lab-v3 · QVAC delegate. El banco ve un JSON. Nunca la foto.</p>
   </div>
 </footer>
 

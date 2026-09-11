@@ -1,15 +1,46 @@
-# Ina Igar · IA local para salud y crédito donde no llega la señal
+# Ina Igar · Camino de la medicina
 
-> Decentralized AI Hackathon · ISD Summit 2026 · Panamá. Equipo: 0xj4an y Artur.
-> Retos: General · Tether QVAC Psy · Caja de Ahorros.
+> ISD Summit 2026 · 0xj4an y Artur · General · Tether QVAC Psy · Caja de Ahorros.
 
-App Expo para zonas rurales de Panamá: alerta de salud en el teléfono, crédito
-con documentos leídos **sin que las fotos salgan del dispositivo**. Dos
-tuberías: **inferencia** (MedPsy / LoRA) y **solicitud** (JSON). Demo en
-**iPhone 17 Pro Max**, `@qvac/sdk` **0.18.2**. Nunca un proveedor de IA remoto.
+App de **salud y crédito**. Lee lo que el teléfono ya midió —o un papel de
+laboratorio—. Cotiza el año. Pide el préstamo. Las fotos no salen. Si este
+aparato no corre el modelo, el pueblo lo corre.
 
-**Estado vivo (medido, URLs, qué falta):** [`docs/ESTADO.md`](docs/ESTADO.md).  
-**Mapa de docs:** [`docs/README.md`](docs/README.md).
+Dos tuberías: **inferencia** (MedPsy / LoRA / QVAC delegate) y **solicitud**
+(JSON al banco o al pueblo). Nunca un proveedor de IA remoto.
+
+**Sitio:** [isd-hackathon-landing-production.up.railway.app](https://isd-hackathon-landing-production.up.railway.app/) · [pitch](https://isd-hackathon-landing-production.up.railway.app/pitch)  
+**Estado vivo:** [`docs/ESTADO.md`](docs/ESTADO.md) · **mapa:** [`docs/README.md`](docs/README.md)
+
+## Qué hace
+
+1. **Salud.** Apple Salud / Health Connect, o foto de un examen. Catorce
+   umbrales citados. Las reglas marcan el rango. MedPsy redacta: qué se vio,
+   qué hacer, a quién ver y cuánto cuesta. El caso sano no dispara. No es
+   diagnóstico.
+2. **Ruta y costo.** El crédito es el año de esa ruta (consulta, controles,
+   medicamento), no un mínimo de consumo ni un nombre de enfermedad.
+3. **Documentos.** OCR de cédula, ingresos y extracto en el teléfono. Las
+   fotos se borran. El banco recibe JSON: nombre, cédula, ingreso, monto,
+   motivo «salud». Nunca la foto ni el hallazgo clínico.
+4. **Laboratorio.** OCR aquí → MedPsy + LoRA `lab-v3`. JSON válido de lab:
+   **5 % → 68 %**. Clasificar el rango es código, no el adaptador.
+
+## Tres caminos ([`ADR-006`](.ai/adr/ADR-006-tres-modos-segun-el-telefono.md))
+
+OCR siempre en el teléfono. Inferencia y préstamo son tuberías distintas.
+
+| Camino | Inferencia | Solicitud |
+|---|---|---|
+| WiFi · modelo local | MedPsy + LoRA en el teléfono | HTTPS al banco |
+| Sin WiFi · modelo local | MedPsy + LoRA en el teléfono | Pueblo / cola |
+| Delegar al nodo | QVAC `delegate` al par; plano B `POST /inferir` | Pueblo / cola |
+
+El tercer camino es el producto cuando el aparato no carga 2.1 GB: el pueblo
+presta el cómputo. Delegate medido: **72** extracciones `@p2p-delegate`.
+
+La malla nodo↔nodo (Hyperswarm topic) es el siguiente tramo: un par en cada
+corregimiento. Hoy el crédito viaja por HTTP.
 
 ## Modelos (nombres honestos)
 
@@ -19,8 +50,9 @@ tuberías: **inferencia** (MedPsy / LoRA) y **solicitud** (JSON). Demo en
 | OCR | `OCR_LATIN` | - | - |
 | Lab (examen) | MedPsy + LoRA `lab-v3` | Q8_0 + LoRA | +33 MB |
 
-Hardware demo: iPhone 17 Pro Max, iOS 26.6.1, CPU (TTFT 2915 ms, 9 sep). Xiaomi
-14T Pro aborta Bare; no es el aparato de grabación. Log: [`perf/`](perf/).
+Producto: Android de gama media + Health Connect. Demo de hoy: iPhone 17 Pro
+Max, iOS 26.6.1, CPU (TTFT 2915 ms). SDK `@qvac/sdk` **0.18.2**. Log:
+[`perf/`](perf/).
 
 ## Cómo correrlo
 
@@ -31,8 +63,8 @@ cd mobile && npm install && npx expo start
 cd nodo && npm install && npm run corregimiento   # misma WiFi; la app descubre sola
 ```
 
-URLs de banco/admin y detalle de discovery: [`docs/ESTADO.md`](docs/ESTADO.md).
-Primera vez: descarga MedPsy (~2.1 GB) con wifi, no delante del jurado.
+URLs de banco/admin: [`docs/ESTADO.md`](docs/ESTADO.md). Primera vez: descarga
+MedPsy (~2.1 GB) con wifi.
 
 ## Evaluación
 
@@ -44,27 +76,23 @@ node --test eval/salud/alerta.test.mjs eval/nodo/inferir.test.mjs
 
 LoRA spike: [`spikes/lora-medpsy/`](spikes/lora-medpsy/).
 
-## Seguridad y límites
+## Producto y siguiente
 
-- No es diagnóstico. Banco: solo JSON de crédito; nunca fotos ni motivo de salud.
-- Crédito: scorecard determinista ([`ADR-011`](.ai/adr/ADR-011-el-modelo-de-credito.md)).
-- Firma = trazo; desembolso simulado. Datos 100% sintéticos.
+La app es esta. El recorte de la demo: historial sintético, un pueblo en la
+LAN, cierre de muestra (trazo en pantalla).
 
-## Tres caminos ([`ADR-006`](.ai/adr/ADR-006-tres-modos-segun-el-telefono.md))
+- **Banco.** Scorecard ya compartido. Siguiente: origination y desembolso en
+  producción.
+- **LoRA.** lab-v3 en el producto. Siguiente: un adaptador por cédula,
+  ingresos, extracto y más paneles.
+- **Malla.** Delegate ya presta cómputo. Siguiente: topic entre pueblos.
+- **Campo.** El esquema ya es Health Connect / HealthKit. Siguiente: el
+  historial real en Android.
 
-Dos ejes: **WiFi al banco** × **capacidad del teléfono**. OCR siempre aquí.
+## Seguridad
 
-| Modo | Inferencia | Solicitud |
-|---|---|---|
-| `local-wifi` | MedPsy + LoRA en el teléfono | HTTPS al banco (luego pueblo si hace falta) |
-| `local-offline` | MedPsy + LoRA en el teléfono | Pueblo / cola |
-| `nodo-offline` | Este teléfono no puede correr el modelo: se **delega al nodo** (`delegate`, si no `POST /inferir`) | Pueblo / cola |
-
-`nodo-offline` **simula** un teléfono sin capacidad. El iPhone de demo sí puede
-cargar MedPsy; la UI no dice que se fuerza. Hyperswarm por topic (nodo↔nodo)
-sigue apagado salvo `ENABLE_P2P=1`. Cada pantalla lleva la cinta de modo
-(los mismos letreros de Entrada) y una consola negra; la laptop espeja en
-[http://127.0.0.1:8788/consola](http://127.0.0.1:8788/consola).
+No es diagnóstico. Banco: solo JSON de crédito. Crédito: scorecard
+determinista ([`ADR-011`](.ai/adr/ADR-011-el-modelo-de-credito.md)).
 
 ## El nombre
 
