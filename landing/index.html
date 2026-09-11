@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Ina Igar — Camino de la medicina. Salud y crédito donde no llega la señal. Inferencia en el teléfono. ISD Summit 2026, Panamá.">
+<meta name="description" content="Ina Igar — ruta y crédito de salud en el teléfono. MedPsy, OCR, LoRA y QVAC delegate. Las fotos no salen. ISD Summit 2026.">
 <meta name="color-scheme" content="light">
 <meta property="og:title" content="Ina Igar">
-<meta property="og:description" content="Salud y crédito donde no llega la señal. La inteligencia vive en el bolsillo, no en la nube.">
+<meta property="og:description" content="Cualquier hallazgo, una ruta, un crédito. Inferencia en el teléfono o en el pueblo. El banco no ve la cédula.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="/og.png">
 <link rel="icon" type="image/png" href="/favicon.png">
@@ -105,11 +105,11 @@ p,h1,h2,h3,ul,figure,dl,dt,dd{margin:0}
   font-family:var(--display);
   font-size:clamp(1.9rem,4.3vw,3.05rem);
   font-weight:400;line-height:1.1;letter-spacing:-.02em;
-  max-width:15ch;margin-bottom:14px;
+  max-width:16ch;margin-bottom:14px;
   animation:in .65s .16s cubic-bezier(.22,1,.36,1);
 }
 .hero .sub{
-  max-width:34ch;font-size:1.05rem;line-height:1.5;color:var(--mute);
+  max-width:42ch;font-size:1.05rem;line-height:1.5;color:var(--mute);
   margin-bottom:28px;
   animation:in .65s .22s cubic-bezier(.22,1,.36,1);
 }
@@ -177,7 +177,49 @@ p,h1,h2,h3,ul,figure,dl,dt,dd{margin:0}
   letter-spacing:-.04em;line-height:1;
 }
 .stats span{display:block;margin-top:8px;color:var(--mute);font-size:.95rem;max-width:16ch}
-@media(max-width:640px){.stats{grid-template-columns:1fr}}
+@media(max-width:640px){.stats,.paths,.stackq,.road{grid-template-columns:1fr}}
+
+.flow{
+  display:flex;flex-wrap:wrap;align-items:stretch;gap:0;
+  margin-top:28px;border:1px solid var(--line);background:#fff;
+}
+.flow b{
+  flex:1 1 8rem;padding:14px 16px;border-right:1px solid var(--line);
+  font-size:.92rem;letter-spacing:-.02em;line-height:1.25;
+}
+.flow b:last-child{border-right:0}
+.flow small{display:block;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-bottom:4px}
+@media(max-width:700px){
+  .flow{flex-direction:column}
+  .flow b{border-right:0;border-bottom:1px solid var(--line)}
+  .flow b:last-child{border-bottom:0}
+}
+
+.paths{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--line);margin-top:32px;border:1px solid var(--line);
+}
+.paths article{background:#FBFAF7;padding:22px 20px}
+.paths .n{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
+.paths h3{font-size:1.12rem;font-weight:700;letter-spacing:-.02em;margin-bottom:8px;max-width:18ch}
+.paths p{color:var(--mute);font-size:.95rem}
+
+.stackq{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:var(--line);margin-top:28px;border:1px solid var(--line);
+}
+.stackq > div{background:#FBFAF7;padding:22px 20px}
+.stackq strong{display:block;font-size:1.05rem;letter-spacing:-.02em;margin-bottom:6px}
+.stackq span{color:var(--mute);font-size:.92rem}
+
+.road{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:var(--line);margin-top:28px;border:1px solid var(--line);
+}
+.road > div{background:#FBFAF7;padding:22px 20px}
+.road .when{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
+.road h3{font-size:1.12rem;font-weight:700;margin-bottom:6px}
+.road p{color:var(--mute);font-size:.95rem}
 
 .split{
   display:grid;grid-template-columns:1fr 1fr;
@@ -269,29 +311,29 @@ footer a{text-underline-offset:3px}
   <div class="hero-body">
     <p class="brand">Ina <em>Igar</em></p>
     <p class="tag">Camino de la medicina</p>
-    <h1>Salud y crédito donde no llega la señal</h1>
-    <p class="sub">La inteligencia vive en el bolsillo, no en la nube. Lee tu salud y arma el crédito sin subir tu cédula a ningún servidor.</p>
+    <h1>Cualquier hallazgo. Una ruta. Un crédito.</h1>
+    <p class="sub">Lee lo que el teléfono ya midió —o un papel de laboratorio—. Cotiza el año. Pide el préstamo. Las fotos no salen. Si este aparato no corre el modelo, el pueblo lo corre.</p>
     <div class="actions">
-      <a class="btn" href="#problema">Ver cómo funciona</a>
-      <a class="link" href="#nombre">Qué significa Ina Igar</a>
+      <a class="btn" href="#problema">Cómo funciona</a>
+      <a class="link" href="/pitch">Pitch</a>
     </div>
   </div>
 </section>
 
 <div class="strip">
-  <p>Sin nube para la IA. Sin cédula en manos ajenas. Sin esperar a que haya señal.</p>
+  <p>MedPsy · OCR · LoRA · QVAC delegate. El banco ve un JSON. Nunca la foto.</p>
 </div>
 
 <main>
   <section class="sec" id="problema">
     <div class="wrap">
       <span class="eyebrow">El problema</span>
-      <h2>Panamá ya sabe qué la enferma. Falta enterarse a tiempo.</h2>
-      <p class="lead">Con señal intermitente, enterarse es bajar al pueblo. Si el examen cuesta, hay que entregar la cédula en físico. Ina Igar resuelve las dos mitades <b>sin que nada salga del teléfono</b>.</p>
+      <h2>No se entera. No puede pagar. Tiene que viajar.</h2>
+      <p class="lead">Da igual la enfermedad: si un valor está fuera de rango hay que bajar al pueblo, entregar la cédula y costear el año. Ina Igar elige una <b>ruta</b> y un <b>crédito por ese monto</b>. No un diagnóstico. No un mínimo de consumo.</p>
       <div class="stats">
-        <div><strong>42%</strong><span>con hipertensión arterial</span></div>
-        <div><strong>15%</strong><span>de mayores de 15 con diabetes tipo 2</span></div>
-        <div><strong>3ª</strong><span>causa de diagnóstico en MINSA</span></div>
+        <div><strong>1.1&nbsp;M</strong><span>adultos con hipertensión. La mitad no lo sabía por un médico</span></div>
+        <div><strong>14</strong><span>señales vigiladas: glucosa, presión, O₂, fiebre, peso…</span></div>
+        <div><strong>37%</strong><span>del gasto en salud es de bolsillo</span></div>
       </div>
     </div>
   </section>
@@ -299,18 +341,24 @@ footer a{text-underline-offset:3px}
   <section class="sec">
     <div class="wrap">
       <span class="eyebrow">Qué hace</span>
-      <h2>Dos mitades de un mismo problema</h2>
+      <h2>Dos mitades. Un solo trámite en el bolsillo.</h2>
       <div class="split">
         <article>
           <div class="n">01 · Salud</div>
           <h3>Se da cuenta y te lo explica</h3>
-          <p>Lee tu historial o un examen en papel. Reglas escritas marcan el rango. El modelo solo redacta: qué se vio, qué hacer, a quién ver y cuánto cuesta.</p>
+          <p>Historial de Apple Salud o Health Connect, o foto de un examen. Catorce umbrales citados. Las reglas marcan el rango. MedPsy redacta: qué se vio, qué hacer, a quién ver y cuánto cuesta. El caso sano no dispara.</p>
         </article>
         <article>
           <div class="n">02 · Crédito</div>
-          <h3>Te dice el costo y te ayuda a pagarlo</h3>
-          <p>Fotos de cédula y comprobante; el teléfono las lee. Con wifi van al banco. Sin internet, al nodo del pueblo. El banco no ve el motivo de salud.</p>
+          <h3>El año, no la consulta</h3>
+          <p>OCR de cédula e ingresos en el teléfono. Las fotos se borran. Con wifi, JSON al banco. Sin red, al nodo del pueblo. El banco no ve el motivo clínico. El scorecard es el mismo en el teléfono y en el banco.</p>
         </article>
+      </div>
+      <div class="flow" aria-label="Flujo">
+        <b><small>01</small>Salud o papel</b>
+        <b><small>02</small>Reglas · 14 señales</b>
+        <b><small>03</small>MedPsy + LoRA</b>
+        <b><small>04</small>JSON al banco o al pueblo</b>
       </div>
     </div>
   </section>
