@@ -64,6 +64,7 @@ p,h1,h2,h3,ul,figure,dl,dt,dd{margin:0}
   font-size:.75rem;font-weight:700;background:rgba(255,255,255,.45);
 }
 .hero-nav .admin:hover{background:#fff}
+.hero-links{display:flex;gap:8px;align-items:center;flex-shrink:0}
 
 .hero-plane{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .hero-plane img{
@@ -129,10 +130,14 @@ p,h1,h2,h3,ul,figure,dl,dt,dd{margin:0}
   display:inline-flex;align-items:center;justify-content:center;
   background:var(--ink);color:#F7F4EE;
   font-size:.9rem;font-weight:700;text-decoration:none;
-  padding:13px 18px;
+  padding:13px 18px;border:1.5px solid var(--ink);
 }
 .btn:hover{background:#000}
 .btn:active{transform:translateY(1px)}
+.btn-ghost{
+  background:transparent;color:var(--ink);border:1.5px solid var(--ink);
+}
+.btn-ghost:hover{background:var(--ink);color:#F7F4EE}
 .btn-lg{
   font-size:clamp(1.15rem,2.6vw,1.45rem);
   padding:20px 36px;
@@ -147,6 +152,7 @@ p,h1,h2,h3,ul,figure,dl,dt,dd{margin:0}
 @media(max-width:700px){
   .hero-plane img{width:130vw;right:-42%;top:26%;opacity:.35}
   .hero-body{padding-top:10vh}
+  .hero-nav .meta{display:none}
   .btn-lg{width:100%}
 }
 
@@ -314,8 +320,11 @@ footer a{text-underline-offset:3px}
   <header class="hero-nav">
     <a href="/">Ina Igar</a>
     <span class="meta">ISD Summit 2026 · Panamá</span>
-    <a class="admin" href="/pitch">Pitch</a>
-    <a class="admin" href="/admin">Admin</a>
+    <div class="hero-links">
+      <a class="admin" href="https://youtu.be/oiW3VXyl36Q" target="_blank" rel="noopener">Demo</a>
+      <a class="admin" href="/pitch">Pitch</a>
+      <a class="admin" href="/admin">Admin</a>
+    </div>
   </header>
   <div class="hero-body">
     <p class="brand">Ina <em>Igar</em></p>
@@ -324,6 +333,7 @@ footer a{text-underline-offset:3px}
     <p class="sub">Se conecta a Apple Health o Google Health. Si hay una anomalía, te recomienda qué hacer. Si cargas un examen, te lo lee. Calcula el tratamiento y te ofrece crédito si no tienes plata. El banco no ve tu salud.</p>
     <div class="actions">
       <a class="btn btn-lg" href="/pitch">Ver pitch deck</a>
+      <a class="btn btn-lg btn-ghost" href="https://youtu.be/oiW3VXyl36Q" target="_blank" rel="noopener">Ver demo</a>
       <a class="link" href="#problema">Cómo funciona</a>
     </div>
   </div>
@@ -539,7 +549,7 @@ footer a{text-underline-offset:3px}
 
 <footer>
   <div class="wrap">
-    <p><b>Ina Igar</b> · ISD Summit 2026 · 0xj4an y Artur · MIT · <a href="/pitch">Pitch</a> · <a href="/admin">Admin</a></p>
+    <p><b>Ina Igar</b> · ISD Summit 2026 · 0xj4an y Artur · MIT · <a href="https://youtu.be/oiW3VXyl36Q" target="_blank" rel="noopener">Demo</a> · <a href="/pitch">Pitch</a> · <a href="/admin">Admin</a></p>
     <p>MedPsy · OCR · LoRA lab-v3 · QVAC delegate. El banco ve un JSON. Nunca la foto.</p>
   </div>
 </footer>
