@@ -13,6 +13,9 @@ const ESTATICO = {
   "/splash.png": ["splash.png", "image/png"],
   "/huellas-blanco.png": ["huellas-blanco.png", "image/png"],
   "/huellas-negro.png": ["huellas-negro.png", "image/png"],
+  "/huellas-mark.png": ["huellas-mark.png", "image/png"],
+  "/huellas-mark-blanco.png": ["huellas-mark-blanco.png", "image/png"],
+  "/huellas-mark-sm.png": ["huellas-mark-sm.png", "image/png"],
 };
 const PUERTO = Number(process.env.PORT || 3000);
 const BANCO_URL = (process.env.BANCO_URL || "http://127.0.0.1:8787").replace(/\/$/, "");
